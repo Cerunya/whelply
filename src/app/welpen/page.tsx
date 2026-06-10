@@ -2,14 +2,9 @@ import { prisma } from '@/lib/prisma'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ListingCard from '@/components/ListingCard'
+import WelpenFilter from '@/components/WelpenFilter'
 import Link from 'next/link'
-
-const BUNDESLAENDER = [
-  'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
-  'Hamburg', 'Hessen', 'Mecklenburg-Vorpommern', 'Niedersachsen',
-  'Nordrhein-Westfalen', 'Rheinland-Pfalz', 'Saarland', 'Sachsen',
-  'Sachsen-Anhalt', 'Schleswig-Holstein', 'Thüringen',
-]
+import { Suspense } from 'react'
 
 export default async function WelpenPage({
   searchParams,
@@ -26,30 +21,26 @@ export default async function WelpenPage({
 
   const selectedBreed = breeds.find((b) => b.slug === searchParams.rasse)
 
-  const listings = await prisma.listing.findMany({
-    where: {
-      status: 'available',
-      type: 'puppy',
-      ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
-      ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
-    },
-    orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
-    skip: (page - 1) * perPage,
-    take: perPage,
-    include: {
-      breed: { select: { nameDe: true } },
-      breeder: { select: { kennelName: true, city: true, state: true } },
-    },
-  }).catch(() => [])
+  const where = {
+    status: 'available' as const,
+    type: 'puppy' as const,
+    ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
+    ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
+  }
 
-  const total = await prisma.listing.count({
-    where: {
-      status: 'available',
-      type: 'puppy',
-      ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
-      ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
-    },
-  }).catch(() => 0)
+  const [listings, total] = await Promise.all([
+    prisma.listing.findMany({
+      where,
+      orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
+      skip: (page - 1) * perPage,
+      take: perPage,
+      include: {
+        breed: { select: { nameDe: true } },
+        breeder: { select: { kennelName: true, city: true, state: true } },
+      },
+    }).catch(() => []),
+    prisma.listing.count({ where }).catch(() => 0),
+  ])
 
   const now = new Date()
   const totalPages = Math.ceil(total / perPage)
@@ -65,53 +56,18 @@ export default async function WelpenPage({
     <>
       <Navbar />
       <main className="min-h-screen bg-white">
-        {/* Filter-Leiste */}
         <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
-          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center">
-            <select
-              defaultValue={searchParams.rasse ?? ''}
-              onChange={(e) => {
-                if (typeof window !== 'undefined') {
-                  window.location.href = buildUrl({ rasse: e.target.value || undefined, seite: undefined })
-                }
-              }}
-              className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
-            >
-              <option value="">Alle Rassen</option>
-              {breeds.map((b) => (
-                <option key={b.id} value={b.slug}>{b.nameDe}</option>
-              ))}
-            </select>
-
-            <select
-              defaultValue={searchParams.region ?? ''}
-              onChange={(e) => {
-                if (typeof window !== 'undefined') {
-                  window.location.href = buildUrl({ region: e.target.value || undefined, seite: undefined })
-                }
-              }}
-              className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
-            >
-              <option value="">Alle Bundesländer</option>
-              {BUNDESLAENDER.map((bl) => (
-                <option key={bl} value={bl}>{bl}</option>
-              ))}
-            </select>
-
-            {(searchParams.rasse || searchParams.region) && (
-              <Link href="/welpen" className="text-sm text-stone-500 hover:text-stone-900 transition-colors">
-                Filter zurücksetzen ×
-              </Link>
-            )}
-
-            <span className="text-sm text-stone-400 ml-auto">
+          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
+            <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
+              <WelpenFilter breeds={breeds} />
+            </Suspense>
+            <span className="text-sm text-stone-400">
               {total} {total === 1 ? 'Inserat' : 'Inserate'}
             </span>
           </div>
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-10">
-          {/* Breadcrumb */}
           <p className="text-sm text-stone-400 mb-6">
             <Link href="/" className="hover:text-stone-700">Startseite</Link>
             {' / '}
