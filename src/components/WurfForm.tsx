@@ -1,0 +1,184 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+
+type Breed = { id: number; nameDe: string }
+
+export default function WurfForm({ breeds }: { breeds: Breed[] }) {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [form, setForm] = useState({
+    breedId: '',
+    expectedDate: '',
+    bornDate: '',
+    puppyCount: '',
+    sireExternal: '',
+    notes: '',
+    status: 'planned',
+  })
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    const res = await fetch('/api/wuerfe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        breedId: Number(form.breedId),
+        expectedDate: form.expectedDate || null,
+        bornDate: form.bornDate || null,
+        puppyCount: form.puppyCount ? Number(form.puppyCount) : null,
+        sireExternal: form.sireExternal || null,
+        notes: form.notes || null,
+        status: form.status,
+      }),
+    })
+
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error ?? 'Fehler beim Speichern.')
+      setLoading(false)
+      return
+    }
+
+    router.push('/dashboard')
+  }
+
+  const labelClass = 'block text-sm font-medium text-stone-700 mb-1.5'
+  const inputClass = 'w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest bg-white'
+
+  return (
+    <div className="min-h-screen bg-cream font-sans">
+      <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
+          <Link href="/dashboard" className="text-stone-400 hover:text-stone-700 transition-colors text-sm">
+            ← Dashboard
+          </Link>
+          <span className="text-stone-300">|</span>
+          <h1 className="font-semibold text-stone-800 text-sm">Wurf eintragen</h1>
+        </div>
+      </header>
+
+      <main className="max-w-xl mx-auto px-4 py-12">
+        <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Wurf eintragen</h2>
+        <p className="text-stone-400 text-sm mb-8">
+          Trag deinen geplanten oder bereits geborenen Wurf ein. Käufer können sich vormerken lassen.
+        </p>
+
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className={labelClass}>Rasse <span className="text-red-400">*</span></label>
+            <select name="breedId" required value={form.breedId} onChange={handleChange} className={inputClass}>
+              <option value="">Rasse auswählen</option>
+              {breeds.map((b) => (
+                <option key={b.id} value={b.id}>{b.nameDe}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass}>Status <span className="text-red-400">*</span></label>
+            <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
+              <option value="planned">Geplant (Deckung steht bevor)</option>
+              <option value="pregnant">Trächtig</option>
+              <option value="born">Geboren</option>
+              <option value="available">Welpen abgabebereit</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Erwartetes Datum</label>
+              <input
+                type="date"
+                name="expectedDate"
+                value={form.expectedDate}
+                onChange={handleChange}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Geburtsdatum</label>
+              <input
+                type="date"
+                name="bornDate"
+                value={form.bornDate}
+                onChange={handleChange}
+                className={inputClass}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Anzahl Welpen</label>
+            <input
+              type="number"
+              name="puppyCount"
+              value={form.puppyCount}
+              onChange={handleChange}
+              min="1"
+              max="20"
+              placeholder="z.B. 6"
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Vater (externer Deckrüde)</label>
+            <input
+              type="text"
+              name="sireExternal"
+              value={form.sireExternal}
+              onChange={handleChange}
+              placeholder="Name des Deckrüden (falls nicht auf Whelply)"
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Notizen</label>
+            <textarea
+              name="notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              rows={3}
+              placeholder="Besonderheiten zum Wurf, Farben, Gesundheitstests der Eltern..."
+              className={inputClass + ' resize-none'}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={loading || !form.breedId}
+              className="flex-1 bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
+            >
+              {loading ? 'Wird gespeichert...' : 'Wurf speichern'}
+            </button>
+            <Link
+              href="/dashboard"
+              className="px-5 py-3 border border-stone-200 rounded-xl text-sm text-stone-500 hover:bg-stone-50 transition-colors"
+            >
+              Abbrechen
+            </Link>
+          </div>
+        </form>
+      </main>
+    </div>
+  )
+}

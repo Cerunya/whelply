@@ -5,7 +5,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
   // Immer zugänglich
-  const alwaysAllowed = ['/api/auth', '/api/preview-login', '/preview', '/_next', '/favicon.ico']
+  const alwaysAllowed = ['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/preview', '/_next', '/favicon.ico']
   if (alwaysAllowed.some((p) => pathname.startsWith(p))) {
     return NextResponse.next()
   }
