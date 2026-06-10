@@ -25,39 +25,33 @@ export default function SearchForm({ breeds }: { breeds: Breed[] }) {
     router.push(`/welpen?${params.toString()}`)
   }
 
+  const selectClass = `
+    flex-1 bg-white border border-stone-200 rounded-xl px-4 py-3.5 text-sm
+    text-stone-700 focus:outline-none focus:ring-2 focus:ring-forest/30
+    focus:border-forest appearance-none shadow-sm
+  `
+
   return (
-    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl">
-      <select
-        value={breed}
-        onChange={(e) => setBreed(e.target.value)}
-        className="flex-1 border border-stone-300 rounded-xl px-4 py-3 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent appearance-none"
-      >
+    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 w-full max-w-2xl">
+      <select value={breed} onChange={(e) => setBreed(e.target.value)} className={selectClass}>
         <option value="">Alle Rassen</option>
         {breeds.map((b) => (
-          <option key={b.id} value={b.slug}>
-            {b.nameDe}
-          </option>
+          <option key={b.id} value={b.slug}>{b.nameDe}</option>
         ))}
       </select>
 
-      <select
-        value={region}
-        onChange={(e) => setRegion(e.target.value)}
-        className="flex-1 border border-stone-300 rounded-xl px-4 py-3 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent appearance-none"
-      >
+      <select value={region} onChange={(e) => setRegion(e.target.value)} className={selectClass}>
         <option value="">Alle Bundesländer</option>
         {BUNDESLAENDER.map((bl) => (
-          <option key={bl} value={bl}>
-            {bl}
-          </option>
+          <option key={bl} value={bl}>{bl}</option>
         ))}
       </select>
 
       <button
         type="submit"
-        className="bg-stone-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-stone-700 transition-colors whitespace-nowrap"
+        className="bg-honey text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors whitespace-nowrap shadow-sm"
       >
-        Welpen suchen
+        Suchen
       </button>
     </form>
   )
