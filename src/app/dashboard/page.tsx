@@ -1,140 +1,84 @@
-'use client'
-
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { signOut } from '@/lib/auth'
 
-export default function RegisterPage() {
-  const router = useRouter()
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    kennelName: '',
-  })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+export default async function DashboardPage() {
+  const session = await auth()
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    // Registrierung
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-
-    const data = await res.json()
-
-    if (!res.ok) {
-      setError(data.error ?? 'Ein Fehler ist aufgetreten.')
-      setLoading(false)
-      return
-    }
-
-    // Nach erfolgreicher Registrierung direkt einloggen
-    await signIn('credentials', {
-      email: form.email,
-      password: form.password,
-      redirect: false,
-    })
-
-    router.push('/dashboard')
+  if (!session) {
+    redirect('/login')
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-gray-900">
-            Whelply
-          </Link>
-          <p className="text-gray-500 mt-2 text-sm">Züchter-Konto erstellen</p>
+    <main className="min-h-screen bg-gray-50">
+      <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <Link href="/" className="text-lg font-bold text-gray-900">
+          Whelply
+        </Link>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-500">
+            {session.user.kennelName ?? session.user.email}
+          </span>
+          <form
+            action={async () => {
+              'use server'
+              await signOut({ redirectTo: '/' })
+            }}
+          >
+            <button
+              type="submit"
+              className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              Abmelden
+            </button>
+          </form>
+        </div>
+      </nav>
+
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Willkommen, {session.user.kennelName ?? 'Züchter'}
+        </h1>
+        <p className="text-gray-500 mb-8">
+          Dein Züchter-Dashboard — hier verwaltest du deine Inserate und Würfe.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <p className="text-sm text-gray-500 mb-1">Aktive Inserate</p>
+            <p className="text-3xl font-bold text-gray-900">0</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <p className="text-sm text-gray-500 mb-1">Würfe</p>
+            <p className="text-3xl font-bold text-gray-900">0</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <p className="text-sm text-gray-500 mb-1">Plan</p>
+            <p className="text-xl font-bold text-gray-900">Kostenlos</p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              FCI-Zwingername <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="kennelName"
-              required
-              value={form.kennelName}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="z.B. vom Schwarzen Tal"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Dein bei der FCI registrierter Zwingername. Muss eindeutig sein.
-            </p>
+        <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="font-semibold text-gray-900 mb-4">Schnellzugriff</h2>
+          <div className="flex flex-wrap gap-3">
+            <button
+              disabled
+              className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium opacity-40 cursor-not-allowed"
+            >
+              + Neues Inserat
+            </button>
+            <button
+              disabled
+              className="border border-gray-300 text-gray-700 rounded-lg px-4 py-2 text-sm hover:bg-gray-50 opacity-40 cursor-not-allowed"
+            >
+              + Neuen Wurf eintragen
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              E-Mail <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              required
-              value={form.email}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="name@beispiel.de"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Passwort <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="password"
-              name="password"
-              required
-              minLength={8}
-              value={form.password}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="Mindestens 8 Zeichen"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gray-900 text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? 'Konto wird erstellt...' : 'Konto erstellen'}
-          </button>
-
-          <p className="text-xs text-gray-400 text-center">
-            Mit der Registrierung bestätigst du, dass dein Zwingername bei der FCI registriert ist.
-            Falsche Angaben führen zur sofortigen Sperrung.
+          <p className="text-xs text-gray-400 mt-3">
+            Inserate und Würfe kommen im nächsten Update.
           </p>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Bereits registriert?{' '}
-          <Link href="/login" className="text-gray-900 font-medium hover:underline">
-            Anmelden
-          </Link>
-        </p>
+        </div>
       </div>
     </main>
   )

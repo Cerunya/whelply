@@ -1,52 +1,35 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter()
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    kennelName: '',
-  })
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    // Registrierung
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-
-    const data = await res.json()
-
-    if (!res.ok) {
-      setError(data.error ?? 'Ein Fehler ist aufgetreten.')
-      setLoading(false)
-      return
-    }
-
-    // Nach erfolgreicher Registrierung direkt einloggen
-    await signIn('credentials', {
-      email: form.email,
-      password: form.password,
+    const result = await signIn('credentials', {
+      email,
+      password,
       redirect: false,
     })
 
-    router.push('/dashboard')
+    setLoading(false)
+
+    if (result?.error) {
+      setError('E-Mail oder Passwort falsch.')
+    } else {
+      router.push('/dashboard')
+    }
   }
 
   return (
@@ -56,7 +39,7 @@ export default function RegisterPage() {
           <Link href="/" className="text-2xl font-bold text-gray-900">
             Whelply
           </Link>
-          <p className="text-gray-500 mt-2 text-sm">Züchter-Konto erstellen</p>
+          <p className="text-gray-500 mt-2 text-sm">Anmelden</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
@@ -68,32 +51,13 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              FCI-Zwingername <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="kennelName"
-              required
-              value={form.kennelName}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="z.B. vom Schwarzen Tal"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Dein bei der FCI registrierter Zwingername. Muss eindeutig sein.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              E-Mail <span className="text-red-500">*</span>
+              E-Mail
             </label>
             <input
               type="email"
-              name="email"
               required
-              value={form.email}
-              onChange={handleChange}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               placeholder="name@beispiel.de"
             />
@@ -101,17 +65,15 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Passwort <span className="text-red-500">*</span>
+              Passwort
             </label>
             <input
               type="password"
-              name="password"
               required
-              minLength={8}
-              value={form.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="Mindestens 8 Zeichen"
+              placeholder="••••••••"
             />
           </div>
 
@@ -120,19 +82,14 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full bg-gray-900 text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Konto wird erstellt...' : 'Konto erstellen'}
+            {loading ? 'Anmelden...' : 'Anmelden'}
           </button>
-
-          <p className="text-xs text-gray-400 text-center">
-            Mit der Registrierung bestätigst du, dass dein Zwingername bei der FCI registriert ist.
-            Falsche Angaben führen zur sofortigen Sperrung.
-          </p>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-4">
-          Bereits registriert?{' '}
-          <Link href="/login" className="text-gray-900 font-medium hover:underline">
-            Anmelden
+          Noch kein Konto?{' '}
+          <Link href="/register" className="text-gray-900 font-medium hover:underline">
+            Als Züchter registrieren
           </Link>
         </p>
       </div>
