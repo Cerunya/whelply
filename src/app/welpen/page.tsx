@@ -1,0 +1,172 @@
+import { prisma } from '@/lib/prisma'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import ListingCard from '@/components/ListingCard'
+import Link from 'next/link'
+
+const BUNDESLAENDER = [
+  'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
+  'Hamburg', 'Hessen', 'Mecklenburg-Vorpommern', 'Niedersachsen',
+  'Nordrhein-Westfalen', 'Rheinland-Pfalz', 'Saarland', 'Sachsen',
+  'Sachsen-Anhalt', 'Schleswig-Holstein', 'Thüringen',
+]
+
+export default async function WelpenPage({
+  searchParams,
+}: {
+  searchParams: { rasse?: string; region?: string; seite?: string }
+}) {
+  const page = Number(searchParams.seite ?? 1)
+  const perPage = 24
+
+  const breeds = await prisma.breed.findMany({
+    orderBy: { nameDe: 'asc' },
+    select: { id: true, nameDe: true, slug: true },
+  }).catch(() => [])
+
+  const selectedBreed = breeds.find((b) => b.slug === searchParams.rasse)
+
+  const listings = await prisma.listing.findMany({
+    where: {
+      status: 'available',
+      type: 'puppy',
+      ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
+      ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
+    },
+    orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
+    skip: (page - 1) * perPage,
+    take: perPage,
+    include: {
+      breed: { select: { nameDe: true } },
+      breeder: { select: { kennelName: true, city: true, state: true } },
+    },
+  }).catch(() => [])
+
+  const total = await prisma.listing.count({
+    where: {
+      status: 'available',
+      type: 'puppy',
+      ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
+      ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
+    },
+  }).catch(() => 0)
+
+  const now = new Date()
+  const totalPages = Math.ceil(total / perPage)
+
+  function buildUrl(params: Record<string, string | undefined>) {
+    const p = new URLSearchParams()
+    const merged = { rasse: searchParams.rasse, region: searchParams.region, ...params }
+    Object.entries(merged).forEach(([k, v]) => { if (v) p.set(k, v) })
+    return `/welpen?${p.toString()}`
+  }
+
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-white">
+        {/* Filter-Leiste */}
+        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
+          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center">
+            <select
+              defaultValue={searchParams.rasse ?? ''}
+              onChange={(e) => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = buildUrl({ rasse: e.target.value || undefined, seite: undefined })
+                }
+              }}
+              className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
+            >
+              <option value="">Alle Rassen</option>
+              {breeds.map((b) => (
+                <option key={b.id} value={b.slug}>{b.nameDe}</option>
+              ))}
+            </select>
+
+            <select
+              defaultValue={searchParams.region ?? ''}
+              onChange={(e) => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = buildUrl({ region: e.target.value || undefined, seite: undefined })
+                }
+              }}
+              className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
+            >
+              <option value="">Alle Bundesländer</option>
+              {BUNDESLAENDER.map((bl) => (
+                <option key={bl} value={bl}>{bl}</option>
+              ))}
+            </select>
+
+            {(searchParams.rasse || searchParams.region) && (
+              <Link href="/welpen" className="text-sm text-stone-500 hover:text-stone-900 transition-colors">
+                Filter zurücksetzen ×
+              </Link>
+            )}
+
+            <span className="text-sm text-stone-400 ml-auto">
+              {total} {total === 1 ? 'Inserat' : 'Inserate'}
+            </span>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          {/* Breadcrumb */}
+          <p className="text-sm text-stone-400 mb-6">
+            <Link href="/" className="hover:text-stone-700">Startseite</Link>
+            {' / '}
+            <span className="text-stone-700">Welpen</span>
+            {selectedBreed && <> / <span className="text-stone-700">{selectedBreed.nameDe}</span></>}
+          </p>
+
+          {listings.length === 0 ? (
+            <div className="text-center py-24 bg-stone-50 rounded-2xl border border-stone-200">
+              <div className="text-5xl mb-4">🔍</div>
+              <p className="text-stone-600 font-medium mb-2">Keine Inserate gefunden</p>
+              <p className="text-stone-400 text-sm mb-6">Versuch einen anderen Filter oder schau später nochmal.</p>
+              <Link href="/welpen" className="text-sm text-stone-600 hover:text-stone-900 font-medium underline">
+                Alle Inserate anzeigen
+              </Link>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {listings.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    id={listing.id}
+                    breedName={listing.breed.nameDe}
+                    kennelName={listing.breeder.kennelName}
+                    city={listing.breeder.city}
+                    state={listing.breeder.state}
+                    priceCents={listing.priceCents}
+                    isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                  />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-12">
+                  {page > 1 && (
+                    <Link href={buildUrl({ seite: String(page - 1) })} className="px-4 py-2 border border-stone-300 rounded-lg text-sm hover:bg-stone-50 transition-colors">
+                      ← Zurück
+                    </Link>
+                  )}
+                  <span className="px-4 py-2 text-sm text-stone-500">
+                    Seite {page} von {totalPages}
+                  </span>
+                  {page < totalPages && (
+                    <Link href={buildUrl({ seite: String(page + 1) })} className="px-4 py-2 border border-stone-300 rounded-lg text-sm hover:bg-stone-50 transition-colors">
+                      Weiter →
+                    </Link>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </>
+  )
+}
