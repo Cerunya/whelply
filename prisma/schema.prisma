@@ -1,0 +1,385 @@
+// whelply.de — Prisma Schema
+// Stack: Next.js 14 + PostgreSQL + Prisma + Auth.js + MinIO
+// Coolify-compatible: all services run as Docker containers
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  buyer
+  breeder
+  service
+  admin
+}
+
+enum VerificationLevel {
+  none
+  email_verified
+  kennel_verified   // FCI Zwingername bestätigt (Honor-System + AGB)
+  doc_verified      // Dokument hochgeladen + manuell geprüft
+}
+
+enum SubscriptionPlan {
+  free
+  pro        // 14,90 €/Monat
+  premium    // 29,90 €/Monat
+}
+
+enum LitterStatus {
+  planned     // Deckung geplant
+  pregnant    // Trächtig
+  born        // Wurf geboren, noch nicht verfügbar
+  available   // Welpen abgabebereit
+  sold_out    // Alle vermittelt
+}
+
+enum ListingType {
+  puppy       // Welpenvermittlung aus einem Wurf
+  stud        // Deckrüde
+  adult_dog   // Adulter Hund zur Abgabe
+}
+
+enum ListingStatus {
+  draft
+  available
+  reserved
+  sold
+  expired
+}
+
+enum Sex {
+  male
+  female
+}
+
+enum ServiceCategory {
+  vet
+  groomer
+  pension
+  trainer
+  other
+}
+
+enum BoostType {
+  top_24h     // 1 € — 24h Topanzeige (Kern-Feature)
+  top_7d      // 4,90 € — 7 Tage
+  homepage_7d // 19,90 € — Startseiten-Spotlight
+  etalon_top  // 14,90 € — Etalon-Hervorhebung
+}
+
+// ─────────────────────────────────────────────
+// CORE: NUTZER & PROFILE
+// ─────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(buyer)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Auth.js sessions
+  accounts  Account[]
+  sessions  Session[]
+
+  // Profile-Verknüpfungen
+  breederProfile  BreederProfile?
+  serviceProvider ServiceProvider?
+
+  @@map("users")
+}
+
+// Auth.js Pflicht-Tabellen
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Züchter-Profil (1:1 mit User)
+model BreederProfile {
+  id                String            @id @default(cuid())
+  userId            String            @unique @map("user_id")
+  // FCI-Zwingername — UNIQUE, Pflichtfeld, kein Vermehrer hat diesen
+  kennelName        String            @unique @map("kennel_name")
+  // Züchterverband (VDH, ÖKV, SKG, ASCA, etc.) — optional
+  verband           String?
+  // Mitgliedsnummer im Rassezuchtverein — optional, für Badge
+  mitgliedsnummer   String?           @map("mitgliedsnummer")
+  verificationLevel VerificationLevel @default(none) @map("verification_level")
+  bio               String?           @db.Text
+  website           String?
+  phone             String?
+  city              String?
+  state             String?           // Bundesland
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription?
+  dogs         Dog[]
+  litters      Litter[]
+  listings     Listing[]
+  media        Media[]       @relation("BreederMedia")
+
+  @@map("breeder_profiles")
+}
+
+// ─────────────────────────────────────────────
+// RASSEN (FCI-Liste — einmalig importiert)
+// ─────────────────────────────────────────────
+
+model Breed {
+  id         Int    @id @default(autoincrement())
+  fciNumber  Int    @unique @map("fci_number")  // FCI-Rassenummer
+  nameDe     String @map("name_de")             // Offizieller dt. Name
+  nameEn     String @map("name_en")
+  fciGroup   Int    @map("fci_group")           // FCI-Gruppe 1–10
+  fciSection Int    @map("fci_section")
+  slug       String @unique                     // für URLs: /rassen/golden-retriever
+
+  dogs    Dog[]
+  litters Litter[]
+  listings Listing[]
+
+  @@map("breeds")
+}
+
+// ─────────────────────────────────────────────
+// HUNDE (Elterntiere, Etalons, adulte Hunde)
+// ─────────────────────────────────────────────
+
+model Dog {
+  id             String   @id @default(cuid())
+  breederId      String   @map("breeder_id")
+  breedId        Int      @map("breed_id")
+  name           String
+  sex            Sex
+  birthDate      DateTime? @map("birth_date") @db.Date
+  color          String?
+  chipNumber     String?  @unique @map("chip_number")
+  pedigreeNumber String?  @map("pedigree_number") // Ahnentafel-Nr.
+  titles         String?  // Ausstellungstitel, freitext
+  isStud         Boolean  @default(false) @map("is_stud")
+  isForSale      Boolean  @default(false) @map("is_for_sale")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  breeder      BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
+  breed        Breed          @relation(fields: [breedId], references: [id])
+  // Wurf-Beziehungen
+  littersAsDam  Litter[]  @relation("DamLitters")
+  littersAsSire Litter[]  @relation("SireLitters")
+  // Inserate (Etalon / adulter Hund)
+  listings      Listing[]
+  media         Media[]   @relation("DogMedia")
+
+  @@map("dogs")
+}
+
+// ─────────────────────────────────────────────
+// WÜRFE
+// ─────────────────────────────────────────────
+
+model Litter {
+  id           String       @id @default(cuid())
+  breederId    String       @map("breeder_id")
+  breedId      Int          @map("breed_id")
+  damId        String       @map("dam_id")       // Mutterhündin (Pflicht)
+  sireId       String?      @map("sire_id")      // Vater (optional — externer Rüde möglich)
+  sireExternal String?      @map("sire_external") // Name externer Deckrüde falls kein sireId
+  expectedDate DateTime?    @map("expected_date") @db.Date
+  bornDate     DateTime?    @map("born_date") @db.Date
+  puppyCount   Int?         @map("puppy_count")
+  status       LitterStatus @default(planned)
+  notes        String?      @db.Text
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  breeder  BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
+  breed    Breed          @relation(fields: [breedId], references: [id])
+  dam      Dog            @relation("DamLitters", fields: [damId], references: [id])
+  sire     Dog?           @relation("SireLitters", fields: [sireId], references: [id])
+  listings Listing[]
+  media    Media[]        @relation("LitterMedia")
+
+  @@map("litters")
+}
+
+// ─────────────────────────────────────────────
+// INSERATE (Welpen, Etalons, adulte Hunde)
+// ─────────────────────────────────────────────
+
+// Geschäftsregel: type=puppy  → litterId NOT NULL, dogId NULL
+//                 type=stud   → dogId NOT NULL,   litterId NULL
+//                 type=adult  → dogId NOT NULL,   litterId NULL
+// Wird in der App-Schicht enforced (Zod-Validation beim Create)
+
+model Listing {
+  id             String        @id @default(cuid())
+  breederId      String        @map("breeder_id")
+  breedId        Int           @map("breed_id")
+  type           ListingType
+  // Welpen-Inserat
+  litterId       String?       @map("litter_id")
+  // Etalon / adulter Hund
+  dogId          String?       @map("dog_id")
+  // Felder
+  title          String?       // optional, für Etalons sinnvoll
+  description    String?       @db.Text
+  priceCents     Int?          @map("price_cents")  // NULL = Preis auf Anfrage
+  sex            Sex?          // für Welpen-Inserate
+  status         ListingStatus @default(draft)
+  // Boost: NULL oder Timestamp in der Zukunft = geboostet
+  // Geschäftsregel: boost_expires_at > NOW() → oben anzeigen
+  boostExpiresAt DateTime?     @map("boost_expires_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  expiresAt      DateTime?     @map("expires_at")  // automatische Ablaufzeit
+
+  breeder BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
+  breed   Breed          @relation(fields: [breedId], references: [id])
+  litter  Litter?        @relation(fields: [litterId], references: [id])
+  dog     Dog?           @relation(fields: [dogId], references: [id])
+  boosts  Boost[]
+  media   Media[]        @relation("ListingMedia")
+
+  @@map("listings")
+}
+
+// ─────────────────────────────────────────────
+// REVENUE: BOOSTS & ABOS
+// ─────────────────────────────────────────────
+
+model Boost {
+  id             String    @id @default(cuid())
+  listingId      String    @map("listing_id")
+  boostType      BoostType @map("boost_type")
+  amountCents    Int       @map("amount_cents")  // 100 = 1,00 €
+  stripePaymentId String?  @map("stripe_payment_id")
+  paidAt         DateTime  @default(now()) @map("paid_at")
+  expiresAt      DateTime  @map("expires_at")
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("boosts")
+}
+
+model Subscription {
+  id              String           @id @default(cuid())
+  breederId       String           @unique @map("breeder_id")
+  plan            SubscriptionPlan @default(free)
+  stripeSubId     String?          @unique @map("stripe_sub_id")
+  stripeCustomerId String?         @map("stripe_customer_id")
+  startedAt       DateTime         @default(now()) @map("started_at")
+  expiresAt       DateTime?        @map("expires_at")
+  canceledAt      DateTime?        @map("canceled_at")
+
+  breeder BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────────
+// DIENSTLEISTER
+// ─────────────────────────────────────────────
+
+model ServiceProvider {
+  id          String          @id @default(cuid())
+  userId      String          @unique @map("user_id")
+  name        String
+  category    ServiceCategory
+  description String?         @db.Text
+  street      String?
+  city        String?
+  zip         String?
+  state       String?
+  lat         Float?
+  lng         Float?
+  phone       String?
+  website     String?
+  isPremium   Boolean         @default(false) @map("is_premium")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media Media[] @relation("ServiceMedia")
+
+  @@map("service_providers")
+}
+
+// ─────────────────────────────────────────────
+// MEDIEN (Fotos für alle Entitäten)
+// ─────────────────────────────────────────────
+
+// Polymorphe Zuordnung: eine Tabelle für alle Foto-Typen
+// Gespeichert in MinIO (S3-kompatibel auf Coolify)
+model Media {
+  id          String   @id @default(cuid())
+  storageKey  String   @unique @map("storage_key")  // MinIO object key
+  url         String   // public URL
+  altText     String?  @map("alt_text")
+  isPrimary   Boolean  @default(false) @map("is_primary")
+  sortOrder   Int      @default(0) @map("sort_order")
+  width       Int?
+  height      Int?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Polymorphe FKs — maximal eine ist NOT NULL
+  breederId   String?  @map("breeder_id")
+  dogId       String?  @map("dog_id")
+  litterId    String?  @map("litter_id")
+  listingId   String?  @map("listing_id")
+  serviceId   String?  @map("service_id")
+
+  breeder  BreederProfile?  @relation("BreederMedia",  fields: [breederId],  references: [id], onDelete: Cascade)
+  dog      Dog?             @relation("DogMedia",      fields: [dogId],      references: [id], onDelete: Cascade)
+  litter   Litter?          @relation("LitterMedia",   fields: [litterId],   references: [id], onDelete: Cascade)
+  listing  Listing?         @relation("ListingMedia",  fields: [listingId],  references: [id], onDelete: Cascade)
+  service  ServiceProvider? @relation("ServiceMedia",  fields: [serviceId],  references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
