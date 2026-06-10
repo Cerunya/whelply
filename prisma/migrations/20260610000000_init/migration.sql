@@ -128,7 +128,7 @@ CREATE TABLE "litters" (
     "id" TEXT NOT NULL,
     "breeder_id" TEXT NOT NULL,
     "breed_id" INTEGER NOT NULL,
-    "dam_id" TEXT NOT NULL,
+    "dam_id" TEXT,
     "sire_id" TEXT,
     "sire_external" TEXT,
     "expected_date" DATE,
@@ -255,7 +255,7 @@ ALTER TABLE "dogs" ADD CONSTRAINT "dogs_breeder_id_fkey" FOREIGN KEY ("breeder_i
 ALTER TABLE "dogs" ADD CONSTRAINT "dogs_breed_id_fkey" FOREIGN KEY ("breed_id") REFERENCES "breeds"("id") ON UPDATE CASCADE;
 ALTER TABLE "litters" ADD CONSTRAINT "litters_breeder_id_fkey" FOREIGN KEY ("breeder_id") REFERENCES "breeder_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "litters" ADD CONSTRAINT "litters_breed_id_fkey" FOREIGN KEY ("breed_id") REFERENCES "breeds"("id") ON UPDATE CASCADE;
-ALTER TABLE "litters" ADD CONSTRAINT "litters_dam_id_fkey" FOREIGN KEY ("dam_id") REFERENCES "dogs"("id") ON UPDATE CASCADE;
+ALTER TABLE "litters" ADD CONSTRAINT "litters_dam_id_fkey" FOREIGN KEY ("dam_id") REFERENCES "dogs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "litters" ADD CONSTRAINT "litters_sire_id_fkey" FOREIGN KEY ("sire_id") REFERENCES "dogs"("id") ON UPDATE CASCADE;
 ALTER TABLE "listings" ADD CONSTRAINT "listings_breeder_id_fkey" FOREIGN KEY ("breeder_id") REFERENCES "breeder_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "listings" ADD CONSTRAINT "listings_breed_id_fkey" FOREIGN KEY ("breed_id") REFERENCES "breeds"("id") ON UPDATE CASCADE;

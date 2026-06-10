@@ -229,7 +229,7 @@ model Litter {
   id           String       @id @default(cuid())
   breederId    String       @map("breeder_id")
   breedId      Int          @map("breed_id")
-  damId        String       @map("dam_id")       // Mutterhündin (Pflicht)
+  damId        String?      @map("dam_id")       // Mutterhündin (optional beim Eintragen)
   sireId       String?      @map("sire_id")      // Vater (optional — externer Rüde möglich)
   sireExternal String?      @map("sire_external") // Name externer Deckrüde falls kein sireId
   expectedDate DateTime?    @map("expected_date") @db.Date
@@ -242,7 +242,7 @@ model Litter {
 
   breeder  BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
   breed    Breed          @relation(fields: [breedId], references: [id])
-  dam      Dog            @relation("DamLitters", fields: [damId], references: [id])
+  dam      Dog?           @relation("DamLitters", fields: [damId], references: [id])
   sire     Dog?           @relation("SireLitters", fields: [sireId], references: [id])
   listings Listing[]
   media    Media[]        @relation("LitterMedia")
