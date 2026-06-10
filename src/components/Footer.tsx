@@ -2,12 +2,12 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-forest text-forest-muted mt-20">
+    <footer className="bg-forest text-white/60 mt-20">
       <div className="max-w-6xl mx-auto px-4 py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div className="col-span-2 md:col-span-1">
             <p className="text-white font-bold text-xl font-serif mb-3">Whelply</p>
-            <p className="text-sm leading-relaxed text-forest-muted">
+            <p className="text-sm leading-relaxed text-white/60">
               Die Plattform für seriöse Rassehunde-Züchter in Deutschland.
               Nur FCI-anerkannte Rassen.
             </p>
@@ -22,7 +22,7 @@ export default function Footer() {
                 ['/dienste', 'Dienste'],
               ].map(([href, label]) => (
                 <li key={href}>
-                  <Link href={href} className="hover:text-white transition-colors">{label}</Link>
+                  <Link href={href} className="text-white/60 hover:text-white transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>
@@ -36,7 +36,7 @@ export default function Footer() {
                 ['/dashboard', 'Dashboard'],
               ].map(([href, label]) => (
                 <li key={href}>
-                  <Link href={href} className="hover:text-white transition-colors">{label}</Link>
+                  <Link href={href} className="text-white/60 hover:text-white transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>
@@ -50,13 +50,13 @@ export default function Footer() {
                 ['/agb', 'AGB'],
               ].map(([href, label]) => (
                 <li key={href}>
-                  <Link href={href} className="hover:text-white transition-colors">{label}</Link>
+                  <Link href={href} className="text-white/60 hover:text-white transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-        <div className="border-t border-forest-light pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-forest-muted">
+        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
           <p>© {new Date().getFullYear()} Whelply</p>
           <p>Nur FCI-anerkannte Rassen · Kein Tierschutz · Keine Mischlinge</p>
         </div>

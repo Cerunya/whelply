@@ -48,7 +48,7 @@ export default async function Home() {
                 Finde deinen<br />
                 <span className="text-honey">Rassewelpen.</span>
               </h1>
-              <p className="text-forest-muted text-lg mb-10 leading-relaxed">
+              <p className="text-white/75 text-lg mb-10 leading-relaxed">
                 Whelply verbindet dich mit geprüften Züchtern in ganz Deutschland —
                 mit FCI-Stammbaum, ohne Vermehrer.
               </p>
@@ -70,7 +70,7 @@ export default async function Home() {
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-2xl font-bold text-white font-serif">{stat.value}</p>
-                <p className="text-xs text-forest-muted mt-0.5">{stat.label}</p>
+                <p className="text-xs text-white/60 mt-0.5">{stat.label}</p>
               </div>
             ))}
           </div>
