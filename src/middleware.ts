@@ -1,15 +1,36 @@
-import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth
-  const isOnDashboard = req.nextUrl.pathname.startsWith('/dashboard')
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
 
-  if (isOnDashboard && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/login', req.nextUrl))
+  // Immer zugänglich
+  const alwaysAllowed = ['/api/auth', '/preview', '/_next', '/favicon.ico']
+  if (alwaysAllowed.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next()
   }
-})
+
+  // Vorschaltseite: wenn PREVIEW_PASSWORD gesetzt, alle Besucher ohne Cookie blocken
+  const previewPassword = process.env.PREVIEW_PASSWORD
+  if (previewPassword) {
+    const cookie = req.cookies.get('preview_access')
+    if (cookie?.value !== previewPassword) {
+      return NextResponse.redirect(new URL('/preview', req.url))
+    }
+  }
+
+  // Dashboard nur für eingeloggte Nutzer
+  if (pathname.startsWith('/dashboard')) {
+    const { auth } = await import('@/lib/auth')
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+  }
+
+  return NextResponse.next()
+}
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
