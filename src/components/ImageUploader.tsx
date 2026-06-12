@@ -32,39 +32,24 @@ export default function ImageUploader({
       }
 
       try {
-        // Schritt 1: Presigned URL anfordern
-        const presignRes = await fetch('/api/upload', {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('listingId', listingId)
+
+        const res = await fetch('/api/upload', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            listingId,
-            fileName: file.name,
-            contentType: file.type,
-          }),
+          body: formData,
         })
-        if (!presignRes.ok) throw new Error('Presign fehlgeschlagen')
-        const { uploadUrl, storageKey } = await presignRes.json()
 
-        // Schritt 2: Direkt zu MinIO hochladen
-        const uploadRes = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.type },
-          body: file,
-        })
-        if (!uploadRes.ok) throw new Error('Upload fehlgeschlagen')
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data.error ?? 'Upload fehlgeschlagen')
+        }
 
-        // Schritt 3: In DB registrieren
-        const completeRes = await fetch('/api/upload/complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ listingId, storageKey, isPrimary: media.length === 0 }),
-        })
-        if (!completeRes.ok) throw new Error('Speichern fehlgeschlagen')
-        const { id, url } = await completeRes.json()
-
+        const { id, url } = await res.json()
         setMedia((prev) => [...prev, { id, url, isPrimary: prev.length === 0 }])
-      } catch (err) {
-        setError('Fehler beim Hochladen. Bitte erneut versuchen.')
+      } catch (err: any) {
+        setError(err.message ?? 'Fehler beim Hochladen. Bitte erneut versuchen.')
       }
     }
 

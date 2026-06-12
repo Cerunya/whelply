@@ -3,27 +3,29 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { s3, MINIO_BUCKET } from '@/lib/s3'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { z } from 'zod'
 
-const schema = z.object({
-  listingId: z.string(),
-  fileName: z.string(),
-  contentType: z.string().regex(/^image\/(jpeg|png|webp)$/),
-})
-
-// Schritt 1: Presigned Upload-URL anfordern
+// Server-seitiger Upload-Proxy:
+// Browser → /api/upload (whelply.de, gültiges Zertifikat)
+// Server  → Garage (internes Docker-Netzwerk, kein TLS nötig)
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
 
-  const body = await req.json()
-  const parsed = schema.safeParse(body)
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
+  const formData = await req.formData()
+  const file = formData.get('file') as File | null
+  const listingId = formData.get('listingId') as string | null
+
+  if (!file || !listingId) {
+    return NextResponse.json({ error: 'Datei oder Inserat-ID fehlt' }, { status: 400 })
   }
 
-  const { listingId, fileName, contentType } = parsed.data
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    return NextResponse.json({ error: 'Nur JPG, PNG oder WebP erlaubt' }, { status: 400 })
+  }
+
+  if (file.size > 8 * 1024 * 1024) {
+    return NextResponse.json({ error: 'Datei zu groß (max. 8 MB)' }, { status: 400 })
+  }
 
   // Prüfen ob das Inserat dem eingeloggten Züchter gehört
   const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
@@ -35,16 +37,33 @@ export async function POST(req: NextRequest) {
   }
 
   // Eindeutiger Storage-Key
-  const ext = fileName.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
   const storageKey = `listings/${listingId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
-  const command = new PutObjectCommand({
+  const buffer = Buffer.from(await file.arrayBuffer())
+
+  await s3.send(new PutObjectCommand({
     Bucket: MINIO_BUCKET,
     Key: storageKey,
-    ContentType: contentType,
+    Body: buffer,
+    ContentType: file.type,
+  }))
+
+  // Direkt Media-Eintrag anlegen
+  const existingCount = await prisma.media.count({ where: { listingId } })
+  if (existingCount === 0) {
+    await prisma.media.updateMany({ where: { listingId }, data: { isPrimary: false } })
+  }
+
+  const media = await prisma.media.create({
+    data: {
+      storageKey,
+      url: `/api/media/${storageKey}/view`,
+      listingId,
+      isPrimary: existingCount === 0,
+      sortOrder: existingCount,
+    },
   })
 
-  const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 }) // 5 Minuten gültig
-
-  return NextResponse.json({ uploadUrl, storageKey })
+  return NextResponse.json({ id: media.id, url: media.url })
 }
