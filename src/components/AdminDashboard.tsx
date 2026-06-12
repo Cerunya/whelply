@@ -67,7 +67,7 @@ export default function AdminDashboard({
 
   async function toggleVerification(id: string, current: string) {
     setBusyId(id)
-    const next = current === 'none' ? 'verband' : 'none'
+    const next = current === 'none' ? 'kennel_verified' : 'none'
     const res = await fetch(`/api/admin/breeders/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

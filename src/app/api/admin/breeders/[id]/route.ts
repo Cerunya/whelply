@@ -12,7 +12,7 @@ async function requireAdmin() {
 }
 
 const patchSchema = z.object({
-  verificationLevel: z.enum(['none', 'verband', 'fci']),
+  verificationLevel: z.enum(['none', 'email_verified', 'kennel_verified', 'doc_verified']),
 })
 
 export async function PATCH(
