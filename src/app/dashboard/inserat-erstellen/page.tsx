@@ -24,5 +24,19 @@ export default async function InseratErstellenPage() {
     select: { id: true, nameDe: true },
   })
 
-  return <InseratForm breeds={breeds} />
+  const litters = await prisma.litter.findMany({
+    where: { breederId: breeder.id },
+    include: { breed: { select: { nameDe: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const littersForForm = litters.map((l) => ({
+    id: l.id,
+    breedId: l.breedId,
+    label: `${l.breed.nameDe} — ${
+      l.bornDate ? `geb. ${l.bornDate.toLocaleDateString('de-DE')}` : 'geplant'
+    }`,
+  }))
+
+  return <InseratForm breeds={breeds} litters={littersForForm} />
 }

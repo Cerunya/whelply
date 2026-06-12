@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/slugify'
+import { auth } from '@/lib/auth'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -11,7 +12,7 @@ export default async function WelpenDetailPage({
   params: { id: string }
 }) {
   const listing = await prisma.listing.findUnique({
-    where: { id: params.id, status: 'available' },
+    where: { id: params.id },
     include: {
       breed: true,
       breeder: true,
@@ -20,6 +21,17 @@ export default async function WelpenDetailPage({
   })
 
   if (!listing) notFound()
+
+  const session = await auth()
+  const viewerBreeder = session?.user
+    ? await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
+    : null
+  const isOwner = !!viewerBreeder && viewerBreeder.id === listing.breederId
+
+  // Nicht-aktive Inserate (Entwurf, reserviert, verkauft) sind nur für den Eigentümer sichtbar
+  if (listing.status !== 'available' && !isOwner) {
+    notFound()
+  }
 
   const price = listing.priceCents
     ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
@@ -37,6 +49,27 @@ export default async function WelpenDetailPage({
       <Navbar />
       <main className="min-h-screen bg-cream">
         <div className="max-w-4xl mx-auto px-4 py-10">
+          {/* Eigentümer-Hinweis */}
+          {isOwner && (
+            <div className="bg-honey-pale border border-honey/30 rounded-xl px-5 py-3 mb-6 flex items-center justify-between flex-wrap gap-3">
+              <p className="text-sm text-stone-700">
+                {listing.status === 'available'
+                  ? 'Dies ist die öffentliche Ansicht deines Inserats.'
+                  : listing.status === 'draft'
+                  ? 'Entwurf — für andere Nutzer nicht sichtbar.'
+                  : listing.status === 'reserved'
+                  ? 'Als reserviert markiert.'
+                  : 'Als verkauft markiert.'}
+              </p>
+              <Link
+                href={`/dashboard/inserat/${listing.id}`}
+                className="bg-forest text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-forest-light transition-colors"
+              >
+                Bearbeiten
+              </Link>
+            </div>
+          )}
+
           {/* Breadcrumb */}
           <p className="text-sm text-stone-400 mb-6">
             <Link href="/" className="hover:text-stone-700">Startseite</Link>
@@ -74,8 +107,11 @@ export default async function WelpenDetailPage({
                 {listing.breed.nameDe}
               </p>
               <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
-                {listing.breeder.kennelName}
+                {listing.title || listing.breeder.kennelName}
               </h1>
+              {listing.title && (
+                <p className="text-sm text-stone-400 mb-1">{listing.breeder.kennelName}</p>
+              )}
               {location && (
                 <p className="text-stone-400 text-sm mb-6 flex items-center gap-1">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

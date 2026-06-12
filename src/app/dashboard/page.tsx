@@ -151,7 +151,16 @@ export default async function DashboardPage() {
                   return (
                     <tr key={listing.id} className="hover:bg-cream/50 transition-colors">
                       <td className="px-6 py-4 font-medium text-stone-800">
-                        {listing.breed.nameDe}
+                        <Link
+                          href={`/welpen/${listing.id}`}
+                          target="_blank"
+                          className="hover:text-forest transition-colors"
+                        >
+                          {listing.title || listing.breed.nameDe}
+                        </Link>
+                        {listing.title && (
+                          <span className="text-stone-400 font-normal"> · {listing.breed.nameDe}</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-stone-500 hidden md:table-cell">
                         {listing.priceCents

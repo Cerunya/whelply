@@ -5,13 +5,16 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 type Breed = { id: number; nameDe: string }
+type Litter = { id: string; breedId: number; label: string }
 
-export default function InseratErstellen({ breeds }: { breeds: Breed[] }) {
+export default function InseratErstellen({ breeds, litters = [] }: { breeds: Breed[]; litters?: Litter[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
+    title: '',
     breedId: '',
+    litterId: '',
     priceCents: '',
     sex: '',
     description: '',
@@ -19,7 +22,14 @@ export default function InseratErstellen({ breeds }: { breeds: Breed[] }) {
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    if (name === 'litterId') {
+      // Beim Wechsel des Wurfs automatisch die passende Rasse setzen
+      const litter = litters.find((l) => l.id === value)
+      setForm({ ...form, litterId: value, ...(litter ? { breedId: String(litter.breedId) } : {}) })
+      return
+    }
+    setForm({ ...form, [name]: value })
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -31,7 +41,9 @@ export default function InseratErstellen({ breeds }: { breeds: Breed[] }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        title: form.title || null,
         breedId: Number(form.breedId),
+        litterId: form.litterId || null,
         priceCents: form.priceCents ? Math.round(Number(form.priceCents) * 100) : null,
         sex: form.sex || null,
         description: form.description || null,
@@ -46,7 +58,8 @@ export default function InseratErstellen({ breeds }: { breeds: Breed[] }) {
       return
     }
 
-    router.push('/dashboard')
+    // Direkt zur Bearbeitungsseite — dort können sofort Fotos hinzugefügt werden
+    router.push(`/dashboard/inserat/${data.id}`)
     router.refresh()
   }
 
@@ -66,12 +79,42 @@ export default function InseratErstellen({ breeds }: { breeds: Breed[] }) {
       </header>
 
       <main className="max-w-xl mx-auto px-4 py-12">
-        <h2 className="font-serif text-2xl font-bold text-stone-900 mb-8">Inserat erstellen</h2>
+        <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Inserat erstellen</h2>
+        <p className="text-stone-400 text-sm mb-8">
+          Nach dem Speichern kannst du direkt Fotos hinzufügen.
+        </p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
               {error}
+            </div>
+          )}
+
+          <div>
+            <label className={labelClass}>Name</label>
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="z.B. Bruno, Welpe 3, oder leer lassen"
+              className={inputClass}
+            />
+            <p className="text-xs text-stone-400 mt-1">
+              Optional — hilft dir und Interessenten bei der Unterscheidung mehrerer Welpen.
+            </p>
+          </div>
+
+          {litters.length > 0 && (
+            <div>
+              <label className={labelClass}>Zu welchem Wurf gehört dieses Inserat?</label>
+              <select name="litterId" value={form.litterId} onChange={handleChange} className={inputClass}>
+                <option value="">Kein Wurf / einzelnes Tier</option>
+                {litters.map((l) => (
+                  <option key={l.id} value={l.id}>{l.label}</option>
+                ))}
+              </select>
             </div>
           )}
 
@@ -134,7 +177,7 @@ export default function InseratErstellen({ breeds }: { breeds: Breed[] }) {
               disabled={loading || !form.breedId}
               className="flex-1 bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
             >
-              {loading ? 'Wird gespeichert...' : 'Inserat speichern'}
+              {loading ? 'Wird gespeichert...' : 'Weiter zu Fotos →'}
             </button>
             <Link
               href="/dashboard"

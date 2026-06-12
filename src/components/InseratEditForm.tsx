@@ -6,10 +6,13 @@ import Link from 'next/link'
 import ImageUploader from '@/components/ImageUploader'
 
 type Breed = { id: number; nameDe: string }
+type Litter = { id: string; breedId: number; label: string }
 type MediaItem = { id: string; url: string; isPrimary: boolean }
 type Listing = {
   id: string
+  title: string | null
   breedId: number
+  litterId: string | null
   priceCents: number | null
   sex: string | null
   description: string | null
@@ -19,10 +22,12 @@ type Listing = {
 export default function InseratEditForm({
   listing,
   breeds,
+  litters = [],
   media = [],
 }: {
   listing: Listing
   breeds: Breed[]
+  litters?: Litter[]
   media?: MediaItem[]
 }) {
   const router = useRouter()
@@ -30,7 +35,9 @@ export default function InseratEditForm({
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
+    title: listing.title ?? '',
     breedId: String(listing.breedId),
+    litterId: listing.litterId ?? '',
     priceCents: listing.priceCents ? String(listing.priceCents / 100) : '',
     sex: listing.sex ?? '',
     description: listing.description ?? '',
@@ -52,7 +59,9 @@ export default function InseratEditForm({
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        title: form.title || null,
         breedId: Number(form.breedId),
+        litterId: form.litterId || null,
         priceCents: form.priceCents ? Math.round(Number(form.priceCents) * 100) : null,
         sex: form.sex || null,
         description: form.description || null,
@@ -121,6 +130,30 @@ export default function InseratEditForm({
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
               {error}
+            </div>
+          )}
+
+          <div>
+            <label className={labelClass}>Name</label>
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="z.B. Bruno, Welpe 3, oder leer lassen"
+              className={inputClass}
+            />
+          </div>
+
+          {litters.length > 0 && (
+            <div>
+              <label className={labelClass}>Zu welchem Wurf gehört dieses Inserat?</label>
+              <select name="litterId" value={form.litterId} onChange={handleChange} className={inputClass}>
+                <option value="">Kein Wurf / einzelnes Tier</option>
+                {litters.map((l) => (
+                  <option key={l.id} value={l.id}>{l.label}</option>
+                ))}
+              </select>
             </div>
           )}
 

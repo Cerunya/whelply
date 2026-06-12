@@ -4,7 +4,9 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
 const schema = z.object({
+  title: z.string().max(80).nullable().optional(),
   breedId: z.number().int().positive(),
+  litterId: z.string().nullable().optional(),
   priceCents: z.number().int().positive().nullable().optional(),
   sex: z.enum(['male', 'female']).nullable().optional(),
   description: z.string().max(2000).nullable().optional(),
@@ -38,10 +40,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
   }
 
+  // Falls ein Wurf angegeben wurde: prüfen ob er diesem Züchter gehört
+  if (parsed.data.litterId) {
+    const litter = await prisma.litter.findUnique({ where: { id: parsed.data.litterId } })
+    if (!litter || litter.breederId !== breeder.id) {
+      return NextResponse.json({ error: 'Wurf nicht gefunden' }, { status: 404 })
+    }
+  }
+
   const listing = await prisma.listing.create({
     data: {
       breederId: breeder.id,
       breedId: parsed.data.breedId,
+      litterId: parsed.data.litterId ?? null,
+      title: parsed.data.title ?? null,
       type: 'puppy',
       priceCents: parsed.data.priceCents ?? null,
       sex: parsed.data.sex ?? null,

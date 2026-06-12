@@ -31,11 +31,25 @@ export default async function InseratBearbeitenPage({
     select: { id: true, nameDe: true },
   })
 
+  const litters = await prisma.litter.findMany({
+    where: { breederId: breeder.id },
+    include: { breed: { select: { nameDe: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const littersForForm = litters.map((l) => ({
+    id: l.id,
+    breedId: l.breedId,
+    label: `${l.breed.nameDe} — ${
+      l.bornDate ? `geb. ${l.bornDate.toLocaleDateString('de-DE')}` : 'geplant'
+    }`,
+  }))
+
   const media = listing.media.map((m) => ({
     id: m.id,
     url: m.url,
     isPrimary: m.isPrimary,
   }))
 
-  return <InseratEditForm listing={listing} breeds={breeds} media={media} />
+  return <InseratEditForm listing={listing} breeds={breeds} litters={littersForForm} media={media} />
 }
