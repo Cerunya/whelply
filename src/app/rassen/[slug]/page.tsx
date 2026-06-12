@@ -81,6 +81,7 @@ export default async function RassenDetailPage({
                   id={listing.id}
                   breedName={breed.nameDe}
                   kennelName={listing.breeder.displayName || listing.breeder.kennelName}
+                  puppyName={listing.title}
                   city={listing.breeder.city}
                   state={listing.breeder.state}
                   priceCents={listing.priceCents}

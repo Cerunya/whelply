@@ -17,6 +17,20 @@ export default async function WelpenDetailPage({
       breed: true,
       breeder: true,
       media: { orderBy: { sortOrder: 'asc' } },
+      dog: true,
+      litter: {
+        include: {
+          dam: { select: { id: true, name: true, titles: true } },
+          sire: { select: { id: true, name: true, titles: true } },
+          listings: {
+            where: { status: 'available' },
+            include: {
+              dog: { select: { id: true, name: true, sex: true } },
+              media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+            },
+          },
+        },
+      },
     },
   })
 
@@ -47,6 +61,18 @@ export default async function WelpenDetailPage({
 
   const sex =
     listing.sex === 'male' ? 'Rüde' : listing.sex === 'female' ? 'Hündin' : 'Nicht angegeben'
+
+  const birthDate = listing.dog?.birthDate ?? listing.litter?.bornDate ?? null
+  let ageText: string | null = null
+  if (birthDate) {
+    const days = Math.floor((Date.now() - birthDate.getTime()) / (24 * 60 * 60 * 1000))
+    if (days < 14) ageText = `${days} Tage`
+    else if (days < 60) ageText = `${Math.floor(days / 7)} Wochen`
+    else ageText = `${Math.floor(days / 30.44)} Monate`
+  }
+
+  // Wurfgeschwister: andere verfügbare Listings desselben Wurfs (ohne dieses)
+  const siblings = (listing.litter?.listings ?? []).filter((l) => l.id !== listing.id)
 
   const location = [listing.breeder.city, listing.breeder.state]
     .filter(Boolean)
@@ -139,6 +165,26 @@ export default async function WelpenDetailPage({
                   <span className="text-stone-400">Geschlecht</span>
                   <span className="font-medium text-stone-800">{sex}</span>
                 </div>
+                {birthDate && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Geboren am</span>
+                    <span className="font-medium text-stone-800">
+                      {birthDate.toLocaleDateString('de-DE')}{ageText && ` (${ageText})`}
+                    </span>
+                  </div>
+                )}
+                {listing.dog?.chipNumber && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Chip-Nummer</span>
+                    <span className="font-medium text-stone-800">{listing.dog.chipNumber}</span>
+                  </div>
+                )}
+                {listing.dog?.color && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Farbe</span>
+                    <span className="font-medium text-stone-800">{listing.dog.color}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm border-t border-cream-deep pt-3">
                   <span className="text-stone-400">Preis</span>
                   <span className="font-bold text-forest text-base">{price}</span>
@@ -175,6 +221,73 @@ export default async function WelpenDetailPage({
               </div>
             </div>
           </div>
+
+          {/* Eltern */}
+          {(listing.litter?.dam || listing.litter?.sire || listing.litter?.sireExternal) && (
+            <div className="mt-10">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Die Eltern</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {listing.litter?.dam && (
+                  <div className="bg-white rounded-xl border border-cream-deep p-5">
+                    <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Mutter</p>
+                    <p className="font-semibold text-stone-800">{listing.litter.dam.name}</p>
+                    {listing.litter.dam.titles && (
+                      <p className="text-sm text-stone-400 mt-1">{listing.litter.dam.titles}</p>
+                    )}
+                  </div>
+                )}
+                {(listing.litter?.sire || listing.litter?.sireExternal) && (
+                  <div className="bg-white rounded-xl border border-cream-deep p-5">
+                    <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Vater</p>
+                    <p className="font-semibold text-stone-800">
+                      {listing.litter?.sire?.name ?? listing.litter?.sireExternal}
+                    </p>
+                    {listing.litter?.sire?.titles && (
+                      <p className="text-sm text-stone-400 mt-1">{listing.litter.sire.titles}</p>
+                    )}
+                    {!listing.litter?.sire && (
+                      <p className="text-xs text-stone-400 mt-1">Externer Deckrüde</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Wurfgeschwister */}
+          {siblings.length > 0 && (
+            <div className="mt-10">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">
+                Geschwister aus diesem Wurf
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {siblings.map((sibling) => (
+                  <Link
+                    key={sibling.id}
+                    href={`/welpen/${sibling.id}`}
+                    className="bg-white rounded-xl border border-cream-deep overflow-hidden hover:border-forest/30 transition-colors"
+                  >
+                    <div className="bg-cream-dark aspect-square flex items-center justify-center">
+                      {sibling.media[0]?.url ? (
+                        <img src={sibling.media[0].url} alt={sibling.dog?.name ?? ''} className="w-full h-full object-cover" />
+                      ) : (
+                        <svg className="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="font-medium text-stone-800 text-sm">{sibling.dog?.name ?? sibling.title}</p>
+                      <p className="text-xs text-stone-400">
+                        {sibling.dog?.sex === 'male' ? 'Rüde' : sibling.dog?.sex === 'female' ? 'Hündin' : ''}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

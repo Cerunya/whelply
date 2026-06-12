@@ -1,0 +1,62 @@
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import LitterDashboard from '@/components/LitterDashboard'
+
+export default async function WurfDetailPage({
+  params,
+}: {
+  params: { id: string }
+}) {
+  const session = await auth()
+  if (!session?.user) redirect('/login')
+
+  const breeder = await prisma.breederProfile.findUnique({
+    where: { userId: session.user.id },
+  })
+  if (!breeder) redirect('/login')
+
+  const litter = await prisma.litter.findUnique({
+    where: { id: params.id },
+    include: {
+      breed: { select: { nameDe: true } },
+      dam: { select: { id: true, name: true } },
+      sire: { select: { id: true, name: true } },
+      listings: {
+        include: {
+          dog: true,
+          media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+        },
+        orderBy: { createdAt: 'asc' },
+      },
+    },
+  })
+
+  if (!litter || litter.breederId !== breeder.id) notFound()
+
+  return (
+    <LitterDashboard
+      litter={{
+        id: litter.id,
+        breedName: litter.breed.nameDe,
+        damName: litter.dam?.name ?? null,
+        sireName: litter.sire?.name ?? litter.sireExternal,
+        expectedDate: litter.expectedDate?.toISOString() ?? null,
+        bornDate: litter.bornDate?.toISOString() ?? null,
+        puppyCount: litter.puppyCount,
+        status: litter.status,
+        notes: litter.notes,
+      }}
+      puppies={litter.listings.map((l) => ({
+        listingId: l.id,
+        dogId: l.dog?.id ?? null,
+        name: l.title || l.dog?.name || 'Unbenannt',
+        sex: l.sex,
+        status: l.status,
+        priceCents: l.priceCents,
+        imageUrl: l.media[0]?.url ?? null,
+      }))}
+    />
+  )
+}

@@ -137,6 +137,7 @@ export default async function ZuechterProfilPage({
                       id={listing.id}
                       breedName={listing.breed.nameDe}
                       kennelName={displayName}
+                      puppyName={listing.title}
                       city={breeder.city}
                       state={breeder.state}
                       priceCents={listing.priceCents}

@@ -111,6 +111,7 @@ export default async function Home() {
                   id={listing.id}
                   breedName={listing.breed.nameDe}
                   kennelName={listing.breeder.kennelName}
+                  puppyName={listing.title}
                   city={listing.breeder.city}
                   state={listing.breeder.state}
                   priceCents={listing.priceCents}

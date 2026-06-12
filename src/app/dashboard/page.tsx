@@ -16,6 +16,14 @@ export default async function DashboardPage() {
         orderBy: { createdAt: 'desc' },
         take: 10,
       },
+      litters: {
+        include: {
+          breed: { select: { nameDe: true } },
+          _count: { select: { listings: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      },
       subscription: true,
       user: { select: { role: true } },
       _count: { select: { listings: true } },
@@ -125,6 +133,45 @@ export default async function DashboardPage() {
             + Rüde eintragen
           </Link>
         </div>
+
+        {/* Würfe */}
+        {breeder.litters.length > 0 && (
+          <div className="mb-10">
+            <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Würfe</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {breeder.litters.map((litter) => (
+                <Link
+                  key={litter.id}
+                  href={`/dashboard/wurf/${litter.id}`}
+                  className="bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors flex items-center justify-between"
+                >
+                  <div>
+                    <p className="font-medium text-stone-800 text-sm">{litter.breed.nameDe}</p>
+                    <p className="text-xs text-stone-400 mt-0.5">
+                      {litter.bornDate
+                        ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}`
+                        : litter.expectedDate
+                        ? `Erwartet am ${litter.expectedDate.toLocaleDateString('de-DE')}`
+                        : 'Geplant'}
+                      {' · '}{litter._count.listings} Welpe{litter._count.listings !== 1 ? 'n' : ''}
+                    </p>
+                  </div>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
+                    litter.status === 'available' ? 'bg-green-50 text-green-700'
+                    : litter.status === 'sold_out' ? 'bg-stone-200 text-stone-600'
+                    : 'bg-stone-100 text-stone-500'
+                  }`}>
+                    {litter.status === 'available' ? 'Verfügbar'
+                      : litter.status === 'sold_out' ? 'Ausverkauft'
+                      : litter.status === 'born' ? 'Geboren'
+                      : litter.status === 'pregnant' ? 'Trächtig'
+                      : 'Geplant'}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Inserate-Tabelle */}
         <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden">

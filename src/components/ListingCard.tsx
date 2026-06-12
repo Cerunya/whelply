@@ -4,6 +4,7 @@ type ListingCardProps = {
   id: string
   breedName: string
   kennelName: string
+  puppyName?: string | null
   city?: string | null
   state?: string | null
   priceCents?: number | null
@@ -12,7 +13,7 @@ type ListingCardProps = {
 }
 
 export default function ListingCard({
-  id, breedName, kennelName, city, state, priceCents, isBoosted, imageUrl,
+  id, breedName, kennelName, puppyName, city, state, priceCents, isBoosted, imageUrl,
 }: ListingCardProps) {
   const price = priceCents
     ? `${(priceCents / 100).toLocaleString('de-DE')} €`
@@ -52,9 +53,13 @@ export default function ListingCard({
           <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">
             {breedName}
           </p>
-          <h3 className="font-semibold text-stone-900 text-sm leading-snug mb-3 group-hover:text-forest transition-colors line-clamp-1">
-            {kennelName}
+          <h3 className="font-semibold text-stone-900 text-sm leading-snug mb-0.5 group-hover:text-forest transition-colors line-clamp-1">
+            {puppyName || kennelName}
           </h3>
+          {puppyName && (
+            <p className="text-xs text-stone-400 mb-3 line-clamp-1">{kennelName}</p>
+          )}
+          {!puppyName && <div className="mb-3" />}
           <div className="flex items-center justify-between pt-2 border-t border-cream-deep">
             <span className="text-xs text-stone-400 flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
