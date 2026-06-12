@@ -110,6 +110,12 @@ export default async function DashboardPage() {
           >
             + Wurf eintragen
           </Link>
+          <Link
+            href="/dashboard/ruede-eintragen"
+            className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
+          >
+            + Rüde eintragen
+          </Link>
         </div>
 
         {/* Inserate-Tabelle */}
