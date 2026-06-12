@@ -17,6 +17,7 @@ export default async function DashboardPage() {
         take: 10,
       },
       subscription: true,
+      user: { select: { role: true } },
       _count: { select: { listings: true } },
     },
   })
@@ -25,6 +26,7 @@ export default async function DashboardPage() {
 
   const activeListings = breeder.listings.filter((l) => l.status === 'available')
   const draftListings = breeder.listings.filter((l) => l.status === 'draft')
+  const totalViews = breeder.listings.reduce((sum, l) => sum + l.viewCount, 0)
   const plan = breeder.subscription?.plan ?? 'free'
   const maxFree = 3
   const canAddMore = plan !== 'free' || activeListings.length < maxFree
@@ -40,6 +42,11 @@ export default async function DashboardPage() {
             <span className="text-sm text-stone-500 font-medium">Mein Dashboard</span>
           </div>
           <div className="flex items-center gap-4">
+            {breeder.user.role === 'admin' && (
+              <Link href="/admin" className="text-sm text-honey font-semibold hover:text-honey-light transition-colors">
+                Admin
+              </Link>
+            )}
             <Link href="/dashboard/profil" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
               Profil bearbeiten
             </Link>
@@ -71,10 +78,11 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stat-Karten */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
           {[
             { label: 'Aktive Inserate', value: activeListings.length },
             { label: 'Entwürfe', value: draftListings.length },
+            { label: 'Profilaufrufe', value: totalViews },
             { label: 'Inserate gesamt', value: breeder._count.listings },
             { label: 'Verifizierung', value: breeder.verificationLevel === 'none' ? '—' : '✓' },
           ].map((s) => (
@@ -141,6 +149,7 @@ export default async function DashboardPage() {
                   <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Rasse</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide hidden md:table-cell">Preis</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Status</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide hidden md:table-cell">Aufrufe</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Boost</th>
                   <th className="px-6 py-3"></th>
                 </tr>
@@ -178,6 +187,15 @@ export default async function DashboardPage() {
                             : listing.status === 'reserved' ? 'Reserviert'
                             : listing.status === 'sold' ? 'Verkauft'
                             : 'Entwurf'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-stone-500 hidden md:table-cell">
+                        <span className="inline-flex items-center gap-1.5">
+                          <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          {listing.viewCount}
                         </span>
                       </td>
                       <td className="px-6 py-4">

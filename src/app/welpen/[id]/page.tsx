@@ -33,6 +33,14 @@ export default async function WelpenDetailPage({
     notFound()
   }
 
+  // Aufruf zählen — nicht für den Eigentümer selbst (verzerrt sonst die Statistik)
+  if (!isOwner) {
+    await prisma.listing.update({
+      where: { id: listing.id },
+      data: { viewCount: { increment: 1 } },
+    }).catch(() => {}) // Fehler beim Zählen sollen die Seite nicht crashen
+  }
+
   const price = listing.priceCents
     ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
     : 'Preis auf Anfrage'

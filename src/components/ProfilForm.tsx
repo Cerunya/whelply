@@ -23,6 +23,8 @@ type BreederData = {
   zip: string | null
   city: string | null
   state: string | null
+  showPhone: boolean
+  showAddress: boolean
 }
 
 export default function ProfilForm({ breeder }: { breeder: BreederData }) {
@@ -41,10 +43,17 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
     zip: breeder.zip ?? '',
     city: breeder.city ?? '',
     state: breeder.state ?? '',
+    showPhone: breeder.showPhone,
+    showAddress: breeder.showAddress,
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value, type } = e.target
+    if (type === 'checkbox') {
+      setForm({ ...form, [name]: (e.target as HTMLInputElement).checked })
+    } else {
+      setForm({ ...form, [name]: value })
+    }
     setSuccess(false)
   }
 
@@ -206,7 +215,8 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
               Private Kontaktdaten
             </h3>
             <p className="text-xs text-stone-400 -mt-3">
-              Werden nicht öffentlich angezeigt. Nötig für Verifizierung und Kontaktaufnahme durch Whelply.
+              Standardmäßig nicht öffentlich sichtbar. Nötig für Verifizierung und Kontaktaufnahme durch Whelply.
+              Du kannst unten festlegen, ob diese Angaben auf deiner Züchter-Seite angezeigt werden sollen.
             </p>
 
             <div>
@@ -219,6 +229,18 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
                 placeholder="+49 ..."
                 className={inputClass}
               />
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="showPhone"
+                  checked={form.showPhone}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-forest"
+                />
+                <span className="text-xs text-stone-500">
+                  Telefonnummer auf meiner Züchter-Seite öffentlich anzeigen
+                </span>
+              </label>
             </div>
 
             <div>
@@ -230,6 +252,19 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
                 onChange={handleChange}
                 className={inputClass}
               />
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="showAddress"
+                  checked={form.showAddress}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-forest"
+                />
+                <span className="text-xs text-stone-500">
+                  Vollständige Adresse (Straße + PLZ) auf meiner Züchter-Seite öffentlich anzeigen.
+                  Stadt und Bundesland sind unabhängig davon immer sichtbar.
+                </span>
+              </label>
             </div>
 
             <div className="grid grid-cols-3 gap-4">

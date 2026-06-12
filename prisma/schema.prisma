@@ -156,12 +156,15 @@ model BreederProfile {
   verificationLevel VerificationLevel @default(none) @map("verification_level")
   bio               String?           @db.Text
   website           String?
-  // Kontaktdaten — NICHT öffentlich, nur für Whelply / spätere Kontaktanfragen
+  // Kontaktdaten — standardmäßig NICHT öffentlich, Züchter kann dies in den Privatsphäre-Einstellungen ändern
   phone             String?
   street            String?
   zip               String?           @map("zip")
   city              String?
   state             String?           // Bundesland
+  // Sichtbarkeits-Schalter für private Kontaktdaten
+  showPhone         Boolean           @default(false) @map("show_phone")
+  showAddress       Boolean           @default(false) @map("show_address")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
 
@@ -282,6 +285,7 @@ model Listing {
   // Boost: NULL oder Timestamp in der Zukunft = geboostet
   // Geschäftsregel: boost_expires_at > NOW() → oben anzeigen
   boostExpiresAt DateTime?     @map("boost_expires_at")
+  viewCount      Int           @default(0) @map("view_count")
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
   expiresAt      DateTime?     @map("expires_at")  // automatische Ablaufzeit

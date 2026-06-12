@@ -26,6 +26,8 @@ export default async function ProfilPage() {
         zip: breeder.zip,
         city: breeder.city,
         state: breeder.state,
+        showPhone: breeder.showPhone,
+        showAddress: breeder.showAddress,
       }}
     />
   )
