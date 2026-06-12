@@ -1,6 +1,10 @@
 // Einmaliges Skript: setzt CORS-Policy auf den whelply-media Bucket.
 // Ausführen im App-Container: node scripts/set-cors.js
 // Danach kann diese Datei gelöscht werden.
+//
+// HINWEIS: Das sslip.io-Zertifikat von Coolify ist für *.ceruserv.de ausgestellt,
+// nicht für *.sslip.io — daher TLS-Check für dieses einmalige Skript deaktivieren.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const { S3Client, PutBucketCorsCommand } = require('@aws-sdk/client-s3')
 
