@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import ImageUploader from '@/components/ImageUploader'
 
 type Breed = { id: number; nameDe: string }
+type MediaItem = { id: string; url: string; isPrimary: boolean }
 type Listing = {
   id: string
   breedId: number
@@ -17,9 +19,11 @@ type Listing = {
 export default function InseratEditForm({
   listing,
   breeds,
+  media = [],
 }: {
   listing: Listing
   breeds: Breed[]
+  media?: MediaItem[]
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -104,6 +108,11 @@ export default function InseratEditForm({
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-8">
           Inserat bearbeiten
         </h2>
+
+        <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-5">
+          <label className={labelClass}>Fotos</label>
+          <ImageUploader listingId={listing.id} initialMedia={media} />
+        </div>
 
         <form
           onSubmit={handleSubmit}

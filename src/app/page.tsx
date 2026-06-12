@@ -18,6 +18,7 @@ export default async function Home() {
     include: {
       breed: { select: { nameDe: true } },
       breeder: { select: { kennelName: true, city: true, state: true } },
+      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
     },
   }).catch(() => [])
 
@@ -114,6 +115,7 @@ export default async function Home() {
                   state={listing.breeder.state}
                   priceCents={listing.priceCents}
                   isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                  imageUrl={listing.media[0]?.url}
                 />
               ))}
             </div>

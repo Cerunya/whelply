@@ -18,7 +18,10 @@ export default async function InseratBearbeitenPage({
 
   const listing = await prisma.listing.findUnique({
     where: { id: params.id },
-    include: { breed: true },
+    include: {
+      breed: true,
+      media: { orderBy: { sortOrder: 'asc' } },
+    },
   })
 
   if (!listing || listing.breederId !== breeder.id) notFound()
@@ -28,5 +31,11 @@ export default async function InseratBearbeitenPage({
     select: { id: true, nameDe: true },
   })
 
-  return <InseratEditForm listing={listing} breeds={breeds} />
+  const media = listing.media.map((m) => ({
+    id: m.id,
+    url: m.url,
+    isPrimary: m.isPrimary,
+  }))
+
+  return <InseratEditForm listing={listing} breeds={breeds} media={media} />
 }

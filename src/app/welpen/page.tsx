@@ -37,6 +37,7 @@ export default async function WelpenPage({
       include: {
         breed: { select: { nameDe: true } },
         breeder: { select: { kennelName: true, city: true, state: true } },
+        media: { where: { isPrimary: true }, take: 1, select: { url: true } },
       },
     }).catch(() => []),
     prisma.listing.count({ where }).catch(() => 0),
@@ -97,6 +98,7 @@ export default async function WelpenPage({
                     state={listing.breeder.state}
                     priceCents={listing.priceCents}
                     isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                    imageUrl={listing.media[0]?.url}
                   />
                 ))}
               </div>
