@@ -11,7 +11,7 @@ export default async function DashboardPage() {
     where: { userId: session.user.id },
     include: {
       listings: {
-        where: { status: { in: ['available', 'draft'] } },
+        where: { status: { in: ['available', 'draft', 'reserved', 'sold'] } },
         include: { breed: { select: { nameDe: true } } },
         orderBy: { createdAt: 'desc' },
         take: 10,
@@ -40,6 +40,9 @@ export default async function DashboardPage() {
             <span className="text-sm text-stone-500 font-medium">Mein Dashboard</span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/dashboard/profil" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
+              Profil bearbeiten
+            </Link>
             <Link href="/" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
               Zur Website
             </Link>
@@ -151,11 +154,15 @@ export default async function DashboardPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          listing.status === 'available'
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-stone-100 text-stone-500'
+                          listing.status === 'available' ? 'bg-green-50 text-green-700'
+                          : listing.status === 'reserved' ? 'bg-amber-50 text-amber-700'
+                          : listing.status === 'sold' ? 'bg-stone-200 text-stone-600'
+                          : 'bg-stone-100 text-stone-500'
                         }`}>
-                          {listing.status === 'available' ? 'Aktiv' : 'Entwurf'}
+                          {listing.status === 'available' ? 'Aktiv'
+                            : listing.status === 'reserved' ? 'Reserviert'
+                            : listing.status === 'sold' ? 'Verkauft'
+                            : 'Entwurf'}
                         </span>
                       </td>
                       <td className="px-6 py-4">

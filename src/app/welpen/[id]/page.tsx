@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { slugify } from '@/lib/slugify'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -122,7 +123,7 @@ export default async function WelpenDetailPage({
                   </a>
                 ) : null}
                 <Link
-                  href={`/zuechter/${listing.breeder.kennelName.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={`/zuechter/${slugify(listing.breeder.kennelName)}`}
                   className="block w-full bg-white/10 text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors"
                 >
                   Züchter-Profil ansehen

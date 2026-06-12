@@ -147,6 +147,8 @@ model BreederProfile {
   userId            String            @unique @map("user_id")
   // FCI-Zwingername — UNIQUE, Pflichtfeld, kein Vermehrer hat diesen
   kennelName        String            @unique @map("kennel_name")
+  // Anzeigename auf der öffentlichen Profilseite (optional, sonst kennelName)
+  displayName       String?           @map("display_name")
   // Züchterverband (VDH, ÖKV, SKG, ASCA, etc.) — optional
   verband           String?
   // Mitgliedsnummer im Rassezuchtverein — optional, für Badge
@@ -154,7 +156,10 @@ model BreederProfile {
   verificationLevel VerificationLevel @default(none) @map("verification_level")
   bio               String?           @db.Text
   website           String?
+  // Kontaktdaten — NICHT öffentlich, nur für Whelply / spätere Kontaktanfragen
   phone             String?
+  street            String?
+  zip               String?           @map("zip")
   city              String?
   state             String?           // Bundesland
   createdAt         DateTime          @default(now()) @map("created_at")
