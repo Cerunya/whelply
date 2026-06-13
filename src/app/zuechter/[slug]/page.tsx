@@ -31,7 +31,10 @@ export default async function ZuechterProfilPage({
         orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
       },
       litters: {
-        include: { breed: { select: { nameDe: true } } },
+        include: {
+          breed: { select: { nameDe: true } },
+          media: { take: 1, select: { url: true } },
+        },
         orderBy: { createdAt: 'desc' },
         take: 10,
       },
@@ -165,8 +168,13 @@ export default async function ZuechterProfilPage({
               </h2>
               <div className="space-y-3">
                 {breeder.litters.map((litter) => (
-                  <div key={litter.id} className="bg-white rounded-xl border border-cream-deep p-5 flex items-center justify-between">
-                    <div>
+                  <div key={litter.id} className="bg-white rounded-xl border border-cream-deep p-5 flex items-center gap-4 justify-between">
+                    {litter.media[0]?.url && (
+                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={litter.media[0].url} alt={litter.breed.nameDe} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex-1">
                       <p className="font-semibold text-stone-800 text-sm">{litter.breed.nameDe}</p>
                       <p className="text-xs text-stone-400 mt-0.5">
                         {litter.status === 'planned' && 'Geplant'}

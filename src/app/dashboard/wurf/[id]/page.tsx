@@ -30,6 +30,7 @@ export default async function WurfDetailPage({
         },
         orderBy: { createdAt: 'asc' },
       },
+      media: { take: 1, select: { url: true } },
     },
   })
 
@@ -47,6 +48,7 @@ export default async function WurfDetailPage({
         puppyCount: litter.puppyCount,
         status: litter.status,
         notes: litter.notes,
+        imageUrl: litter.media[0]?.url ?? null,
       }}
       puppies={litter.listings.map((l) => ({
         listingId: l.id,

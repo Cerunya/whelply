@@ -5,6 +5,8 @@ import { z } from 'zod'
 
 const schema = z.object({
   breedId: z.number().int().positive(),
+  damId: z.string().nullable().optional(),
+  sireId: z.string().nullable().optional(),
   expectedDate: z.string().nullable().optional(),
   bornDate: z.string().nullable().optional(),
   puppyCount: z.number().int().min(1).max(20).nullable().optional(),
@@ -28,10 +30,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
   }
 
+  // Neuer Wurf hat noch keine Welpen — "available"/"sold_out" ist nicht erlaubt
+  if (parsed.data.status === 'available' || parsed.data.status === 'sold_out') {
+    return NextResponse.json(
+      { error: 'Dieser Status kann erst gesetzt werden, wenn mindestens ein Welpe eingetragen wurde.' },
+      { status: 400 }
+    )
+  }
+
+  // Prüfen ob damId/sireId diesem Züchter gehören
+  if (parsed.data.damId) {
+    const dam = await prisma.dog.findUnique({ where: { id: parsed.data.damId } })
+    if (!dam || dam.breederId !== breeder.id) {
+      return NextResponse.json({ error: 'Mutterhündin nicht gefunden' }, { status: 404 })
+    }
+  }
+  if (parsed.data.sireId) {
+    const sire = await prisma.dog.findUnique({ where: { id: parsed.data.sireId } })
+    if (!sire || sire.breederId !== breeder.id) {
+      return NextResponse.json({ error: 'Deckrüde nicht gefunden' }, { status: 404 })
+    }
+  }
+
   const litter = await prisma.litter.create({
     data: {
       breederId: breeder.id,
       breedId: parsed.data.breedId,
+      damId: parsed.data.damId ?? null,
+      sireId: parsed.data.sireId ?? null,
       expectedDate: parsed.data.expectedDate ? new Date(parsed.data.expectedDate) : null,
       bornDate: parsed.data.bornDate ? new Date(parsed.data.bornDate) : null,
       puppyCount: parsed.data.puppyCount ?? null,

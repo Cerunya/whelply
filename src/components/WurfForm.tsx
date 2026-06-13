@@ -5,13 +5,24 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 type Breed = { id: number; nameDe: string }
+type DogOption = { id: string; name: string; sex: string; breedId: number }
 
-export default function WurfForm({ breeds }: { breeds: Breed[] }) {
+export default function WurfForm({
+  breeds,
+  dams = [],
+  sires = [],
+}: {
+  breeds: Breed[]
+  dams?: DogOption[]
+  sires?: DogOption[]
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     breedId: '',
+    damId: '',
+    sireId: '',
     expectedDate: '',
     bornDate: '',
     puppyCount: '',
@@ -19,6 +30,10 @@ export default function WurfForm({ breeds }: { breeds: Breed[] }) {
     notes: '',
     status: 'planned',
   })
+
+  // Nur Hunde derselben Rasse zur Auswahl anbieten
+  const matchingDams = form.breedId ? dams.filter((d) => d.breedId === Number(form.breedId)) : dams
+  const matchingSires = form.breedId ? sires.filter((s) => s.breedId === Number(form.breedId)) : sires
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -34,10 +49,12 @@ export default function WurfForm({ breeds }: { breeds: Breed[] }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         breedId: Number(form.breedId),
+        damId: form.damId || null,
+        sireId: form.sireId || null,
         expectedDate: form.expectedDate || null,
         bornDate: form.bornDate || null,
         puppyCount: form.puppyCount ? Number(form.puppyCount) : null,
-        sireExternal: form.sireExternal || null,
+        sireExternal: form.sireId ? null : (form.sireExternal || null),
         notes: form.notes || null,
         status: form.status,
       }),
@@ -51,6 +68,7 @@ export default function WurfForm({ breeds }: { breeds: Breed[] }) {
     }
 
     router.push('/dashboard')
+    router.refresh()
   }
 
   const labelClass = 'block text-sm font-medium text-stone-700 mb-1.5'
@@ -139,16 +157,46 @@ export default function WurfForm({ breeds }: { breeds: Breed[] }) {
           </div>
 
           <div>
-            <label className={labelClass}>Vater (externer Deckrüde)</label>
-            <input
-              type="text"
-              name="sireExternal"
-              value={form.sireExternal}
-              onChange={handleChange}
-              placeholder="Name des Deckrüden (falls nicht auf Whelply)"
-              className={inputClass}
-            />
+            <label className={labelClass}>Mutterhündin</label>
+            <select name="damId" value={form.damId} onChange={handleChange} className={inputClass}>
+              <option value="">Nicht angegeben</option>
+              {matchingDams.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+            {dams.length === 0 && (
+              <p className="text-xs text-stone-400 mt-1">
+                Noch keine Hündinnen eingetragen.{' '}
+                <Link href="/dashboard/hund-eintragen" className="text-forest hover:underline">
+                  Jetzt eintragen
+                </Link>
+              </p>
+            )}
           </div>
+
+          <div>
+            <label className={labelClass}>Deckrüde</label>
+            <select name="sireId" value={form.sireId} onChange={handleChange} className={inputClass}>
+              <option value="">Externer Deckrüde / nicht angegeben</option>
+              {matchingSires.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {!form.sireId && (
+            <div>
+              <label className={labelClass}>Name des externen Deckrüden</label>
+              <input
+                type="text"
+                name="sireExternal"
+                value={form.sireExternal}
+                onChange={handleChange}
+                placeholder="Falls der Deckrüde nicht auf Whelply registriert ist"
+                className={inputClass}
+              />
+            </div>
+          )}
 
           <div>
             <label className={labelClass}>Notizen</label>

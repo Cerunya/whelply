@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import LitterImageUploader from './LitterImageUploader'
 
 type Litter = {
   id: string
@@ -14,6 +15,7 @@ type Litter = {
   puppyCount: number | null
   status: string
   notes: string | null
+  imageUrl: string | null
 }
 
 type Puppy = {
@@ -37,16 +39,19 @@ const STATUS_LABELS: Record<string, string> = {
 export default function LitterDashboard({ litter, puppies }: { litter: Litter; puppies: Puppy[] }) {
   const router = useRouter()
   const [status, setStatus] = useState(litter.status)
+  const [selectedStatus, setSelectedStatus] = useState(litter.status)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   const hasPuppies = puppies.length > 0
 
-  async function handleStatusChange(newStatus: string) {
+  async function handleStatusSave() {
     setError('')
+    setSuccess(false)
 
-    if (newStatus === 'available' && !hasPuppies) {
-      setError('Du musst zuerst mindestens einen Welpen hinzufügen, bevor der Wurf als "abgabebereit" markiert werden kann.')
+    if ((selectedStatus === 'available' || selectedStatus === 'sold_out') && !hasPuppies) {
+      setError('Du musst zuerst mindestens einen Welpen hinzufügen, bevor der Wurf als "abgabebereit" oder "ausverkauft" markiert werden kann.')
       return
     }
 
@@ -54,7 +59,7 @@ export default function LitterDashboard({ litter, puppies }: { litter: Litter; p
     const res = await fetch(`/api/wuerfe/${litter.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
+      body: JSON.stringify({ status: selectedStatus }),
     })
     setSaving(false)
 
@@ -64,7 +69,8 @@ export default function LitterDashboard({ litter, puppies }: { litter: Litter; p
       return
     }
 
-    setStatus(newStatus)
+    setStatus(selectedStatus)
+    setSuccess(true)
     router.refresh()
   }
 
@@ -100,23 +106,42 @@ export default function LitterDashboard({ litter, puppies }: { litter: Litter; p
           </div>
         )}
 
+        {/* Titelbild */}
+        <div className="mb-6">
+          <label className={labelClass}>Titelbild / Ankündigungsbild</label>
+          <LitterImageUploader litterId={litter.id} initialUrl={litter.imageUrl} />
+        </div>
+
         {/* Status */}
         <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
           <label className={labelClass}>Wurf-Status</label>
-          <select
-            value={status}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            disabled={saving}
-            className={inputClass}
-          >
-            {Object.entries(STATUS_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
-            ))}
-          </select>
+          <div className="flex gap-3">
+            <select
+              value={selectedStatus}
+              onChange={(e) => { setSelectedStatus(e.target.value); setSuccess(false) }}
+              disabled={saving}
+              className={inputClass}
+            >
+              {Object.entries(STATUS_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleStatusSave}
+              disabled={saving || selectedStatus === status}
+              className="bg-forest text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40 whitespace-nowrap"
+            >
+              {saving ? 'Speichert...' : 'Speichern'}
+            </button>
+          </div>
+          {success && (
+            <p className="text-xs text-green-600 mt-2">✓ Status gespeichert.</p>
+          )}
           {!hasPuppies && (
             <p className="text-xs text-amber-600 mt-2">
-              ⚠ Noch keine Welpen eingetragen. "Welpen abgabebereit" kann erst gewählt werden,
-              wenn mindestens ein Welpe unten hinzugefügt wurde.
+              ⚠ Noch keine Welpen eingetragen. "Welpen abgabebereit" und "Ausverkauft" können
+              erst gewählt werden, wenn mindestens ein Welpe unten hinzugefügt wurde.
             </p>
           )}
         </div>

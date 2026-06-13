@@ -1,9 +1,9 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import WurfForm from '@/components/WurfForm'
+import HundForm from '@/components/HundForm'
 
-export default async function WurfEintragenPage() {
+export default async function HundEintragenPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
@@ -17,14 +17,5 @@ export default async function WurfEintragenPage() {
     select: { id: true, nameDe: true },
   })
 
-  const dogs = await prisma.dog.findMany({
-    where: { breederId: breeder.id },
-    select: { id: true, name: true, sex: true, breedId: true },
-    orderBy: { name: 'asc' },
-  })
-
-  const dams = dogs.filter((d) => d.sex === 'female')
-  const sires = dogs.filter((d) => d.sex === 'male')
-
-  return <WurfForm breeds={breeds} dams={dams} sires={sires} />
+  return <HundForm breeds={breeds} />
 }
