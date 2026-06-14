@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchForm from '@/components/SearchForm'
@@ -6,6 +7,8 @@ import ListingCard from '@/components/ListingCard'
 import Link from 'next/link'
 
 export default async function Home() {
+  const session = await auth()
+
   const breeds = await prisma.breed.findMany({
     orderBy: { nameDe: 'asc' },
     select: { id: true, nameDe: true, slug: true },
@@ -161,28 +164,50 @@ export default async function Home() {
 
         {/* ── Züchter-CTA ── */}
         <section className="max-w-6xl mx-auto px-4 py-20 text-center">
-          <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-4">Für Züchter</p>
-          <h2 className="font-serif text-4xl font-bold text-stone-900 mb-4">
-            Dein Zwinger auf Whelply.
-          </h2>
-          <p className="text-stone-500 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
-            Profil anlegen, Würfe eintragen, Käufer in ganz Deutschland erreichen.
-            Kostenlos, ohne versteckte Gebühren.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/register"
-              className="bg-forest text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors shadow-sm"
-            >
-              Kostenlos registrieren
-            </Link>
-            <Link
-              href="/welpen"
-              className="border-2 border-forest/20 text-forest px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest/5 transition-colors"
-            >
-              Inserate durchsuchen
-            </Link>
-          </div>
+          {session?.user ? (
+            <>
+              <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-4">Für Züchter</p>
+              <h2 className="font-serif text-4xl font-bold text-stone-900 mb-4">
+                Willkommen zurück.
+              </h2>
+              <p className="text-stone-500 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
+                Verwalte deine Inserate, Würfe und Zuchthunde in deinem Dashboard.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/dashboard"
+                  className="bg-forest text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors shadow-sm"
+                >
+                  Zum Dashboard
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-4">Für Züchter</p>
+              <h2 className="font-serif text-4xl font-bold text-stone-900 mb-4">
+                Dein Zwinger auf Whelply.
+              </h2>
+              <p className="text-stone-500 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
+                Profil anlegen, Würfe eintragen, Käufer in ganz Deutschland erreichen.
+                Kostenlos, ohne versteckte Gebühren.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/register"
+                  className="bg-forest text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors shadow-sm"
+                >
+                  Kostenlos registrieren
+                </Link>
+                <Link
+                  href="/welpen"
+                  className="border-2 border-forest/20 text-forest px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest/5 transition-colors"
+                >
+                  Inserate durchsuchen
+                </Link>
+              </div>
+            </>
+          )}
         </section>
 
       </main>

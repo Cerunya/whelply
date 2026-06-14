@@ -230,7 +230,9 @@ export default async function WelpenDetailPage({
                 {listing.litter?.dam && (
                   <div className="bg-white rounded-xl border border-cream-deep p-5">
                     <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Mutter</p>
-                    <p className="font-semibold text-stone-800">{listing.litter.dam.name}</p>
+                    <Link href={`/hund/${listing.litter.dam.id}`} className="font-semibold text-stone-800 hover:text-forest transition-colors">
+                      {listing.litter.dam.name}
+                    </Link>
                     {listing.litter.dam.titles && (
                       <p className="text-sm text-stone-400 mt-1">{listing.litter.dam.titles}</p>
                     )}
@@ -239,9 +241,13 @@ export default async function WelpenDetailPage({
                 {(listing.litter?.sire || listing.litter?.sireExternal) && (
                   <div className="bg-white rounded-xl border border-cream-deep p-5">
                     <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Vater</p>
-                    <p className="font-semibold text-stone-800">
-                      {listing.litter?.sire?.name ?? listing.litter?.sireExternal}
-                    </p>
+                    {listing.litter?.sire ? (
+                      <Link href={`/hund/${listing.litter.sire.id}`} className="font-semibold text-stone-800 hover:text-forest transition-colors">
+                        {listing.litter.sire.name}
+                      </Link>
+                    ) : (
+                      <p className="font-semibold text-stone-800">{listing.litter?.sireExternal}</p>
+                    )}
                     {listing.litter?.sire?.titles && (
                       <p className="text-sm text-stone-400 mt-1">{listing.litter.sire.titles}</p>
                     )}

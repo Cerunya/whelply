@@ -1,6 +1,9 @@
 import Link from 'next/link'
+import { auth } from '@/lib/auth'
 
-export default function Footer() {
+export default async function Footer() {
+  const session = await auth()
+
   return (
     <footer className="bg-forest text-white/60 mt-20">
       <div className="max-w-6xl mx-auto px-4 py-14">
@@ -30,11 +33,17 @@ export default function Footer() {
           <div>
             <p className="text-white text-sm font-semibold mb-4">Züchter</p>
             <ul className="space-y-2.5 text-sm">
-              {[
-                ['/register', 'Kostenlos registrieren'],
-                ['/login', 'Einloggen'],
-                ['/dashboard', 'Dashboard'],
-              ].map(([href, label]) => (
+              {(session?.user
+                ? [
+                    ['/dashboard', 'Dashboard'],
+                    ['/dashboard/wurf-eintragen', 'Wurf eintragen'],
+                    ['/dashboard/profil', 'Profil bearbeiten'],
+                  ]
+                : [
+                    ['/register', 'Kostenlos registrieren'],
+                    ['/login', 'Einloggen'],
+                  ]
+              ).map(([href, label]) => (
                 <li key={href}>
                   <Link href={href} className="text-white/60 hover:text-white transition-colors">{label}</Link>
                 </li>

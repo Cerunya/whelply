@@ -38,10 +38,29 @@ export default async function ZuechterProfilPage({
         orderBy: { createdAt: 'desc' },
         take: 10,
       },
+      dogs: {
+        where: { isStud: true },
+        include: {
+          breed: { select: { nameDe: true } },
+          media: { take: 1, select: { url: true } },
+        },
+        orderBy: { name: 'asc' },
+      },
     },
   })
 
   if (!breeder) notFound()
+
+  // Separate Query: erwachsene Hunde zur Abgabe (eigene Relation-Instanz nötig, da
+  // Prisma die gleiche Relation nicht zweimal mit unterschiedlichen Filtern in einem include erlaubt)
+  const adultListings = await prisma.listing.findMany({
+    where: { breederId: breeder.id, status: { in: ['available', 'reserved', 'sold'] }, type: 'adult_dog' },
+    include: {
+      breed: { select: { nameDe: true } },
+      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+    },
+    orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
+  })
 
   const now = new Date()
   const displayName = breeder.displayName || breeder.kennelName
@@ -191,6 +210,80 @@ export default async function ZuechterProfilPage({
                       {litter.status === 'available' ? 'Verfügbar' : litter.status === 'sold_out' ? 'Ausverkauft' : 'In Planung'}
                     </span>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Erwachsene Hunde zur Abgabe */}
+          {adultListings.length > 0 && (
+            <div className="mb-12">
+              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
+                Erwachsene Hunde zur Abgabe
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {adultListings.map((listing) => (
+                  <div key={listing.id} className="relative">
+                    <ListingCard
+                      id={listing.id}
+                      breedName={listing.breed.nameDe}
+                      kennelName={displayName}
+                      puppyName={listing.title}
+                      city={breeder.city}
+                      state={breeder.state}
+                      priceCents={listing.priceCents}
+                      isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                      imageUrl={listing.media[0]?.url}
+                    />
+                    {listing.status !== 'available' && (
+                      <span className={`absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full ${
+                        listing.status === 'reserved' ? 'bg-amber-400 text-amber-900' : 'bg-stone-700 text-white'
+                      }`}>
+                        {listing.status === 'reserved' ? 'Reserviert' : 'Verkauft'}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Zuchtrüden */}
+          {breeder.dogs.length > 0 && (
+            <div className="mb-12">
+              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
+                Zuchtrüden
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {breeder.dogs.map((dog) => (
+                  <Link
+                    key={dog.id}
+                    href={`/hund/${dog.id}`}
+                    className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all"
+                  >
+                    <div className="bg-cream-dark aspect-square flex items-center justify-center relative">
+                      {dog.media[0]?.url ? (
+                        <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      )}
+                      <span className="absolute top-2 left-2 bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                        Deckrüde
+                      </span>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-0.5">
+                        {dog.breed.nameDe}
+                      </p>
+                      <p className="font-semibold text-stone-800 text-sm">{dog.name}</p>
+                      {dog.titles && (
+                        <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{dog.titles}</p>
+                      )}
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
