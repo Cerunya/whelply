@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BreederImageUploader from './BreederImageUploader'
 import SaveToast from './SaveToast'
@@ -37,8 +36,6 @@ const ACCENT_PRESETS = [
 const HEX_REGEX = /^#[0-9a-fA-F]{6}$/
 
 export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
-  const router = useRouter()
-
   const [subdomain, setSubdomain] = useState(breeder.subdomain ?? '')
   const [subdomainStatus, setSubdomainStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'unchanged'>('idle')
   const [subdomainError, setSubdomainError] = useState('')
@@ -121,7 +118,6 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
 
     setSuccess(true)
     setLoading(false)
-    router.refresh()
   }
 
   async function handleReset() {
@@ -140,7 +136,6 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
 
     if (res.ok) {
       setSuccess(true)
-      router.refresh()
     } else {
       const data = await res.json().catch(() => ({}))
       setError(data.error ?? 'Fehler beim Zurücksetzen.')
