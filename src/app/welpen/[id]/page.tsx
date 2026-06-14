@@ -228,33 +228,38 @@ export default async function WelpenDetailPage({
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Die Eltern</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {listing.litter?.dam && (
-                  <div className="bg-white rounded-xl border border-cream-deep p-5">
+                  <Link
+                    href={`/hund/${listing.litter.dam.id}`}
+                    className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all block"
+                  >
                     <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Mutter</p>
-                    <Link href={`/hund/${listing.litter.dam.id}`} className="font-semibold text-stone-800 hover:text-forest transition-colors">
+                    <p className="font-semibold text-stone-800">
                       {listing.litter.dam.name}
-                    </Link>
+                    </p>
                     {listing.litter.dam.titles && (
                       <p className="text-sm text-stone-400 mt-1">{listing.litter.dam.titles}</p>
                     )}
-                  </div>
+                  </Link>
                 )}
                 {(listing.litter?.sire || listing.litter?.sireExternal) && (
-                  <div className="bg-white rounded-xl border border-cream-deep p-5">
-                    <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Vater</p>
-                    {listing.litter?.sire ? (
-                      <Link href={`/hund/${listing.litter.sire.id}`} className="font-semibold text-stone-800 hover:text-forest transition-colors">
-                        {listing.litter.sire.name}
-                      </Link>
-                    ) : (
+                  listing.litter?.sire ? (
+                    <Link
+                      href={`/hund/${listing.litter.sire.id}`}
+                      className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all block"
+                    >
+                      <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Vater</p>
+                      <p className="font-semibold text-stone-800">{listing.litter.sire.name}</p>
+                      {listing.litter.sire.titles && (
+                        <p className="text-sm text-stone-400 mt-1">{listing.litter.sire.titles}</p>
+                      )}
+                    </Link>
+                  ) : (
+                    <div className="bg-white rounded-xl border border-cream-deep p-5">
+                      <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Vater</p>
                       <p className="font-semibold text-stone-800">{listing.litter?.sireExternal}</p>
-                    )}
-                    {listing.litter?.sire?.titles && (
-                      <p className="text-sm text-stone-400 mt-1">{listing.litter.sire.titles}</p>
-                    )}
-                    {!listing.litter?.sire && (
                       <p className="text-xs text-stone-400 mt-1">Externer Deckrüde</p>
-                    )}
-                  </div>
+                    </div>
+                  )
                 )}
               </div>
             </div>

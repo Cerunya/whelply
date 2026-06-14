@@ -57,6 +57,17 @@ export default async function WelpenPage({
     <>
       <Navbar />
       <main className="min-h-screen bg-white">
+        <section className="bg-forest px-4 py-12">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="font-serif text-3xl font-bold text-white mb-2">
+              Welpen
+            </h1>
+            <p className="text-white/70 text-sm">
+              Welpen unserer Züchter — von der Wurfankündigung bis zum abgabebereiten Hund.
+            </p>
+          </div>
+        </section>
+
         <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
           <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
             <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>

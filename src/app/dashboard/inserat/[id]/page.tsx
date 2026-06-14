@@ -37,11 +37,19 @@ export default async function InseratBearbeitenPage({
     orderBy: { createdAt: 'desc' },
   })
 
+  const LITTER_STATUS_LABELS: Record<string, string> = {
+    planned: 'geplant',
+    pregnant: 'trächtig',
+    born: 'geboren',
+    available: 'abgabebereit',
+    sold_out: 'ausverkauft',
+  }
+
   const littersForForm = litters.map((l) => ({
     id: l.id,
     breedId: l.breedId,
-    label: `${l.breed.nameDe} — ${
-      l.bornDate ? `geb. ${l.bornDate.toLocaleDateString('de-DE')}` : 'geplant'
+    label: `${l.breed.nameDe} — ${LITTER_STATUS_LABELS[l.status]}${
+      l.bornDate ? ` (${l.bornDate.toLocaleDateString('de-DE')})` : ''
     }`,
   }))
 

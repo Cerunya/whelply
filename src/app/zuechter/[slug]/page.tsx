@@ -204,10 +204,17 @@ export default async function ZuechterProfilPage({
                         {litter.puppyCount && ` · ${litter.puppyCount} Welpen`}
                       </p>
                     </div>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      litter.status === 'available' ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-stone-500'
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
+                      litter.status === 'available' ? 'bg-green-50 text-green-700'
+                      : litter.status === 'sold_out' ? 'bg-stone-200 text-stone-600'
+                      : litter.status === 'born' ? 'bg-blue-50 text-blue-700'
+                      : 'bg-stone-100 text-stone-500'
                     }`}>
-                      {litter.status === 'available' ? 'Verfügbar' : litter.status === 'sold_out' ? 'Ausverkauft' : 'In Planung'}
+                      {litter.status === 'available' ? 'Verfügbar'
+                        : litter.status === 'sold_out' ? 'Ausverkauft'
+                        : litter.status === 'born' ? 'Geboren'
+                        : litter.status === 'pregnant' ? 'Trächtig'
+                        : 'Geplant'}
                     </span>
                   </div>
                 ))}
