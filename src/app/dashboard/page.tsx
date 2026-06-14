@@ -165,6 +165,12 @@ export default async function DashboardPage() {
           >
             + Zuchthund eintragen
           </Link>
+          <Link
+            href="/dashboard/theme"
+            className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+          >
+            Theme & Branding
+          </Link>
         </div>
 
         {/* Würfe */}

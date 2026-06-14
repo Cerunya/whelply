@@ -8,7 +8,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 // Browser → /api/upload (whelply.de, gültiges Zertifikat)
 // Server  → Garage (internes Docker-Netzwerk, kein TLS nötig)
 //
-// Akzeptiert listingId, litterId ODER dogId als Ziel.
+// Akzeptiert listingId, litterId, dogId ODER purpose (für Breeder-Theme: header/background) als Ziel.
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
@@ -18,9 +18,14 @@ export async function POST(req: NextRequest) {
   const listingId = formData.get('listingId') as string | null
   const litterId = formData.get('litterId') as string | null
   const dogId = formData.get('dogId') as string | null
+  const purpose = formData.get('purpose') as string | null // 'header' | 'background'
 
-  if (!file || (!listingId && !litterId && !dogId)) {
+  if (!file || (!listingId && !litterId && !dogId && !purpose)) {
     return NextResponse.json({ error: 'Datei oder Ziel-ID fehlt' }, { status: 400 })
+  }
+
+  if (purpose && !['header', 'background'].includes(purpose)) {
+    return NextResponse.json({ error: 'Ungültiger purpose-Wert' }, { status: 400 })
   }
 
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
@@ -93,6 +98,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: media.id, url: media.url })
   }
 
+  if (purpose) {
+    // purpose-Zweig (Theme: Header- oder Hintergrundbild des Züchterprofils)
+    const storageKey = `breeders/${breeder.id}/${purpose}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
+
+    // Pro purpose nur ein Bild — altes ersetzen
+    const oldMedia = await prisma.media.findMany({ where: { breederId: breeder.id, purpose } })
+    for (const old of oldMedia) {
+      await prisma.media.delete({ where: { id: old.id } })
+    }
+
+    const media = await prisma.media.create({
+      data: {
+        storageKey,
+        url: `/api/media/${storageKey}/view`,
+        breederId: breeder.id,
+        purpose,
+        isPrimary: false,
+        sortOrder: 0,
+      },
+    })
+
+    return NextResponse.json({ id: media.id, url: media.url })
+  }
+
   // dogId-Zweig (Zuchthund-Profilbild)
   const dog = await prisma.dog.findUnique({ where: { id: dogId! } })
   if (!dog || dog.breederId !== breeder.id) {
@@ -119,4 +149,22 @@ export async function POST(req: NextRequest) {
   })
 
   return NextResponse.json({ id: media.id, url: media.url })
+}
+
+// Entfernt das Header- oder Hintergrundbild des Züchterprofils (Theme-Editor)
+export async function DELETE(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
+
+  const purpose = req.nextUrl.searchParams.get('purpose')
+  if (!purpose || !['header', 'background'].includes(purpose)) {
+    return NextResponse.json({ error: 'Ungültiger purpose-Wert' }, { status: 400 })
+  }
+
+  const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
+  if (!breeder) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
+
+  await prisma.media.deleteMany({ where: { breederId: breeder.id, purpose } })
+
+  return NextResponse.json({ ok: true })
 }

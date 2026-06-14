@@ -46,6 +46,10 @@ export default async function ZuechterProfilPage({
         },
         orderBy: { name: 'asc' },
       },
+      media: {
+        where: { purpose: { in: ['header', 'background'] } },
+        select: { url: true, purpose: true },
+      },
     },
   })
 
@@ -65,15 +69,43 @@ export default async function ZuechterProfilPage({
   const now = new Date()
   const displayName = breeder.displayName || breeder.kennelName
   const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
+  const headerImage = breeder.media.find((m) => m.purpose === 'header')?.url
+  const backgroundImage = breeder.media.find((m) => m.purpose === 'background')?.url
+  const themeColor = breeder.themeColor || undefined
+  const accentColor = breeder.themeAccentColor || undefined
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-cream">
+      <main className="min-h-screen relative">
+        {backgroundImage ? (
+          <>
+            <div
+              className="fixed inset-0 -z-20"
+              style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
+            />
+            <div className="fixed inset-0 -z-10 bg-cream/85" />
+          </>
+        ) : (
+          <div className="fixed inset-0 -z-10 bg-cream" />
+        )}
+
         {/* Header */}
-        <section className="bg-forest px-4 py-14">
-          <div className="max-w-5xl mx-auto">
-            <p className="text-xs font-semibold text-honey uppercase tracking-widest mb-2">
+        <section
+          className={`relative px-4 py-14 ${headerImage ? '' : 'bg-forest'}`}
+          style={themeColor && !headerImage ? { backgroundColor: themeColor } : undefined}
+        >
+          {headerImage && (
+            <>
+              <img src={headerImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/45" />
+            </>
+          )}
+          <div className="max-w-5xl mx-auto relative">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-2 text-honey"
+              style={accentColor ? { color: accentColor } : undefined}
+            >
               {breeder.verband ? `${breeder.verband}-Züchter` : 'Züchter'}
             </p>
             <h1 className="font-serif text-4xl font-bold text-white mb-2">
@@ -89,7 +121,9 @@ export default async function ZuechterProfilPage({
               </p>
             )}
             {breeder.verificationLevel !== 'none' && (
-              <p className="text-honey text-sm mt-2 font-medium">✓ Verifizierter Züchter</p>
+              <p className="text-sm mt-2 font-medium text-honey" style={accentColor ? { color: accentColor } : undefined}>
+                ✓ Verifizierter Züchter
+              </p>
             )}
           </div>
         </section>
@@ -277,7 +311,10 @@ export default async function ZuechterProfilPage({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       )}
-                      <span className="absolute top-2 left-2 bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                      <span
+                        className="absolute top-2 left-2 bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full"
+                        style={accentColor ? { backgroundColor: accentColor } : undefined}
+                      >
                         Deckrüde
                       </span>
                     </div>
