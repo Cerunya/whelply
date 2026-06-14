@@ -2,6 +2,7 @@ import { auth, signOut } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import MobileNav from '@/components/MobileNav'
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -57,7 +58,7 @@ export default async function DashboardPage() {
             <span className="text-stone-300">|</span>
             <span className="text-sm text-stone-500 font-medium">Mein Dashboard</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             {breeder.user.role === 'admin' && (
               <Link href="/admin" className="text-sm text-honey font-semibold hover:text-honey-light transition-colors">
                 Admin
@@ -75,6 +76,30 @@ export default async function DashboardPage() {
               </button>
             </form>
           </div>
+
+          <MobileNav
+            links={[]}
+            extra={
+              <>
+                {breeder.user.role === 'admin' && (
+                  <Link href="/admin" className="font-semibold text-honey hover:text-honey-light transition-colors">
+                    Admin
+                  </Link>
+                )}
+                <Link href="/dashboard/profil" className="font-medium text-stone-700 hover:text-forest transition-colors">
+                  Profil bearbeiten
+                </Link>
+                <Link href="/" className="font-medium text-stone-700 hover:text-forest transition-colors">
+                  Zur Website
+                </Link>
+                <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
+                  <button type="submit" className="text-stone-400 hover:text-stone-700 transition-colors">
+                    Abmelden
+                  </button>
+                </form>
+              </>
+            }
+          />
         </div>
       </header>
 
@@ -159,7 +184,7 @@ export default async function DashboardPage() {
                       {litter.bornDate
                         ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}`
                         : litter.expectedDate
-                        ? `Erwartet am ${litter.expectedDate.toLocaleDateString('de-DE')}`
+                        ? `Erwartet: ${litter.expectedDate}`
                         : 'Geplant'}
                       {' · '}{litter._count.listings} Welpe{litter._count.listings !== 1 ? 'n' : ''}
                     </p>

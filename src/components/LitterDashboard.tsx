@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import LitterImageUploader from './LitterImageUploader'
+import SaveToast from './SaveToast'
 
 type Litter = {
   id: string
@@ -251,17 +252,24 @@ export default function LitterDashboard({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          {(selectedStatus === 'planned' || selectedStatus === 'pregnant') && (
             <div>
               <label className={labelClass}>Erwartetes Datum</label>
               <input
-                type="date"
+                type="text"
                 name="expectedDate"
                 value={details.expectedDate}
                 onChange={handleDetailsChange}
+                placeholder="z.B. Ende Mai 2026"
                 className={inputClass}
               />
+              <p className="text-xs text-stone-400 mt-1">
+                Freitext — muss kein genaues Datum sein.
+              </p>
             </div>
+          )}
+
+          {(selectedStatus === 'born' || selectedStatus === 'available' || selectedStatus === 'sold_out') && (
             <div>
               <label className={labelClass}>Geburtsdatum</label>
               <input
@@ -272,7 +280,7 @@ export default function LitterDashboard({
                 className={inputClass}
               />
             </div>
-          </div>
+          )}
 
           <div>
             <label className={labelClass}>Anzahl Welpen (geplant)</label>
@@ -415,6 +423,7 @@ export default function LitterDashboard({
           )}
         </div>
       </main>
+      <SaveToast show={success || detailsSuccess} />
     </div>
   )
 }

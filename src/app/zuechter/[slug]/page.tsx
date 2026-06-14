@@ -196,8 +196,8 @@ export default async function ZuechterProfilPage({
                     <div className="flex-1">
                       <p className="font-semibold text-stone-800 text-sm">{litter.breed.nameDe}</p>
                       <p className="text-xs text-stone-400 mt-0.5">
-                        {litter.status === 'planned' && 'Geplant'}
-                        {litter.status === 'pregnant' && 'Trächtig'}
+                        {litter.status === 'planned' && (litter.expectedDate ? `Erwartet: ${litter.expectedDate}` : 'Geplant')}
+                        {litter.status === 'pregnant' && (litter.expectedDate ? `Erwartet: ${litter.expectedDate}` : 'Trächtig')}
                         {litter.status === 'born' && litter.bornDate && `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}`}
                         {litter.status === 'available' && 'Welpen abgabebereit'}
                         {litter.status === 'sold_out' && 'Ausverkauft'}

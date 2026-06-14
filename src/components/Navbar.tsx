@@ -1,8 +1,18 @@
 import Link from 'next/link'
 import { auth, signOut } from '@/lib/auth'
+import MobileNav from './MobileNav'
 
 export default async function Navbar() {
   const session = await auth()
+
+  const navItems = [
+    { href: '/welpen', label: 'Welpen' },
+    { href: '/hunde', label: 'Hunde' },
+    { href: '/zuchtrueden', label: 'Zuchtrüden' },
+    { href: '/zuechter', label: 'Züchter' },
+    { href: '/rassen', label: 'Rassen' },
+    { href: '/dienste', label: 'Dienste' },
+  ]
 
   return (
     <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
@@ -12,14 +22,7 @@ export default async function Navbar() {
             Whelply
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            {[
-              { href: '/welpen', label: 'Welpen' },
-              { href: '/hunde', label: 'Hunde' },
-              { href: '/zuchtrueden', label: 'Zuchtrüden' },
-              { href: '/zuechter', label: 'Züchter' },
-              { href: '/rassen', label: 'Rassen' },
-              { href: '/dienste', label: 'Dienste' },
-            ].map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -31,7 +34,7 @@ export default async function Navbar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           {session ? (
             <>
               <Link href="/dashboard" className="text-sm text-stone-600 hover:text-forest transition-colors font-medium">
@@ -57,6 +60,33 @@ export default async function Navbar() {
             </>
           )}
         </div>
+
+        <MobileNav
+          links={navItems}
+          extra={
+            session ? (
+              <>
+                <Link href="/dashboard" className="font-medium text-stone-700 hover:text-forest transition-colors">
+                  {session.user.kennelName ?? 'Dashboard'}
+                </Link>
+                <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
+                  <button type="submit" className="text-stone-400 hover:text-stone-700 transition-colors">
+                    Abmelden
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="font-medium text-stone-700 hover:text-forest transition-colors">
+                  Anmelden
+                </Link>
+                <Link href="/register" className="font-semibold text-forest hover:underline">
+                  Züchter werden
+                </Link>
+              </>
+            )
+          }
+        />
       </div>
     </header>
   )

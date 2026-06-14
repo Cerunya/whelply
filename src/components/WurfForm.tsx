@@ -119,17 +119,24 @@ export default function WurfForm({
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {(form.status === 'planned' || form.status === 'pregnant') && (
             <div>
               <label className={labelClass}>Erwartetes Datum</label>
               <input
-                type="date"
+                type="text"
                 name="expectedDate"
                 value={form.expectedDate}
                 onChange={handleChange}
+                placeholder="z.B. Ende Mai 2026"
                 className={inputClass}
               />
+              <p className="text-xs text-stone-400 mt-1">
+                Freitext — muss kein genaues Datum sein.
+              </p>
             </div>
+          )}
+
+          {(form.status === 'born' || form.status === 'available' || form.status === 'sold_out') && (
             <div>
               <label className={labelClass}>Geburtsdatum</label>
               <input
@@ -140,7 +147,7 @@ export default function WurfForm({
                 className={inputClass}
               />
             </div>
-          </div>
+          )}
 
           <div>
             <label className={labelClass}>Anzahl Welpen</label>

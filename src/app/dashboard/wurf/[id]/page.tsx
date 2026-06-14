@@ -61,7 +61,7 @@ export default async function WurfDetailPage({
         damName: litter.dam?.name ?? null,
         sireName: litter.sire?.name ?? litter.sireExternal,
         sireExternal: litter.sireExternal,
-        expectedDate: litter.expectedDate?.toISOString().slice(0, 10) ?? null,
+        expectedDate: litter.expectedDate,
         bornDate: litter.bornDate?.toISOString().slice(0, 10) ?? null,
         puppyCount: litter.puppyCount,
         status: litter.status,

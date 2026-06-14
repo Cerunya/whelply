@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ImageUploader from '@/components/ImageUploader'
+import SaveToast from '@/components/SaveToast'
 
 type Breed = { id: number; nameDe: string }
 type Litter = { id: string; breedId: number; label: string }
@@ -280,6 +281,7 @@ export default function InseratEditForm({
           </div>
         </form>
       </main>
+      <SaveToast show={success} />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DogImageUploader from './DogImageUploader'
+import SaveToast from './SaveToast'
 
 type Breed = { id: number; nameDe: string }
 type DogData = {
@@ -250,6 +251,7 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
           {deleting ? 'Wird gelöscht...' : 'Hund löschen'}
         </button>
       </main>
+      <SaveToast show={success} />
     </div>
   )
 }

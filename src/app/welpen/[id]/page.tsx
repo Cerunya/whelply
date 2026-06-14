@@ -20,8 +20,8 @@ export default async function WelpenDetailPage({
       dog: true,
       litter: {
         include: {
-          dam: { select: { id: true, name: true, titles: true } },
-          sire: { select: { id: true, name: true, titles: true } },
+          dam: { include: { media: { take: 1, select: { url: true } } } },
+          sire: { include: { media: { take: 1, select: { url: true } } } },
           listings: {
             where: { status: 'available' },
             include: {
@@ -230,28 +230,46 @@ export default async function WelpenDetailPage({
                 {listing.litter?.dam && (
                   <Link
                     href={`/hund/${listing.litter.dam.id}`}
-                    className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all block"
+                    className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all flex items-center gap-4"
                   >
-                    <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Mutter</p>
-                    <p className="font-semibold text-stone-800">
-                      {listing.litter.dam.name}
-                    </p>
-                    {listing.litter.dam.titles && (
-                      <p className="text-sm text-stone-400 mt-1">{listing.litter.dam.titles}</p>
+                    {listing.litter.dam.media[0]?.url && (
+                      <img
+                        src={listing.litter.dam.media[0].url}
+                        alt={listing.litter.dam.name}
+                        className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                      />
                     )}
+                    <div>
+                      <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Mutter</p>
+                      <p className="font-semibold text-stone-800">
+                        {listing.litter.dam.name}
+                      </p>
+                      {listing.litter.dam.titles && (
+                        <p className="text-sm text-stone-400 mt-1">{listing.litter.dam.titles}</p>
+                      )}
+                    </div>
                   </Link>
                 )}
                 {(listing.litter?.sire || listing.litter?.sireExternal) && (
                   listing.litter?.sire ? (
                     <Link
                       href={`/hund/${listing.litter.sire.id}`}
-                      className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all block"
+                      className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all flex items-center gap-4"
                     >
-                      <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Vater</p>
-                      <p className="font-semibold text-stone-800">{listing.litter.sire.name}</p>
-                      {listing.litter.sire.titles && (
-                        <p className="text-sm text-stone-400 mt-1">{listing.litter.sire.titles}</p>
+                      {listing.litter.sire.media[0]?.url && (
+                        <img
+                          src={listing.litter.sire.media[0].url}
+                          alt={listing.litter.sire.name}
+                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                        />
                       )}
+                      <div>
+                        <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Vater</p>
+                        <p className="font-semibold text-stone-800">{listing.litter.sire.name}</p>
+                        {listing.litter.sire.titles && (
+                          <p className="text-sm text-stone-400 mt-1">{listing.litter.sire.titles}</p>
+                        )}
+                      </div>
                     </Link>
                   ) : (
                     <div className="bg-white rounded-xl border border-cream-deep p-5">

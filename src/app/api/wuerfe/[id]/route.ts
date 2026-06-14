@@ -9,7 +9,7 @@ const schema = z.object({
   damId: z.string().nullable().optional(),
   sireId: z.string().nullable().optional(),
   sireExternal: z.string().max(200).nullable().optional(),
-  expectedDate: z.string().nullable().optional(),
+  expectedDate: z.string().max(100).nullable().optional(),
   bornDate: z.string().nullable().optional(),
   puppyCount: z.number().int().min(1).max(20).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
@@ -80,7 +80,7 @@ export async function PATCH(
   }
   if (parsed.data.sireExternal !== undefined) data.sireExternal = parsed.data.sireExternal
   if (parsed.data.expectedDate !== undefined) {
-    data.expectedDate = parsed.data.expectedDate ? new Date(parsed.data.expectedDate) : null
+    data.expectedDate = parsed.data.expectedDate || null
   }
   if (parsed.data.bornDate !== undefined) {
     data.bornDate = parsed.data.bornDate ? new Date(parsed.data.bornDate) : null

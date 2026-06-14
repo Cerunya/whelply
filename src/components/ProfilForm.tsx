@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import SaveToast from './SaveToast'
 
 const BUNDESLAENDER = [
   'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
@@ -301,6 +302,7 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
           </button>
         </form>
       </main>
+      <SaveToast show={success} />
     </div>
   )
 }

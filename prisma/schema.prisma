@@ -240,7 +240,7 @@ model Litter {
   damId        String?      @map("dam_id")       // Mutterhündin (optional beim Eintragen)
   sireId       String?      @map("sire_id")      // Vater (optional — externer Rüde möglich)
   sireExternal String?      @map("sire_external") // Name externer Deckrüde falls kein sireId
-  expectedDate DateTime?    @map("expected_date") @db.Date
+  expectedDate String?    @map("expected_date") // Freitext, z.B. "Ende Mai 2026"
   bornDate     DateTime?    @map("born_date") @db.Date
   puppyCount   Int?         @map("puppy_count")
   status       LitterStatus @default(planned)
