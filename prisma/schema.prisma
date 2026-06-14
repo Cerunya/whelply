@@ -165,6 +165,10 @@ model BreederProfile {
   // Sichtbarkeits-Schalter für private Kontaktdaten
   showPhone         Boolean           @default(false) @map("show_phone")
   showAddress       Boolean           @default(false) @map("show_address")
+  // Subdomain + Theme (z.B. kennelname.whelply.de)
+  subdomain         String?           @unique // lowercase, a-z0-9-, validiert beim Speichern
+  themeColor        String?           @map("theme_color")        // Primärfarbe, Hex z.B. "#2d5a3d"
+  themeAccentColor  String?           @map("theme_accent_color") // Akzentfarbe, Hex
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
 
@@ -375,6 +379,8 @@ model Media {
   sortOrder   Int      @default(0) @map("sort_order")
   width       Int?
   height      Int?
+  // Für breederId-Medien: unterscheidet "header" / "background" (sonst Profilbild via dogId etc.)
+  purpose     String?  @map("purpose")
   createdAt   DateTime @default(now()) @map("created_at")
 
   // Polymorphe FKs — maximal eine ist NOT NULL
