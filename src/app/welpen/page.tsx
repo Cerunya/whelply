@@ -6,6 +6,10 @@ import WelpenFilter from '@/components/WelpenFilter'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+// Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
+// sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
+export const dynamic = 'force-dynamic'
+
 export default async function WelpenPage({
   searchParams,
 }: {

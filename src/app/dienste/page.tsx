@@ -2,6 +2,10 @@ import { prisma } from '@/lib/prisma'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
+// Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
+// sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
+export const dynamic = 'force-dynamic'
+
 const CATEGORY_LABELS: Record<string, string> = {
   vet: 'Tierärzte',
   groomer: 'Hundefriseure & Groomer',

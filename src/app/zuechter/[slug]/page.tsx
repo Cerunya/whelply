@@ -6,6 +6,10 @@ import Footer from '@/components/Footer'
 import ListingCard from '@/components/ListingCard'
 import Link from 'next/link'
 
+// Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
+// sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
+export const dynamic = 'force-dynamic'
+
 export default async function ZuechterProfilPage({
   params,
 }: {
