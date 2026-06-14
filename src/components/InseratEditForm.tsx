@@ -11,6 +11,7 @@ type MediaItem = { id: string; url: string; isPrimary: boolean }
 type Listing = {
   id: string
   title: string | null
+  type: string
   breedId: number
   litterId: string | null
   priceCents: number | null
@@ -32,10 +33,12 @@ export default function InseratEditForm({
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     title: listing.title ?? '',
+    type: listing.type,
     breedId: String(listing.breedId),
     litterId: listing.litterId ?? '',
     priceCents: listing.priceCents ? String(listing.priceCents / 100) : '',
@@ -48,6 +51,7 @@ export default function InseratEditForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setSuccess(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -60,6 +64,7 @@ export default function InseratEditForm({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: form.title || null,
+        type: form.litterId ? 'puppy' : form.type,
         breedId: Number(form.breedId),
         litterId: form.litterId || null,
         priceCents: form.priceCents ? Math.round(Number(form.priceCents) * 100) : null,
@@ -76,7 +81,8 @@ export default function InseratEditForm({
       return
     }
 
-    router.push('/dashboard')
+    setSuccess(true)
+    setLoading(false)
     router.refresh()
   }
 
@@ -132,6 +138,11 @@ export default function InseratEditForm({
               {error}
             </div>
           )}
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+              ✓ Gespeichert.
+            </div>
+          )}
 
           <div>
             <label className={labelClass}>Name</label>
@@ -153,6 +164,17 @@ export default function InseratEditForm({
                 {litters.map((l) => (
                   <option key={l.id} value={l.id}>{l.label}</option>
                 ))}
+              </select>
+            </div>
+          )}
+
+          {!form.litterId && (
+            <div>
+              <label className={labelClass}>Art des Inserats</label>
+              <select name="type" value={form.type} onChange={handleChange} className={inputClass}>
+                <option value="adult_dog">Erwachsener Hund (zur Abgabe)</option>
+                <option value="puppy">Welpe (einzeln, ohne Wurf)</option>
+                <option value="stud">Deckrüde-Angebot</option>
               </select>
             </div>
           )}

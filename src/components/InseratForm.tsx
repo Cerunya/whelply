@@ -13,6 +13,7 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     title: '',
+    type: 'adult_dog',
     breedId: '',
     litterId: '',
     priceCents: '',
@@ -24,9 +25,14 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
     if (name === 'litterId') {
-      // Beim Wechsel des Wurfs automatisch die passende Rasse setzen
+      // Beim Wechsel des Wurfs automatisch die passende Rasse setzen und Typ auf "Welpe" stellen
       const litter = litters.find((l) => l.id === value)
-      setForm({ ...form, litterId: value, ...(litter ? { breedId: String(litter.breedId) } : {}) })
+      setForm({
+        ...form,
+        litterId: value,
+        type: value ? 'puppy' : 'adult_dog',
+        ...(litter ? { breedId: String(litter.breedId) } : {}),
+      })
       return
     }
     setForm({ ...form, [name]: value })
@@ -42,6 +48,7 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: form.title || null,
+        type: form.type,
         breedId: Number(form.breedId),
         litterId: form.litterId || null,
         priceCents: form.priceCents ? Math.round(Number(form.priceCents) * 100) : null,
@@ -114,6 +121,17 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
                 {litters.map((l) => (
                   <option key={l.id} value={l.id}>{l.label}</option>
                 ))}
+              </select>
+            </div>
+          )}
+
+          {!form.litterId && (
+            <div>
+              <label className={labelClass}>Art des Inserats</label>
+              <select name="type" value={form.type} onChange={handleChange} className={inputClass}>
+                <option value="adult_dog">Erwachsener Hund (zur Abgabe)</option>
+                <option value="puppy">Welpe (einzeln, ohne Wurf)</option>
+                <option value="stud">Deckrüde-Angebot</option>
               </select>
             </div>
           )}

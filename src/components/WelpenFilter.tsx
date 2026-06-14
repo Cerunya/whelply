@@ -11,7 +11,7 @@ const BUNDESLAENDER = [
 
 type Breed = { id: number; nameDe: string; slug: string }
 
-export default function WelpenFilter({ breeds }: { breeds: Breed[] }) {
+export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds: Breed[]; basePath?: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentRasse = searchParams.get('rasse') ?? ''
@@ -25,7 +25,7 @@ export default function WelpenFilter({ breeds }: { breeds: Breed[] }) {
       params.delete(key)
     }
     params.delete('seite')
-    router.push(`/welpen?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   return (
@@ -54,7 +54,7 @@ export default function WelpenFilter({ breeds }: { breeds: Breed[] }) {
 
       {(currentRasse || currentRegion) && (
         <button
-          onClick={() => router.push('/welpen')}
+          onClick={() => router.push(basePath)}
           className="text-sm text-stone-500 hover:text-stone-900 transition-colors"
         >
           Filter zurücksetzen ×

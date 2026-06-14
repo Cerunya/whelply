@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 const schema = z.object({
   title: z.string().max(80).nullable().optional(),
+  type: z.enum(['puppy', 'stud', 'adult_dog']).default('adult_dog'),
   breedId: z.number().int().positive(),
   litterId: z.string().nullable().optional(),
   priceCents: z.number().int().positive().nullable().optional(),
@@ -55,6 +56,7 @@ export async function PATCH(
     where: { id: params.id },
     data: {
       title: parsed.data.title ?? null,
+      type: parsed.data.litterId ? 'puppy' : parsed.data.type,
       breedId: parsed.data.breedId,
       litterId: parsed.data.litterId ?? null,
       priceCents: parsed.data.priceCents ?? null,

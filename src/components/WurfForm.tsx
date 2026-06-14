@@ -67,7 +67,7 @@ export default function WurfForm({
       return
     }
 
-    router.push('/dashboard')
+    router.push(`/dashboard/wurf/${data.id}`)
     router.refresh()
   }
 

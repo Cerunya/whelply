@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 const schema = z.object({
   status: z.enum(['planned', 'pregnant', 'born', 'available', 'sold_out']).optional(),
+  breedId: z.number().int().positive().optional(),
   damId: z.string().nullable().optional(),
   sireId: z.string().nullable().optional(),
   sireExternal: z.string().max(200).nullable().optional(),
@@ -26,7 +27,10 @@ export async function PATCH(
 
   const litter = await prisma.litter.findUnique({
     where: { id: params.id },
-    include: { _count: { select: { listings: true } } },
+    include: {
+      _count: { select: { listings: true } },
+      listings: { select: { id: true, dogId: true } },
+    },
   })
   if (!litter || litter.breederId !== breeder.id) {
     return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
@@ -67,6 +71,7 @@ export async function PATCH(
   // Nur tatsächlich übergebene Felder aktualisieren
   const data: Record<string, unknown> = {}
   if (parsed.data.status !== undefined) data.status = parsed.data.status
+  if (parsed.data.breedId !== undefined) data.breedId = parsed.data.breedId
   if (parsed.data.damId !== undefined) data.damId = parsed.data.damId
   if (parsed.data.sireId !== undefined) {
     data.sireId = parsed.data.sireId
@@ -87,6 +92,25 @@ export async function PATCH(
     where: { id: params.id },
     data,
   })
+
+  // Rassenänderung auf alle Welpen dieses Wurfs übertragen (Dog + Listing)
+  if (parsed.data.breedId !== undefined && parsed.data.breedId !== litter.breedId) {
+    const listingIds = litter.listings.map((l) => l.id)
+    const dogIds = litter.listings.map((l) => l.dogId).filter((id): id is string => !!id)
+
+    if (listingIds.length > 0) {
+      await prisma.listing.updateMany({
+        where: { id: { in: listingIds } },
+        data: { breedId: parsed.data.breedId },
+      })
+    }
+    if (dogIds.length > 0) {
+      await prisma.dog.updateMany({
+        where: { id: { in: dogIds } },
+        data: { breedId: parsed.data.breedId },
+      })
+    }
+  }
 
   return NextResponse.json({ ok: true })
 }

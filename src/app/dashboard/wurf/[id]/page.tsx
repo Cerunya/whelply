@@ -36,6 +36,11 @@ export default async function WurfDetailPage({
 
   if (!litter || litter.breederId !== breeder.id) notFound()
 
+  const breeds = await prisma.breed.findMany({
+    orderBy: { nameDe: 'asc' },
+    select: { id: true, nameDe: true },
+  })
+
   // Eigene Hunde für Mutter/Vater-Auswahl (gefiltert nach Rasse des Wurfs)
   const dogs = await prisma.dog.findMany({
     where: { breederId: breeder.id },
@@ -63,6 +68,7 @@ export default async function WurfDetailPage({
         notes: litter.notes,
         imageUrl: litter.media[0]?.url ?? null,
       }}
+      breeds={breeds}
       dams={dams}
       sires={sires}
       puppies={litter.listings.map((l) => ({

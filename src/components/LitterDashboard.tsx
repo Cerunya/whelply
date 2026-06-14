@@ -23,6 +23,7 @@ type Litter = {
 }
 
 type DogOption = { id: string; name: string; sex: string; breedId: number }
+type Breed = { id: number; nameDe: string }
 
 type Puppy = {
   listingId: string
@@ -45,11 +46,13 @@ const STATUS_LABELS: Record<string, string> = {
 export default function LitterDashboard({
   litter,
   puppies,
+  breeds = [],
   dams = [],
   sires = [],
 }: {
   litter: Litter
   puppies: Puppy[]
+  breeds?: Breed[]
   dams?: DogOption[]
   sires?: DogOption[]
 }) {
@@ -62,6 +65,7 @@ export default function LitterDashboard({
 
   // Wurf-Details (bearbeitbar)
   const [details, setDetails] = useState({
+    breedId: String(litter.breedId),
     damId: litter.damId ?? '',
     sireId: litter.sireId ?? '',
     sireExternal: litter.sireExternal ?? '',
@@ -74,14 +78,27 @@ export default function LitterDashboard({
   const [detailsError, setDetailsError] = useState('')
   const [detailsSuccess, setDetailsSuccess] = useState(false)
 
-  const matchingDams = dams.filter((d) => d.breedId === litter.breedId)
-  const matchingSires = sires.filter((s) => s.breedId === litter.breedId)
+  const matchingDams = dams.filter((d) => d.breedId === Number(details.breedId))
+  const matchingSires = sires.filter((s) => s.breedId === Number(details.breedId))
 
   const hasPuppies = puppies.length > 0
 
   function handleDetailsChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
-    setDetails({ ...details, [name]: value })
+    if (name === 'breedId') {
+      // Bei Rassenwechsel Mutter/Vater zurücksetzen, falls sie nicht mehr zur neuen Rasse passen
+      const newBreedId = Number(value)
+      const damStillValid = dams.some((d) => d.id === details.damId && d.breedId === newBreedId)
+      const sireStillValid = sires.some((s) => s.id === details.sireId && s.breedId === newBreedId)
+      setDetails({
+        ...details,
+        breedId: value,
+        damId: damStillValid ? details.damId : '',
+        sireId: sireStillValid ? details.sireId : '',
+      })
+    } else {
+      setDetails({ ...details, [name]: value })
+    }
     setDetailsSuccess(false)
   }
 
@@ -94,6 +111,7 @@ export default function LitterDashboard({
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        breedId: Number(details.breedId),
         damId: details.damId || null,
         sireId: details.sireId || null,
         sireExternal: details.sireId ? null : (details.sireExternal || null),
@@ -184,6 +202,20 @@ export default function LitterDashboard({
               {detailsError}
             </div>
           )}
+
+          <div>
+            <label className={labelClass}>Rasse <span className="text-red-400">*</span></label>
+            <select name="breedId" value={details.breedId} onChange={handleDetailsChange} className={inputClass}>
+              {breeds.map((b) => (
+                <option key={b.id} value={b.id}>{b.nameDe}</option>
+              ))}
+            </select>
+            {hasPuppies && (
+              <p className="text-xs text-amber-600 mt-1">
+                ⚠ Eine Änderung der Rasse wird auf alle bereits eingetragenen Welpen dieses Wurfs übertragen.
+              </p>
+            )}
+          </div>
 
           <div>
             <label className={labelClass}>Mutterhündin</label>

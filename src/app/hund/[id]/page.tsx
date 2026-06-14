@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/slugify'
+import { auth } from '@/lib/auth'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -43,6 +44,12 @@ export default async function HundDetailPage({
 
   if (!dog) notFound()
 
+  const session = await auth()
+  const viewerBreeder = session?.user
+    ? await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
+    : null
+  const isOwner = !!viewerBreeder && viewerBreeder.id === dog.breederId
+
   const breederName = dog.breeder.displayName || dog.breeder.kennelName
   const location = [dog.breeder.city, dog.breeder.state].filter(Boolean).join(', ')
   const litters = [...dog.littersAsDam, ...dog.littersAsSire]
@@ -57,6 +64,21 @@ export default async function HundDetailPage({
       <Navbar />
       <main className="min-h-screen bg-cream">
         <div className="max-w-4xl mx-auto px-4 py-10">
+          {/* Eigentümer-Hinweis */}
+          {isOwner && (
+            <div className="bg-honey-pale border border-honey/30 rounded-xl px-5 py-3 mb-6 flex items-center justify-between flex-wrap gap-3">
+              <p className="text-sm text-stone-700">
+                Dies ist die öffentliche Ansicht dieses Zuchthundes.
+              </p>
+              <Link
+                href={`/dashboard/hund/${dog.id}`}
+                className="bg-forest text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-forest-light transition-colors"
+              >
+                Bearbeiten
+              </Link>
+            </div>
+          )}
+
           {/* Breadcrumb */}
           <p className="text-sm text-stone-400 mb-6">
             <Link href="/" className="hover:text-stone-700">Startseite</Link>

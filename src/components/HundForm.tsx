@@ -57,7 +57,7 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
       return
     }
 
-    router.push('/dashboard')
+    router.push(`/dashboard/hund/${data.id}`)
     router.refresh()
   }
 

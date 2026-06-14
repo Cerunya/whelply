@@ -14,6 +14,7 @@ export default async function Navbar() {
           <nav className="hidden md:flex items-center gap-6">
             {[
               { href: '/welpen', label: 'Welpen' },
+              { href: '/hunde', label: 'Hunde' },
               { href: '/zuchtrueden', label: 'Zuchtrüden' },
               { href: '/zuechter', label: 'Züchter' },
               { href: '/rassen', label: 'Rassen' },
