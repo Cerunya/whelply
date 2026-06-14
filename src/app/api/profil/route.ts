@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { validateSubdomain } from '@/lib/subdomain'
 import { z } from 'zod'
+
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/
 
 const schema = z.object({
   displayName: z.string().max(80).optional(),
@@ -16,6 +19,9 @@ const schema = z.object({
   state: z.string().max(50).optional(),
   showPhone: z.boolean().optional(),
   showAddress: z.boolean().optional(),
+  subdomain: z.string().max(30).optional(),
+  themeColor: z.string().regex(HEX_COLOR).or(z.literal('')).optional(),
+  themeAccentColor: z.string().regex(HEX_COLOR).or(z.literal('')).optional(),
 })
 
 export async function PATCH(req: NextRequest) {
@@ -29,6 +35,22 @@ export async function PATCH(req: NextRequest) {
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
+  }
+
+  // Subdomain validieren + Eindeutigkeit prüfen, falls geändert
+  if (parsed.data.subdomain !== undefined && parsed.data.subdomain !== '') {
+    const sub = parsed.data.subdomain.toLowerCase()
+    const error = validateSubdomain(sub)
+    if (error) {
+      return NextResponse.json({ error }, { status: 400 })
+    }
+    if (sub !== breeder.subdomain) {
+      const existing = await prisma.breederProfile.findUnique({ where: { subdomain: sub } })
+      if (existing) {
+        return NextResponse.json({ error: 'Diese Subdomain ist bereits vergeben.' }, { status: 409 })
+      }
+    }
+    parsed.data.subdomain = sub
   }
 
   // Leere Strings als null speichern (Booleans unverändert lassen)
