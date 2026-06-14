@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma'
-import { slugify } from '@/lib/slugify'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
@@ -98,7 +97,7 @@ export default async function ZuchtrudenPage({
                 return (
                   <Link
                     key={dog.id}
-                    href={`/zuechter/${slugify(dog.breeder.kennelName)}`}
+                    href={`/hund/${dog.id}`}
                     className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all"
                   >
                     <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative">

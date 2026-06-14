@@ -7,9 +7,13 @@ import LitterImageUploader from './LitterImageUploader'
 
 type Litter = {
   id: string
+  breedId: number
   breedName: string
+  damId: string | null
+  sireId: string | null
   damName: string | null
   sireName: string | null
+  sireExternal: string | null
   expectedDate: string | null
   bornDate: string | null
   puppyCount: number | null
@@ -17,6 +21,8 @@ type Litter = {
   notes: string | null
   imageUrl: string | null
 }
+
+type DogOption = { id: string; name: string; sex: string; breedId: number }
 
 type Puppy = {
   listingId: string
@@ -36,7 +42,17 @@ const STATUS_LABELS: Record<string, string> = {
   sold_out: 'Ausverkauft',
 }
 
-export default function LitterDashboard({ litter, puppies }: { litter: Litter; puppies: Puppy[] }) {
+export default function LitterDashboard({
+  litter,
+  puppies,
+  dams = [],
+  sires = [],
+}: {
+  litter: Litter
+  puppies: Puppy[]
+  dams?: DogOption[]
+  sires?: DogOption[]
+}) {
   const router = useRouter()
   const [status, setStatus] = useState(litter.status)
   const [selectedStatus, setSelectedStatus] = useState(litter.status)
@@ -44,7 +60,60 @@ export default function LitterDashboard({ litter, puppies }: { litter: Litter; p
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
+  // Wurf-Details (bearbeitbar)
+  const [details, setDetails] = useState({
+    damId: litter.damId ?? '',
+    sireId: litter.sireId ?? '',
+    sireExternal: litter.sireExternal ?? '',
+    expectedDate: litter.expectedDate ?? '',
+    bornDate: litter.bornDate ?? '',
+    puppyCount: litter.puppyCount ? String(litter.puppyCount) : '',
+    notes: litter.notes ?? '',
+  })
+  const [savingDetails, setSavingDetails] = useState(false)
+  const [detailsError, setDetailsError] = useState('')
+  const [detailsSuccess, setDetailsSuccess] = useState(false)
+
+  const matchingDams = dams.filter((d) => d.breedId === litter.breedId)
+  const matchingSires = sires.filter((s) => s.breedId === litter.breedId)
+
   const hasPuppies = puppies.length > 0
+
+  function handleDetailsChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    const { name, value } = e.target
+    setDetails({ ...details, [name]: value })
+    setDetailsSuccess(false)
+  }
+
+  async function handleDetailsSave() {
+    setDetailsError('')
+    setDetailsSuccess(false)
+    setSavingDetails(true)
+
+    const res = await fetch(`/api/wuerfe/${litter.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        damId: details.damId || null,
+        sireId: details.sireId || null,
+        sireExternal: details.sireId ? null : (details.sireExternal || null),
+        expectedDate: details.expectedDate || null,
+        bornDate: details.bornDate || null,
+        puppyCount: details.puppyCount ? Number(details.puppyCount) : null,
+        notes: details.notes || null,
+      }),
+    })
+    setSavingDetails(false)
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setDetailsError(data.error ?? 'Fehler beim Speichern.')
+      return
+    }
+
+    setDetailsSuccess(true)
+    router.refresh()
+  }
 
   async function handleStatusSave() {
     setError('')
@@ -105,6 +174,114 @@ export default function LitterDashboard({ litter, puppies }: { litter: Litter; p
             {error}
           </div>
         )}
+
+        {/* Wurf-Details */}
+        <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6 space-y-5">
+          <h3 className="font-serif text-lg font-bold text-stone-900">Wurf-Details</h3>
+
+          {detailsError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+              {detailsError}
+            </div>
+          )}
+
+          <div>
+            <label className={labelClass}>Mutterhündin</label>
+            <select name="damId" value={details.damId} onChange={handleDetailsChange} className={inputClass}>
+              <option value="">Nicht angegeben</option>
+              {matchingDams.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass}>Deckrüde</label>
+            <select name="sireId" value={details.sireId} onChange={handleDetailsChange} className={inputClass}>
+              <option value="">Externer Deckrüde / nicht angegeben</option>
+              {matchingSires.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {!details.sireId && (
+            <div>
+              <label className={labelClass}>Name des externen Deckrüden</label>
+              <input
+                type="text"
+                name="sireExternal"
+                value={details.sireExternal}
+                onChange={handleDetailsChange}
+                placeholder="Falls der Deckrüde nicht auf Whelply registriert ist"
+                className={inputClass}
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Erwartetes Datum</label>
+              <input
+                type="date"
+                name="expectedDate"
+                value={details.expectedDate}
+                onChange={handleDetailsChange}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Geburtsdatum</label>
+              <input
+                type="date"
+                name="bornDate"
+                value={details.bornDate}
+                onChange={handleDetailsChange}
+                className={inputClass}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Anzahl Welpen (geplant)</label>
+            <input
+              type="number"
+              name="puppyCount"
+              value={details.puppyCount}
+              onChange={handleDetailsChange}
+              min="1"
+              max="20"
+              placeholder="z.B. 6"
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Notizen</label>
+            <textarea
+              name="notes"
+              value={details.notes}
+              onChange={handleDetailsChange}
+              rows={3}
+              placeholder="Besonderheiten zum Wurf, Farben, Gesundheitstests der Eltern..."
+              className={inputClass + ' resize-none'}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleDetailsSave}
+              disabled={savingDetails}
+              className="bg-forest text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
+            >
+              {savingDetails ? 'Speichert...' : 'Details speichern'}
+            </button>
+            {detailsSuccess && (
+              <p className="text-xs text-green-600">✓ Gespeichert.</p>
+            )}
+          </div>
+        </div>
 
         {/* Titelbild */}
         <div className="mb-6">

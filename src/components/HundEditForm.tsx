@@ -3,22 +3,37 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import DogImageUploader from './DogImageUploader'
 
 type Breed = { id: number; nameDe: string }
+type DogData = {
+  id: string
+  name: string
+  breedId: number
+  sex: string
+  birthDate: string | null
+  color: string | null
+  pedigreeNumber: string | null
+  titles: string | null
+  isStud: boolean
+  imageUrl: string | null
+}
 
-export default function HundForm({ breeds }: { breeds: Breed[] }) {
+export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Breed[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   const [form, setForm] = useState({
-    name: '',
-    breedId: '',
-    sex: 'female',
-    birthDate: '',
-    color: '',
-    pedigreeNumber: '',
-    titles: '',
-    isStud: false,
+    name: dog.name,
+    breedId: String(dog.breedId),
+    sex: dog.sex,
+    birthDate: dog.birthDate ?? '',
+    color: dog.color ?? '',
+    pedigreeNumber: dog.pedigreeNumber ?? '',
+    titles: dog.titles ?? '',
+    isStud: dog.isStud,
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -28,6 +43,7 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
     } else {
       setForm({ ...form, [name]: value })
     }
+    setSuccess(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -35,8 +51,8 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
     setError('')
     setLoading(true)
 
-    const res = await fetch('/api/hunde', {
-      method: 'POST',
+    const res = await fetch(`/api/hunde/${dog.id}`, {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: form.name,
@@ -57,6 +73,23 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
       return
     }
 
+    setSuccess(true)
+    setLoading(false)
+    router.refresh()
+  }
+
+  async function handleDelete() {
+    if (!confirm(`"${dog.name}" wirklich löschen?`)) return
+    setDeleting(true)
+    const res = await fetch(`/api/hunde/${dog.id}`, { method: 'DELETE' })
+    const data = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      setError(data.error ?? 'Fehler beim Löschen.')
+      setDeleting(false)
+      return
+    }
+
     router.push('/dashboard')
     router.refresh()
   }
@@ -72,25 +105,31 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
             ← Dashboard
           </Link>
           <span className="text-stone-300">|</span>
-          <h1 className="font-semibold text-stone-800 text-sm">Zuchthund eintragen</h1>
+          <h1 className="font-semibold text-stone-800 text-sm">Zuchthund bearbeiten</h1>
         </div>
       </header>
 
       <main className="max-w-xl mx-auto px-4 py-12">
-        <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Zuchthund eintragen</h2>
-        <p className="text-stone-400 text-sm mb-2">
-          Trag deine Zuchthündinnen und -rüden ein. Sie erscheinen auf deiner Züchter-Seite
-          und können bei der Eintragung von Würfen als Mutter oder Vater verlinkt werden.
+        <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">{dog.name}</h2>
+        <p className="text-stone-400 text-sm mb-8">
+          Diese Angaben werden auf deiner Züchter-Seite und bei Würfen angezeigt, bei denen
+          dieser Hund als Mutter oder Vater verlinkt ist.
         </p>
-        <p className="text-stone-400 text-xs mb-8">
-          Hinweis: Dies ist <strong>kein Inserat</strong>. Welpen zum Verkauf trägst du über
-          "Wurf eintragen" → "Welpe hinzufügen" ein.
-        </p>
+
+        <div className="mb-6">
+          <label className={labelClass}>Profilbild</label>
+          <DogImageUploader dogId={dog.id} initialUrl={dog.imageUrl} />
+        </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
               {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+              ✓ Gespeichert.
             </div>
           )}
 
@@ -117,7 +156,6 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
           <div>
             <label className={labelClass}>Rasse <span className="text-red-400">*</span></label>
             <select name="breedId" required value={form.breedId} onChange={handleChange} className={inputClass}>
-              <option value="">Rasse auswählen</option>
               {breeds.map((b) => (
                 <option key={b.id} value={b.id}>{b.nameDe}</option>
               ))}
@@ -193,16 +231,24 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
               disabled={loading || !form.name || !form.breedId}
               className="flex-1 bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
             >
-              {loading ? 'Wird gespeichert...' : 'Hund speichern'}
+              {loading ? 'Wird gespeichert...' : 'Speichern'}
             </button>
             <Link
               href="/dashboard"
               className="px-5 py-3 border border-stone-200 rounded-xl text-sm text-stone-500 hover:bg-stone-50 transition-colors"
             >
-              Abbrechen
+              Zurück
             </Link>
           </div>
         </form>
+
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="mt-4 text-sm text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+        >
+          {deleting ? 'Wird gelöscht...' : 'Hund löschen'}
+        </button>
       </main>
     </div>
   )

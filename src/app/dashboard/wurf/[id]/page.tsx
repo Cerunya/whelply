@@ -36,20 +36,35 @@ export default async function WurfDetailPage({
 
   if (!litter || litter.breederId !== breeder.id) notFound()
 
+  // Eigene Hunde für Mutter/Vater-Auswahl (gefiltert nach Rasse des Wurfs)
+  const dogs = await prisma.dog.findMany({
+    where: { breederId: breeder.id },
+    select: { id: true, name: true, sex: true, breedId: true },
+    orderBy: { name: 'asc' },
+  })
+  const dams = dogs.filter((d) => d.sex === 'female')
+  const sires = dogs.filter((d) => d.sex === 'male')
+
   return (
     <LitterDashboard
       litter={{
         id: litter.id,
+        breedId: litter.breedId,
         breedName: litter.breed.nameDe,
+        damId: litter.damId,
+        sireId: litter.sireId,
         damName: litter.dam?.name ?? null,
         sireName: litter.sire?.name ?? litter.sireExternal,
-        expectedDate: litter.expectedDate?.toISOString() ?? null,
-        bornDate: litter.bornDate?.toISOString() ?? null,
+        sireExternal: litter.sireExternal,
+        expectedDate: litter.expectedDate?.toISOString().slice(0, 10) ?? null,
+        bornDate: litter.bornDate?.toISOString().slice(0, 10) ?? null,
         puppyCount: litter.puppyCount,
         status: litter.status,
         notes: litter.notes,
         imageUrl: litter.media[0]?.url ?? null,
       }}
+      dams={dams}
+      sires={sires}
       puppies={litter.listings.map((l) => ({
         listingId: l.id,
         dogId: l.dog?.id ?? null,
