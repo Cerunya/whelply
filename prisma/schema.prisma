@@ -233,7 +233,7 @@ model Dog {
   media         Media[]   @relation("DogMedia")
   // Freitext für Gesundheitstests/Untersuchungen (HD/ED, DNA-Tests, Gentests etc.)
   // — bewusst Freitext, da Züchter oft sehr viele Tests dokumentieren
-  healthInfo    String?   @db.Text
+  healthInfo    String?   @map("health_info") @db.Text
 
   @@map("dogs")
 }
