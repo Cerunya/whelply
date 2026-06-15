@@ -65,9 +65,6 @@ export default async function DashboardPage() {
                 Admin
               </Link>
             )}
-            <Link href="/dashboard/profil" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-              Profil bearbeiten
-            </Link>
             <Link href="/" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
               Zur Website
             </Link>
@@ -87,9 +84,6 @@ export default async function DashboardPage() {
                     Admin
                   </Link>
                 )}
-                <Link href="/dashboard/profil" className="font-medium text-stone-700 hover:text-forest transition-colors">
-                  Profil bearbeiten
-                </Link>
                 <Link href="/" className="font-medium text-stone-700 hover:text-forest transition-colors">
                   Zur Website
                 </Link>
@@ -186,6 +180,12 @@ export default async function DashboardPage() {
             </Link>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link
+              href="/dashboard/profil"
+              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+            >
+              Profil bearbeiten
+            </Link>
             <Link
               href="/dashboard/theme"
               className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"

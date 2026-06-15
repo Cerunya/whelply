@@ -29,7 +29,6 @@ export default async function HundDetailPage({
       breed: { select: { nameDe: true, slug: true } },
       breeder: { select: { kennelName: true, displayName: true, city: true, state: true } },
       media: { take: 1, select: { url: true } },
-      healthTests: { orderBy: { sortOrder: 'asc' } },
       littersAsDam: {
         include: {
           breed: { select: { nameDe: true } },
@@ -163,24 +162,26 @@ export default async function HundDetailPage({
             </div>
           </div>
 
+          {/* Vorstellung */}
+          {dog.description && (
+            <div className="mt-10">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Über {dog.name}</h2>
+              <div className="bg-white rounded-2xl border border-cream-deep p-6">
+                <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
+                  {dog.description}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Gesundheitstests */}
-          {dog.healthTests.length > 0 && (
+          {dog.healthInfo && (
             <div className="mt-10">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Gesundheitstests</h2>
-              <div className="bg-white rounded-2xl border border-cream-deep divide-y divide-cream-deep">
-                {dog.healthTests.map((test) => (
-                  <div key={test.id} className="flex items-center justify-between px-5 py-3">
-                    <span className="text-sm font-medium text-stone-800">{test.name}</span>
-                    <div className="text-right">
-                      <span className="text-sm text-stone-600">{test.result}</span>
-                      {test.testDate && (
-                        <span className="text-xs text-stone-400 ml-2">
-                          ({test.testDate.toLocaleDateString('de-DE')})
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+              <div className="bg-white rounded-2xl border border-cream-deep p-6">
+                <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
+                  {dog.healthInfo}
+                </p>
               </div>
             </div>
           )}

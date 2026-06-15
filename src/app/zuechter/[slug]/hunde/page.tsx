@@ -37,12 +37,12 @@ export default async function ZuechterErwachseneHundePage({
 
         <div className="max-w-5xl mx-auto px-4 py-12">
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
-            Erwachsene Hunde zur Abgabe
+            Hunde zu vergeben
           </h2>
 
           {adultListings.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
-              <p className="text-stone-400 text-sm">Aktuell keine erwachsenen Hunde zur Abgabe.</p>
+              <p className="text-stone-400 text-sm">Aktuell keine Hunde zu vergeben.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

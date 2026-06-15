@@ -20,7 +20,6 @@ export default async function HundBearbeitenPage({
     where: { id: params.id },
     include: {
       media: { take: 1, select: { url: true } },
-      healthTests: { orderBy: { sortOrder: 'asc' } },
     },
   })
 
@@ -45,12 +44,7 @@ export default async function HundBearbeitenPage({
         isStud: dog.isStud,
         description: dog.description,
         imageUrl: dog.media[0]?.url ?? null,
-        healthTests: dog.healthTests.map((t) => ({
-          id: t.id,
-          name: t.name,
-          result: t.result,
-          testDate: t.testDate ? t.testDate.toISOString().slice(0, 10) : null,
-        })),
+        healthInfo: dog.healthInfo,
       }}
       breeds={breeds}
     />

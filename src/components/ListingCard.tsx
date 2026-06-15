@@ -10,26 +10,33 @@ type ListingCardProps = {
   priceCents?: number | null
   isBoosted: boolean
   imageUrl?: string | null
+  tint?: 'male' | 'female' | 'sold' | null
 }
 
 export default function ListingCard({
-  id, breedName, kennelName, puppyName, city, state, priceCents, isBoosted, imageUrl,
+  id, breedName, kennelName, puppyName, city, state, priceCents, isBoosted, imageUrl, tint,
 }: ListingCardProps) {
   const price = priceCents
     ? `${(priceCents / 100).toLocaleString('de-DE')} €`
     : 'Auf Anfrage'
   const location = [city, state].filter(Boolean).join(', ')
 
+  let cardClasses = 'rounded-2xl border overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 '
+  if (tint === 'sold') {
+    cardClasses += 'border-stone-200 bg-stone-100 opacity-60'
+  } else if (tint === 'male') {
+    cardClasses += 'border-blue-200 bg-blue-50/60'
+  } else if (tint === 'female') {
+    cardClasses += 'border-pink-200 bg-pink-50/60'
+  } else if (isBoosted) {
+    cardClasses += 'border-honey bg-white ring-1 ring-honey/30'
+  } else {
+    cardClasses += 'border-cream-deep bg-white hover:border-forest/20'
+  }
+
   return (
     <Link href={`/welpen/${id}`} className="group block">
-      <div className={`
-        rounded-2xl border overflow-hidden transition-all duration-200
-        hover:shadow-lg hover:-translate-y-1
-        ${isBoosted
-          ? 'border-honey bg-white ring-1 ring-honey/30'
-          : 'border-cream-deep bg-white hover:border-forest/20'
-        }
-      `}>
+      <div className={cardClasses}>
         {/* Bild oder Platzhalter */}
         <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative overflow-hidden">
           {imageUrl ? (

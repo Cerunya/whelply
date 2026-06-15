@@ -4,11 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DogImageUploader from './DogImageUploader'
-import DogHealthTests from './DogHealthTests'
 import SaveToast from './SaveToast'
 
 type Breed = { id: number; nameDe: string }
-type HealthTest = { id: string; name: string; result: string; testDate: string | null }
 type DogData = {
   id: string
   name: string
@@ -21,7 +19,7 @@ type DogData = {
   isStud: boolean
   description: string | null
   imageUrl: string | null
-  healthTests: HealthTest[]
+  healthInfo: string | null
 }
 
 export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Breed[] }) {
@@ -40,6 +38,7 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
     titles: dog.titles ?? '',
     isStud: dog.isStud,
     description: dog.description ?? '',
+    healthInfo: dog.healthInfo ?? '',
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -70,6 +69,7 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
         titles: form.titles || null,
         isStud: form.sex === 'male' ? form.isStud : false,
         description: form.description || null,
+        healthInfo: form.healthInfo || null,
       }),
     })
 
@@ -248,6 +248,21 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
             </p>
           </div>
 
+          <div>
+            <label className={labelClass}>Gesundheitstests / Untersuchungen (optional)</label>
+            <textarea
+              name="healthInfo"
+              value={form.healthInfo}
+              onChange={handleChange}
+              rows={5}
+              placeholder={'z.B.\nHD/ED: HD-A / ED-0\nDNA-Augenuntersuchung: frei\nMDR1: +/+ (normal)'}
+              className={inputClass}
+            />
+            <p className="text-xs text-stone-400 mt-1">
+              Freitext — wird unverändert auf dem Profil dieses Hundes angezeigt (z.B. eine Zeile pro Test).
+            </p>
+          </div>
+
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
@@ -264,10 +279,6 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
             </Link>
           </div>
         </form>
-
-        <div className="mt-6">
-          <DogHealthTests dogId={dog.id} initialTests={dog.healthTests} />
-        </div>
 
         <button
           onClick={handleDelete}

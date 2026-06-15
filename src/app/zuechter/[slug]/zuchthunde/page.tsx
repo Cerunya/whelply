@@ -24,7 +24,6 @@ export default async function ZuechterZuchthundePage({
     include: {
       breed: { select: { nameDe: true } },
       media: { orderBy: { sortOrder: 'asc' }, select: { url: true } },
-      healthTests: { orderBy: { sortOrder: 'asc' } },
     },
     orderBy: { name: 'asc' },
   })
@@ -86,14 +85,10 @@ export default async function ZuechterZuchthundePage({
                     <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
                       {dog.description}
                     </p>
-                    {dog.healthTests.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-4">
-                        {dog.healthTests.map((test) => (
-                          <span key={test.id} className="text-xs bg-cream border border-cream-deep rounded-full px-3 py-1 text-stone-600">
-                            <span className="font-medium text-stone-800">{test.name}:</span> {test.result}
-                          </span>
-                        ))}
-                      </div>
+                    {dog.healthInfo && (
+                      <p className="text-stone-500 text-xs leading-relaxed whitespace-pre-line mt-4 border-t border-cream-deep pt-3">
+                        {dog.healthInfo}
+                      </p>
                     )}
                     <Link
                       href={`/hund/${dog.id}`}

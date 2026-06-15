@@ -291,17 +291,44 @@ sort_order).
   Eltern-Karten (verlinkt zu `/hund/[id]`, externer Deckrüde als Text) und Grid aller
   Welpen-Inserate dieses Wurfs. Dadurch wurde die eigene `/welpen`-Unterseite überflüssig
   und entfernt.
-- **Gesundheitstests pro Zuchthund**: neues `DogHealthTest`-Modell. Dashboard:
-  `src/components/DogHealthTests.tsx` (Liste + Hinzufügen/Entfernen, eigene API
-  `/api/hunde/[id]/tests` POST und `/api/hunde/[id]/tests/[testId]` DELETE,
-  sofort gespeichert ohne Haupt-Formular-Submit), eingebunden unter dem
-  "Zuchthund bearbeiten"-Formular. Anzeige: als Tag-Liste in der großen
-  Zuchthund-Vorstellung (`/zuechter/[slug]/zuchthunde`) und als Tabelle auf
-  `/hund/[id]`.
+- **Gesundheitstests pro Zuchthund**: ~~eigenes `DogHealthTest`-Modell mit
+  Einzeleinträgen~~ — noch am selben Tag durch Freitext ersetzt (s. nächster
+  Abschnitt), da Züchter oft sehr viele Tests dokumentieren.
 - **Rich-Text "Über uns"**: `src/lib/richtext.tsx` — abhängigkeitsfreier Renderer für
   `**fett**` / `*kursiv*` + Zeilenumbrüche. `ProfilForm.tsx` hat B/I-Buttons über dem
   Bio-Feld (umschließen die Textauswahl mit `**`/`*`). `/zuechter/[slug]` rendert
   `renderRichText(breeder.bio)` statt Plain-Text.
+
+### ✅ Iteration 2 (2026-06-15) — FERTIG
+Migration `20260615020000_dog_health_info_text`: `dogs.health_info TEXT` (Freitext)
+hinzugefügt, Tabelle `dog_health_tests` wieder gedroppt (Einzeleinträge waren zu
+umständlich für Züchter mit vielen Tests).
+- **Gesundheitstests als Freitext**: `Dog.healthInfo String? @db.Text`. Neues Feld
+  "Gesundheitstests / Untersuchungen" in `HundEditForm.tsx` (Teil des normalen
+  Speichervorgangs, kein separates API mehr). Anzeige als Fließtext auf `/hund/[id]`
+  und unterhalb des Vorstellungstexts in der großen Zuchthund-Vorstellung
+  (`/zuechter/[slug]/zuchthunde`).
+- **Vorstellungstext auch auf Hund-Detailseite**: `/hund/[id]` zeigt jetzt zusätzlich
+  einen "Über {Name}"-Abschnitt mit `dog.description` (vorher nur in der
+  Zuchthunde-Übersicht der Züchterseite sichtbar).
+- **Dashboard-Reorg**: "Profil bearbeiten" aus der Kopfzeile entfernt, jetzt erster
+  Button in der "Meine Züchterseite"-Karte.
+- **Tab-Reihenfolge** (`BreederPageHeader.tsx`): Profil – Würfe & Planung – Hunde zu
+  vergeben – Zuchthunde – Aktuelles – Galerie. "Erwachsene Hunde" → "Hunde zu vergeben"
+  umbenannt (Tab + Seitentitel `/zuechter/[slug]/hunde`); Alternativen wie "Hunde in
+  neue Hände" wären auch möglich, falls gewünscht.
+- **Tab-Leiste in Theme-Farbe**: aktiver Tab nutzt `themeAccentColor` (Fallback
+  `themeColor`, sonst `forest`) für Unterstrich + Textfarbe.
+- **Wurf-Detailseite** (`/zuechter/[slug]/wuerfe/[litterId]`): "Die Eltern"-Sektion
+  jetzt UNTER der Welpen-Übersicht. Geburtsdatum prominent im Kopfbereich (langes
+  Format "26. März 2026" + Status-Badge statt Fließtext "Geboren am..."). Welpen-Karten
+  sind nach Geschlecht eingefärbt (`ListingCard` neuer `tint`-Prop: `male` = blau,
+  `female` = rosa, `sold` = grau/abgedunkelt) inkl. kleiner Legende.
+- **Würfe-Übersicht** (`/zuechter/[slug]/wuerfe`): größere Fotos/Schrift, bei
+  geborenen Würfen Geburtsdatum (langes Format) + Gesamtzahl Rüden/Hündinnen,
+  zusätzlich bei `available` die Anzahl noch verfügbarer Rüden/Hündinnen. Vater/Mutter
+  als klickbare Badges (→ `/hund/[id]`, externer Deckrüde als reiner Text) unterhalb
+  der Karte (separat verlinkt, um verschachtelte `<a>`-Tags zu vermeiden).
 
 
 - **GROSS — Subdomain-Routing Phase 2 (später):**

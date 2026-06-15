@@ -231,7 +231,9 @@ model Dog {
   // Inserate (Etalon / adulter Hund)
   listings      Listing[]
   media         Media[]   @relation("DogMedia")
-  healthTests   DogHealthTest[]
+  // Freitext für Gesundheitstests/Untersuchungen (HD/ED, DNA-Tests, Gentests etc.)
+  // — bewusst Freitext, da Züchter oft sehr viele Tests dokumentieren
+  healthInfo    String?   @db.Text
 
   @@map("dogs")
 }
@@ -422,23 +424,4 @@ model NewsPost {
 
   @@map("news_posts")
   @@index([breederId])
-}
-
-// ─────────────────────────────────────────────
-// GESUNDHEITSTESTS — z.B. HD/ED, DNA-Tests, Gentests
-// ─────────────────────────────────────────────
-
-model DogHealthTest {
-  id       String    @id @default(cuid())
-  dogId    String    @map("dog_id")
-  name     String    // z.B. "HD/ED", "DNA-Augenuntersuchung", "Gentest MDR1"
-  result   String    // z.B. "HD-A / ED-0", "frei", "negativ"
-  testDate DateTime? @map("test_date") @db.Date
-  sortOrder Int      @default(0) @map("sort_order")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
-
-  @@map("dog_health_tests")
-  @@index([dogId])
 }

@@ -35,9 +35,9 @@ export default function BreederPageHeader({
 
   const navItems = [
     { id: 'profil', label: 'Profil', href: `/zuechter/${slug}`, show: true },
-    { id: 'zuchthunde', label: 'Zuchthunde', href: `/zuechter/${slug}/zuchthunde`, show: tabs.zuchthunde },
     { id: 'wuerfe', label: 'Würfe & Planung', href: `/zuechter/${slug}/wuerfe`, show: tabs.wuerfe },
-    { id: 'hunde', label: 'Erwachsene Hunde', href: `/zuechter/${slug}/hunde`, show: tabs.erwachseneHunde },
+    { id: 'hunde', label: 'Hunde zu vergeben', href: `/zuechter/${slug}/hunde`, show: tabs.erwachseneHunde },
+    { id: 'zuchthunde', label: 'Zuchthunde', href: `/zuechter/${slug}/zuchthunde`, show: tabs.zuchthunde },
     { id: 'aktuelles', label: 'Aktuelles', href: `/zuechter/${slug}/aktuelles`, show: tabs.aktuelles },
     { id: 'galerie', label: 'Galerie', href: `/zuechter/${slug}/galerie`, show: tabs.galerie },
   ].filter((item) => item.show)
@@ -97,19 +97,24 @@ export default function BreederPageHeader({
       {/* Unterseiten-Navigation */}
       <nav className="bg-white border-b border-cream-deep sticky top-16 z-40">
         <div className="max-w-5xl mx-auto px-4 flex gap-1 overflow-x-auto">
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`flex-shrink-0 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                active === item.id
-                  ? 'border-forest text-forest'
-                  : 'border-transparent text-stone-500 hover:text-stone-800'
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive = active === item.id
+            const color = accentColor || themeColor
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`flex-shrink-0 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                  isActive
+                    ? color ? '' : 'border-forest text-forest'
+                    : 'border-transparent text-stone-500 hover:text-stone-800'
+                }`}
+                style={isActive && color ? { borderColor: color, color } : undefined}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
         </div>
       </nav>
     </>

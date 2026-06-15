@@ -43,12 +43,17 @@ export default async function LitterDetailPage({
 
   const title = litter.name || litter.breed.nameDe
 
-  let statusText = ''
-  if (litter.status === 'planned') statusText = litter.expectedDate ? `Geplant · erwartet ${litter.expectedDate}` : 'Geplant'
-  else if (litter.status === 'pregnant') statusText = litter.expectedDate ? `Trächtig · erwartet ${litter.expectedDate}` : 'Trächtig'
-  else if (litter.status === 'born') statusText = litter.bornDate ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}` : 'Geboren'
-  else if (litter.status === 'available') statusText = litter.bornDate ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')} · Welpen abgabebereit` : 'Welpen abgabebereit'
-  else if (litter.status === 'sold_out') statusText = 'Ausverkauft'
+  let plannedText = ''
+  if (litter.status === 'planned') plannedText = litter.expectedDate ? `Geplant · erwartet ${litter.expectedDate}` : 'Geplant'
+  else if (litter.status === 'pregnant') plannedText = litter.expectedDate ? `Trächtig · erwartet ${litter.expectedDate}` : 'Trächtig'
+
+  const statusBadge = {
+    planned: { label: 'Geplant', cls: 'bg-stone-100 text-stone-500' },
+    pregnant: { label: 'Trächtig', cls: 'bg-stone-100 text-stone-500' },
+    born: { label: 'Geboren', cls: 'bg-blue-50 text-blue-700' },
+    available: { label: 'Verfügbar', cls: 'bg-green-50 text-green-700' },
+    sold_out: { label: 'Ausverkauft', cls: 'bg-stone-200 text-stone-600' },
+  }[litter.status]
 
   return (
     <>
@@ -61,23 +66,86 @@ export default async function LitterDetailPage({
             ← Würfe & Planung
           </Link>
 
-          <div className="mt-4 mb-8 flex items-start gap-5">
+          <div className="mt-4 mb-10 flex items-start gap-5">
             {litter.media[0]?.url && (
-              <img src={litter.media[0].url} alt={title} className="w-24 h-24 rounded-2xl object-cover flex-shrink-0" />
+              <img src={litter.media[0].url} alt={title} className="w-28 h-28 rounded-2xl object-cover flex-shrink-0" />
             )}
             <div>
               <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">{litter.breed.nameDe}</p>
               <h1 className="font-serif text-3xl font-bold text-stone-900">{title}</h1>
-              <p className="text-stone-500 text-sm mt-2">{statusText}</p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                {litter.bornDate ? (
+                  <p className="text-stone-500 text-sm flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Geboren am {litter.bornDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </p>
+                ) : (
+                  <p className="text-stone-500 text-sm">{plannedText}</p>
+                )}
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusBadge.cls}`}>
+                  {statusBadge.label}
+                </span>
+              </div>
               {litter.notes && (
                 <p className="text-stone-600 text-sm mt-3 whitespace-pre-line">{litter.notes}</p>
               )}
             </div>
           </div>
 
+          {/* Welpen */}
+          <div className="mb-10">
+            <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Welpen aus diesem Wurf</h2>
+            {litter.listings.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-2xl border border-cream-deep">
+                <p className="text-stone-400 text-sm">Noch keine Welpen eingetragen.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {litter.listings.map((listing) => {
+                  const tint = listing.status === 'sold' ? 'sold' : listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null
+                  return (
+                    <div key={listing.id} className="relative">
+                      <ListingCard
+                        id={listing.id}
+                        breedName={listing.breed.nameDe}
+                        kennelName={displayName}
+                        puppyName={listing.title}
+                        city={breeder.city}
+                        state={breeder.state}
+                        priceCents={listing.priceCents}
+                        isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                        imageUrl={listing.media[0]?.url}
+                        tint={tint}
+                      />
+                      {listing.status === 'reserved' && (
+                        <span className="absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-400 text-amber-900">
+                          Reserviert
+                        </span>
+                      )}
+                      {listing.status === 'sold' && (
+                        <span className="absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full bg-stone-700 text-white">
+                          Verkauft
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {litter.listings.length > 0 && (
+              <div className="flex items-center gap-4 mt-3 text-xs text-stone-400">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-blue-100 border border-blue-200 inline-block" /> Rüde</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-pink-100 border border-pink-200 inline-block" /> Hündin</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-stone-200 border border-stone-300 inline-block" /> Verkauft</span>
+              </div>
+            )}
+          </div>
+
           {/* Eltern */}
           {(litter.dam || litter.sire || litter.sireExternal) && (
-            <div className="mb-10">
+            <div>
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Die Eltern</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {litter.dam && (
@@ -133,41 +201,6 @@ export default async function LitterDetailPage({
               </div>
             </div>
           )}
-
-          {/* Welpen */}
-          <div>
-            <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Welpen aus diesem Wurf</h2>
-            {litter.listings.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-2xl border border-cream-deep">
-                <p className="text-stone-400 text-sm">Noch keine Welpen eingetragen.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {litter.listings.map((listing) => (
-                  <div key={listing.id} className="relative">
-                    <ListingCard
-                      id={listing.id}
-                      breedName={listing.breed.nameDe}
-                      kennelName={displayName}
-                      puppyName={listing.title}
-                      city={breeder.city}
-                      state={breeder.state}
-                      priceCents={listing.priceCents}
-                      isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
-                      imageUrl={listing.media[0]?.url}
-                    />
-                    {listing.status !== 'available' && (
-                      <span className={`absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full ${
-                        listing.status === 'reserved' ? 'bg-amber-400 text-amber-900' : 'bg-stone-700 text-white'
-                      }`}>
-                        {listing.status === 'reserved' ? 'Reserviert' : 'Verkauft'}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </main>
       <Footer />
