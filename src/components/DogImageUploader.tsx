@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { resizeImage } from '@/lib/image-resize'
 
 export default function DogImageUploader({
   dogId,
@@ -29,8 +30,10 @@ export default function DogImageUploader({
 
     setUploading(true)
     try {
+      const resized = await resizeImage(file, 1920, 0.85)
+
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', resized)
       formData.append('dogId', dogId)
 
       const res = await fetch('/api/upload', { method: 'POST', body: formData })

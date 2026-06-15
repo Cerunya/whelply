@@ -20,15 +20,18 @@ export async function GET(
       Key: storageKey,
     }))
 
-    const body = await result.Body?.transformToByteArray()
-    if (!body) return NextResponse.json({ error: 'Bild nicht gefunden' }, { status: 404 })
+    if (!result.Body) return NextResponse.json({ error: 'Bild nicht gefunden' }, { status: 404 })
 
-    return new NextResponse(Buffer.from(body), {
-      headers: {
-        'Content-Type': result.ContentType ?? 'image/jpeg',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    })
+    // Stream statt vollständig puffern — schickt Bytes weiter, sobald sie von Garage ankommen
+    const stream = result.Body.transformToWebStream()
+
+    const headers: Record<string, string> = {
+      'Content-Type': result.ContentType ?? 'image/jpeg',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    }
+    if (result.ContentLength) headers['Content-Length'] = String(result.ContentLength)
+
+    return new NextResponse(stream, { headers })
   } catch {
     return NextResponse.json({ error: 'Bild nicht gefunden' }, { status: 404 })
   }

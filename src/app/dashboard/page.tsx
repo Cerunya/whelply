@@ -171,6 +171,18 @@ export default async function DashboardPage() {
           >
             Theme & Branding
           </Link>
+          <Link
+            href="/dashboard/news"
+            className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+          >
+            Aktuelles
+          </Link>
+          <Link
+            href="/dashboard/galerie"
+            className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+          >
+            Galerie
+          </Link>
         </div>
 
         {/* Würfe */}

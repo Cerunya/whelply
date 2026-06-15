@@ -12,6 +12,7 @@ const schema = z.object({
   pedigreeNumber: z.string().max(60).nullable().optional(),
   titles: z.string().max(200).nullable().optional(),
   isStud: z.boolean().default(false),
+  description: z.string().max(3000).nullable().optional(),
 })
 
 async function getOwnedDog(userId: string, dogId: string) {
@@ -52,6 +53,7 @@ export async function PATCH(
       pedigreeNumber: parsed.data.pedigreeNumber ?? null,
       titles: parsed.data.titles ?? null,
       isStud: parsed.data.sex === 'male' ? parsed.data.isStud : false,
+      description: parsed.data.description ?? null,
     },
   })
 

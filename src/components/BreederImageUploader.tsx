@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { resizeImage } from '@/lib/image-resize'
 
 export default function BreederImageUploader({
   purpose,
@@ -35,8 +36,10 @@ export default function BreederImageUploader({
 
     setUploading(true)
     try {
+      const resized = await resizeImage(file, 1920, 0.85)
+
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', resized)
       formData.append('purpose', purpose)
 
       const res = await fetch('/api/upload', { method: 'POST', body: formData })

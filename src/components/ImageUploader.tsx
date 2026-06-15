@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { resizeImage } from '@/lib/image-resize'
 
 type MediaItem = { id: string; url: string; isPrimary: boolean }
 
@@ -32,8 +33,10 @@ export default function ImageUploader({
       }
 
       try {
+        const resized = await resizeImage(file, 1920, 0.85)
+
         const formData = new FormData()
-        formData.append('file', file)
+        formData.append('file', resized)
         formData.append('listingId', listingId)
 
         const res = await fetch('/api/upload', {

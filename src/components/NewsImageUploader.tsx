@@ -3,14 +3,17 @@
 import { useState, useRef } from 'react'
 import { resizeImage } from '@/lib/image-resize'
 
-export default function LitterImageUploader({
-  litterId,
+export default function NewsImageUploader({
+  newsPostId,
   initialUrl,
+  initialMediaId,
 }: {
-  litterId: string
+  newsPostId: string
   initialUrl?: string | null
+  initialMediaId?: string | null
 }) {
   const [url, setUrl] = useState<string | null>(initialUrl ?? null)
+  const [mediaId, setMediaId] = useState<string | null>(initialMediaId ?? null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -34,7 +37,7 @@ export default function LitterImageUploader({
 
       const formData = new FormData()
       formData.append('file', resized)
-      formData.append('litterId', litterId)
+      formData.append('newsPostId', newsPostId)
 
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       if (!res.ok) {
@@ -44,8 +47,28 @@ export default function LitterImageUploader({
 
       const data = await res.json()
       setUrl(data.url)
+      setMediaId(data.id)
     } catch (err: any) {
       setError(err.message ?? 'Fehler beim Hochladen.')
+    }
+    setUploading(false)
+  }
+
+  async function handleRemove(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!mediaId) return
+    setError('')
+    setUploading(true)
+    try {
+      const res = await fetch(`/api/upload?mediaId=${mediaId}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error ?? 'Fehler beim Entfernen.')
+      }
+      setUrl(null)
+      setMediaId(null)
+    } catch (err: any) {
+      setError(err.message ?? 'Fehler beim Entfernen.')
     }
     setUploading(false)
   }
@@ -67,11 +90,18 @@ export default function LitterImageUploader({
         />
         {url ? (
           <div className="aspect-video relative">
-            <img src={url} alt="Wurf-Titelbild" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors flex items-center justify-center">
+            <img src={url} alt="Beitragsbild" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors flex items-center justify-center gap-3">
               <span className="text-white text-sm font-medium opacity-0 hover:opacity-100 transition-opacity">
                 Bild ändern
               </span>
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="text-white text-sm font-medium opacity-0 hover:opacity-100 transition-opacity underline"
+              >
+                Entfernen
+              </button>
             </div>
           </div>
         ) : (
@@ -80,9 +110,9 @@ export default function LitterImageUploader({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             <p className="text-sm text-stone-500">
-              {uploading ? 'Wird hochgeladen...' : 'Ankündigungs- oder Titelbild für den Wurf hochladen'}
+              {uploading ? 'Wird hochgeladen...' : 'Bild zum Beitrag hochladen (optional)'}
             </p>
-            <p className="text-xs text-stone-400 mt-1">Optional · JPG, PNG oder WebP, max. 8 MB</p>
+            <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, max. 8 MB</p>
           </div>
         )}
       </div>

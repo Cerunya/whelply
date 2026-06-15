@@ -178,6 +178,7 @@ model BreederProfile {
   litters      Litter[]
   listings     Listing[]
   media        Media[]       @relation("BreederMedia")
+  newsPosts    NewsPost[]
 
   @@map("breeder_profiles")
 }
@@ -219,6 +220,7 @@ model Dog {
   titles         String?  // Ausstellungstitel, freitext
   isStud         Boolean  @default(false) @map("is_stud")
   isForSale      Boolean  @default(false) @map("is_for_sale")
+  description    String?  @db.Text // Persönlicher Vorstellungstext (große Anzeige auf Züchterseite, wenn gesetzt)
   createdAt      DateTime @default(now()) @map("created_at")
 
   breeder      BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
@@ -389,12 +391,33 @@ model Media {
   litterId    String?  @map("litter_id")
   listingId   String?  @map("listing_id")
   serviceId   String?  @map("service_id")
+  newsPostId  String?  @map("news_post_id")
 
   breeder  BreederProfile?  @relation("BreederMedia",  fields: [breederId],  references: [id], onDelete: Cascade)
   dog      Dog?             @relation("DogMedia",      fields: [dogId],      references: [id], onDelete: Cascade)
   litter   Litter?          @relation("LitterMedia",   fields: [litterId],   references: [id], onDelete: Cascade)
   listing  Listing?         @relation("ListingMedia",  fields: [listingId],  references: [id], onDelete: Cascade)
   service  ServiceProvider? @relation("ServiceMedia",  fields: [serviceId],  references: [id], onDelete: Cascade)
+  newsPost NewsPost?        @relation("NewsPostMedia", fields: [newsPostId], references: [id], onDelete: Cascade)
 
   @@map("media")
+}
+
+// ─────────────────────────────────────────────
+// AKTUELLES / NEWS — eigene Unterseite pro Züchter
+// ─────────────────────────────────────────────
+
+model NewsPost {
+  id        String   @id @default(cuid())
+  breederId String   @map("breeder_id")
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  breeder BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
+  media   Media[]        @relation("NewsPostMedia")
+
+  @@map("news_posts")
+  @@index([breederId])
 }

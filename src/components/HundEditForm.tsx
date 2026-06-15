@@ -17,6 +17,7 @@ type DogData = {
   pedigreeNumber: string | null
   titles: string | null
   isStud: boolean
+  description: string | null
   imageUrl: string | null
 }
 
@@ -35,6 +36,7 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
     pedigreeNumber: dog.pedigreeNumber ?? '',
     titles: dog.titles ?? '',
     isStud: dog.isStud,
+    description: dog.description ?? '',
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -64,6 +66,7 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
         pedigreeNumber: form.pedigreeNumber || null,
         titles: form.titles || null,
         isStud: form.sex === 'male' ? form.isStud : false,
+        description: form.description || null,
       }),
     })
 
@@ -225,6 +228,22 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
               </span>
             </label>
           )}
+
+          <div>
+            <label className={labelClass}>Vorstellungstext (optional)</label>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows={5}
+              placeholder="Erzähl etwas über diesen Hund — Charakter, Geschichte, was ihn besonders macht..."
+              className={inputClass}
+            />
+            <p className="text-xs text-stone-400 mt-1">
+              Wenn du hier etwas eingibst, wird dieser Hund mit Foto und Text groß auf deiner
+              öffentlichen Züchterseite vorgestellt — sonst nur in der kleinen Übersicht.
+            </p>
+          </div>
 
           <div className="flex gap-3 pt-2">
             <button

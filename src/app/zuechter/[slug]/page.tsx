@@ -70,6 +70,33 @@ export default async function ZuechterProfilPage({
     orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
   })
 
+  // Hunde mit Vorstellungstext werden groß auf der Seite vorgestellt
+  const featuredDogs = await prisma.dog.findMany({
+    where: { breederId: breeder.id, description: { not: null } },
+    include: {
+      breed: { select: { nameDe: true } },
+      media: { orderBy: { sortOrder: 'asc' }, select: { url: true } },
+    },
+    orderBy: { name: 'asc' },
+  })
+
+  // Aktuelles & Galerie — kleine Vorschau-Sektionen
+  const latestPosts = await prisma.newsPost.findMany({
+    where: { breederId: breeder.id },
+    orderBy: { createdAt: 'desc' },
+    take: 2,
+    include: { media: { take: 1, select: { url: true } } },
+  })
+  const galleryPreview = await prisma.media.findMany({
+    where: { breederId: breeder.id, purpose: 'gallery' },
+    orderBy: { sortOrder: 'asc' },
+    take: 6,
+    select: { url: true },
+  })
+  const galleryCount = await prisma.media.count({
+    where: { breederId: breeder.id, purpose: 'gallery' },
+  })
+
   const now = new Date()
   const displayName = breeder.displayName || breeder.kennelName
   const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
@@ -150,6 +177,84 @@ export default async function ZuechterProfilPage({
                   Webseite besuchen →
                 </a>
               )}
+            </div>
+          )}
+
+          {/* Unsere Zuchthunde — große Einzelvorstellung mit Foto + Text */}
+          {featuredDogs.length > 0 && (
+            <div className="mb-10 space-y-8">
+              <h2 className="font-serif text-2xl font-bold text-stone-900">
+                Unsere Zuchthunde
+              </h2>
+              {featuredDogs.map((dog, i) => (
+                <div
+                  key={dog.id}
+                  className="bg-white rounded-2xl border border-cream-deep overflow-hidden md:grid md:grid-cols-3"
+                >
+                  <div className={`bg-cream-dark aspect-square md:aspect-auto ${i % 2 === 1 ? 'md:order-2' : ''}`}>
+                    {dog.media[0]?.url ? (
+                      <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-12 h-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="md:col-span-2 p-7">
+                    <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">
+                      {dog.breed.nameDe}{dog.isStud ? ' · Deckrüde' : ''}
+                    </p>
+                    <h3 className="font-serif text-xl font-bold text-stone-900 mb-3">
+                      <Link href={`/hund/${dog.id}`} className="hover:underline">
+                        {dog.name}
+                      </Link>
+                    </h3>
+                    <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
+                      {dog.description}
+                    </p>
+                    <Link
+                      href={`/hund/${dog.id}`}
+                      className="inline-block mt-4 text-sm text-forest font-semibold hover:underline"
+                    >
+                      Profil ansehen →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Aktuelles — kleine Vorschau */}
+          {latestPosts.length > 0 && (
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-serif text-2xl font-bold text-stone-900">Aktuelles</h2>
+                <Link href={`/zuechter/${params.slug}/aktuelles`} className="text-sm text-forest font-semibold hover:underline">
+                  Alle Beiträge →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {latestPosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/zuechter/${params.slug}/aktuelles`}
+                    className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-sm transition-all flex"
+                  >
+                    {post.media[0]?.url && (
+                      <img src={post.media[0].url} alt="" className="w-28 h-28 object-cover flex-shrink-0" />
+                    )}
+                    <div className="p-4 min-w-0">
+                      <p className="text-xs text-stone-400 mb-1">
+                        {post.createdAt.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                      </p>
+                      <p className="font-semibold text-stone-800 text-sm line-clamp-2">{post.title}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
 
@@ -331,6 +436,29 @@ export default async function ZuechterProfilPage({
                         <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{dog.titles}</p>
                       )}
                     </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Galerie — kleine Vorschau */}
+          {galleryPreview.length > 0 && (
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-serif text-2xl font-bold text-stone-900">Galerie</h2>
+                <Link href={`/zuechter/${params.slug}/galerie`} className="text-sm text-forest font-semibold hover:underline">
+                  Alle {galleryCount} Fotos →
+                </Link>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                {galleryPreview.map((img, i) => (
+                  <Link
+                    key={i}
+                    href={`/zuechter/${params.slug}/galerie`}
+                    className="aspect-square rounded-xl overflow-hidden border border-cream-deep block"
+                  >
+                    <img src={img.url} alt="" className="w-full h-full object-cover" />
                   </Link>
                 ))}
               </div>

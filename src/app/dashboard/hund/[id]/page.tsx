@@ -40,6 +40,7 @@ export default async function HundBearbeitenPage({
         pedigreeNumber: dog.pedigreeNumber,
         titles: dog.titles,
         isStud: dog.isStud,
+        description: dog.description,
         imageUrl: dog.media[0]?.url ?? null,
       }}
       breeds={breeds}
