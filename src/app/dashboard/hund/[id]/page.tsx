@@ -18,7 +18,10 @@ export default async function HundBearbeitenPage({
 
   const dog = await prisma.dog.findUnique({
     where: { id: params.id },
-    include: { media: { take: 1, select: { url: true } } },
+    include: {
+      media: { take: 1, select: { url: true } },
+      healthTests: { orderBy: { sortOrder: 'asc' } },
+    },
   })
 
   if (!dog || dog.breederId !== breeder.id) notFound()
@@ -42,6 +45,12 @@ export default async function HundBearbeitenPage({
         isStud: dog.isStud,
         description: dog.description,
         imageUrl: dog.media[0]?.url ?? null,
+        healthTests: dog.healthTests.map((t) => ({
+          id: t.id,
+          name: t.name,
+          result: t.result,
+          testDate: t.testDate ? t.testDate.toISOString().slice(0, 10) : null,
+        })),
       }}
       breeds={breeds}
     />

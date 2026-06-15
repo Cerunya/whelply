@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SaveToast from './SaveToast'
@@ -47,6 +47,22 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
     showPhone: breeder.showPhone,
     showAddress: breeder.showAddress,
   })
+
+  const bioRef = useRef<HTMLTextAreaElement>(null)
+
+  // Umschließt die aktuelle Textauswahl im Bio-Feld mit ** oder * (Markdown-ähnliche Formatierung)
+  function wrapBioSelection(marker: string) {
+    const el = bioRef.current
+    if (!el) return
+    const { selectionStart, selectionEnd, value } = el
+    const selected = value.slice(selectionStart, selectionEnd)
+    const newValue = value.slice(0, selectionStart) + marker + selected + marker + value.slice(selectionEnd)
+    setForm((prev) => ({ ...prev, bio: newValue }))
+    requestAnimationFrame(() => {
+      el.focus()
+      el.setSelectionRange(selectionStart + marker.length, selectionEnd + marker.length)
+    })
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target
@@ -141,7 +157,26 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
 
             <div>
               <label className={labelClass}>Über dich / deine Zucht</label>
+              <div className="flex gap-1 mb-1.5">
+                <button
+                  type="button"
+                  onClick={() => wrapBioSelection('**')}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-sm font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                  title="Fett (Auswahl markieren und klicken)"
+                >
+                  B
+                </button>
+                <button
+                  type="button"
+                  onClick={() => wrapBioSelection('*')}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-sm italic text-stone-600 hover:bg-stone-50 transition-colors"
+                  title="Kursiv (Auswahl markieren und klicken)"
+                >
+                  I
+                </button>
+              </div>
               <textarea
+                ref={bioRef}
                 name="bio"
                 value={form.bio}
                 onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -149,6 +184,9 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
                 placeholder="Erzähl etwas über deine Zucht, Philosophie, Erfahrung..."
                 className={inputClass + ' resize-none'}
               />
+              <p className="text-xs text-stone-400 mt-1">
+                Text markieren und B/I klicken, um **fett** oder *kursiv* zu formatieren.
+              </p>
             </div>
 
             <div>

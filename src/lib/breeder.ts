@@ -24,7 +24,6 @@ export async function getBreederBySlug(slug: string) {
 }
 
 export type BreederTabFlags = {
-  welpen: boolean
   zuchthunde: boolean
   wuerfe: boolean
   erwachseneHunde: boolean
@@ -33,8 +32,7 @@ export type BreederTabFlags = {
 }
 
 export async function getBreederTabs(breederId: string): Promise<BreederTabFlags> {
-  const [listingsCount, studDogsCount, featuredDogsCount, littersCount, adultListingsCount, newsCount, galleryCount] = await Promise.all([
-    prisma.listing.count({ where: { breederId, status: { in: ['available', 'reserved', 'sold'] }, type: 'puppy' } }),
+  const [studDogsCount, featuredDogsCount, littersCount, adultListingsCount, newsCount, galleryCount] = await Promise.all([
     prisma.dog.count({ where: { breederId, isStud: true } }),
     prisma.dog.count({ where: { breederId, description: { not: null } } }),
     prisma.litter.count({ where: { breederId } }),
@@ -44,7 +42,6 @@ export async function getBreederTabs(breederId: string): Promise<BreederTabFlags
   ])
 
   return {
-    welpen: listingsCount > 0,
     zuchthunde: studDogsCount > 0 || featuredDogsCount > 0,
     wuerfe: littersCount > 0,
     erwachseneHunde: adultListingsCount > 0,

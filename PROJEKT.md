@@ -98,6 +98,18 @@ NIXPACKS_NODE_VERSION=22
   psql -U whelply -d whelply -c "ALTER TABLE litters ALTER COLUMN dam_id DROP NOT NULL;"
   ```
 - Danach: `npx prisma db seed` im App-Container für deutsche Rassenamen
+- **Zu prüfen (2026-06-15)**: User berichtet, dass ein gesetzter "Vorstellungstext"
+  (Dog.description) nirgends erscheint. Im Code sieht alles korrekt aus (Formular,
+  API, Query, Tab-Flag). Hauptverdacht: die Spalte `dogs.description` wurde beim
+  ersten Migrations-Batch (20260614010000) eventuell nicht angelegt (User hatte
+  initial rohes SQL statt psql -c ausgeführt). Diagnose:
+  ```bash
+  psql -U whelply -d whelply -c "\d dogs"
+  ```
+  Falls `description` fehlt, idempotent nachziehen:
+  ```bash
+  psql -U whelply -d whelply -c "ALTER TABLE dogs ADD COLUMN IF NOT EXISTS description TEXT;"
+  ```
 
 ## Abgeschlossene Tasks
 - [x] Task 1: Analyse chiens-de-france.com
@@ -241,16 +253,17 @@ eigene Routen pro Bereich, alle mit gemeinsamem Hero + Tab-Navigation.
   Hintergrundbild) und `getBreederTabs(breederId)` (Bool-Flags, welche Tabs Inhalt haben)
 - `src/components/BreederPageHeader.tsx` — Hero (Bild/Theme-Farbe, Name, Ort, Verband-/
   Verifiziert-Badge) + horizontale Tab-Leiste (sticky unter der Navbar). Tabs: Profil,
-  Welpen (immer), Zuchthunde, Würfe & Planung, Erwachsene Hunde, Aktuelles, Galerie
-  (letztere 4 nur wenn `getBreederTabs` true liefert)
-- `/zuechter/[slug]` — jetzt nur noch "Profil": Bio + Kontakt
-- `/zuechter/[slug]/welpen` — Welpen-Inserate (Grid)
+  Zuchthunde, Würfe & Planung, Erwachsene Hunde, Aktuelles, Galerie
+  (letztere 4 nur wenn `getBreederTabs` true liefert; Profil immer)
+- `/zuechter/[slug]` — nur noch "Profil": Bio (rich text, s.u.) + Kontakt
 - `/zuechter/[slug]/zuchthunde` — große Einzelvorstellung (Dog.description) + Zuchtrüden-Grid
-- `/zuechter/[slug]/wuerfe` — Würfe & Planung (alle, nicht mehr auf 10 begrenzt)
+- `/zuechter/[slug]/wuerfe` — Würfe & Planung (s.u., jetzt inkl. Welpen-Übersicht)
 - `/zuechter/[slug]/hunde` — Erwachsene Hunde zur Abgabe (Grid)
-- `/zuechter/[slug]/aktuelles`, `/zuechter/[slug]/galerie` — nutzen jetzt ebenfalls
+- `/zuechter/[slug]/aktuelles`, `/zuechter/[slug]/galerie` — nutzen ebenfalls
   `BreederPageHeader`/`getBreederTabs` statt eigenem Mini-Header
 - Alle Subseiten: `export const dynamic = 'force-dynamic'`
+- Eigene `/zuechter/[slug]/welpen`-Unterseite wieder ENTFERNT (Punkt 6, 2026-06-15,
+  s.u.) — Welpen werden jetzt direkt bei ihrem Wurf unter "Würfe & Planung" gezeigt.
 
 ### ✅ Galerie-Lightbox (2026-06-15) — FERTIG
 - Klick auf ein Galerie-Foto öffnet es groß in einem Overlay — reines CSS (`:target`-
@@ -264,7 +277,33 @@ eigene Routen pro Bereich, alle mit gemeinsamem Hero + Tab-Navigation.
   wird automatisch das verbleibende Bild mit der niedrigsten `sortOrder` zum neuen
   Titelbild. `ImageUploader.tsx` spiegelt das sofort im UI (kein Reload nötig).
 
-### ❌ Fehlt noch (priorisiert)
+### ✅ Wurfname, Wurf-Detailseite, Gesundheitstests, Rich-Text-Bio (2026-06-15) — FERTIG
+Migration `20260615010000_litter_name_health_tests`: `litters.name` (optionaler
+Wurfname) + neue Tabelle `dog_health_tests` (id, dog_id, name, result, test_date,
+sort_order).
+- **Wurfname**: `LitterDashboard.tsx` → "Wurf-Details" hat neues Feld "Wurfname"
+  (optional). Wird überall angezeigt, wo bisher nur die Rasse stand — Rasse bleibt
+  als Zusatzinfo sichtbar, wenn ein Name gesetzt ist.
+- **Würfe & Planung als zentrale Welpen-Übersicht (Punkt 6)**: `/zuechter/[slug]/wuerfe`
+  zeigt jetzt pro Wurf: Foto, Name/Rasse, Status, bei `available` die Anzahl
+  verfügbarer Rüden/Hündinnen (aus `listing.sex`), sowie Vater/Mutter. Jede Zeile ist
+  klickbar → `/zuechter/[slug]/wuerfe/[litterId]` (NEU): Wurf-Detailseite mit
+  Eltern-Karten (verlinkt zu `/hund/[id]`, externer Deckrüde als Text) und Grid aller
+  Welpen-Inserate dieses Wurfs. Dadurch wurde die eigene `/welpen`-Unterseite überflüssig
+  und entfernt.
+- **Gesundheitstests pro Zuchthund**: neues `DogHealthTest`-Modell. Dashboard:
+  `src/components/DogHealthTests.tsx` (Liste + Hinzufügen/Entfernen, eigene API
+  `/api/hunde/[id]/tests` POST und `/api/hunde/[id]/tests/[testId]` DELETE,
+  sofort gespeichert ohne Haupt-Formular-Submit), eingebunden unter dem
+  "Zuchthund bearbeiten"-Formular. Anzeige: als Tag-Liste in der großen
+  Zuchthund-Vorstellung (`/zuechter/[slug]/zuchthunde`) und als Tabelle auf
+  `/hund/[id]`.
+- **Rich-Text "Über uns"**: `src/lib/richtext.tsx` — abhängigkeitsfreier Renderer für
+  `**fett**` / `*kursiv*` + Zeilenumbrüche. `ProfilForm.tsx` hat B/I-Buttons über dem
+  Bio-Feld (umschließen die Textauswahl mit `**`/`*`). `/zuechter/[slug]` rendert
+  `renderRichText(breeder.bio)` statt Plain-Text.
+
+
 - **GROSS — Subdomain-Routing Phase 2 (später):**
   - Wildcard-DNS (`*.whelply.de`) + Wildcard-TLS-Zertifikat (DNS-01-Challenge, braucht
     DNS-Provider-API-Zugriff in Coolify/Traefik — größter Aufwand)

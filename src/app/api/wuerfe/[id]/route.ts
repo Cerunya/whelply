@@ -6,6 +6,7 @@ import { z } from 'zod'
 const schema = z.object({
   status: z.enum(['planned', 'pregnant', 'born', 'available', 'sold_out']).optional(),
   breedId: z.number().int().positive().optional(),
+  name: z.string().max(100).nullable().optional(),
   damId: z.string().nullable().optional(),
   sireId: z.string().nullable().optional(),
   sireExternal: z.string().max(200).nullable().optional(),
@@ -72,6 +73,7 @@ export async function PATCH(
   const data: Record<string, unknown> = {}
   if (parsed.data.status !== undefined) data.status = parsed.data.status
   if (parsed.data.breedId !== undefined) data.breedId = parsed.data.breedId
+  if (parsed.data.name !== undefined) data.name = parsed.data.name
   if (parsed.data.damId !== undefined) data.damId = parsed.data.damId
   if (parsed.data.sireId !== undefined) {
     data.sireId = parsed.data.sireId

@@ -56,6 +56,7 @@ export default async function WurfDetailPage({
         id: litter.id,
         breedId: litter.breedId,
         breedName: litter.breed.nameDe,
+        name: litter.name,
         damId: litter.damId,
         sireId: litter.sireId,
         damName: litter.dam?.name ?? null,

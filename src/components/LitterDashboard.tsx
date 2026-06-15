@@ -10,6 +10,7 @@ type Litter = {
   id: string
   breedId: number
   breedName: string
+  name: string | null
   damId: string | null
   sireId: string | null
   damName: string | null
@@ -67,6 +68,7 @@ export default function LitterDashboard({
   // Wurf-Details (bearbeitbar)
   const [details, setDetails] = useState({
     breedId: String(litter.breedId),
+    name: litter.name ?? '',
     damId: litter.damId ?? '',
     sireId: litter.sireId ?? '',
     sireExternal: litter.sireExternal ?? '',
@@ -113,6 +115,7 @@ export default function LitterDashboard({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         breedId: Number(details.breedId),
+        name: details.name || null,
         damId: details.damId || null,
         sireId: details.sireId || null,
         sireExternal: details.sireId ? null : (details.sireExternal || null),
@@ -203,6 +206,21 @@ export default function LitterDashboard({
               {detailsError}
             </div>
           )}
+
+          <div>
+            <label className={labelClass}>Wurfname (optional)</label>
+            <input
+              type="text"
+              name="name"
+              value={details.name}
+              onChange={handleDetailsChange}
+              placeholder="z.B. „A-Wurf“, „Frühlingswurf 2026“..."
+              className={inputClass}
+            />
+            <p className="text-xs text-stone-400 mt-1">
+              Hilft, mehrere Würfe derselben Rasse zu unterscheiden. Ohne Namen wird die Rasse angezeigt.
+            </p>
+          </div>
 
           <div>
             <label className={labelClass}>Rasse <span className="text-red-400">*</span></label>

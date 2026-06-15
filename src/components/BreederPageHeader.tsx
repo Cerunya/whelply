@@ -13,7 +13,7 @@ type BreederHeaderData = {
   media: { url: string; purpose: string | null }[]
 }
 
-type TabId = 'profil' | 'welpen' | 'zuchthunde' | 'wuerfe' | 'hunde' | 'aktuelles' | 'galerie'
+type TabId = 'profil' | 'zuchthunde' | 'wuerfe' | 'hunde' | 'aktuelles' | 'galerie'
 
 export default function BreederPageHeader({
   breeder,
@@ -35,7 +35,6 @@ export default function BreederPageHeader({
 
   const navItems = [
     { id: 'profil', label: 'Profil', href: `/zuechter/${slug}`, show: true },
-    { id: 'welpen', label: 'Welpen', href: `/zuechter/${slug}/welpen`, show: true },
     { id: 'zuchthunde', label: 'Zuchthunde', href: `/zuechter/${slug}/zuchthunde`, show: tabs.zuchthunde },
     { id: 'wuerfe', label: 'Würfe & Planung', href: `/zuechter/${slug}/wuerfe`, show: tabs.wuerfe },
     { id: 'hunde', label: 'Erwachsene Hunde', href: `/zuechter/${slug}/hunde`, show: tabs.erwachseneHunde },

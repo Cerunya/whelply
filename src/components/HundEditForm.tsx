@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DogImageUploader from './DogImageUploader'
+import DogHealthTests from './DogHealthTests'
 import SaveToast from './SaveToast'
 
 type Breed = { id: number; nameDe: string }
+type HealthTest = { id: string; name: string; result: string; testDate: string | null }
 type DogData = {
   id: string
   name: string
@@ -19,6 +21,7 @@ type DogData = {
   isStud: boolean
   description: string | null
   imageUrl: string | null
+  healthTests: HealthTest[]
 }
 
 export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Breed[] }) {
@@ -261,6 +264,10 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
             </Link>
           </div>
         </form>
+
+        <div className="mt-6">
+          <DogHealthTests dogId={dog.id} initialTests={dog.healthTests} />
+        </div>
 
         <button
           onClick={handleDelete}

@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import { renderRichText } from '@/lib/richtext'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -31,8 +32,8 @@ export default async function ZuechterProfilPage({
           {breeder.bio && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">Über uns</h2>
-              <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
-                {breeder.bio}
+              <p className="text-stone-600 text-sm leading-relaxed">
+                {renderRichText(breeder.bio)}
               </p>
               {breeder.website && (
                 <a
