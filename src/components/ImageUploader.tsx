@@ -62,7 +62,16 @@ export default function ImageUploader({
   async function handleDelete(mediaId: string) {
     const res = await fetch(`/api/media-item/${mediaId}`, { method: 'DELETE' })
     if (res.ok) {
-      setMedia((prev) => prev.filter((m) => m.id !== mediaId))
+      setMedia((prev) => {
+        const deleted = prev.find((m) => m.id === mediaId)
+        const rest = prev.filter((m) => m.id !== mediaId)
+        // Wenn das Titelbild gelöscht wurde, wird (wie im Backend) das nächste
+        // Bild zum neuen Titelbild — UI muss das sofort widerspiegeln.
+        if (deleted?.isPrimary && rest.length > 0 && !rest.some((m) => m.isPrimary)) {
+          rest[0] = { ...rest[0], isPrimary: true }
+        }
+        return rest
+      })
     }
   }
 

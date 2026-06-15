@@ -25,6 +25,9 @@ export async function DELETE(
     return NextResponse.json({ error: 'Nicht erlaubt' }, { status: 403 })
   }
 
+  const wasPrimary = media.isPrimary
+  const listingId = media.listingId!
+
   // Aus MinIO löschen
   try {
     await s3.send(new DeleteObjectCommand({ Bucket: MINIO_BUCKET, Key: media.storageKey }))
@@ -33,6 +36,17 @@ export async function DELETE(
   }
 
   await prisma.media.delete({ where: { id: params.id } })
+
+  // Falls das Titelbild gelöscht wurde, das nächste verbleibende Bild zum neuen Titelbild machen
+  if (wasPrimary) {
+    const next = await prisma.media.findFirst({
+      where: { listingId },
+      orderBy: { sortOrder: 'asc' },
+    })
+    if (next) {
+      await prisma.media.update({ where: { id: next.id }, data: { isPrimary: true } })
+    }
+  }
 
   return NextResponse.json({ ok: true })
 }

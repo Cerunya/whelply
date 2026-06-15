@@ -1,10 +1,9 @@
-import { prisma } from '@/lib/prisma'
-import { slugify } from '@/lib/slugify'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import ListingCard from '@/components/ListingCard'
-import Link from 'next/link'
+import BreederPageHeader from '@/components/BreederPageHeader'
+import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -15,202 +14,22 @@ export default async function ZuechterProfilPage({
 }: {
   params: { slug: string }
 }) {
-  // Alle Züchter laden und nach Slug matchen
-  // (Hinweis: bei vielen Züchtern später durch eine echte slug-Spalte ersetzen)
-  const breeders = await prisma.breederProfile.findMany({
-    select: { id: true, kennelName: true },
-  })
-  const match = breeders.find((b) => slugify(b.kennelName) === params.slug)
-  if (!match) notFound()
-
-  const breeder = await prisma.breederProfile.findUnique({
-    where: { id: match.id },
-    include: {
-      listings: {
-        where: { status: { in: ['available', 'reserved', 'sold'] }, type: 'puppy' },
-        include: {
-          breed: { select: { nameDe: true } },
-          media: { where: { isPrimary: true }, take: 1, select: { url: true } },
-        },
-        orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
-      },
-      litters: {
-        include: {
-          breed: { select: { nameDe: true } },
-          media: { take: 1, select: { url: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-      },
-      dogs: {
-        where: { isStud: true },
-        include: {
-          breed: { select: { nameDe: true } },
-          media: { take: 1, select: { url: true } },
-        },
-        orderBy: { name: 'asc' },
-      },
-      media: {
-        where: { purpose: { in: ['header', 'background'] } },
-        select: { url: true, purpose: true },
-      },
-    },
-  })
-
+  const breeder = await getBreederBySlug(params.slug)
   if (!breeder) notFound()
 
-  // Separate Query: erwachsene Hunde zur Abgabe (eigene Relation-Instanz nötig, da
-  // Prisma die gleiche Relation nicht zweimal mit unterschiedlichen Filtern in einem include erlaubt)
-  const adultListings = await prisma.listing.findMany({
-    where: { breederId: breeder.id, status: { in: ['available', 'reserved', 'sold'] }, type: 'adult_dog' },
-    include: {
-      breed: { select: { nameDe: true } },
-      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
-    },
-    orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
-  })
-
-  // Hunde mit Vorstellungstext werden groß auf der Seite vorgestellt
-  const featuredDogs = await prisma.dog.findMany({
-    where: { breederId: breeder.id, description: { not: null } },
-    include: {
-      breed: { select: { nameDe: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { url: true } },
-    },
-    orderBy: { name: 'asc' },
-  })
-
-  // Aktuelles & Galerie — kleine Vorschau-Sektionen
-  const latestPosts = await prisma.newsPost.findMany({
-    where: { breederId: breeder.id },
-    orderBy: { createdAt: 'desc' },
-    take: 2,
-    include: { media: { take: 1, select: { url: true } } },
-  })
-  const galleryPreview = await prisma.media.findMany({
-    where: { breederId: breeder.id, purpose: 'gallery' },
-    orderBy: { sortOrder: 'asc' },
-    take: 6,
-    select: { url: true },
-  })
-  const galleryCount = await prisma.media.count({
-    where: { breederId: breeder.id, purpose: 'gallery' },
-  })
-
-  const now = new Date()
-  const displayName = breeder.displayName || breeder.kennelName
-  const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
-  const headerImage = breeder.media.find((m) => m.purpose === 'header')?.url
-  const backgroundImage = breeder.media.find((m) => m.purpose === 'background')?.url
-  const themeColor = breeder.themeColor || undefined
-  const accentColor = breeder.themeAccentColor || undefined
+  const tabs = await getBreederTabs(breeder.id)
   const hasContact = (breeder.showPhone && breeder.phone) || (breeder.showAddress && breeder.street)
-
-  // Sprungnavigation — nur Abschnitte, die tatsächlich Inhalt haben (Welpen immer)
-  const navItems = [
-    { id: 'ueber-uns', label: 'Über uns', show: !!breeder.bio },
-    { id: 'zuchthunde', label: 'Unsere Zuchthunde', show: featuredDogs.length > 0 },
-    { id: 'aktuelles', label: 'Aktuelles', show: latestPosts.length > 0 },
-    { id: 'kontakt', label: 'Kontakt', show: !!hasContact },
-    { id: 'welpen', label: 'Welpen', show: true },
-    { id: 'wuerfe', label: 'Würfe & Planung', show: breeder.litters.length > 0 },
-    { id: 'erwachsene-hunde', label: 'Erwachsene Hunde', show: adultListings.length > 0 },
-    { id: 'zuchtrueden', label: 'Zuchtrüden', show: breeder.dogs.length > 0 },
-    { id: 'galerie', label: 'Galerie', show: galleryPreview.length > 0 },
-  ].filter((item) => item.show)
 
   return (
     <>
       <Navbar />
       <main className="min-h-screen relative">
-        {backgroundImage ? (
-          <>
-            <div
-              className="fixed inset-0 -z-20"
-              style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
-            />
-            <div className="fixed inset-0 -z-10 bg-cream/85" />
-          </>
-        ) : (
-          <div className="fixed inset-0 -z-10 bg-cream" />
-        )}
+        <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="profil" />
 
-        {/* Header */}
-        <section
-          className={`relative px-4 py-14 ${headerImage ? '' : 'bg-forest'}`}
-          style={themeColor && !headerImage ? { backgroundColor: themeColor } : undefined}
-        >
-          {headerImage && (
-            <>
-              <img src={headerImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/45" />
-            </>
-          )}
-          <div className="max-w-5xl mx-auto relative">
-            <p
-              className="text-xs font-semibold uppercase tracking-widest mb-2 text-honey"
-              style={accentColor ? { color: accentColor } : undefined}
-            >
-              {breeder.verband ? `${breeder.verband}-Züchter` : 'Züchter'}
-            </p>
-            <h1 className="font-serif text-4xl font-bold text-white mb-2">
-              {displayName}
-            </h1>
-            {location && (
-              <p className="text-white/70 text-sm flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                {location}
-              </p>
-            )}
-            {breeder.verificationLevel !== 'none' && (
-              <p className="text-sm mt-2 font-medium text-honey" style={accentColor ? { color: accentColor } : undefined}>
-                ✓ Verifizierter Züchter
-              </p>
-            )}
-          </div>
-        </section>
-
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          {/* Sprungnavigation (Mobile: horizontal scrollbar) */}
-          {navItems.length > 1 && (
-            <nav className="lg:hidden flex gap-2 overflow-x-auto pb-3 mb-6 -mx-4 px-4">
-              {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white border border-cream-deep text-stone-600 whitespace-nowrap hover:border-forest/30 transition-colors"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-          )}
-
-          <div className={navItems.length > 1 ? 'lg:grid lg:grid-cols-[180px_1fr] lg:gap-10' : ''}>
-            {/* Sprungnavigation (Desktop: Seitenleiste) */}
-            {navItems.length > 1 && (
-              <aside className="hidden lg:block">
-                <nav className="sticky top-24 space-y-0.5">
-                  {navItems.map((item) => (
-                    <a
-                      key={item.id}
-                      href={`#${item.id}`}
-                      className="block px-3 py-2 rounded-lg text-sm text-stone-500 hover:bg-white hover:text-forest transition-colors"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </nav>
-              </aside>
-            )}
-
-            <div className="min-w-0">
+        <div className="max-w-5xl mx-auto px-4 py-12">
           {/* Bio */}
           {breeder.bio && (
-            <div id="ueber-uns" className="bg-white rounded-2xl border border-cream-deep p-7 mb-10 scroll-mt-24">
+            <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">Über uns</h2>
               <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
                 {breeder.bio}
@@ -228,87 +47,9 @@ export default async function ZuechterProfilPage({
             </div>
           )}
 
-          {/* Unsere Zuchthunde — große Einzelvorstellung mit Foto + Text */}
-          {featuredDogs.length > 0 && (
-            <div id="zuchthunde" className="mb-10 space-y-8 scroll-mt-24">
-              <h2 className="font-serif text-2xl font-bold text-stone-900">
-                Unsere Zuchthunde
-              </h2>
-              {featuredDogs.map((dog, i) => (
-                <div
-                  key={dog.id}
-                  className="bg-white rounded-2xl border border-cream-deep overflow-hidden md:grid md:grid-cols-3"
-                >
-                  <div className={`bg-cream-dark aspect-square md:aspect-auto ${i % 2 === 1 ? 'md:order-2' : ''}`}>
-                    {dog.media[0]?.url ? (
-                      <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-12 h-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="md:col-span-2 p-7">
-                    <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">
-                      {dog.breed.nameDe}{dog.isStud ? ' · Deckrüde' : ''}
-                    </p>
-                    <h3 className="font-serif text-xl font-bold text-stone-900 mb-3">
-                      <Link href={`/hund/${dog.id}`} className="hover:underline">
-                        {dog.name}
-                      </Link>
-                    </h3>
-                    <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
-                      {dog.description}
-                    </p>
-                    <Link
-                      href={`/hund/${dog.id}`}
-                      className="inline-block mt-4 text-sm text-forest font-semibold hover:underline"
-                    >
-                      Profil ansehen →
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Aktuelles — kleine Vorschau */}
-          {latestPosts.length > 0 && (
-            <div id="aktuelles" className="mb-10 scroll-mt-24">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-serif text-2xl font-bold text-stone-900">Aktuelles</h2>
-                <Link href={`/zuechter/${params.slug}/aktuelles`} className="text-sm text-forest font-semibold hover:underline">
-                  Alle Beiträge →
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {latestPosts.map((post) => (
-                  <Link
-                    key={post.id}
-                    href={`/zuechter/${params.slug}/aktuelles`}
-                    className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-sm transition-all flex"
-                  >
-                    {post.media[0]?.url && (
-                      <img src={post.media[0].url} alt="" className="w-28 h-28 object-cover flex-shrink-0" />
-                    )}
-                    <div className="p-4 min-w-0">
-                      <p className="text-xs text-stone-400 mb-1">
-                        {post.createdAt.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
-                      </p>
-                      <p className="font-semibold text-stone-800 text-sm line-clamp-2">{post.title}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Kontakt — Telefon/Adresse nur wenn vom Züchter freigegeben */}
-          {(breeder.showPhone && breeder.phone) || (breeder.showAddress && breeder.street) ? (
-            <div id="kontakt" className="bg-white rounded-2xl border border-cream-deep p-7 mb-10 scroll-mt-24">
+          {hasContact ? (
+            <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">Kontakt</h2>
               <div className="space-y-2 text-sm text-stone-600">
                 {breeder.showPhone && breeder.phone && (
@@ -332,188 +73,13 @@ export default async function ZuechterProfilPage({
             </div>
           ) : null}
 
-          {/* Verfügbare Welpen */}
-          <div id="welpen" className="mb-12 scroll-mt-24">
-            <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
-              Welpen
-            </h2>
-
-            {breeder.listings.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
-                <p className="text-stone-400 text-sm">Aktuell keine Inserate.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {breeder.listings.map((listing) => (
-                  <div key={listing.id} className="relative">
-                    <ListingCard
-                      id={listing.id}
-                      breedName={listing.breed.nameDe}
-                      kennelName={displayName}
-                      puppyName={listing.title}
-                      city={breeder.city}
-                      state={breeder.state}
-                      priceCents={listing.priceCents}
-                      isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
-                      imageUrl={listing.media[0]?.url}
-                    />
-                    {listing.status !== 'available' && (
-                      <span className={`absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full ${
-                        listing.status === 'reserved' ? 'bg-amber-400 text-amber-900' : 'bg-stone-700 text-white'
-                      }`}>
-                        {listing.status === 'reserved' ? 'Reserviert' : 'Verkauft'}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Würfe / Zuchtplanung */}
-          {breeder.litters.length > 0 && (
-            <div id="wuerfe" className="mb-12 scroll-mt-24">
-              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
-                Würfe & Planung
-              </h2>
-              <div className="space-y-3">
-                {breeder.litters.map((litter) => (
-                  <div key={litter.id} className="bg-white rounded-xl border border-cream-deep p-5 flex items-center gap-4 justify-between">
-                    {litter.media[0]?.url && (
-                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                        <img src={litter.media[0].url} alt={litter.breed.nameDe} className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <p className="font-semibold text-stone-800 text-sm">{litter.breed.nameDe}</p>
-                      <p className="text-xs text-stone-400 mt-0.5">
-                        {litter.status === 'planned' && (litter.expectedDate ? `Erwartet: ${litter.expectedDate}` : 'Geplant')}
-                        {litter.status === 'pregnant' && (litter.expectedDate ? `Erwartet: ${litter.expectedDate}` : 'Trächtig')}
-                        {litter.status === 'born' && litter.bornDate && `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}`}
-                        {litter.status === 'available' && 'Welpen abgabebereit'}
-                        {litter.status === 'sold_out' && 'Ausverkauft'}
-                        {litter.puppyCount && ` · ${litter.puppyCount} Welpen`}
-                      </p>
-                    </div>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
-                      litter.status === 'available' ? 'bg-green-50 text-green-700'
-                      : litter.status === 'sold_out' ? 'bg-stone-200 text-stone-600'
-                      : litter.status === 'born' ? 'bg-blue-50 text-blue-700'
-                      : 'bg-stone-100 text-stone-500'
-                    }`}>
-                      {litter.status === 'available' ? 'Verfügbar'
-                        : litter.status === 'sold_out' ? 'Ausverkauft'
-                        : litter.status === 'born' ? 'Geboren'
-                        : litter.status === 'pregnant' ? 'Trächtig'
-                        : 'Geplant'}
-                    </span>
-                  </div>
-                ))}
-              </div>
+          {!breeder.bio && !hasContact && (
+            <div className="text-center py-12 bg-white rounded-2xl border border-cream-deep mb-6">
+              <p className="text-stone-400 text-sm">
+                {breeder.displayName || breeder.kennelName} hat noch keine Beschreibung hinterlegt.
+              </p>
             </div>
           )}
-
-          {/* Erwachsene Hunde zur Abgabe */}
-          {adultListings.length > 0 && (
-            <div id="erwachsene-hunde" className="mb-12 scroll-mt-24">
-              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
-                Erwachsene Hunde zur Abgabe
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {adultListings.map((listing) => (
-                  <div key={listing.id} className="relative">
-                    <ListingCard
-                      id={listing.id}
-                      breedName={listing.breed.nameDe}
-                      kennelName={displayName}
-                      puppyName={listing.title}
-                      city={breeder.city}
-                      state={breeder.state}
-                      priceCents={listing.priceCents}
-                      isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
-                      imageUrl={listing.media[0]?.url}
-                    />
-                    {listing.status !== 'available' && (
-                      <span className={`absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full ${
-                        listing.status === 'reserved' ? 'bg-amber-400 text-amber-900' : 'bg-stone-700 text-white'
-                      }`}>
-                        {listing.status === 'reserved' ? 'Reserviert' : 'Verkauft'}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Zuchtrüden */}
-          {breeder.dogs.length > 0 && (
-            <div id="zuchtrueden" className="mb-12 scroll-mt-24">
-              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
-                Zuchtrüden
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {breeder.dogs.map((dog) => (
-                  <Link
-                    key={dog.id}
-                    href={`/hund/${dog.id}`}
-                    className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all"
-                  >
-                    <div className="bg-cream-dark aspect-square flex items-center justify-center relative">
-                      {dog.media[0]?.url ? (
-                        <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      )}
-                      <span
-                        className="absolute top-2 left-2 bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full"
-                        style={accentColor ? { backgroundColor: accentColor } : undefined}
-                      >
-                        Deckrüde
-                      </span>
-                    </div>
-                    <div className="p-3">
-                      <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-0.5">
-                        {dog.breed.nameDe}
-                      </p>
-                      <p className="font-semibold text-stone-800 text-sm">{dog.name}</p>
-                      {dog.titles && (
-                        <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{dog.titles}</p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Galerie — kleine Vorschau */}
-          {galleryPreview.length > 0 && (
-            <div id="galerie" className="mb-10 scroll-mt-24">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-serif text-2xl font-bold text-stone-900">Galerie</h2>
-                <Link href={`/zuechter/${params.slug}/galerie`} className="text-sm text-forest font-semibold hover:underline">
-                  Alle {galleryCount} Fotos →
-                </Link>
-              </div>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                {galleryPreview.map((img, i) => (
-                  <Link
-                    key={i}
-                    href={`/zuechter/${params.slug}/galerie`}
-                    className="aspect-square rounded-xl overflow-hidden border border-cream-deep block"
-                  >
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-            </div>
-          </div>
 
           <div className="text-center">
             <Link href="/zuechter" className="text-sm text-forest font-semibold hover:underline">

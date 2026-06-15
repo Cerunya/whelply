@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma'
-import { slugify } from '@/lib/slugify'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import Link from 'next/link'
+import BreederPageHeader from '@/components/BreederPageHeader'
+import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,38 +12,26 @@ export default async function AktuellesPage({
 }: {
   params: { slug: string }
 }) {
-  const breeders = await prisma.breederProfile.findMany({
-    select: { id: true, kennelName: true, displayName: true, themeColor: true },
-  })
-  const match = breeders.find((b) => slugify(b.kennelName) === params.slug)
-  if (!match) notFound()
+  const breeder = await getBreederBySlug(params.slug)
+  if (!breeder) notFound()
+
+  const tabs = await getBreederTabs(breeder.id)
 
   const posts = await prisma.newsPost.findMany({
-    where: { breederId: match.id },
+    where: { breederId: breeder.id },
     orderBy: { createdAt: 'desc' },
     include: { media: { take: 1, select: { url: true } } },
   })
 
-  const displayName = match.displayName || match.kennelName
-
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-cream">
-        <section
-          className="bg-forest px-4 py-10"
-          style={match.themeColor ? { backgroundColor: match.themeColor } : undefined}
-        >
-          <div className="max-w-3xl mx-auto">
-            <p className="text-xs text-white/60 mb-2">
-              <Link href={`/zuechter/${params.slug}`} className="hover:underline">{displayName}</Link>
-              {' / Aktuelles'}
-            </p>
-            <h1 className="font-serif text-3xl font-bold text-white">Aktuelles</h1>
-          </div>
-        </section>
+      <main className="min-h-screen relative">
+        <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="aktuelles" />
 
         <div className="max-w-3xl mx-auto px-4 py-12">
+          <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Aktuelles</h2>
+
           {posts.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400">Noch keine Beiträge.</p>
@@ -66,12 +54,6 @@ export default async function AktuellesPage({
               ))}
             </div>
           )}
-
-          <div className="text-center mt-10">
-            <Link href={`/zuechter/${params.slug}`} className="text-sm text-forest font-semibold hover:underline">
-              ← Zurück zur Züchterseite
-            </Link>
-          </div>
         </div>
       </main>
       <Footer />
