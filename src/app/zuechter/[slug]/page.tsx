@@ -104,6 +104,20 @@ export default async function ZuechterProfilPage({
   const backgroundImage = breeder.media.find((m) => m.purpose === 'background')?.url
   const themeColor = breeder.themeColor || undefined
   const accentColor = breeder.themeAccentColor || undefined
+  const hasContact = (breeder.showPhone && breeder.phone) || (breeder.showAddress && breeder.street)
+
+  // Sprungnavigation — nur Abschnitte, die tatsächlich Inhalt haben (Welpen immer)
+  const navItems = [
+    { id: 'ueber-uns', label: 'Über uns', show: !!breeder.bio },
+    { id: 'zuchthunde', label: 'Unsere Zuchthunde', show: featuredDogs.length > 0 },
+    { id: 'aktuelles', label: 'Aktuelles', show: latestPosts.length > 0 },
+    { id: 'kontakt', label: 'Kontakt', show: !!hasContact },
+    { id: 'welpen', label: 'Welpen', show: true },
+    { id: 'wuerfe', label: 'Würfe & Planung', show: breeder.litters.length > 0 },
+    { id: 'erwachsene-hunde', label: 'Erwachsene Hunde', show: adultListings.length > 0 },
+    { id: 'zuchtrueden', label: 'Zuchtrüden', show: breeder.dogs.length > 0 },
+    { id: 'galerie', label: 'Galerie', show: galleryPreview.length > 0 },
+  ].filter((item) => item.show)
 
   return (
     <>
@@ -159,10 +173,44 @@ export default async function ZuechterProfilPage({
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          {/* Sprungnavigation (Mobile: horizontal scrollbar) */}
+          {navItems.length > 1 && (
+            <nav className="lg:hidden flex gap-2 overflow-x-auto pb-3 mb-6 -mx-4 px-4">
+              {navItems.map((item) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white border border-cream-deep text-stone-600 whitespace-nowrap hover:border-forest/30 transition-colors"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          )}
+
+          <div className={navItems.length > 1 ? 'lg:grid lg:grid-cols-[180px_1fr] lg:gap-10' : ''}>
+            {/* Sprungnavigation (Desktop: Seitenleiste) */}
+            {navItems.length > 1 && (
+              <aside className="hidden lg:block">
+                <nav className="sticky top-24 space-y-0.5">
+                  {navItems.map((item) => (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      className="block px-3 py-2 rounded-lg text-sm text-stone-500 hover:bg-white hover:text-forest transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              </aside>
+            )}
+
+            <div className="min-w-0">
           {/* Bio */}
           {breeder.bio && (
-            <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-10">
+            <div id="ueber-uns" className="bg-white rounded-2xl border border-cream-deep p-7 mb-10 scroll-mt-24">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">Über uns</h2>
               <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
                 {breeder.bio}
@@ -182,7 +230,7 @@ export default async function ZuechterProfilPage({
 
           {/* Unsere Zuchthunde — große Einzelvorstellung mit Foto + Text */}
           {featuredDogs.length > 0 && (
-            <div className="mb-10 space-y-8">
+            <div id="zuchthunde" className="mb-10 space-y-8 scroll-mt-24">
               <h2 className="font-serif text-2xl font-bold text-stone-900">
                 Unsere Zuchthunde
               </h2>
@@ -229,7 +277,7 @@ export default async function ZuechterProfilPage({
 
           {/* Aktuelles — kleine Vorschau */}
           {latestPosts.length > 0 && (
-            <div className="mb-10">
+            <div id="aktuelles" className="mb-10 scroll-mt-24">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-serif text-2xl font-bold text-stone-900">Aktuelles</h2>
                 <Link href={`/zuechter/${params.slug}/aktuelles`} className="text-sm text-forest font-semibold hover:underline">
@@ -260,7 +308,7 @@ export default async function ZuechterProfilPage({
 
           {/* Kontakt — Telefon/Adresse nur wenn vom Züchter freigegeben */}
           {(breeder.showPhone && breeder.phone) || (breeder.showAddress && breeder.street) ? (
-            <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-10">
+            <div id="kontakt" className="bg-white rounded-2xl border border-cream-deep p-7 mb-10 scroll-mt-24">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">Kontakt</h2>
               <div className="space-y-2 text-sm text-stone-600">
                 {breeder.showPhone && breeder.phone && (
@@ -285,7 +333,7 @@ export default async function ZuechterProfilPage({
           ) : null}
 
           {/* Verfügbare Welpen */}
-          <div className="mb-12">
+          <div id="welpen" className="mb-12 scroll-mt-24">
             <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
               Welpen
             </h2>
@@ -324,7 +372,7 @@ export default async function ZuechterProfilPage({
 
           {/* Würfe / Zuchtplanung */}
           {breeder.litters.length > 0 && (
-            <div className="mb-12">
+            <div id="wuerfe" className="mb-12 scroll-mt-24">
               <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
                 Würfe & Planung
               </h2>
@@ -367,7 +415,7 @@ export default async function ZuechterProfilPage({
 
           {/* Erwachsene Hunde zur Abgabe */}
           {adultListings.length > 0 && (
-            <div className="mb-12">
+            <div id="erwachsene-hunde" className="mb-12 scroll-mt-24">
               <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
                 Erwachsene Hunde zur Abgabe
               </h2>
@@ -400,7 +448,7 @@ export default async function ZuechterProfilPage({
 
           {/* Zuchtrüden */}
           {breeder.dogs.length > 0 && (
-            <div className="mb-12">
+            <div id="zuchtrueden" className="mb-12 scroll-mt-24">
               <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
                 Zuchtrüden
               </h2>
@@ -444,7 +492,7 @@ export default async function ZuechterProfilPage({
 
           {/* Galerie — kleine Vorschau */}
           {galleryPreview.length > 0 && (
-            <div className="mb-10">
+            <div id="galerie" className="mb-10 scroll-mt-24">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-serif text-2xl font-bold text-stone-900">Galerie</h2>
                 <Link href={`/zuechter/${params.slug}/galerie`} className="text-sm text-forest font-semibold hover:underline">
@@ -464,6 +512,8 @@ export default async function ZuechterProfilPage({
               </div>
             </div>
           )}
+            </div>
+          </div>
 
           <div className="text-center">
             <Link href="/zuechter" className="text-sm text-forest font-semibold hover:underline">

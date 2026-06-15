@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
+import { slugify } from '@/lib/slugify'
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -135,7 +136,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Aktionen */}
-        <div className="flex flex-wrap gap-3 mb-10">
+        <div className="flex flex-wrap gap-3 mb-6">
           {canAddMore ? (
             <Link
               href="/dashboard/inserat-erstellen"
@@ -165,24 +166,45 @@ export default async function DashboardPage() {
           >
             + Zuchthund eintragen
           </Link>
-          <Link
-            href="/dashboard/theme"
-            className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-          >
-            Theme & Branding
-          </Link>
-          <Link
-            href="/dashboard/news"
-            className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-          >
-            Aktuelles
-          </Link>
-          <Link
-            href="/dashboard/galerie"
-            className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-          >
-            Galerie
-          </Link>
+        </div>
+
+        {/* Meine Züchterseite */}
+        <div className="bg-white rounded-2xl border border-cream-deep p-5 mb-10">
+          <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
+            <div>
+              <h3 className="font-serif text-base font-bold text-stone-900">Meine Züchterseite</h3>
+              <p className="text-xs text-stone-400 mt-0.5">
+                Branding, Neuigkeiten und Fotos für deine öffentliche Profilseite
+              </p>
+            </div>
+            <Link
+              href={`/zuechter/${slugify(breeder.kennelName)}`}
+              target="_blank"
+              className="text-sm text-forest font-semibold hover:underline whitespace-nowrap"
+            >
+              Seite ansehen →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/dashboard/theme"
+              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+            >
+              Theme & Branding
+            </Link>
+            <Link
+              href="/dashboard/news"
+              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+            >
+              Aktuelles
+            </Link>
+            <Link
+              href="/dashboard/galerie"
+              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+            >
+              Galerie
+            </Link>
+          </div>
         </div>
 
         {/* Würfe */}

@@ -51,8 +51,33 @@ export default async function GaleriePage({
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {images.map((img) => (
-                <div key={img.id} className="aspect-square rounded-xl overflow-hidden border border-cream-deep">
-                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                <div key={img.id}>
+                  <a
+                    href={`#foto-${img.id}`}
+                    className="aspect-square rounded-xl overflow-hidden border border-cream-deep block cursor-zoom-in hover:opacity-90 transition-opacity"
+                  >
+                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  </a>
+
+                  {/* Lightbox: per CSS :target ein-/ausgeblendet, kein JS nötig */}
+                  <div
+                    id={`foto-${img.id}`}
+                    className="hidden target:flex fixed inset-0 z-50 items-center justify-center p-4 bg-black/90"
+                  >
+                    <a href="#" className="absolute inset-0" aria-label="Schließen" />
+                    <img
+                      src={img.url}
+                      alt=""
+                      className="relative max-w-full max-h-full object-contain rounded-lg"
+                    />
+                    <a
+                      href="#"
+                      aria-label="Schließen"
+                      className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white text-2xl leading-none hover:bg-white/20 transition-colors"
+                    >
+                      ×
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
