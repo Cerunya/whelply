@@ -33,7 +33,7 @@ export default function BreederPageHeader({
   const themeColor = breeder.themeColor || undefined
   const accentColor = breeder.themeAccentColor || undefined
 
-  const navItems: { id: TabId; label: string; href: string; show: boolean }[] = [
+  const navItems = [
     { id: 'profil', label: 'Profil', href: `/zuechter/${slug}`, show: true },
     { id: 'welpen', label: 'Welpen', href: `/zuechter/${slug}/welpen`, show: true },
     { id: 'zuchthunde', label: 'Zuchthunde', href: `/zuechter/${slug}/zuchthunde`, show: tabs.zuchthunde },
