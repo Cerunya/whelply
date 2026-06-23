@@ -19,6 +19,13 @@ type Listing = {
   sex: string | null
   description: string | null
   status: string
+  hasPedigree: boolean
+  isVaccinated: boolean
+  isDewormed: boolean
+  isChipped: boolean
+  isInsured: boolean
+  birthLocation: string | null
+  chipNumber: string | null
 }
 
 export default function InseratEditForm({
@@ -46,6 +53,13 @@ export default function InseratEditForm({
     sex: listing.sex ?? '',
     description: listing.description ?? '',
     status: listing.status,
+    hasPedigree: listing.hasPedigree,
+    isVaccinated: listing.isVaccinated,
+    isDewormed: listing.isDewormed,
+    isChipped: listing.isChipped,
+    isInsured: listing.isInsured,
+    birthLocation: listing.birthLocation ?? '',
+    chipNumber: listing.chipNumber ?? '',
   })
 
   function handleChange(
@@ -72,6 +86,13 @@ export default function InseratEditForm({
         sex: form.sex || null,
         description: form.description || null,
         status: form.status,
+        hasPedigree: form.hasPedigree,
+        isVaccinated: form.isVaccinated,
+        isDewormed: form.isDewormed,
+        isChipped: form.isChipped,
+        isInsured: form.isInsured,
+        birthLocation: form.birthLocation || null,
+        chipNumber: form.chipNumber || null,
       }),
     })
 
@@ -237,6 +258,59 @@ export default function InseratEditForm({
               className={inputClass + ' resize-none'}
             />
           </div>
+
+          {/* Welpen-Zusatzinfos */}
+          {(form.type === 'puppy' || form.litterId) && (
+            <>
+              <div>
+                <label className={labelClass}>Geburtsort</label>
+                <input
+                  type="text"
+                  name="birthLocation"
+                  value={form.birthLocation}
+                  onChange={handleChange}
+                  placeholder="z.B. Beim Züchter, 12345 Musterstadt"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Chipnummer (optional)</label>
+                <input
+                  type="text"
+                  name="chipNumber"
+                  value={form.chipNumber}
+                  onChange={handleChange}
+                  placeholder="15-stellige ISO-Chipnummer"
+                  maxLength={20}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={`${labelClass} mb-3`}>Gesundheit & Dokumente</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: 'hasPedigree', label: 'Ahnentafel vorhanden' },
+                    { key: 'isVaccinated', label: 'Geimpft' },
+                    { key: 'isDewormed', label: 'Entwurmt' },
+                    { key: 'isChipped', label: 'Gechipt' },
+                    { key: 'isInsured', label: 'Versichert' },
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-3 p-3 bg-cream rounded-xl border border-cream-deep cursor-pointer hover:bg-stone-50 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={form[key as keyof typeof form] as boolean}
+                        onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
+                        className="w-4 h-4 rounded accent-forest"
+                      />
+                      <span className="text-sm text-stone-700">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           <div>
             <label className={labelClass}>Status</label>

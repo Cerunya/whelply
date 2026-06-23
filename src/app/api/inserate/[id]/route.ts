@@ -12,6 +12,13 @@ const schema = z.object({
   sex: z.enum(['male', 'female']).nullable().optional(),
   description: z.string().max(2000).nullable().optional(),
   status: z.enum(['draft', 'available', 'reserved', 'sold']),
+  hasPedigree: z.boolean().optional(),
+  isVaccinated: z.boolean().optional(),
+  isDewormed: z.boolean().optional(),
+  isChipped: z.boolean().optional(),
+  isInsured: z.boolean().optional(),
+  birthLocation: z.string().max(200).nullable().optional(),
+  chipNumber: z.string().max(30).nullable().optional(),
 })
 
 async function getBreederAndListing(userId: string, listingId: string) {
@@ -63,6 +70,13 @@ export async function PATCH(
       sex: parsed.data.sex ?? null,
       description: parsed.data.description ?? null,
       status: parsed.data.status,
+      ...(parsed.data.hasPedigree !== undefined && { hasPedigree: parsed.data.hasPedigree }),
+      ...(parsed.data.isVaccinated !== undefined && { isVaccinated: parsed.data.isVaccinated }),
+      ...(parsed.data.isDewormed !== undefined && { isDewormed: parsed.data.isDewormed }),
+      ...(parsed.data.isChipped !== undefined && { isChipped: parsed.data.isChipped }),
+      ...(parsed.data.isInsured !== undefined && { isInsured: parsed.data.isInsured }),
+      birthLocation: parsed.data.birthLocation ?? null,
+      chipNumber: parsed.data.chipNumber ?? null,
     },
   })
 
