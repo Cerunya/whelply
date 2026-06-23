@@ -39,15 +39,14 @@ export default async function ZuechterWuerfePage({
       <BreederNavbar />
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="wuerfe" />
-
         <BreederPageContent bgColor={breeder.themeBgColor}>
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
-            Würfe & Planung
+            {'Würfe & Planung'}
           </h2>
 
           {litters.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
-              <p className="text-stone-400 text-sm">Aktuell keine Würfe oder geplante Würfe.</p>
+              <p className="text-stone-400 text-sm">{'Aktuell keine Würfe oder geplante Würfe.'}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -60,60 +59,113 @@ export default async function ZuechterWuerfePage({
                 const availableFemales = available.filter((l) => l.sex === 'female').length
 
                 let statusText = ''
-                if (litter.status === 'planned') statusText = litter.expectedDate ? `Geplant · erwartet ${litter.expectedDate}` : 'Geplant'
-                else if (litter.status === 'pregnant') statusText = litter.expectedDate ? `Trächtig · erwartet ${litter.expectedDate}` : 'Trächtig'
+                if (litter.status === 'planned') {
+                  statusText = litter.expectedDate
+                    ? ('Geplant · erwartet ' + litter.expectedDate)
+                    : 'Geplant'
+                } else if (litter.status === 'pregnant') {
+                  statusText = litter.expectedDate
+                    ? ('Trächtig · erwartet ' + litter.expectedDate)
+                    : 'Trächtig'
+                }
+
+                const statusLabel =
+                  litter.status === 'available' ? 'Verfügbar'
+                  : litter.status === 'sold_out' ? 'Ausverkauft'
+                  : litter.status === 'born' ? 'Geboren'
+                  : litter.status === 'pregnant' ? 'Trächtig'
+                  : 'Geplant'
+
+                const statusClass =
+                  litter.status === 'available' ? 'bg-green-50 text-green-700'
+                  : litter.status === 'sold_out' ? 'bg-stone-200 text-stone-600'
+                  : litter.status === 'born' ? 'bg-blue-50 text-blue-700'
+                  : 'bg-stone-100 text-stone-500'
 
                 return (
                   <div
                     key={litter.id}
                     className="bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all"
                   >
-                    <Link href={`/zuechter/${params.slug}/wuerfe/${litter.id}`} className="flex items-start gap-4">
+                    <Link
+                      href={`/zuechter/${params.slug}/wuerfe/${litter.id}`}
+                      className="flex items-start gap-4"
+                    >
                       {litter.media[0]?.url ? (
                         <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0">
-                          <img src={litter.media[0].url} alt={title} className="w-full h-full object-cover" />
+                          <img
+                            src={litter.media[0].url}
+                            alt={title}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       ) : (
                         <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl bg-cream-dark flex-shrink-0 flex items-center justify-center">
-                          <svg className="w-9 h-9 sm:w-12 sm:h-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <svg
+                            className="w-9 h-9 sm:w-12 sm:h-12 text-stone-300"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
                           </svg>
                         </div>
                       )}
+
                       <div className="flex-1 min-w-0">
-                        <p className="font-serif font-bold text-stone-900 text-lg sm:text-xl leading-snug">{title}</p>
+                        <p className="font-serif font-bold text-stone-900 text-lg sm:text-xl leading-snug">
+                          {title}
+                        </p>
                         {litter.name && (
                           <p className="text-xs sm:text-sm text-stone-400">{litter.breed.nameDe}</p>
                         )}
                         {litter.bornDate ? (
                           <p className="text-sm sm:text-base text-stone-500 mt-1 sm:mt-1.5">
-                            Geboren am {litter.bornDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
-                            {litter.listings.length > 0 && ` · ${totalMales} Rüden, ${totalFemales} Hündinnen`}
+                            {'Geboren am '}
+                            {litter.bornDate.toLocaleDateString('de-DE', {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                            {litter.listings.length > 0 &&
+                              (` · ${totalMales} ` + 'Rüden, ' + `${totalFemales} Hündinnen`)}
                           </p>
                         ) : (
-                          <p className="text-sm sm:text-base text-stone-500 mt-1 sm:mt-1.5">{statusText}</p>
+                          <p className="text-sm sm:text-base text-stone-500 mt-1 sm:mt-1.5">
+                            {statusText}
+                          </p>
                         )}
                         {litter.status === 'available' && (availableMales > 0 || availableFemales > 0) && (
                           <p className="text-sm sm:text-base text-green-700 font-medium mt-1 sm:mt-1.5">
-                            Verfügbar: {availableMales} Rüden · {availableFemales} Hündinnen
-                            {litter.handoverDate && ` · ab ${litter.handoverDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}`}
+                            {'Verfügbar: '}
+                            {availableMales}
+                            {' Rüden · '}
+                            {availableFemales}
+                            {' Hündinnen'}
+                            {litter.handoverDate &&
+                              (' · ab ' + litter.handoverDate.toLocaleDateString('de-DE', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric',
+                              }))}
                           </p>
                         )}
                       </div>
-                      <span className={`text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full whitespace-nowrap flex-shrink-0 ${
-                        litter.status === 'available' ? 'bg-green-50 text-green-700'
-                        : litter.status === 'sold_out' ? 'bg-stone-200 text-stone-600'
-                        : litter.status === 'born' ? 'bg-blue-50 text-blue-700'
-                        : 'bg-stone-100 text-stone-500'
-                      }`}>
-                        {litter.status === 'available' ? 'Verfügbar'
-                          : litter.status === 'sold_out' ? 'Ausverkauft'
-                          : litter.status === 'born' ? 'Geboren'
-                          : litter.status === 'pregnant' ? 'Trächtig'
-                          : 'Geplant'}
+
+                      <span className={`text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full whitespace-nowrap flex-shrink-0 ${statusClass}`}>
+                        {statusLabel}
                       </span>
-                    </Link>
                     </Link>
 
                     {(litter.dam || litter.sire || litter.sireExternal) && (
@@ -123,11 +175,11 @@ export default async function ZuechterWuerfePage({
                             href={`/hund/${litter.sire.id}`}
                             className="text-sm bg-cream border border-cream-deep rounded-full px-3.5 py-1.5 text-stone-600 hover:border-forest/30 hover:text-forest transition-colors"
                           >
-                            Vater: {litter.sire.name}
+                            {'Vater: ' + litter.sire.name}
                           </Link>
                         ) : litter.sireExternal ? (
                           <span className="text-sm bg-cream border border-cream-deep rounded-full px-3.5 py-1.5 text-stone-600">
-                            Vater: {litter.sireExternal}
+                            {'Vater: ' + litter.sireExternal}
                           </span>
                         ) : null}
                         {litter.dam && (
@@ -135,7 +187,7 @@ export default async function ZuechterWuerfePage({
                             href={`/hund/${litter.dam.id}`}
                             className="text-sm bg-cream border border-cream-deep rounded-full px-3.5 py-1.5 text-stone-600 hover:border-forest/30 hover:text-forest transition-colors"
                           >
-                            Mutter: {litter.dam.name}
+                            {'Mutter: ' + litter.dam.name}
                           </Link>
                         )}
                       </div>
