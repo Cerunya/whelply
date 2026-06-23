@@ -19,6 +19,7 @@ type Litter = {
   expectedDate: string | null
   bornDate: string | null
   puppyCount: number | null
+  handoverDate: string | null
   status: string
   notes: string | null
   imageUrl: string | null
@@ -75,6 +76,7 @@ export default function LitterDashboard({
     expectedDate: litter.expectedDate ?? '',
     bornDate: litter.bornDate ?? '',
     puppyCount: litter.puppyCount ? String(litter.puppyCount) : '',
+    handoverDate: litter.handoverDate ?? '',
     notes: litter.notes ?? '',
   })
   const [savingDetails, setSavingDetails] = useState(false)
@@ -122,6 +124,7 @@ export default function LitterDashboard({
         expectedDate: details.expectedDate || null,
         bornDate: details.bornDate || null,
         puppyCount: details.puppyCount ? Number(details.puppyCount) : null,
+        handoverDate: details.handoverDate || null,
         notes: details.notes || null,
       }),
     })
@@ -300,19 +303,38 @@ export default function LitterDashboard({
             </div>
           )}
 
-          <div>
-            <label className={labelClass}>Anzahl Welpen (geplant)</label>
-            <input
-              type="number"
-              name="puppyCount"
-              value={details.puppyCount}
-              onChange={handleDetailsChange}
-              min="1"
-              max="20"
-              placeholder="z.B. 6"
-              className={inputClass}
-            />
-          </div>
+          {(selectedStatus === 'planned' || selectedStatus === 'pregnant') && (
+            <div>
+              <label className={labelClass}>Anzahl Welpen (geplant)</label>
+              <input
+                type="number"
+                name="puppyCount"
+                value={details.puppyCount}
+                onChange={handleDetailsChange}
+                min="1"
+                max="20"
+                placeholder="z.B. 6"
+                className={inputClass}
+              />
+            </div>
+          )}
+
+          {(selectedStatus === 'born' || selectedStatus === 'available' || selectedStatus === 'sold_out') && (
+            <div>
+              <label className={labelClass}>Abgabedatum</label>
+              <input
+                type="date"
+                name="handoverDate"
+                value={details.handoverDate}
+                onChange={handleDetailsChange}
+                className={inputClass}
+              />
+              <p className="text-xs text-stone-400 mt-1">
+                Ab wann können die Welpen zu ihren neuen Familien? Wird auf den Welpen-Inseraten
+                und der Wurf-Seite angezeigt.
+              </p>
+            </div>
+          )}
 
           <div>
             <label className={labelClass}>Notizen</label>

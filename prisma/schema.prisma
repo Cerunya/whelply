@@ -253,6 +253,7 @@ model Litter {
   expectedDate String?    @map("expected_date") // Freitext, z.B. "Ende Mai 2026"
   bornDate     DateTime?    @map("born_date") @db.Date
   puppyCount   Int?         @map("puppy_count")
+  handoverDate DateTime?    @map("handover_date") @db.Date // Abgabe-/Abholdatum der Welpen
   status       LitterStatus @default(planned)
   notes        String?      @db.Text
   createdAt    DateTime     @default(now()) @map("created_at")

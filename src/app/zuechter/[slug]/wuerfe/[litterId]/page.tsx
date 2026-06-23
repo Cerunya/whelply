@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
+import BreederPageContent from '@/components/BreederPageContent'
 import ListingCard from '@/components/ListingCard'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 
@@ -61,7 +62,7 @@ export default async function LitterDetailPage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="wuerfe" />
 
-        <div className="max-w-5xl mx-auto px-4 py-12">
+        <BreederPageContent>
           <Link href={`/zuechter/${params.slug}/wuerfe`} className="text-sm text-forest font-semibold hover:underline">
             ← Würfe & Planung
           </Link>
@@ -88,6 +89,14 @@ export default async function LitterDetailPage({
                   {statusBadge.label}
                 </span>
               </div>
+              {litter.handoverDate && (
+                <p className="text-stone-500 text-sm mt-1 flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Abgabebereit ab {litter.handoverDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </p>
+              )}
               {litter.notes && (
                 <p className="text-stone-600 text-sm mt-3 whitespace-pre-line">{litter.notes}</p>
               )}
@@ -201,7 +210,7 @@ export default async function LitterDetailPage({
               </div>
             </div>
           )}
-        </div>
+        </BreederPageContent>
       </main>
       <Footer />
     </>

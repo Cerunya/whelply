@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
+import BreederPageContent from '@/components/BreederPageContent'
 import ListingCard from '@/components/ListingCard'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 
@@ -35,7 +36,7 @@ export default async function ZuechterErwachseneHundePage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="hunde" />
 
-        <div className="max-w-5xl mx-auto px-4 py-12">
+        <BreederPageContent>
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
             Hunde zu vergeben
           </h2>
@@ -70,7 +71,7 @@ export default async function ZuechterErwachseneHundePage({
               ))}
             </div>
           )}
-        </div>
+        </BreederPageContent>
       </main>
       <Footer />
     </>

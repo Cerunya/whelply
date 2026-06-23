@@ -46,8 +46,9 @@ export default async function WelpenDetailPage({
     : null
   const isOwner = !!viewerBreeder && viewerBreeder.id === listing.breederId
 
-  // Nicht-aktive Inserate (Entwurf, reserviert, verkauft) sind nur für den Eigentümer sichtbar
-  if (listing.status !== 'available' && !isOwner) {
+  // Entwürfe sind nur für den Eigentümer sichtbar. Reservierte/verkaufte Inserate
+  // bleiben (vorerst) für alle sichtbar — Dauer kann später noch festgelegt werden.
+  if (listing.status === 'draft' && !isOwner) {
     notFound()
   }
 
@@ -147,6 +148,13 @@ export default async function WelpenDetailPage({
               <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
                 {listing.title || listing.breeder.kennelName}
               </h1>
+              {listing.status !== 'available' && listing.status !== 'draft' && (
+                <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full mb-2 ${
+                  listing.status === 'reserved' ? 'bg-amber-100 text-amber-800' : 'bg-stone-200 text-stone-600'
+                }`}>
+                  {listing.status === 'reserved' ? 'Reserviert' : 'Verkauft'}
+                </span>
+              )}
               {listing.title && (
                 <p className="text-sm text-stone-400 mb-1">{listing.breeder.kennelName}</p>
               )}
@@ -174,6 +182,14 @@ export default async function WelpenDetailPage({
                     <span className="text-stone-400">Geboren am</span>
                     <span className="font-medium text-stone-800">
                       {birthDate.toLocaleDateString('de-DE')}{ageText && ` (${ageText})`}
+                    </span>
+                  </div>
+                )}
+                {listing.litter?.handoverDate && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Abgabebereit ab</span>
+                    <span className="font-medium text-stone-800">
+                      {listing.litter.handoverDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </span>
                   </div>
                 )}

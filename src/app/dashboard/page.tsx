@@ -297,41 +297,111 @@ export default async function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-cream-deep bg-cream">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Rasse</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide hidden md:table-cell">Preis</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Status</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide hidden md:table-cell">Aufrufe</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Boost</th>
-                  <th className="px-6 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-cream-deep">
+            <>
+              {/* Desktop: Tabelle */}
+              <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-cream-deep bg-cream">
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Rasse</th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Preis</th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Status</th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Aufrufe</th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Boost</th>
+                    <th className="px-6 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-cream-deep">
+                  {breeder.listings.map((listing) => {
+                    const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date()
+                    return (
+                      <tr key={listing.id} className="hover:bg-cream/50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-stone-800">
+                          <Link
+                            href={`/welpen/${listing.id}`}
+                            target="_blank"
+                            className="hover:text-forest transition-colors"
+                          >
+                            {listing.title || listing.breed.nameDe}
+                          </Link>
+                          {listing.title && (
+                            <span className="text-stone-400 font-normal"> · {listing.breed.nameDe}</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-stone-500">
+                          {listing.priceCents
+                            ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
+                            : '—'}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            listing.status === 'available' ? 'bg-green-50 text-green-700'
+                            : listing.status === 'reserved' ? 'bg-amber-50 text-amber-700'
+                            : listing.status === 'sold' ? 'bg-stone-200 text-stone-600'
+                            : 'bg-stone-100 text-stone-500'
+                          }`}>
+                            {listing.status === 'available' ? 'Aktiv'
+                              : listing.status === 'reserved' ? 'Reserviert'
+                              : listing.status === 'sold' ? 'Verkauft'
+                              : 'Entwurf'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-stone-500">
+                          <span className="inline-flex items-center gap-1.5">
+                            <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            {listing.viewCount}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {isBoosted ? (
+                            <span className="text-xs text-honey font-semibold">★ Aktiv</span>
+                          ) : (
+                            <Link
+                              href={`/dashboard/boost/${listing.id}`}
+                              className="text-xs text-stone-400 hover:text-honey transition-colors font-medium"
+                            >
+                              1 € buchen
+                            </Link>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <Link
+                            href={`/dashboard/inserat/${listing.id}`}
+                            className="text-xs text-stone-400 hover:text-forest transition-colors"
+                          >
+                            Bearbeiten
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              </div>
+
+              {/* Mobile: Karten */}
+              <div className="md:hidden divide-y divide-cream-deep">
                 {breeder.listings.map((listing) => {
                   const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date()
                   return (
-                    <tr key={listing.id} className="hover:bg-cream/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-stone-800">
-                        <Link
-                          href={`/welpen/${listing.id}`}
-                          target="_blank"
-                          className="hover:text-forest transition-colors"
-                        >
-                          {listing.title || listing.breed.nameDe}
-                        </Link>
-                        {listing.title && (
-                          <span className="text-stone-400 font-normal"> · {listing.breed.nameDe}</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-stone-500 hidden md:table-cell">
-                        {listing.priceCents
-                          ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
-                          : '—'}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
+                    <div key={listing.id} className="p-4">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0">
+                          <Link
+                            href={`/welpen/${listing.id}`}
+                            target="_blank"
+                            className="font-medium text-stone-800 hover:text-forest transition-colors block"
+                          >
+                            {listing.title || listing.breed.nameDe}
+                          </Link>
+                          {listing.title && (
+                            <p className="text-xs text-stone-400">{listing.breed.nameDe}</p>
+                          )}
+                        </div>
+                        <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
                           listing.status === 'available' ? 'bg-green-50 text-green-700'
                           : listing.status === 'reserved' ? 'bg-amber-50 text-amber-700'
                           : listing.status === 'sold' ? 'bg-stone-200 text-stone-600'
@@ -342,41 +412,39 @@ export default async function DashboardPage() {
                             : listing.status === 'sold' ? 'Verkauft'
                             : 'Entwurf'}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 text-stone-500 hidden md:table-cell">
-                        <span className="inline-flex items-center gap-1.5">
-                          <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-stone-500 mb-3">
+                        <span>
+                          {listing.priceCents
+                            ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
+                            : 'Preis auf Anfrage'}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                           {listing.viewCount}
                         </span>
-                      </td>
-                      <td className="px-6 py-4">
                         {isBoosted ? (
-                          <span className="text-xs text-honey font-semibold">★ Aktiv</span>
+                          <span className="text-honey font-semibold">★ Boost aktiv</span>
                         ) : (
-                          <Link
-                            href={`/dashboard/boost/${listing.id}`}
-                            className="text-xs text-stone-400 hover:text-honey transition-colors font-medium"
-                          >
-                            1 € buchen
+                          <Link href={`/dashboard/boost/${listing.id}`} className="text-stone-400 hover:text-honey transition-colors font-medium">
+                            Boost: 1 € buchen
                           </Link>
                         )}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <Link
-                          href={`/dashboard/inserat/${listing.id}`}
-                          className="text-xs text-stone-400 hover:text-forest transition-colors"
-                        >
-                          Bearbeiten
-                        </Link>
-                      </td>
-                    </tr>
+                      </div>
+                      <Link
+                        href={`/dashboard/inserat/${listing.id}`}
+                        className="block text-center bg-cream border border-cream-deep rounded-lg py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
+                      >
+                        Bearbeiten
+                      </Link>
+                    </div>
                   )
                 })}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       </main>

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
+import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import { renderRichText } from '@/lib/richtext'
 
@@ -27,7 +28,7 @@ export default async function ZuechterProfilPage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="profil" />
 
-        <div className="max-w-5xl mx-auto px-4 py-12">
+        <BreederPageContent>
           {/* Bio */}
           {breeder.bio && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
@@ -87,7 +88,7 @@ export default async function ZuechterProfilPage({
               ← Alle Züchter durchsuchen
             </Link>
           </div>
-        </div>
+        </BreederPageContent>
       </main>
       <Footer />
     </>

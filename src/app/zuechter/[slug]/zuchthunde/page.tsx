@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
+import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 
 export const dynamic = 'force-dynamic'
@@ -43,7 +44,7 @@ export default async function ZuechterZuchthundePage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="zuchthunde" />
 
-        <div className="max-w-5xl mx-auto px-4 py-12">
+        <BreederPageContent>
           {featuredDogs.length === 0 && studDogs.length === 0 && (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400 text-sm">Noch keine Zuchthunde vorgestellt.</p>
@@ -145,7 +146,7 @@ export default async function ZuechterZuchthundePage({
               </div>
             </div>
           )}
-        </div>
+        </BreederPageContent>
       </main>
       <Footer />
     </>

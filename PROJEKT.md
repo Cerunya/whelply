@@ -330,6 +330,33 @@ umständlich für Züchter mit vielen Tests).
   als klickbare Badges (→ `/hund/[id]`, externer Deckrüde als reiner Text) unterhalb
   der Karte (separat verlinkt, um verschachtelte `<a>`-Tags zu vermeiden).
 
+### ✅ Iteration 3 (2026-06-15) — FERTIG
+Migration `20260615030000_litter_handover_date`: `litters.handover_date DATE`.
+- **Reservierte/verkaufte Inserate bleiben öffentlich sichtbar**: `/welpen/[id]`
+  blockiert für Nicht-Eigentümer jetzt nur noch `status === 'draft'` (vorher auch
+  `reserved`/`sold`). Sichtbarer Status-Badge ("Reserviert"/"Verkauft") für Besucher.
+  Spätere Aufgabe: zeitliche Begrenzung (~180 Tage) evaluieren.
+- **Mobile "Meine Inserate"**: Tabelle (`hidden md:block`) bleibt für Desktop, neue
+  Karten-Ansicht (`md:hidden`) zeigt Titel/Rasse, Status, Preis/Aufrufe/Boost und einen
+  vollbreiten "Bearbeiten"-Button — vorher fiel der Button auf Mobilgeräten aus dem
+  sichtbaren Bereich.
+- **Welpenkarten-Einfärbung intensiver**: `ListingCard` `tint`-Prop jetzt
+  `border-blue-300 bg-blue-100` (Rüde) / `border-pink-300 bg-pink-100` (Hündin) statt
+  der vorherigen sehr dezenten `/60`-Opacity-Variante.
+- **Würfe-Übersicht nochmal größer**: Bild `w-28 h-28`, Titel `text-xl`, Status-Badge
+  und Eltern-Badges `text-sm`.
+- **Abgabedatum statt "Anzahl Welpen (geplant)"**: `Litter.handoverDate`. In
+  "Wurf-Details" (`LitterDashboard.tsx`) wird "Anzahl Welpen (geplant)" nur noch bei
+  Status `planned`/`pregnant` angezeigt; bei `born`/`available`/`sold_out` erscheint
+  stattdessen "Abgabedatum". Anzeige: `/welpen/[id]` ("Abgabebereit ab"),
+  `/zuechter/[slug]/wuerfe` (in der "Verfügbar"-Zeile) und
+  `/zuechter/[slug]/wuerfe/[litterId]` (im Kopfbereich).
+- **Hintergrundbild prominenter + Lesbarkeit**: Overlay in `BreederPageHeader.tsx`
+  von `bg-cream/85` auf `bg-cream/45` reduziert (Bild deutlich sichtbarer). Neue
+  `src/components/BreederPageContent.tsx` — `bg-white/80 backdrop-blur-sm`-Panel,
+  das den Seiteninhalt umschließt und so trotz sichtbarem Hintergrundbild lesbar
+  bleibt. Auf allen 7 Unterseiten der Züchterseite eingebunden.
+
 
 - **GROSS — Subdomain-Routing Phase 2 (später):**
   - Wildcard-DNS (`*.whelply.de`) + Wildcard-TLS-Zertifikat (DNS-01-Challenge, braucht

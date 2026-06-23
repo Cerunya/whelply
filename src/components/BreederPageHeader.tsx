@@ -50,7 +50,7 @@ export default function BreederPageHeader({
             className="fixed inset-0 -z-20"
             style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
           />
-          <div className="fixed inset-0 -z-10 bg-cream/85" />
+          <div className="fixed inset-0 -z-10 bg-cream/45" />
         </>
       ) : (
         <div className="fixed inset-0 -z-10 bg-cream" />

@@ -23,11 +23,11 @@ export default function ListingCard({
 
   let cardClasses = 'rounded-2xl border overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 '
   if (tint === 'sold') {
-    cardClasses += 'border-stone-200 bg-stone-100 opacity-60'
+    cardClasses += 'border-stone-300 bg-stone-100 opacity-60'
   } else if (tint === 'male') {
-    cardClasses += 'border-blue-200 bg-blue-50/60'
+    cardClasses += 'border-blue-300 bg-blue-100'
   } else if (tint === 'female') {
-    cardClasses += 'border-pink-200 bg-pink-50/60'
+    cardClasses += 'border-pink-300 bg-pink-100'
   } else if (isBoosted) {
     cardClasses += 'border-honey bg-white ring-1 ring-honey/30'
   } else {

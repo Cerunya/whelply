@@ -65,6 +65,7 @@ export default async function WurfDetailPage({
         expectedDate: litter.expectedDate,
         bornDate: litter.bornDate?.toISOString().slice(0, 10) ?? null,
         puppyCount: litter.puppyCount,
+        handoverDate: litter.handoverDate?.toISOString().slice(0, 10) ?? null,
         status: litter.status,
         notes: litter.notes,
         imageUrl: litter.media[0]?.url ?? null,

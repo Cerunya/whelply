@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
+import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 
 export const dynamic = 'force-dynamic'
@@ -29,7 +30,7 @@ export default async function AktuellesPage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="aktuelles" />
 
-        <div className="max-w-3xl mx-auto px-4 py-12">
+        <BreederPageContent>
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Aktuelles</h2>
 
           {posts.length === 0 ? (
@@ -54,7 +55,7 @@ export default async function AktuellesPage({
               ))}
             </div>
           )}
-        </div>
+        </BreederPageContent>
       </main>
       <Footer />
     </>
