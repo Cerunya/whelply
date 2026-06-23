@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
+import BreederNavbar from '@/components/BreederNavbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
@@ -24,11 +24,11 @@ export default async function ZuechterProfilPage({
 
   return (
     <>
-      <Navbar />
+      <BreederNavbar />
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="profil" />
 
-        <BreederPageContent>
+        <BreederPageContent bgColor={breeder.themeBgColor}>
           {/* Bio */}
           {breeder.bio && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">

@@ -169,6 +169,10 @@ model BreederProfile {
   subdomain         String?           @unique // lowercase, a-z0-9-, validiert beim Speichern
   themeColor        String?           @map("theme_color")        // Primärfarbe, Hex z.B. "#2d5a3d"
   themeAccentColor  String?           @map("theme_accent_color") // Akzentfarbe, Hex
+  themeBgColor      String?           @map("theme_bg_color")     // Hintergrundfarbe der Content-Panels
+  themeNavColor     String?           @map("theme_nav_color")    // Farbe der Tab-Navigation
+  themeFont         String?           @map("theme_font")         // Google Fonts Familienname, z.B. "Playfair Display"
+  themeAlign        String?           @map("theme_align")        // "left" | "center" | "right"
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
 
@@ -292,6 +296,14 @@ model Listing {
   description    String?       @db.Text
   priceCents     Int?          @map("price_cents")  // NULL = Preis auf Anfrage
   sex            Sex?          // für Welpen-Inserate
+  // Welpen-Zusatzinfos (Screenshot-Felder)
+  hasPedigree    Boolean       @default(false) @map("has_pedigree")   // Ahnentafel vorhanden
+  isVaccinated   Boolean       @default(false) @map("is_vaccinated")  // geimpft
+  isDewormed     Boolean       @default(false) @map("is_dewormed")    // entwurmt
+  isChipped      Boolean       @default(false) @map("is_chipped")     // gechippt
+  isInsured      Boolean       @default(false) @map("is_insured")     // versichert
+  birthLocation  String?       @map("birth_location")  // z.B. "A l'élevage" → "Beim Züchter"
+  chipNumber     String?       @map("chip_number")
   status         ListingStatus @default(draft)
   // Boost: NULL oder Timestamp in der Zukunft = geboostet
   // Geschäftsregel: boost_expires_at > NOW() → oben anzeigen

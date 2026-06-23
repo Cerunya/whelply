@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
+import BreederNavbar from '@/components/BreederNavbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
@@ -40,11 +40,11 @@ export default async function ZuechterZuchthundePage({
 
   return (
     <>
-      <Navbar />
+      <BreederNavbar />
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="zuchthunde" />
 
-        <BreederPageContent>
+        <BreederPageContent bgColor={breeder.themeBgColor}>
           {featuredDogs.length === 0 && studDogs.length === 0 && (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400 text-sm">Noch keine Zuchthunde vorgestellt.</p>

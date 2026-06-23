@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import Navbar from '@/components/Navbar'
+import BreederNavbar from '@/components/BreederNavbar'
 import Footer from '@/components/Footer'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
@@ -26,11 +26,11 @@ export default async function GaleriePage({
 
   return (
     <>
-      <Navbar />
+      <BreederNavbar />
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="galerie" />
 
-        <BreederPageContent>
+        <BreederPageContent bgColor={breeder.themeBgColor}>
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Galerie</h2>
 
           {images.length === 0 ? (

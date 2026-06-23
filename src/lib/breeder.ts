@@ -17,6 +17,10 @@ export async function getBreederBySlug(slug: string) {
         where: { purpose: { in: ['header', 'background'] } },
         select: { url: true, purpose: true },
       },
+      dogs: {
+        select: { breed: { select: { nameDe: true } } },
+        distinct: ['breedId'],
+      },
     },
   })
 

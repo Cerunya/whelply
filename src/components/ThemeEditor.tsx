@@ -9,6 +9,10 @@ type BreederTheme = {
   subdomain: string | null
   themeColor: string | null
   themeAccentColor: string | null
+  themeBgColor: string | null
+  themeNavColor: string | null
+  themeFont: string | null
+  themeAlign: string | null
   kennelName: string
   headerImageUrl: string | null
   backgroundImageUrl: string | null
@@ -22,6 +26,8 @@ const COLOR_PRESETS = [
   { label: 'Bordeaux', value: '#7a2233' },
   { label: 'Taubenblau', value: '#4a6b7c' },
   { label: 'Senfgelb', value: '#c08a1e' },
+  { label: 'Anthrazit', value: '#2c2c2c' },
+  { label: 'Lavendel', value: '#5b5ea6' },
 ]
 
 const ACCENT_PRESETS = [
@@ -31,6 +37,30 @@ const ACCENT_PRESETS = [
   { label: 'Gold', value: '#d4af37' },
   { label: 'Himmelblau', value: '#7fb3d5' },
   { label: 'Rosé', value: '#d99aa6' },
+  { label: 'Mintgrün', value: '#6dbf9e' },
+  { label: 'Kupfer', value: '#b87333' },
+]
+
+const BG_PRESETS = [
+  { label: 'Creme (Standard)', value: '#FAF8F4' },
+  { label: 'Weiß', value: '#FFFFFF' },
+  { label: 'Hellgrau', value: '#F3F4F6' },
+  { label: 'Warmbeige', value: '#F5F0E8' },
+  { label: 'Salbei', value: '#EFF4EF' },
+  { label: 'Lavendel hell', value: '#F3F2F8' },
+]
+
+const FONT_OPTIONS = [
+  { label: 'Georgia (Standard)', value: '' },
+  { label: 'Playfair Display', value: 'Playfair Display' },
+  { label: 'Cormorant Garamond', value: 'Cormorant Garamond' },
+  { label: 'Josefin Sans', value: 'Josefin Sans' },
+  { label: 'Raleway', value: 'Raleway' },
+  { label: 'Montserrat', value: 'Montserrat' },
+  { label: 'Lora', value: 'Lora' },
+  { label: 'Cinzel', value: 'Cinzel' },
+  { label: 'Dancing Script', value: 'Dancing Script' },
+  { label: 'Great Vibes', value: 'Great Vibes' },
 ]
 
 const HEX_REGEX = /^#[0-9a-fA-F]{6}$/
@@ -43,6 +73,10 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
 
   const [themeColor, setThemeColor] = useState(breeder.themeColor ?? '#2d5a3d')
   const [themeAccentColor, setThemeAccentColor] = useState(breeder.themeAccentColor ?? '#e0a72e')
+  const [themeBgColor, setThemeBgColor] = useState(breeder.themeBgColor ?? '#FAF8F4')
+  const [themeNavColor, setThemeNavColor] = useState(breeder.themeNavColor ?? '')
+  const [themeFont, setThemeFont] = useState(breeder.themeFont ?? '')
+  const [themeAlign, setThemeAlign] = useState(breeder.themeAlign ?? 'left')
 
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -93,7 +127,10 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
       setError(subdomainError || 'Bitte korrigiere die Subdomain.')
       return
     }
-    if (!HEX_REGEX.test(themeColor) || !HEX_REGEX.test(themeAccentColor)) {
+    const colorsToCheck = [themeColor, themeAccentColor]
+    if (themeBgColor) colorsToCheck.push(themeBgColor)
+    if (themeNavColor) colorsToCheck.push(themeNavColor)
+    if (colorsToCheck.some((c) => !HEX_REGEX.test(c))) {
       setError('Bitte gültige Hex-Farbwerte verwenden (z.B. #2d5a3d).')
       return
     }
@@ -106,6 +143,10 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
         subdomain: subdomain.trim().toLowerCase(),
         themeColor,
         themeAccentColor,
+        themeBgColor: themeBgColor || null,
+        themeNavColor: themeNavColor || null,
+        themeFont: themeFont || null,
+        themeAlign: themeAlign || null,
       }),
     })
 
@@ -127,11 +168,15 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
 
     setThemeColor('#2d5a3d')
     setThemeAccentColor('#e0a72e')
+    setThemeBgColor('#FAF8F4')
+    setThemeNavColor('')
+    setThemeFont('')
+    setThemeAlign('left')
 
     const res = await fetch('/api/profil', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ themeColor: '', themeAccentColor: '' }),
+      body: JSON.stringify({ themeColor: '', themeAccentColor: '', themeBgColor: null, themeNavColor: null, themeFont: null, themeAlign: null }),
     })
 
     if (res.ok) {
@@ -276,6 +321,140 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Schriftart */}
+      <div className="bg-white rounded-2xl border border-cream-deep p-6">
+        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Schriftart (Züchtername)</h2>
+        <p className="text-sm text-stone-400 mb-4">
+          Wähle eine Schriftart für den großen Züchternamen im Hero-Bereich deiner Seite.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+          {FONT_OPTIONS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setThemeFont(f.value)}
+              className={`px-3 py-2 rounded-xl text-sm border-2 transition-colors text-left ${
+                themeFont === f.value ? 'border-forest bg-cream' : 'border-stone-200 hover:border-stone-300'
+              }`}
+              style={{ fontFamily: f.value ? `'${f.value}', serif` : 'Georgia, serif' }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={themeFont}
+            onChange={(e) => setThemeFont(e.target.value)}
+            placeholder="Eigener Google-Font-Name, z.B. Cinzel"
+            className={inputClass}
+          />
+        </div>
+        {themeFont && (
+          <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(themeFont)}:wght@400;700&display=swap`} />
+        )}
+        {themeFont && (
+          <p className="mt-3 text-2xl font-bold text-stone-700" style={{ fontFamily: `'${themeFont}', serif` }}>
+            {breeder.kennelName} ← Vorschau
+          </p>
+        )}
+      </div>
+
+      {/* Ausrichtung */}
+      <div className="bg-white rounded-2xl border border-cream-deep p-6">
+        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Textausrichtung (Header)</h2>
+        <p className="text-sm text-stone-400 mb-4">
+          Wie sollen Züchtername und Infos im Hero-Bereich angeordnet sein?
+        </p>
+        <div className="flex gap-3">
+          {[
+            { value: 'left', label: 'Links' },
+            { value: 'center', label: 'Mitte' },
+            { value: 'right', label: 'Rechts' },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setThemeAlign(opt.value)}
+              className={`flex-1 py-3 rounded-xl text-sm font-semibold border-2 transition-colors ${
+                themeAlign === opt.value ? 'border-forest bg-cream text-forest' : 'border-stone-200 text-stone-500 hover:border-stone-300'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Hintergrundfarbe der Content-Panels */}
+      <div className="bg-white rounded-2xl border border-cream-deep p-6">
+        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Hintergrundfarbe (Inhaltsbereich)</h2>
+        <p className="text-sm text-stone-400 mb-4">
+          Farbe der halbtransparenten Inhalts-Panels deiner Seite — besonders sichtbar, wenn du ein Hintergrundbild verwendest.
+        </p>
+        <div className="flex flex-wrap gap-2 mb-3">
+          {BG_PRESETS.map((preset) => (
+            <button
+              key={preset.value}
+              type="button"
+              onClick={() => setThemeBgColor(preset.value)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs border-2 transition-colors ${
+                themeBgColor === preset.value ? 'border-forest' : 'border-stone-200'
+              }`}
+            >
+              <span className="w-4 h-4 rounded-full border border-stone-300 inline-block" style={{ backgroundColor: preset.value }} />
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={themeBgColor || '#FAF8F4'}
+            onChange={(e) => setThemeBgColor(e.target.value)}
+            className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer"
+          />
+          <input
+            type="text"
+            value={themeBgColor}
+            onChange={(e) => setThemeBgColor(e.target.value)}
+            placeholder="#FAF8F4"
+            className={inputClass + ' flex-1'}
+            maxLength={7}
+          />
+        </div>
+      </div>
+
+      {/* Navigationsfarbe */}
+      <div className="bg-white rounded-2xl border border-cream-deep p-6">
+        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Tab-Navigationsfarbe</h2>
+        <p className="text-sm text-stone-400 mb-4">
+          Hintergrundfarbe der Tab-Leiste unter dem Header. Leer lassen für weißen Hintergrund.
+        </p>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={themeNavColor || themeColor || '#2d5a3d'}
+            onChange={(e) => setThemeNavColor(e.target.value)}
+            className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer"
+          />
+          <input
+            type="text"
+            value={themeNavColor}
+            onChange={(e) => setThemeNavColor(e.target.value)}
+            placeholder="Leer = weiß (standard)"
+            className={inputClass + ' flex-1'}
+            maxLength={7}
+          />
+          {themeNavColor && (
+            <button type="button" onClick={() => setThemeNavColor('')} className="text-xs text-stone-400 hover:text-stone-700 whitespace-nowrap">
+              Zurücksetzen
+            </button>
+          )}
         </div>
       </div>
 

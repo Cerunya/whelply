@@ -22,6 +22,10 @@ const schema = z.object({
   subdomain: z.string().max(30).optional(),
   themeColor: z.string().regex(HEX_COLOR).or(z.literal('')).optional(),
   themeAccentColor: z.string().regex(HEX_COLOR).or(z.literal('')).optional(),
+  themeBgColor: z.string().regex(HEX_COLOR).or(z.literal('')).nullable().optional(),
+  themeNavColor: z.string().regex(HEX_COLOR).or(z.literal('')).nullable().optional(),
+  themeFont: z.string().max(80).nullable().optional(),
+  themeAlign: z.enum(['left', 'center', 'right']).nullable().optional(),
 })
 
 export async function PATCH(req: NextRequest) {

@@ -10,7 +10,12 @@ type BreederHeaderData = {
   verificationLevel: string
   themeColor: string | null
   themeAccentColor: string | null
+  themeBgColor: string | null
+  themeNavColor: string | null
+  themeFont: string | null
+  themeAlign: string | null
   media: { url: string; purpose: string | null }[]
+  dogs?: { breed: { nameDe: string } }[]
 }
 
 type TabId = 'profil' | 'zuchthunde' | 'wuerfe' | 'hunde' | 'aktuelles' | 'galerie'
@@ -27,11 +32,19 @@ export default function BreederPageHeader({
   active: TabId
 }) {
   const displayName = breeder.displayName || breeder.kennelName
-  const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
   const headerImage = breeder.media.find((m) => m.purpose === 'header')?.url
   const backgroundImage = breeder.media.find((m) => m.purpose === 'background')?.url
-  const themeColor = breeder.themeColor || undefined
-  const accentColor = breeder.themeAccentColor || undefined
+  const themeColor = breeder.themeColor || null
+  const accentColor = breeder.themeAccentColor || null
+  const navColor = breeder.themeNavColor || themeColor
+  const font = breeder.themeFont || null
+  const align = (breeder.themeAlign as 'left' | 'center' | 'right' | null) || 'left'
+
+  const alignClass = align === 'center' ? 'text-center items-center' : align === 'right' ? 'text-right items-end' : 'text-left items-start'
+
+  // Unique breeds across all dogs of this breeder (if provided)
+  const breedNames = (breeder.dogs ?? []).map((d: { breed: { nameDe: string } }) => d.breed.nameDe)
+  const uniqueBreeds = [...new Set(breedNames)]
 
   const navItems = [
     { id: 'profil', label: 'Profil', href: `/zuechter/${slug}`, show: true },
@@ -44,6 +57,15 @@ export default function BreederPageHeader({
 
   return (
     <>
+      {/* Google Font laden, falls gesetzt */}
+      {font && (
+        <link
+          rel="stylesheet"
+          href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;700&display=swap`}
+        />
+      )}
+
+      {/* Seitenhintergrund */}
       {backgroundImage ? (
         <>
           <div
@@ -53,63 +75,88 @@ export default function BreederPageHeader({
           <div className="fixed inset-0 -z-10 bg-cream/45" />
         </>
       ) : (
-        <div className="fixed inset-0 -z-10 bg-cream" />
+        <div
+          className="fixed inset-0 -z-10"
+          style={{ backgroundColor: breeder.themeBgColor || '#FAF8F4' }}
+        />
       )}
 
       {/* Hero */}
       <section
-        className={`relative px-4 py-14 ${headerImage ? '' : 'bg-forest'}`}
-        style={themeColor && !headerImage ? { backgroundColor: themeColor } : undefined}
+        className="relative px-4 py-16 md:py-20"
+        style={
+          headerImage
+            ? undefined
+            : { backgroundColor: themeColor || '#2d5a3d' }
+        }
       >
         {headerImage && (
           <>
-            <img src={headerImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/45" />
+            <img src={headerImage} alt="" className="absolute inset-0 w-full h-full object-cover" aria-hidden="true" />
+            <div className="absolute inset-0 bg-black/50" />
           </>
         )}
-        <div className="max-w-5xl mx-auto relative">
-          <p
-            className="text-xs font-semibold uppercase tracking-widest mb-2 text-honey"
-            style={accentColor ? { color: accentColor } : undefined}
+
+        <div className={`max-w-5xl mx-auto relative flex flex-col gap-2 ${alignClass}`}>
+          {/* Züchternamen — groß, mit wählbarer Schrift */}
+          <h1
+            className="text-5xl md:text-6xl font-bold text-white leading-tight"
+            style={font ? { fontFamily: `'${font}', serif` } : { fontFamily: 'Georgia, serif' }}
           >
-            {breeder.verband ? `${breeder.verband}-Züchter` : 'Züchter'}
-          </p>
-          <h1 className="font-serif text-4xl font-bold text-white mb-2">
             {displayName}
           </h1>
-          {location && (
-            <p className="text-white/70 text-sm flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {location}
+
+          {/* Rasse(n) statt Standort */}
+          {uniqueBreeds.length > 0 && (
+            <p className="text-white/80 text-base md:text-lg font-light tracking-wide">
+              {uniqueBreeds.join(' · ')}
             </p>
           )}
-          {breeder.verificationLevel !== 'none' && (
-            <p className="text-sm mt-2 font-medium text-honey" style={accentColor ? { color: accentColor } : undefined}>
-              ✓ Verifizierter Züchter
-            </p>
-          )}
+
+          {/* Verband/Verifiziert — dezent, klein */}
+          <div className="flex items-center gap-3 flex-wrap mt-1">
+            {breeder.verband && (
+              <span
+                className="text-xs font-semibold uppercase tracking-widest px-2 py-0.5 rounded"
+                style={{ color: accentColor || '#D4A853', backgroundColor: 'rgba(255,255,255,0.12)' }}
+              >
+                {breeder.verband}
+              </span>
+            )}
+            {breeder.verificationLevel !== 'none' && (
+              <span className="text-xs text-white/70 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Verifiziert
+              </span>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Unterseiten-Navigation */}
-      <nav className="bg-white border-b border-cream-deep sticky top-16 z-40">
-        <div className="max-w-5xl mx-auto px-4 flex gap-1 overflow-x-auto">
+      {/* Tab-Navigation */}
+      <nav
+        className="sticky top-10 z-40 border-b border-black/10"
+        style={{ backgroundColor: navColor ? navColor + 'F2' : 'rgba(255,255,255,0.95)' }}
+      >
+        <div className="max-w-5xl mx-auto px-4 flex gap-1 overflow-x-auto backdrop-blur-sm">
           {navItems.map((item) => {
             const isActive = active === item.id
-            const color = accentColor || themeColor
+            const activeColor = accentColor || themeColor
             return (
               <Link
                 key={item.id}
                 href={item.href}
                 className={`flex-shrink-0 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   isActive
-                    ? color ? '' : 'border-forest text-forest'
-                    : 'border-transparent text-stone-500 hover:text-stone-800'
+                    ? activeColor ? '' : 'border-forest text-forest'
+                    : 'border-transparent opacity-70 hover:opacity-100'
                 }`}
-                style={isActive && color ? { borderColor: color, color } : undefined}
+                style={{
+                  color: navColor ? 'white' : (isActive && activeColor ? activeColor : undefined),
+                  borderColor: isActive && activeColor ? activeColor : (isActive && !activeColor ? undefined : 'transparent'),
+                }}
               >
                 {item.label}
               </Link>
