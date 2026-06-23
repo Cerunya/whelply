@@ -14,6 +14,8 @@ const schema = z.object({
   isStud: z.boolean().default(false),
   description: z.string().max(3000).nullable().optional(),
   healthInfo: z.string().max(5000).nullable().optional(),
+  parentSireId: z.string().nullable().optional(),
+  parentDamId: z.string().nullable().optional(),
 })
 
 async function getOwnedDog(userId: string, dogId: string) {
@@ -56,6 +58,8 @@ export async function PATCH(
       isStud: parsed.data.sex === 'male' ? parsed.data.isStud : false,
       description: parsed.data.description ?? null,
       healthInfo: parsed.data.healthInfo ?? null,
+      parentSireId: parsed.data.parentSireId ?? null,
+      parentDamId: parsed.data.parentDamId ?? null,
     },
   })
 

@@ -81,50 +81,42 @@ export default function BreederPageHeader({
         />
       )}
 
-      {/* Hero */}
-      <section
-        className="relative px-4 py-16 md:py-20"
-        style={
-          headerImage
-            ? undefined
-            : { backgroundColor: themeColor || '#2d5a3d' }
-        }
-      >
-        {headerImage && (
-          <>
-            <img src={headerImage} alt="" className="absolute inset-0 w-full h-full object-cover" aria-hidden="true" />
-            <div className="absolute inset-0 bg-black/50" />
-          </>
-        )}
-
+      {/* Hero — kein separates Headerbild, der Inhalt liegt auf dem Seitenhintergrund */}
+      <section className="relative px-4 py-20 md:py-28">
         <div className={`max-w-5xl mx-auto relative flex flex-col gap-2 ${alignClass}`}>
-          {/* Züchternamen — groß, mit wählbarer Schrift */}
+          {/* Züchternamen — groß, mit wählbarer Schrift, Textschatten für Lesbarkeit */}
           <h1
-            className="text-5xl md:text-6xl font-bold text-white leading-tight"
-            style={font ? { fontFamily: `'${font}', serif` } : { fontFamily: 'Georgia, serif' }}
+            className="text-5xl md:text-6xl font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
+            style={{
+              color: themeColor ? '#ffffff' : '#1c1c1c',
+              fontFamily: font ? `'${font}', serif` : 'Georgia, serif',
+            }}
           >
             {displayName}
           </h1>
 
-          {/* Rasse(n) statt Standort */}
+          {/* Rasse(n) */}
           {uniqueBreeds.length > 0 && (
-            <p className="text-white/80 text-base md:text-lg font-light tracking-wide">
+            <p
+              className="text-base md:text-lg font-light tracking-wide drop-shadow-sm"
+              style={{ color: accentColor || '#e0a72e' }}
+            >
               {uniqueBreeds.join(' · ')}
             </p>
           )}
 
-          {/* Verband/Verifiziert — dezent, klein */}
+          {/* Verband/Verifiziert — dezent */}
           <div className="flex items-center gap-3 flex-wrap mt-1">
             {breeder.verband && (
               <span
-                className="text-xs font-semibold uppercase tracking-widest px-2 py-0.5 rounded"
-                style={{ color: accentColor || '#D4A853', backgroundColor: 'rgba(255,255,255,0.12)' }}
+                className="text-xs font-semibold uppercase tracking-widest px-2 py-0.5 rounded backdrop-blur-sm"
+                style={{ color: accentColor || '#D4A853', backgroundColor: 'rgba(255,255,255,0.15)' }}
               >
                 {breeder.verband}
               </span>
             )}
             {breeder.verificationLevel !== 'none' && (
-              <span className="text-xs text-white/70 flex items-center gap-1">
+              <span className="text-xs flex items-center gap-1 text-white/80 drop-shadow-sm">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>

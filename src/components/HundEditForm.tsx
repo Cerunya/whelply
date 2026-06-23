@@ -20,9 +20,13 @@ type DogData = {
   description: string | null
   imageUrl: string | null
   healthInfo: string | null
+  parentSireId: string | null
+  parentDamId: string | null
 }
 
-export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Breed[] }) {
+type DogOption = { id: string; name: string; sex: string }
+
+export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogData; breeds: Breed[]; allDogs?: DogOption[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -39,6 +43,8 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
     isStud: dog.isStud,
     description: dog.description ?? '',
     healthInfo: dog.healthInfo ?? '',
+    parentSireId: dog.parentSireId ?? '',
+    parentDamId: dog.parentDamId ?? '',
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -70,6 +76,8 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
         isStud: form.sex === 'male' ? form.isStud : false,
         description: form.description || null,
         healthInfo: form.healthInfo || null,
+        parentSireId: form.parentSireId || null,
+        parentDamId: form.parentDamId || null,
       }),
     })
 
@@ -259,9 +267,50 @@ export default function HundEditForm({ dog, breeds }: { dog: DogData; breeds: Br
               className={inputClass}
             />
             <p className="text-xs text-stone-400 mt-1">
-              Freitext — wird unverändert auf dem Profil dieses Hundes angezeigt (z.B. eine Zeile pro Test).
+              Freitext — wird unverändert auf dem Profil dieses Hundes angezeigt.
             </p>
           </div>
+
+          {/* Elterntiere für Stammbaum */}
+          {allDogs.length > 0 && (
+            <div className="border-t border-cream-deep pt-5">
+              <p className="text-sm font-semibold text-stone-700 mb-1">Elterntiere (für Stammbaum)</p>
+              <p className="text-xs text-stone-400 mb-4">
+                Verknüpfe Vater und Mutter dieses Hundes, falls sie ebenfalls auf Whelply eingetragen sind.
+                Das ermöglicht einen vollständigen Stammbaum auf den Welpen-Inseraten.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Vater (auf Whelply)</label>
+                  <select
+                    name="parentSireId"
+                    value={form.parentSireId}
+                    onChange={handleChange}
+                    className={inputClass}
+                  >
+                    <option value="">— nicht angegeben —</option>
+                    {allDogs.filter((d) => d.sex === 'male' && d.id !== dog.id).map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Mutter (auf Whelply)</label>
+                  <select
+                    name="parentDamId"
+                    value={form.parentDamId}
+                    onChange={handleChange}
+                    className={inputClass}
+                  >
+                    <option value="">— nicht angegeben —</option>
+                    {allDogs.filter((d) => d.sex === 'female' && d.id !== dog.id).map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-3 pt-2">
             <button

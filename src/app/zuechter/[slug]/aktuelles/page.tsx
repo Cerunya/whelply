@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import BreederNavbar from '@/components/BreederNavbar'
-import Footer from '@/components/Footer'
+import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
@@ -57,7 +57,17 @@ export default async function AktuellesPage({
           )}
         </BreederPageContent>
       </main>
-      <Footer />
+      <BreederFooter
+        kennelName={breeder.kennelName}
+        slug={params.slug}
+        themeColor={breeder.themeColor}
+        themeAccentColor={breeder.themeAccentColor}
+        socialInstagram={breeder.socialInstagram}
+        socialFacebook={breeder.socialFacebook}
+        socialTiktok={breeder.socialTiktok}
+        socialYoutube={breeder.socialYoutube}
+        website={breeder.website}
+      />
     </>
   )
 }

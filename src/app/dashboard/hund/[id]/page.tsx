@@ -30,6 +30,12 @@ export default async function HundBearbeitenPage({
     select: { id: true, nameDe: true },
   })
 
+  // Alle Hunde aller Züchter für Elterntier-Auswahl (Stammbaum kann züchterübergreifend sein)
+  const allDogs = await prisma.dog.findMany({
+    select: { id: true, name: true, sex: true },
+    orderBy: { name: 'asc' },
+  })
+
   return (
     <HundEditForm
       dog={{
@@ -45,8 +51,11 @@ export default async function HundBearbeitenPage({
         description: dog.description,
         imageUrl: dog.media[0]?.url ?? null,
         healthInfo: dog.healthInfo,
+        parentSireId: dog.parentSireId,
+        parentDamId: dog.parentDamId,
       }}
       breeds={breeds}
+      allDogs={allDogs}
     />
   )
 }

@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
+import BreederNavbar from '@/components/BreederNavbar'
+import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import ListingCard from '@/components/ListingCard'
@@ -58,11 +58,11 @@ export default async function LitterDetailPage({
 
   return (
     <>
-      <Navbar />
+      <BreederNavbar />
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="wuerfe" />
 
-        <BreederPageContent>
+        <BreederPageContent bgColor={breeder.themeBgColor}>
           <Link href={`/zuechter/${params.slug}/wuerfe`} className="text-sm text-forest font-semibold hover:underline">
             ← Würfe & Planung
           </Link>
@@ -212,7 +212,17 @@ export default async function LitterDetailPage({
           )}
         </BreederPageContent>
       </main>
-      <Footer />
+      <BreederFooter
+        kennelName={breeder.kennelName}
+        slug={params.slug}
+        themeColor={breeder.themeColor}
+        themeAccentColor={breeder.themeAccentColor}
+        socialInstagram={breeder.socialInstagram}
+        socialFacebook={breeder.socialFacebook}
+        socialTiktok={breeder.socialTiktok}
+        socialYoutube={breeder.socialYoutube}
+        website={breeder.website}
+      />
     </>
   )
 }

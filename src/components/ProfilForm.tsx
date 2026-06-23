@@ -17,6 +17,10 @@ type BreederData = {
   displayName: string | null
   bio: string | null
   website: string | null
+  socialInstagram: string | null
+  socialFacebook: string | null
+  socialTiktok: string | null
+  socialYoutube: string | null
   verband: string | null
   mitgliedsnummer: string | null
   phone: string | null
@@ -37,6 +41,10 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
     displayName: breeder.displayName ?? '',
     bio: breeder.bio ?? '',
     website: breeder.website ?? '',
+    socialInstagram: breeder.socialInstagram ?? '',
+    socialFacebook: breeder.socialFacebook ?? '',
+    socialTiktok: breeder.socialTiktok ?? '',
+    socialYoutube: breeder.socialYoutube ?? '',
     verband: breeder.verband ?? '',
     mitgliedsnummer: breeder.mitgliedsnummer ?? '',
     phone: breeder.phone ?? '',
@@ -199,6 +207,30 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
                 placeholder="https://..."
                 className={inputClass}
               />
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-stone-700 mb-3">Social Media</p>
+              <div className="space-y-3">
+                {[
+                  { key: 'socialInstagram', label: 'Instagram', placeholder: 'https://instagram.com/deinname' },
+                  { key: 'socialFacebook', label: 'Facebook', placeholder: 'https://facebook.com/deinname' },
+                  { key: 'socialTiktok', label: 'TikTok', placeholder: 'https://tiktok.com/@deinname' },
+                  { key: 'socialYoutube', label: 'YouTube', placeholder: 'https://youtube.com/@deinkanal' },
+                ].map(({ key, label, placeholder }) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="text-xs text-stone-400 w-20 flex-shrink-0">{label}</span>
+                    <input
+                      type="url"
+                      name={key}
+                      value={form[key as keyof typeof form] as string}
+                      onChange={handleChange}
+                      placeholder={placeholder}
+                      className={inputClass}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

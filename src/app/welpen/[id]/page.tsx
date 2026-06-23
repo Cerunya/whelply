@@ -27,27 +27,15 @@ export default async function WelpenDetailPage({
           dam: {
             include: {
               media: { take: 1, select: { url: true } },
-              littersAsDam: {
-                take: 1,
-                orderBy: { bornDate: 'desc' },
-                include: {
-                  dam: { select: { id: true, name: true } },
-                  sire: { select: { id: true, name: true } },
-                },
-              },
+              parentSire: { select: { id: true, name: true } },
+              parentDam: { select: { id: true, name: true } },
             },
           },
           sire: {
             include: {
               media: { take: 1, select: { url: true } },
-              littersAsSire: {
-                take: 1,
-                orderBy: { bornDate: 'desc' },
-                include: {
-                  dam: { select: { id: true, name: true } },
-                  sire: { select: { id: true, name: true } },
-                },
-              },
+              parentSire: { select: { id: true, name: true } },
+              parentDam: { select: { id: true, name: true } },
             },
           },
           listings: {
@@ -315,113 +303,128 @@ export default async function WelpenDetailPage({
             </div>
           </div>
 
-          {/* Eltern & Großeltern (Mini-Stammbaum) */}
+          {/* Stammbaum (Eltern + Großeltern) — ganz unten, nach Geschwistern */}
           {(listing.litter?.dam || listing.litter?.sire || listing.litter?.sireExternal) && (
-            <div className="mt-10">
-              <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Stammbaum</h2>
+            <div className="mt-14 border-t border-cream-deep pt-10">
+              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-8 text-center">Stammbaum</h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                {/* Mutter */}
-                {listing.litter?.dam && (
-                  <div>
-                    <Link
-                      href={`/hund/${listing.litter.dam.id}`}
-                      className="bg-white rounded-xl border border-pink-200 p-4 hover:border-pink-300 hover:shadow-sm transition-all flex items-center gap-4 mb-3"
-                    >
-                      {listing.litter.dam.media[0]?.url && (
-                        <img src={listing.litter.dam.media[0].url} alt={listing.litter.dam.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
-                      )}
-                      <div>
-                        <p className="text-xs text-pink-500 uppercase tracking-wide font-semibold mb-0.5">Mutter</p>
-                        <p className="font-semibold text-stone-800">{listing.litter.dam.name}</p>
-                        {listing.litter.dam.titles && (
-                          <p className="text-xs text-stone-400 mt-0.5">{listing.litter.dam.titles}</p>
-                        )}
-                      </div>
-                    </Link>
-                    {/* Großeltern Mutterseite */}
-                    {listing.litter.dam.littersAsDam?.[0] && (
-                      <div className="ml-4 grid grid-cols-2 gap-2">
-                        {listing.litter.dam.littersAsDam[0].sire && (
-                          <Link href={`/hund/${listing.litter.dam.littersAsDam[0].sire.id}`}
-                            className="bg-white rounded-lg border border-cream-deep p-3 hover:border-stone-300 transition-colors">
-                            <p className="text-xs text-stone-400 mb-0.5">Großvater (m)</p>
-                            <p className="text-sm font-medium text-stone-700 line-clamp-2">{listing.litter.dam.littersAsDam[0].sire.name}</p>
-                          </Link>
-                        )}
-                        {listing.litter.dam.littersAsDam[0].dam && (
-                          <Link href={`/hund/${listing.litter.dam.littersAsDam[0].dam.id}`}
-                            className="bg-white rounded-lg border border-cream-deep p-3 hover:border-stone-300 transition-colors">
-                            <p className="text-xs text-stone-400 mb-0.5">Großmutter (m)</p>
-                            <p className="text-sm font-medium text-stone-700 line-clamp-2">{listing.litter.dam.littersAsDam[0].dam.name}</p>
-                          </Link>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Vater */}
-                {(listing.litter?.sire || listing.litter?.sireExternal) && (
-                  <div>
-                    {listing.litter?.sire ? (
-                      <>
-                        <Link
-                          href={`/hund/${listing.litter.sire.id}`}
-                          className="bg-white rounded-xl border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all flex items-center gap-4 mb-3"
-                        >
-                          {listing.litter.sire.media[0]?.url && (
-                            <img src={listing.litter.sire.media[0].url} alt={listing.litter.sire.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
-                          )}
-                          <div>
-                            <p className="text-xs text-blue-500 uppercase tracking-wide font-semibold mb-0.5">Vater</p>
-                            <p className="font-semibold text-stone-800">{listing.litter.sire.name}</p>
-                            {listing.litter.sire.titles && (
-                              <p className="text-xs text-stone-400 mt-0.5">{listing.litter.sire.titles}</p>
-                            )}
-                          </div>
-                        </Link>
-                        {/* Großeltern Vaterseite */}
-                        {listing.litter.sire.littersAsSire?.[0] && (
-                          <div className="ml-4 grid grid-cols-2 gap-2">
-                            {listing.litter.sire.littersAsSire[0].sire && (
-                              <Link href={`/hund/${listing.litter.sire.littersAsSire[0].sire.id}`}
-                                className="bg-white rounded-lg border border-cream-deep p-3 hover:border-stone-300 transition-colors">
-                                <p className="text-xs text-stone-400 mb-0.5">Großvater (v)</p>
-                                <p className="text-sm font-medium text-stone-700 line-clamp-2">{listing.litter.sire.littersAsSire[0].sire.name}</p>
-                              </Link>
-                            )}
-                            {listing.litter.sire.littersAsSire[0].dam && (
-                              <Link href={`/hund/${listing.litter.sire.littersAsSire[0].dam.id}`}
-                                className="bg-white rounded-lg border border-cream-deep p-3 hover:border-stone-300 transition-colors">
-                                <p className="text-xs text-stone-400 mb-0.5">Großmutter (v)</p>
-                                <p className="text-sm font-medium text-stone-700 line-clamp-2">{listing.litter.sire.littersAsSire[0].dam.name}</p>
-                              </Link>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="bg-white rounded-xl border border-blue-200 p-4">
-                        <p className="text-xs text-blue-500 uppercase tracking-wide font-semibold mb-0.5">Vater</p>
-                        <p className="font-semibold text-stone-800">{listing.litter?.sireExternal}</p>
-                        <p className="text-xs text-stone-400 mt-1">Externer Deckrüde</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+              {/* Welpe */}
+              <div className="flex justify-center mb-2">
+                <div className="bg-white rounded-2xl border-2 border-forest/30 p-5 w-52 text-center shadow-sm">
+                  {listing.media[0]?.url && (
+                    <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-20 h-20 rounded-xl object-cover mx-auto mb-2" />
+                  )}
+                  <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
+                    {listing.sex === 'male' ? 'Rüde' : listing.sex === 'female' ? 'Hündin' : 'Welpe'}
+                  </p>
+                  <p className="font-serif font-bold text-stone-900 text-sm">{listing.title || listing.breed.nameDe}</p>
+                </div>
               </div>
 
+              {/* Verbindung nach unten */}
+              <div className="flex justify-center mb-0">
+                <div className="w-0.5 h-8 bg-stone-300" />
+              </div>
+              <div className="flex justify-center mb-0">
+                <div className="w-1/2 h-0.5 bg-stone-300" />
+              </div>
+
+              {/* Eltern */}
+              <div className="grid grid-cols-2 gap-6 mb-2">
+                {/* Mutter */}
+                <div className="flex flex-col items-center">
+                  <div className="w-0.5 h-8 bg-stone-300 mb-0" />
+                  {listing.litter?.dam ? (
+                    <Link href={`/hund/${listing.litter.dam.id}`}
+                      className="bg-white rounded-2xl border-2 border-pink-200 p-4 w-full max-w-xs hover:border-pink-400 hover:shadow transition-all block">
+                      {listing.litter.dam.media[0]?.url && (
+                        <img src={listing.litter.dam.media[0].url} alt={listing.litter.dam.name}
+                          className="w-16 h-16 rounded-xl object-cover mx-auto mb-2" />
+                      )}
+                      <p className="text-xs text-pink-500 font-bold uppercase tracking-wide text-center mb-1">Mutter</p>
+                      <p className="font-serif font-bold text-stone-900 text-sm text-center">{listing.litter.dam.name}</p>
+                      {listing.litter.dam.titles && <p className="text-xs text-stone-400 text-center mt-1">{listing.litter.dam.titles}</p>}
+                    </Link>
+                  ) : (
+                    <div className="bg-cream rounded-2xl border border-cream-deep p-4 w-full max-w-xs text-center text-stone-400 text-sm">Mutter nicht eingetragen</div>
+                  )}
+                </div>
+                {/* Vater */}
+                <div className="flex flex-col items-center">
+                  <div className="w-0.5 h-8 bg-stone-300 mb-0" />
+                  {listing.litter?.sire ? (
+                    <Link href={`/hund/${listing.litter.sire.id}`}
+                      className="bg-white rounded-2xl border-2 border-blue-200 p-4 w-full max-w-xs hover:border-blue-400 hover:shadow transition-all block">
+                      {listing.litter.sire.media[0]?.url && (
+                        <img src={listing.litter.sire.media[0].url} alt={listing.litter.sire.name}
+                          className="w-16 h-16 rounded-xl object-cover mx-auto mb-2" />
+                      )}
+                      <p className="text-xs text-blue-500 font-bold uppercase tracking-wide text-center mb-1">Vater</p>
+                      <p className="font-serif font-bold text-stone-900 text-sm text-center">{listing.litter.sire.name}</p>
+                      {listing.litter.sire.titles && <p className="text-xs text-stone-400 text-center mt-1">{listing.litter.sire.titles}</p>}
+                    </Link>
+                  ) : listing.litter?.sireExternal ? (
+                    <div className="bg-white rounded-2xl border-2 border-blue-200 p-4 w-full max-w-xs text-center">
+                      <p className="text-xs text-blue-500 font-bold uppercase tracking-wide mb-1">Vater (extern)</p>
+                      <p className="font-serif font-bold text-stone-900 text-sm">{listing.litter.sireExternal}</p>
+                    </div>
+                  ) : (
+                    <div className="bg-cream rounded-2xl border border-cream-deep p-4 w-full max-w-xs text-center text-stone-400 text-sm">Vater nicht eingetragen</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Großeltern */}
+              {(listing.litter?.dam?.parentSire || listing.litter?.dam?.parentDam ||
+                listing.litter?.sire?.parentSire || listing.litter?.sire?.parentDam) && (
+                <>
+                  <div className="grid grid-cols-2 gap-6 mb-0">
+                    <div className="flex justify-center"><div className="w-0.5 h-6 bg-stone-200" /></div>
+                    <div className="flex justify-center"><div className="w-0.5 h-6 bg-stone-200" /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6 mb-0">
+                    <div className="flex justify-center"><div className="w-1/2 h-0.5 bg-stone-200" /></div>
+                    <div className="flex justify-center"><div className="w-1/2 h-0.5 bg-stone-200" /></div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { label: 'Großvater (m)', dog: listing.litter?.dam?.parentSire, color: 'blue' },
+                      { label: 'Großmutter (m)', dog: listing.litter?.dam?.parentDam, color: 'pink' },
+                      { label: 'Großvater (v)', dog: listing.litter?.sire?.parentSire, color: 'blue' },
+                      { label: 'Großmutter (v)', dog: listing.litter?.sire?.parentDam, color: 'pink' },
+                    ].map(({ label, dog, color }) => (
+                      <div key={label} className="flex flex-col items-center">
+                        <div className="w-0.5 h-6 bg-stone-200 mb-0" />
+                        {dog ? (
+                          <Link href={`/hund/${dog.id}`}
+                            className={`bg-white rounded-xl border-2 w-full p-3 block text-center hover:shadow transition-all ${color === 'pink' ? 'border-pink-100 hover:border-pink-200' : 'border-blue-100 hover:border-blue-200'}`}>
+                            <p className={`text-xs font-semibold mb-1 ${color === 'pink' ? 'text-pink-400' : 'text-blue-400'}`}>{label}</p>
+                            <p className="text-xs font-semibold text-stone-800 line-clamp-2">{dog.name}</p>
+                          </Link>
+                        ) : (
+                          <div className="bg-cream rounded-xl border border-cream-deep p-3 w-full text-center">
+                            <p className="text-xs text-stone-300">{label}</p>
+                            <p className="text-xs text-stone-300 mt-1">—</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
               {/* Link zum vollständigen Stammbaum */}
-              <Link
-                href={`/welpen/${listing.id}/stammbaum`}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-forest border border-forest/30 rounded-xl px-5 py-2.5 hover:bg-forest hover:text-white transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Vollständigen Stammbaum von {listing.title || 'diesem Welpen'} ansehen
-              </Link>
+              <div className="mt-8 text-center">
+                <Link
+                  href={`/welpen/${listing.id}/stammbaum`}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-forest border border-forest/30 rounded-xl px-6 py-3 hover:bg-forest hover:text-white transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Vollständiger Stammbaum
+                </Link>
+              </div>
             </div>
           )}
 

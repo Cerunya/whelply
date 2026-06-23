@@ -173,6 +173,11 @@ model BreederProfile {
   themeNavColor     String?           @map("theme_nav_color")    // Farbe der Tab-Navigation
   themeFont         String?           @map("theme_font")         // Google Fonts Familienname, z.B. "Playfair Display"
   themeAlign        String?           @map("theme_align")        // "left" | "center" | "right"
+  // Social Media
+  socialInstagram   String?           @map("social_instagram")
+  socialFacebook    String?           @map("social_facebook")
+  socialTiktok      String?           @map("social_tiktok")
+  socialYoutube     String?           @map("social_youtube")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
 
@@ -224,11 +229,19 @@ model Dog {
   titles         String?  // Ausstellungstitel, freitext
   isStud         Boolean  @default(false) @map("is_stud")
   isForSale      Boolean  @default(false) @map("is_for_sale")
-  description    String?  @db.Text // Persönlicher Vorstellungstext (große Anzeige auf Züchterseite, wenn gesetzt)
+  description    String?  @db.Text
+  // Elterntiere — direkte Verknüpfung für Stammbaumanzeige
+  parentSireId   String?  @map("parent_sire_id") // Vater dieses Hundes
+  parentDamId    String?  @map("parent_dam_id")  // Mutter dieses Hundes
   createdAt      DateTime @default(now()) @map("created_at")
 
   breeder      BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
   breed        Breed          @relation(fields: [breedId], references: [id])
+  // Eltern-Relationen (self-referential)
+  parentSire   Dog?     @relation("DogSire", fields: [parentSireId], references: [id], onDelete: SetNull)
+  parentDam    Dog?     @relation("DogDam", fields: [parentDamId], references: [id], onDelete: SetNull)
+  childrenAsSire Dog[]  @relation("DogSire")
+  childrenAsDam  Dog[]  @relation("DogDam")
   // Wurf-Beziehungen
   littersAsDam  Litter[]  @relation("DamLitters")
   littersAsSire Litter[]  @relation("SireLitters")
