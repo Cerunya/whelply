@@ -44,7 +44,7 @@ export default function BreederPageHeader({
 
   // Unique breeds across all dogs of this breeder (if provided)
   const breedNames = (breeder.dogs ?? []).map((d: { breed: { nameDe: string } }) => d.breed.nameDe)
-  const uniqueBreeds = [...new Set(breedNames)]
+  const uniqueBreeds = Array.from(new Set(breedNames))
 
   const navItems = [
     { id: 'profil', label: 'Profil', href: `/zuechter/${slug}`, show: true },
