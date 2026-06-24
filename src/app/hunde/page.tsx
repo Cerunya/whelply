@@ -115,6 +115,7 @@ export default async function HundePage({
                     priceCents={listing.priceCents}
                     isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
                     imageUrl={listing.media[0]?.url}
+                    tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
                   />
                 ))}
               </div>

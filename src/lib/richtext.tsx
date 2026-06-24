@@ -1,15 +1,66 @@
 import React from 'react'
 
-// Sehr einfacher, abhängigkeitsfreier Renderer für **fett** und *kursiv*.
-// Zeilenumbrüche werden als <br /> dargestellt.
+// Unterstützte Syntax:
+// **text** = fett
+// *text* = kursiv
+// ![alt](url) = Bild (zentriert, max-Breite)
+// @youtube[id] = YouTube-Einbettung (responsive 16:9)
+// Zeilenumbrüche = <br />
+
 export function renderRichText(text: string): React.ReactNode {
   const lines = text.split('\n')
-  return lines.map((line, i) => (
-    <React.Fragment key={i}>
-      {renderInline(line)}
-      {i < lines.length - 1 && <br />}
-    </React.Fragment>
-  ))
+  const nodes: React.ReactNode[] = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+
+    // YouTube embed
+    const ytMatch = line.match(/^@youtube\[([a-zA-Z0-9_-]{11})\]$/)
+    if (ytMatch) {
+      nodes.push(
+        <div key={i} className="relative w-full my-4" style={{ paddingTop: '56.25%' }}>
+          <iframe
+            src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+            title="YouTube video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full rounded-xl"
+          />
+        </div>
+      )
+      continue
+    }
+
+    // Image
+    const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
+    if (imgMatch) {
+      nodes.push(
+        <div key={i} className="my-4 flex justify-center">
+          <img
+            src={imgMatch[2]}
+            alt={imgMatch[1]}
+            className="max-w-full rounded-xl shadow-sm"
+            style={{ maxHeight: '500px' }}
+          />
+        </div>
+      )
+      continue
+    }
+
+    // Regular line with inline formatting
+    if (line === '') {
+      nodes.push(<br key={i} />)
+    } else {
+      nodes.push(
+        <React.Fragment key={i}>
+          {renderInline(line)}
+          {i < lines.length - 1 && lines[i + 1] !== '' && <br />}
+        </React.Fragment>
+      )
+    }
+  }
+
+  return <>{nodes}</>
 }
 
 function renderInline(line: string): React.ReactNode[] {

@@ -154,14 +154,19 @@ export default async function ZuechterWuerfePage({
                         {litter.bornDate ? (
                           <p className="text-sm sm:text-base text-stone-500 mt-1">
                             {'Geboren am ' + litter.bornDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
-                            {litter.listings.length > 0 && (` · ${totalMales} ` + 'Rüden, ' + `${totalFemales} Hündinnen`)}
+                            {litter.listings.length > 0 && (
+                              ` · ${totalMales} ${totalMales === 1 ? 'Rüde' : 'Rüden'}, ${totalFemales} ${totalFemales === 1 ? 'Hündin' : 'Hündinnen'}`
+                            )}
                           </p>
                         ) : (
                           <p className="hidden sm:block text-sm sm:text-base text-stone-500 mt-1">{statusText}</p>
                         )}
                         {litter.status === 'available' && (availableMales > 0 || availableFemales > 0) && (
                           <p className="text-sm sm:text-base text-green-700 font-medium mt-1">
-                            {'Verfügbar: ' + availableMales + ' Rüden · ' + availableFemales + ' Hündinnen'}
+                            {'Verfügbar: '}
+                            {availableMales} {availableMales === 1 ? 'Rüde' : 'Rüden'}
+                            {' · '}
+                            {availableFemales} {availableFemales === 1 ? 'Hündin' : 'Hündinnen'}
                             {litter.handoverDate && (' · ab ' + litter.handoverDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }))}
                           </p>
                         )}

@@ -127,7 +127,7 @@ export default async function LitterDetailPage({
                   {totalMales} {totalMales === 1 ? 'Rüde' : 'Rüden'}, {totalFemales} {totalFemales === 1 ? 'Hündin' : 'Hündinnen'} gesamt
                   {(availableMales > 0 || availableFemales > 0) && (
                     <span className="text-green-700 font-medium ml-2">
-                      · {availableMales} Rüden / {availableFemales} Hündinnen noch frei
+                      · {availableMales} {availableMales === 1 ? 'Rüde' : 'Rüden'} / {availableFemales} {availableFemales === 1 ? 'Hündin' : 'Hündinnen'} noch frei
                     </span>
                   )}
                 </p>
@@ -181,16 +181,17 @@ export default async function LitterDetailPage({
                               </p>
                             )}
                           </div>
-                          <div className="flex-shrink-0 text-right">
+                          <div className="flex-shrink-0 text-right space-y-1">
+                            {listing.status === 'available' && (
+                              <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700">Noch frei</span>
+                            )}
                             {listing.status === 'reserved' && (
-                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Reserviert</span>
+                              <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Reserviert</span>
                             )}
                             {listing.status === 'sold' && (
-                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-600">Verkauft</span>
+                              <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-600">Verkauft</span>
                             )}
-                            {listing.status === 'available' && (
-                              <span className="text-sm font-bold text-stone-700">{price}</span>
-                            )}
+                            <p className="text-sm font-bold text-stone-700">{price}</p>
                           </div>
                         </div>
                         {listing.description && (

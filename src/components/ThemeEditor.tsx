@@ -252,14 +252,13 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
         )}
       </div>
 
-      {/* Farben */}
-      <div className="bg-white rounded-2xl border border-cream-deep p-6">
-        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Farben</h2>
-        <p className="text-sm text-stone-400 mb-4">
-          Bestimme die Primär- und Akzentfarbe deiner öffentlichen Züchterseite.
-        </p>
+      {/* Farben — alle Farboptionen in einem Block */}
+      <div className="bg-white rounded-2xl border border-cream-deep p-6 space-y-8">
+        <h2 className="font-serif text-lg font-bold text-stone-900">Farben</h2>
 
+        {/* Primär- und Akzentfarbe */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
           <div>
             <label className={labelClass}>Primärfarbe (Hero-Hintergrund)</label>
             <div className="flex items-center gap-3 mb-3">
@@ -320,6 +319,78 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
                 />
               ))}
             </div>
+          </div>
+        
+        </div>
+
+        {/* Hintergrundfarbe */}
+        <div>
+          <label className={labelClass}>Hintergrundfarbe (Inhaltsbereich)</label>
+          <p className="text-xs text-stone-400 mb-3">
+            Farbe der halbtransparenten Inhalts-Panels — besonders sichtbar mit Hintergrundbild.
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+          {BG_PRESETS.map((preset) => (
+            <button
+              key={preset.value}
+              type="button"
+              onClick={() => setThemeBgColor(preset.value)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs border-2 transition-colors ${
+                themeBgColor === preset.value ? 'border-forest' : 'border-stone-200'
+              }`}
+            >
+              <span className="w-4 h-4 rounded-full border border-stone-300 inline-block" style={{ backgroundColor: preset.value }} />
+              {preset.label}
+            </button>
+          ))}
+        </div>
+          <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={themeBgColor || '#FAF8F4'}
+            onChange={(e) => setThemeBgColor(e.target.value)}
+            className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer"
+          />
+          <input
+            type="text"
+            value={themeBgColor}
+            onChange={(e) => setThemeBgColor(e.target.value)}
+            placeholder="#FAF8F4"
+            className={inputClass + ' flex-1'}
+            maxLength={7}
+          />
+          </div>
+        </div>
+
+        {/* Tab-Navigationsfarbe */}
+        <div>
+          <label className={labelClass}>Tab-Navigationsfarbe</label>
+          <p className="text-xs text-stone-400 mb-3">
+            Hintergrundfarbe der Tab-Leiste. Leer lassen = Primärfarbe wird verwendet.
+          </p>
+
+          Hintergrundfarbe der Tab-Leiste unter dem Header. Leer lassen für weißen Hintergrund.
+        </p>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={themeNavColor || themeColor || '#2d5a3d'}
+            onChange={(e) => setThemeNavColor(e.target.value)}
+            className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer"
+          />
+          <input
+            type="text"
+            value={themeNavColor}
+            onChange={(e) => setThemeNavColor(e.target.value)}
+            placeholder="Leer = weiß (standard)"
+            className={inputClass + ' flex-1'}
+            maxLength={7}
+          />
+          {themeNavColor && (
+            <button type="button" onClick={() => setThemeNavColor('')} className="text-xs text-stone-400 hover:text-stone-700 whitespace-nowrap">
+              Zurücksetzen
+            </button>
+          )}
           </div>
         </div>
       </div>
@@ -394,74 +465,6 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
               {opt.label}
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Hintergrundfarbe der Content-Panels */}
-      <div className="bg-white rounded-2xl border border-cream-deep p-6">
-        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Hintergrundfarbe (Inhaltsbereich)</h2>
-        <p className="text-sm text-stone-400 mb-4">
-          Farbe der halbtransparenten Inhalts-Panels deiner Seite — besonders sichtbar, wenn du ein Hintergrundbild verwendest.
-        </p>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {BG_PRESETS.map((preset) => (
-            <button
-              key={preset.value}
-              type="button"
-              onClick={() => setThemeBgColor(preset.value)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs border-2 transition-colors ${
-                themeBgColor === preset.value ? 'border-forest' : 'border-stone-200'
-              }`}
-            >
-              <span className="w-4 h-4 rounded-full border border-stone-300 inline-block" style={{ backgroundColor: preset.value }} />
-              {preset.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            type="color"
-            value={themeBgColor || '#FAF8F4'}
-            onChange={(e) => setThemeBgColor(e.target.value)}
-            className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer"
-          />
-          <input
-            type="text"
-            value={themeBgColor}
-            onChange={(e) => setThemeBgColor(e.target.value)}
-            placeholder="#FAF8F4"
-            className={inputClass + ' flex-1'}
-            maxLength={7}
-          />
-        </div>
-      </div>
-
-      {/* Navigationsfarbe */}
-      <div className="bg-white rounded-2xl border border-cream-deep p-6">
-        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Tab-Navigationsfarbe</h2>
-        <p className="text-sm text-stone-400 mb-4">
-          Hintergrundfarbe der Tab-Leiste unter dem Header. Leer lassen für weißen Hintergrund.
-        </p>
-        <div className="flex items-center gap-3">
-          <input
-            type="color"
-            value={themeNavColor || themeColor || '#2d5a3d'}
-            onChange={(e) => setThemeNavColor(e.target.value)}
-            className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer"
-          />
-          <input
-            type="text"
-            value={themeNavColor}
-            onChange={(e) => setThemeNavColor(e.target.value)}
-            placeholder="Leer = weiß (standard)"
-            className={inputClass + ' flex-1'}
-            maxLength={7}
-          />
-          {themeNavColor && (
-            <button type="button" onClick={() => setThemeNavColor('')} className="text-xs text-stone-400 hover:text-stone-700 whitespace-nowrap">
-              Zurücksetzen
-            </button>
-          )}
         </div>
       </div>
 
