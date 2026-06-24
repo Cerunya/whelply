@@ -189,7 +189,7 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
               target="_blank"
               className="text-sm text-forest font-semibold hover:underline"
             >
-              Seite ansehen ->
+              Seite ansehen {'->'}
             </Link>
           </div>
         </div>
