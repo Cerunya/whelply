@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 type BreederContactSidebarProps = {
   kennelName: string
+  displayName: string | null
   slug: string
   city: string | null
   state: string | null
@@ -44,14 +45,11 @@ function SocialIcon({ type }: { type: string }) {
 }
 
 export default function BreederContactSidebar({
-  kennelName, slug, city, state, street, zip, showAddress, phone, showPhone,
+  kennelName, displayName, slug, city, state, street, zip, showAddress, phone, showPhone,
   website, socialInstagram, socialFacebook, socialTiktok, socialYoutube,
   themeColor, themeAccentColor,
 }: BreederContactSidebarProps) {
   const accent = themeAccentColor || themeColor || '#2d5a3d'
-  const location = showAddress && street
-    ? [street, zip && city ? `${zip} ${city}` : city, state].filter(Boolean).join(', ')
-    : [city, state].filter(Boolean).join(', ')
 
   const socials = [
     { type: 'instagram', href: socialInstagram, label: 'Instagram' },
@@ -62,15 +60,27 @@ export default function BreederContactSidebar({
 
   return (
     <div className="sticky top-20 bg-white/90 rounded-2xl border border-cream-deep p-5 space-y-4">
-      <h3 className="font-serif font-bold text-stone-900 text-sm">{kennelName}</h3>
+      <div>
+        <h3 className="font-serif font-bold text-stone-900 text-sm">{kennelName}</h3>
+        {displayName && displayName !== kennelName && (
+          <p className="text-xs text-stone-500 mt-0.5">{displayName}</p>
+        )}
+      </div>
 
-      {location && (
+      {(city || state || (showAddress && street)) && (
         <div className="flex items-start gap-2 text-sm text-stone-600">
           <svg className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span>{location}</span>
+          <div>
+            {showAddress && street && <p>{street}</p>}
+            {showAddress && zip && city ? (
+              <p>{zip} {city}{state ? `, ${state}` : ''}</p>
+            ) : (
+              <p>{[city, state].filter(Boolean).join(', ')}</p>
+            )}
+          </div>
         </div>
       )}
 

@@ -35,6 +35,7 @@ export default async function GaleriePage({
         <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
           <BreederContactSidebar
             kennelName={breeder.kennelName}
+            displayName={breeder.displayName}
             slug={params.slug}
             city={breeder.city}
             state={breeder.state}

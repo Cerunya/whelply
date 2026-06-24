@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Nur JPG, PNG oder WebP erlaubt' }, { status: 400 })
   }
 
-  if (file.size > 8 * 1024 * 1024) {
-    return NextResponse.json({ error: 'Datei zu groß (max. 8 MB)' }, { status: 400 })
+  if (file.size > 25 * 1024 * 1024) {
+    return NextResponse.json({ error: 'Datei zu groß (max. 25 MB)' }, { status: 400 })
   }
 
   const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
@@ -228,3 +228,5 @@ export async function DELETE(req: NextRequest) {
 
   return NextResponse.json({ ok: true })
 }
+
+export const config = { api: { bodyParser: { sizeLimit: '30mb' } } }

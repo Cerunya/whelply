@@ -23,8 +23,8 @@ export default function DogImageUploader({
       setError('Nur JPG, PNG oder WebP erlaubt.')
       return
     }
-    if (file.size > 8 * 1024 * 1024) {
-      setError('Datei zu groß (max. 8 MB).')
+    if (file.size > 25 * 1024 * 1024) {
+      setError('Datei zu groß (max. 25 MB).')
       return
     }
 

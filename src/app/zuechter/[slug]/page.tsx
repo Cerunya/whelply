@@ -31,6 +31,7 @@ export default async function ZuechterProfilPage({
         <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
           <BreederContactSidebar
             kennelName={breeder.kennelName}
+            displayName={breeder.displayName}
             slug={params.slug}
             city={breeder.city}
             state={breeder.state}

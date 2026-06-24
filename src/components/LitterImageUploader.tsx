@@ -23,8 +23,8 @@ export default function LitterImageUploader({
       setError('Nur JPG, PNG oder WebP erlaubt.')
       return
     }
-    if (file.size > 8 * 1024 * 1024) {
-      setError('Datei zu groß (max. 8 MB).')
+    if (file.size > 25 * 1024 * 1024) {
+      setError('Datei zu groß (max. 25 MB).')
       return
     }
 
@@ -82,7 +82,7 @@ export default function LitterImageUploader({
             <p className="text-sm text-stone-500">
               {uploading ? 'Wird hochgeladen...' : 'Ankündigungs- oder Titelbild für den Wurf hochladen'}
             </p>
-            <p className="text-xs text-stone-400 mt-1">Optional · JPG, PNG oder WebP, max. 8 MB</p>
+            <p className="text-xs text-stone-400 mt-1">Optional · JPG, PNG oder WebP, max. 25 MB</p>
           </div>
         )}
       </div>

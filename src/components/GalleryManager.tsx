@@ -21,8 +21,8 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
         setError('Nur JPG, PNG oder WebP erlaubt.')
         continue
       }
-      if (file.size > 8 * 1024 * 1024) {
-        setError('Datei zu groß (max. 8 MB).')
+      if (file.size > 25 * 1024 * 1024) {
+        setError('Datei zu groß (max. 25 MB).')
         continue
       }
 
@@ -89,7 +89,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
         <p className="text-sm text-stone-500">
           {uploading ? 'Wird hochgeladen...' : 'Bilder hochladen (mehrere möglich)'}
         </p>
-        <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, je max. 8 MB</p>
+        <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, je max. 25 MB</p>
       </div>
 
       {images.length > 0 && (

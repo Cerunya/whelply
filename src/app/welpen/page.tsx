@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 export default async function WelpenPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; region?: string; seite?: string }
+  searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string }
 }) {
   const page = Number(searchParams.seite ?? 1)
   const perPage = 24
@@ -30,6 +30,8 @@ export default async function WelpenPage({
     type: 'puppy' as const,
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
     ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
+    ...(searchParams.geschlecht === 'male' ? { sex: 'male' as const } : {}),
+    ...(searchParams.geschlecht === 'female' ? { sex: 'female' as const } : {}),
   }
 
   const [listings, total] = await Promise.all([
@@ -42,6 +44,7 @@ export default async function WelpenPage({
         breed: { select: { nameDe: true } },
         breeder: { select: { kennelName: true, city: true, state: true } },
         media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+        // sex field is a scalar, automatically included
       },
     }).catch(() => []),
     prisma.listing.count({ where }).catch(() => 0),
@@ -52,7 +55,7 @@ export default async function WelpenPage({
 
   function buildUrl(params: Record<string, string | undefined>) {
     const p = new URLSearchParams()
-    const merged = { rasse: searchParams.rasse, region: searchParams.region, ...params }
+    const merged = { rasse: searchParams.rasse, region: searchParams.region, geschlecht: searchParams.geschlecht, ...params }
     Object.entries(merged).forEach(([k, v]) => { if (v) p.set(k, v) })
     return `/welpen?${p.toString()}`
   }
@@ -102,6 +105,30 @@ export default async function WelpenPage({
             </div>
           ) : (
             <>
+              {/* Geschlechtsfilter */}
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm text-stone-500">Geschlecht:</span>
+                {[
+                  { label: 'Alle', value: undefined },
+                  { label: 'Rüden', value: 'male' },
+                  { label: 'Hündinnen', value: 'female' },
+                ].map(({ label, value }) => (
+                  <a
+                    key={label}
+                    href={buildUrl({ geschlecht: value, seite: undefined })}
+                    className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                      searchParams.geschlecht === value || (!value && !searchParams.geschlecht)
+                        ? value === 'male' ? 'bg-blue-100 border-blue-300 text-blue-700'
+                          : value === 'female' ? 'bg-pink-100 border-pink-300 text-pink-700'
+                          : 'bg-stone-800 border-stone-800 text-white'
+                        : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400'
+                    }`}
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {listings.map((listing) => (
                   <ListingCard
@@ -115,6 +142,7 @@ export default async function WelpenPage({
                     priceCents={listing.priceCents}
                     isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
                     imageUrl={listing.media[0]?.url}
+                    tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
                   />
                 ))}
               </div>

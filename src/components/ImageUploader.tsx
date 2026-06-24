@@ -27,8 +27,8 @@ export default function ImageUploader({
         setError('Nur JPG, PNG oder WebP erlaubt.')
         continue
       }
-      if (file.size > 8 * 1024 * 1024) {
-        setError('Datei zu groß (max. 8 MB).')
+      if (file.size > 25 * 1024 * 1024) {
+        setError('Datei zu groß (max. 25 MB).')
         continue
       }
 
@@ -100,7 +100,7 @@ export default function ImageUploader({
         <p className="text-sm text-stone-500">
           {uploading ? 'Wird hochgeladen...' : 'Bilder hierher ziehen oder klicken'}
         </p>
-        <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, max. 8 MB</p>
+        <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, max. 25 MB</p>
       </div>
 
       {error && (

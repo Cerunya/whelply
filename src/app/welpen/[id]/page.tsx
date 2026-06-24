@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/slugify'
 import { auth } from '@/lib/auth'
+import ListingImageGallery from '@/components/ListingImageGallery'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -131,15 +132,9 @@ export default async function WelpenDetailPage({
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Foto */}
+            {/* Foto(s) */}
             {listing.media.length > 0 ? (
-              <div className="bg-cream-dark rounded-2xl aspect-square overflow-hidden border border-cream-deep">
-                <img
-                  src={listing.media.find((m) => m.isPrimary)?.url ?? listing.media[0].url}
-                  alt={listing.breed.nameDe}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <ListingImageGallery media={listing.media} breedName={listing.breed.nameDe} />
             ) : (
               <div className="bg-cream-dark rounded-2xl aspect-square flex items-center justify-center border border-cream-deep">
                 <div className="text-center text-stone-300">

@@ -327,8 +327,15 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
       {/* Schriftart */}
       <div className="bg-white rounded-2xl border border-cream-deep p-6">
         <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Schriftart (Züchtername)</h2>
-        <p className="text-sm text-stone-400 mb-4">
+        <p className="text-sm text-stone-400 mb-1">
           Wähle eine Schriftart für den großen Züchternamen im Hero-Bereich deiner Seite.
+        </p>
+        <p className="text-xs text-stone-400 mb-4">
+          Weitere Schriften findest du auf{' '}
+          <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer" className="text-forest underline">
+            fonts.google.com
+          </a>
+          {' '}— den Namen einfach unten ins Freitextfeld eintragen.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
           {FONT_OPTIONS.map((f) => (
@@ -460,26 +467,18 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
 
       {/* Bilder */}
       <div className="bg-white rounded-2xl border border-cream-deep p-6">
-        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Bilder</h2>
+        <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Hintergrundbild</h2>
         <p className="text-sm text-stone-400 mb-4">
-          Optionale Bilder für deine öffentliche Züchterseite. Werden sofort gespeichert.
+          Erscheint hinter dem gesamten Inhalt deiner Züchterseite. Wird sofort gespeichert.
+          Empfohlen: ca. 1600×1200px, ruhiges Motiv ohne zu viel Kontrast.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <BreederImageUploader
-            purpose="header"
-            initialUrl={breeder.headerImageUrl}
-            label="Headerbild"
-            hint="Breites Banner oben auf deiner Seite (empfohlen: ca. 1600×400px)"
-            aspect="aspect-[4/1]"
-          />
-          <BreederImageUploader
-            purpose="background"
-            initialUrl={breeder.backgroundImageUrl}
-            label="Hintergrundbild"
-            hint="Dezenter Hintergrund für die ganze Seite (empfohlen: ca. 1600×1200px)"
-            aspect="aspect-video"
-          />
-        </div>
+        <BreederImageUploader
+          purpose="background"
+          initialUrl={breeder.backgroundImageUrl}
+          label="Hintergrundbild"
+          hint="Hintergrund für die ganze Seite"
+          aspect="aspect-video"
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
