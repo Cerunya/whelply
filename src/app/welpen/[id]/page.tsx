@@ -429,30 +429,35 @@ export default async function WelpenDetailPage({
                 Geschwister aus diesem Wurf
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {siblings.map((sibling) => (
-                  <Link
-                    key={sibling.id}
-                    href={`/welpen/${sibling.id}`}
-                    className="bg-white rounded-xl border border-cream-deep overflow-hidden hover:border-forest/30 transition-colors"
-                  >
-                    <div className="bg-cream-dark aspect-square flex items-center justify-center">
-                      {sibling.media[0]?.url ? (
-                        <img src={sibling.media[0].url} alt={sibling.dog?.name ?? ''} className="w-full h-full object-cover" />
-                      ) : (
-                        <svg className="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="p-3">
-                      <p className="font-medium text-stone-800 text-sm">{sibling.dog?.name ?? sibling.title}</p>
-                      <p className="text-xs text-stone-400">
-                        {sibling.dog?.sex === 'male' ? 'Rüde' : sibling.dog?.sex === 'female' ? 'Hündin' : ''}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                {siblings.map((sibling) => {
+                  const sex = sibling.sex ?? sibling.dog?.sex
+                  const borderClass = sex === 'male'
+                    ? 'border-blue-300 bg-blue-50'
+                    : sex === 'female'
+                    ? 'border-pink-300 bg-pink-50'
+                    : 'border-cream-deep bg-white'
+                  return (
+                    <Link key={sibling.id} href={`/welpen/${sibling.id}`}
+                      className={`rounded-xl border-2 overflow-hidden hover:shadow-md transition-all ${borderClass}`}>
+                      <div className="bg-cream-dark aspect-square flex items-center justify-center">
+                        {sibling.media[0]?.url ? (
+                          <img src={sibling.media[0].url} alt={sibling.dog?.name ?? ''} className="w-full h-full object-cover" />
+                        ) : (
+                          <svg className="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="p-3">
+                        <p className="font-medium text-stone-800 text-sm">{sibling.dog?.name ?? sibling.title}</p>
+                        <p className={`text-xs font-medium mt-0.5 ${sex === 'male' ? 'text-blue-500' : sex === 'female' ? 'text-pink-500' : 'text-stone-400'}`}>
+                          {sex === 'male' ? 'Rüde' : sex === 'female' ? 'Hündin' : ''}
+                        </p>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           )}

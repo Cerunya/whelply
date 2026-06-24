@@ -275,6 +275,29 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
             </div>
           </div>
 
+          {/* Tab-Navigationsfarbe */}
+          <div>
+            <label className={labelClass}>Tab-Navigationsfarbe</label>
+            <p className="text-xs text-stone-400 mb-3">
+              Leer lassen = Primaerfarbe wird verwendet.
+            </p>
+            <div className="flex items-center gap-3">
+              <input type="color" value={themeNavColor || themeColor || '#2d5a3d'}
+                onChange={(e) => setThemeNavColor(e.target.value)}
+                className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer" />
+              <input type="text" value={themeNavColor}
+                onChange={(e) => setThemeNavColor(e.target.value)}
+                placeholder="Leer = Primaerfarbe"
+                className={inputClass + ' flex-1'} maxLength={7} />
+              {themeNavColor && (
+                <button type="button" onClick={() => setThemeNavColor('')}
+                  className="text-xs text-stone-400 hover:text-stone-700 whitespace-nowrap">
+                  Zuruecksetzen
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Hintergrundfarbe */}
           <div>
             <label className={labelClass}>Hintergrundfarbe (Inhalts-Panels)</label>
@@ -301,27 +324,27 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
             </div>
           </div>
 
-          {/* Tab-Navigationsfarbe */}
-          <div>
-            <label className={labelClass}>Tab-Navigationsfarbe</label>
-            <p className="text-xs text-stone-400 mb-3">
-              Leer lassen = Primaerfarbe wird verwendet.
-            </p>
-            <div className="flex items-center gap-3">
-              <input type="color" value={themeNavColor || themeColor || '#2d5a3d'}
-                onChange={(e) => setThemeNavColor(e.target.value)}
-                className="w-10 h-10 rounded-lg border border-stone-200 cursor-pointer" />
-              <input type="text" value={themeNavColor}
-                onChange={(e) => setThemeNavColor(e.target.value)}
-                placeholder="Leer = Primaerfarbe"
-                className={inputClass + ' flex-1'} maxLength={7} />
-              {themeNavColor && (
-                <button type="button" onClick={() => setThemeNavColor('')}
-                  className="text-xs text-stone-400 hover:text-stone-700 whitespace-nowrap">
-                  Zuruecksetzen
-                </button>
-              )}
-            </div>
+
+        </div>
+
+        {/* Ausrichtung */}
+        <div className="bg-white rounded-2xl border border-cream-deep p-6">
+          <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Textausrichtung (Header)</h2>
+          <p className="text-sm text-stone-400 mb-4">
+            Wie sollen Zuechternamen und Infos im Hero-Bereich angeordnet sein?
+          </p>
+          <div className="flex gap-3">
+            {[
+              { value: 'left', label: 'Links' },
+              { value: 'center', label: 'Mitte' },
+              { value: 'right', label: 'Rechts' },
+            ].map((opt) => (
+              <button key={opt.value} type="button"
+                onClick={() => setThemeAlign(opt.value)}
+                className={`flex-1 py-3 rounded-xl text-sm font-semibold border-2 transition-colors ${themeAlign === opt.value ? 'border-forest bg-cream text-forest' : 'border-stone-200 text-stone-500 hover:border-stone-300'}`}>
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -359,27 +382,6 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
               {breeder.kennelName} Vorschau
             </p>
           )}
-        </div>
-
-        {/* Ausrichtung */}
-        <div className="bg-white rounded-2xl border border-cream-deep p-6">
-          <h2 className="font-serif text-lg font-bold text-stone-900 mb-1">Textausrichtung (Header)</h2>
-          <p className="text-sm text-stone-400 mb-4">
-            Wie sollen Zuechternamen und Infos im Hero-Bereich angeordnet sein?
-          </p>
-          <div className="flex gap-3">
-            {[
-              { value: 'left', label: 'Links' },
-              { value: 'center', label: 'Mitte' },
-              { value: 'right', label: 'Rechts' },
-            ].map((opt) => (
-              <button key={opt.value} type="button"
-                onClick={() => setThemeAlign(opt.value)}
-                className={`flex-1 py-3 rounded-xl text-sm font-semibold border-2 transition-colors ${themeAlign === opt.value ? 'border-forest bg-cream text-forest' : 'border-stone-200 text-stone-500 hover:border-stone-300'}`}>
-                {opt.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Hintergrundbild */}

@@ -246,12 +246,12 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Zuchthunde */}
-        {breeder.dogs.length > 0 && (
+        {/* Zuchthunde — nur isStud=true */}
+        {breeder.dogs.filter((d) => d.isStud).length > 0 && (
           <div className="mb-10">
             <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Meine Zuchthunde</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {breeder.dogs.map((dog) => (
+              {breeder.dogs.filter((d) => d.isStud).map((dog) => (
                 <Link
                   key={dog.id}
                   href={`/dashboard/hund/${dog.id}`}
@@ -271,7 +271,7 @@ export default async function DashboardPage() {
                     <p className="font-medium text-stone-800 text-sm truncate">{dog.name}</p>
                     <p className="text-xs text-stone-400 truncate">
                       {dog.sex === 'male' ? 'Rüde' : 'Hündin'} · {dog.breed.nameDe}
-                      {dog.isStud && ' · Deckrüde'}
+                      {dog.sex === 'male' ? ' · Deckrüde' : ' · Zuchthündin'}
                     </p>
                   </div>
                 </Link>

@@ -35,8 +35,8 @@ export default function ListingCard({
   }
 
   return (
-    <Link href={`/welpen/${id}`} className="group block">
-      <div className={cardClasses}>
+    <Link href={`/welpen/${id}`} className="group block h-full">
+      <div className={cardClasses + ' flex flex-col h-full'}>
         {/* Bild oder Platzhalter */}
         <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative overflow-hidden">
           {imageUrl ? (
@@ -56,7 +56,7 @@ export default function ListingCard({
           )}
         </div>
 
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-1">
           <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">
             {breedName}
           </p>
@@ -67,7 +67,7 @@ export default function ListingCard({
             <p className="text-xs text-stone-400 mb-3 line-clamp-1">{kennelName}</p>
           )}
           {!puppyName && <div className="mb-3" />}
-          <div className="flex items-center justify-between pt-2 border-t border-cream-deep">
+          <div className="mt-auto flex items-center justify-between pt-2 border-t border-cream-deep">
             <span className="text-xs text-stone-400 flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
