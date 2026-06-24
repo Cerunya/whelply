@@ -409,7 +409,7 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
         </div>
       </main>
 
-      {success && <SaveToast />}
+      {success && <SaveToast show={success} />}
     </div>
   )
 }
