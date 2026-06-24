@@ -5,6 +5,9 @@ type BreederContactSidebarProps = {
   slug: string
   city: string | null
   state: string | null
+  street: string | null
+  zip: string | null
+  showAddress: boolean
   phone: string | null
   showPhone: boolean
   website: string | null
@@ -41,12 +44,14 @@ function SocialIcon({ type }: { type: string }) {
 }
 
 export default function BreederContactSidebar({
-  kennelName, slug, city, state, phone, showPhone,
+  kennelName, slug, city, state, street, zip, showAddress, phone, showPhone,
   website, socialInstagram, socialFacebook, socialTiktok, socialYoutube,
   themeColor, themeAccentColor,
 }: BreederContactSidebarProps) {
   const accent = themeAccentColor || themeColor || '#2d5a3d'
-  const location = [city, state].filter(Boolean).join(', ')
+  const location = showAddress && street
+    ? [street, zip && city ? `${zip} ${city}` : city, state].filter(Boolean).join(', ')
+    : [city, state].filter(Boolean).join(', ')
 
   const socials = [
     { type: 'instagram', href: socialInstagram, label: 'Instagram' },
@@ -56,7 +61,7 @@ export default function BreederContactSidebar({
   ].filter((s) => s.href)
 
   return (
-    <div className="sticky top-20 bg-white/85 backdrop-blur-sm rounded-2xl border border-cream-deep p-5 space-y-4">
+    <div className="sticky top-20 bg-white/90 rounded-2xl border border-cream-deep p-5 space-y-4">
       <h3 className="font-serif font-bold text-stone-900 text-sm">{kennelName}</h3>
 
       {location && (

@@ -43,6 +43,9 @@ export default async function ZuechterErwachseneHundePage({
             slug={params.slug}
             city={breeder.city}
             state={breeder.state}
+            street={breeder.street}
+            zip={breeder.zip}
+            showAddress={breeder.showAddress}
             phone={breeder.phone}
             showPhone={breeder.showPhone}
             website={breeder.website}

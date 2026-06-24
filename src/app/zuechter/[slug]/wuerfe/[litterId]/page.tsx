@@ -5,7 +5,6 @@ import BreederNavbar from '@/components/BreederNavbar'
 import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
-import ListingCard from '@/components/ListingCard'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 
@@ -69,6 +68,9 @@ export default async function LitterDetailPage({
             slug={params.slug}
             city={breeder.city}
             state={breeder.state}
+            street={breeder.street}
+            zip={breeder.zip}
+            showAddress={breeder.showAddress}
             phone={breeder.phone}
             showPhone={breeder.showPhone}
             website={breeder.website}
@@ -128,34 +130,51 @@ export default async function LitterDetailPage({
                 <p className="text-stone-400 text-sm">Noch keine Welpen eingetragen.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="space-y-3">
                 {litter.listings.map((listing) => {
                   const tint = listing.status === 'sold' ? 'sold' : listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null
+                  const borderClass = tint === 'sold' ? 'border-stone-300 bg-stone-100 opacity-60'
+                    : tint === 'male' ? 'border-blue-300 bg-blue-50'
+                    : tint === 'female' ? 'border-pink-300 bg-pink-50'
+                    : 'border-cream-deep bg-white hover:border-forest/20'
+                  const price = listing.priceCents
+                    ? (listing.priceCents / 100).toLocaleString('de-DE') + ' €'
+                    : 'Auf Anfrage'
                   return (
-                    <div key={listing.id} className="relative">
-                      <ListingCard
-                        id={listing.id}
-                        breedName={listing.breed.nameDe}
-                        kennelName={displayName}
-                        puppyName={listing.title}
-                        city={breeder.city}
-                        state={breeder.state}
-                        priceCents={listing.priceCents}
-                        isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
-                        imageUrl={listing.media[0]?.url}
-                        tint={tint}
-                      />
-                      {listing.status === 'reserved' && (
-                        <span className="absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-400 text-amber-900">
-                          Reserviert
-                        </span>
+                    <a
+                      key={listing.id}
+                      href={`/welpen/${listing.id}`}
+                      className={`flex items-center gap-3 rounded-xl border p-3 hover:shadow-sm transition-all ${borderClass}`}
+                    >
+                      {listing.media[0]?.url ? (
+                        <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-cream-dark flex-shrink-0 flex items-center justify-center">
+                          <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
                       )}
-                      {listing.status === 'sold' && (
-                        <span className="absolute top-2 right-2 text-xs font-bold px-2.5 py-1 rounded-full bg-stone-700 text-white">
-                          Verkauft
-                        </span>
-                      )}
-                    </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-stone-800 text-sm truncate">
+                          {listing.title || listing.breed.nameDe}
+                        </p>
+                        <p className="text-xs text-stone-400">
+                          {listing.sex === 'male' ? 'Rüde' : listing.sex === 'female' ? 'Hündin' : ''}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        {listing.status === 'reserved' && (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Reserviert</span>
+                        )}
+                        {listing.status === 'sold' && (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-600">Verkauft</span>
+                        )}
+                        {listing.status === 'available' && (
+                          <span className="text-sm font-semibold text-stone-700">{price}</span>
+                        )}
+                      </div>
+                    </a>
                   )
                 })}
               </div>

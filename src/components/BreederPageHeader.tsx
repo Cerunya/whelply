@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import BreederTabNav from './BreederTabNav'
 import type { BreederTabFlags } from '@/lib/breeder'
 
 type BreederHeaderData = {
@@ -127,41 +127,14 @@ export default function BreederPageHeader({
         </div>
       </section>
 
-      {/* Tab-Navigation — nutzt Primärfarbe als Hintergrund wenn kein navColor gesetzt */}
-      <nav
-        className="sticky top-10 z-40 border-b border-black/10 shadow-sm"
-        style={{
-          backgroundColor: navColor
-            ? navColor + 'F2'
-            : themeColor
-            ? themeColor + 'EE'
-            : 'rgba(45,90,61,0.93)',
-        }}
-      >
-        <div className="max-w-5xl mx-auto px-4 flex gap-1 overflow-x-auto backdrop-blur-sm">
-          {navItems.map((item) => {
-            const isActive = active === item.id
-            const activeHighlight = accentColor || '#e0a72e'
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={`flex-shrink-0 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all ${
-                  isActive
-                    ? 'opacity-100'
-                    : 'border-transparent opacity-60 hover:opacity-90'
-                }`}
-                style={{
-                  color: 'white',
-                  borderColor: isActive ? activeHighlight : 'transparent',
-                }}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-        </div>
-      </nav>
+      {/* Tab-Navigation — schmaler Balken, wird bei Sticky auf volle Breite */}
+      <BreederTabNav
+        navItems={navItems}
+        active={active}
+        themeColor={themeColor}
+        navColor={navColor}
+        accentColor={accentColor}
+      />
     </>
   )
 }

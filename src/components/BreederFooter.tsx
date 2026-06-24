@@ -71,7 +71,7 @@ export default function BreederFooter({
       className="mt-0 py-10 px-4"
       style={{ backgroundColor: bgColor }}
     >
-      <div className="max-w-5xl mx-auto flex flex-col items-center gap-6">
+      <div className="max-w-5xl mx-auto flex flex-col items-center gap-4">
         {/* Zwingername */}
         <p
           className="font-serif text-xl font-bold tracking-wide"
@@ -79,24 +79,6 @@ export default function BreederFooter({
         >
           {kennelName}
         </p>
-
-        {/* Social Icons */}
-        {socials.length > 0 && (
-          <div className="flex items-center gap-4">
-            {socials.map(({ href, icon, label }) => (
-              <a
-                key={label}
-                href={href!}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/60 hover:text-white transition-colors"
-                aria-label={label}
-              >
-                {icon}
-              </a>
-            ))}
-          </div>
-        )}
 
         {/* Links */}
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-white/50">

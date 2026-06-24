@@ -38,11 +38,12 @@ export default function GalleryLightbox({ images }: { images: GalleryImage[] }) 
         ))}
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox — z-[9999] um über allem (inkl. sticky Sidebar) zu liegen */}
       {open !== null && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
           onClick={close}
+          style={{ isolation: 'isolate' }}
         >
           {/* Bild */}
           <img
