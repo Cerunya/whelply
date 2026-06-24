@@ -36,6 +36,21 @@ export default async function ZuechterZuchthundePage({
     where: {
       breederId: breeder.id,
       isStud: true,
+      sex: 'male',
+      id: { notIn: featuredDogIds },
+    },
+    include: {
+      breed: { select: { nameDe: true } },
+      media: { take: 1, select: { url: true } },
+    },
+    orderBy: { name: 'asc' },
+  })
+
+  const breedingFemales = await prisma.dog.findMany({
+    where: {
+      breederId: breeder.id,
+      isStud: true,
+      sex: 'female',
       id: { notIn: featuredDogIds },
     },
     include: {
@@ -72,7 +87,7 @@ export default async function ZuechterZuchthundePage({
             themeAccentColor={breeder.themeAccentColor}
           />
         }>
-          {featuredDogs.length === 0 && studDogs.length === 0 && (
+          {featuredDogs.length === 0 && studDogs.length === 0 && breedingFemales.length === 0 && (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400 text-sm">Noch keine Zuchthunde vorgestellt.</p>
             </div>
@@ -130,19 +145,14 @@ export default async function ZuechterZuchthundePage({
             </div>
           )}
 
-          {/* Zuchtrüden — kompakte Übersicht */}
+          {/* Zuchtrüden */}
           {studDogs.length > 0 && (
             <div>
-              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
-                Zuchtrüden
-              </h2>
+              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Zuchtrüden</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {studDogs.map((dog) => (
-                  <Link
-                    key={dog.id}
-                    href={`/hund/${dog.id}`}
-                    className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all"
-                  >
+                  <Link key={dog.id} href={`/hund/${dog.id}`}
+                    className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all">
                     <div className="bg-cream-dark aspect-square flex items-center justify-center relative">
                       {dog.media[0]?.url ? (
                         <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
@@ -152,21 +162,46 @@ export default async function ZuechterZuchthundePage({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       )}
-                      <span
-                        className="absolute top-2 left-2 bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full"
-                        style={accentColor ? { backgroundColor: accentColor } : undefined}
-                      >
+                      <span className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                         Deckrüde
                       </span>
                     </div>
                     <div className="p-3">
-                      <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-0.5">
-                        {dog.breed.nameDe}
-                      </p>
+                      <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-0.5">{dog.breed.nameDe}</p>
                       <p className="font-semibold text-stone-800 text-sm">{dog.name}</p>
-                      {dog.titles && (
-                        <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{dog.titles}</p>
+                      {dog.titles && <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{dog.titles}</p>}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Zuchthündinnen */}
+          {breedingFemales.length > 0 && (
+            <div>
+              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Zuchthündinnen</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {breedingFemales.map((dog) => (
+                  <Link key={dog.id} href={`/hund/${dog.id}`}
+                    className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all">
+                    <div className="bg-cream-dark aspect-square flex items-center justify-center relative">
+                      {dog.media[0]?.url ? (
+                        <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                       )}
+                      <span className="absolute top-2 left-2 bg-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                        Zuchthündin
+                      </span>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-0.5">{dog.breed.nameDe}</p>
+                      <p className="font-semibold text-stone-800 text-sm">{dog.name}</p>
+                      {dog.titles && <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{dog.titles}</p>}
                     </div>
                   </Link>
                 ))}

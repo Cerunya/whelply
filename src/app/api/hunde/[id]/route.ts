@@ -55,7 +55,7 @@ export async function PATCH(
       color: parsed.data.color ?? null,
       pedigreeNumber: parsed.data.pedigreeNumber ?? null,
       titles: parsed.data.titles ?? null,
-      isStud: parsed.data.sex === 'male' ? parsed.data.isStud : false,
+      isStud: parsed.data.isStud ?? false,
       description: parsed.data.description ?? null,
       healthInfo: parsed.data.healthInfo ?? null,
       parentSireId: parsed.data.parentSireId ?? null,

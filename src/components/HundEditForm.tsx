@@ -26,6 +26,84 @@ type DogData = {
 
 type DogOption = { id: string; name: string; sex: string }
 
+
+function ParentSearch({
+  label, dogs, value, onChange, inputClass,
+}: {
+  label: string
+  dogs: DogOption[]
+  value: string
+  onChange: (id: string) => void
+  inputClass: string
+}) {
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+
+  const selected = dogs.find((d) => d.id === value)
+  const filtered = query
+    ? dogs.filter((d) => d.name.toLowerCase().includes(query.toLowerCase()))
+    : dogs
+
+  return (
+    <div className="relative">
+      <label className="block text-sm font-semibold text-stone-700 mb-1.5">{label}</label>
+      <div className={inputClass + ' flex items-center gap-2 cursor-pointer relative'} onClick={() => setOpen(true)}>
+        <span className={selected ? 'text-stone-800' : 'text-stone-400'}>
+          {selected ? selected.name : '— nicht angegeben —'}
+        </span>
+        {value && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onChange(''); setQuery('') }}
+            className="ml-auto text-stone-400 hover:text-stone-700"
+          >
+            ×
+          </button>
+        )}
+      </div>
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white rounded-xl border border-stone-200 shadow-lg">
+          <div className="p-2 border-b border-stone-100">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Suchen..."
+              className="w-full px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-forest"
+              autoFocus
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => { onChange(''); setQuery(''); setOpen(false) }}
+              className="w-full text-left px-4 py-2.5 text-sm text-stone-400 hover:bg-cream transition-colors"
+            >
+              — nicht angegeben —
+            </button>
+            {filtered.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => { onChange(d.id); setOpen(false); setQuery('') }}
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-cream transition-colors ${d.id === value ? 'bg-cream font-semibold text-forest' : 'text-stone-800'}`}
+              >
+                {d.name}
+              </button>
+            ))}
+            {filtered.length === 0 && (
+              <p className="px-4 py-3 text-sm text-stone-400">Keine Ergebnisse</p>
+            )}
+          </div>
+        </div>
+      )}
+      {open && (
+        <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+      )}
+    </div>
+  )
+}
+
 export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogData; breeds: Breed[]; allDogs?: DogOption[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -73,7 +151,7 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
         color: form.color || null,
         pedigreeNumber: form.pedigreeNumber || null,
         titles: form.titles || null,
-        isStud: form.sex === 'male' ? form.isStud : false,
+        isStud: form.isStud,
         description: form.description || null,
         healthInfo: form.healthInfo || null,
         parentSireId: form.parentSireId || null,
@@ -223,22 +301,22 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
             />
           </div>
 
-          {form.sex === 'male' && (
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="isStud"
-                checked={form.isStud}
-                onChange={handleChange}
-                className="mt-1 w-4 h-4 accent-forest"
-              />
-              <span className="text-sm text-stone-600">
-                <span className="font-medium text-stone-800">Als Deckrüde anbieten</span>
-                <br />
-                Erscheint mit Hervorhebung auf der öffentlichen Zuchtrüden-Seite.
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              name="isStud"
+              checked={form.isStud}
+              onChange={handleChange}
+              className="mt-1 w-4 h-4 accent-forest"
+            />
+            <span className="text-sm text-stone-600">
+              <span className="font-medium text-stone-800">
+                {form.sex === 'male' ? 'Als Deckrüde anbieten' : 'Als Zuchthündin zeigen'}
               </span>
-            </label>
-          )}
+              <br />
+              Erscheint auf der öffentlichen Zuchthunde-Seite.
+            </span>
+          </label>
 
           <div>
             <label className={labelClass}>Vorstellungstext (optional)</label>
@@ -276,38 +354,23 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
             <div className="border-t border-cream-deep pt-5">
               <p className="text-sm font-semibold text-stone-700 mb-1">Elterntiere (für Stammbaum)</p>
               <p className="text-xs text-stone-400 mb-4">
-                Verknüpfe Vater und Mutter dieses Hundes, falls sie ebenfalls auf Whelply eingetragen sind.
-                Das ermöglicht einen vollständigen Stammbaum auf den Welpen-Inseraten.
+                Verknüpfe Vater und Mutter dieses Hundes, falls sie auf Whelply eingetragen sind.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Vater (auf Whelply)</label>
-                  <select
-                    name="parentSireId"
-                    value={form.parentSireId}
-                    onChange={handleChange}
-                    className={inputClass}
-                  >
-                    <option value="">— nicht angegeben —</option>
-                    {allDogs.filter((d) => d.sex === 'male' && d.id !== dog.id).map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>Mutter (auf Whelply)</label>
-                  <select
-                    name="parentDamId"
-                    value={form.parentDamId}
-                    onChange={handleChange}
-                    className={inputClass}
-                  >
-                    <option value="">— nicht angegeben —</option>
-                    {allDogs.filter((d) => d.sex === 'female' && d.id !== dog.id).map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
+                <ParentSearch
+                  label="Vater (auf Whelply)"
+                  dogs={allDogs.filter((d) => d.sex === 'male' && d.id !== dog.id)}
+                  value={form.parentSireId}
+                  onChange={(id) => setForm({ ...form, parentSireId: id })}
+                  inputClass={inputClass}
+                />
+                <ParentSearch
+                  label="Mutter (auf Whelply)"
+                  dogs={allDogs.filter((d) => d.sex === 'female' && d.id !== dog.id)}
+                  value={form.parentDamId}
+                  onChange={(id) => setForm({ ...form, parentDamId: id })}
+                  inputClass={inputClass}
+                />
               </div>
             </div>
           )}
