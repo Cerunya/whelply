@@ -228,5 +228,3 @@ export async function DELETE(req: NextRequest) {
 
   return NextResponse.json({ ok: true })
 }
-
-export const config = { api: { bodyParser: { sizeLimit: '30mb' } } }
