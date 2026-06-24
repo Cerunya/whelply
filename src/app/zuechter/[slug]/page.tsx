@@ -5,6 +5,7 @@ import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import BreederContactSidebar from '@/components/BreederContactSidebar'
 import { renderRichText } from '@/lib/richtext'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
@@ -28,7 +29,23 @@ export default async function ZuechterProfilPage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="profil" />
 
-        <BreederPageContent bgColor={breeder.themeBgColor}>
+        <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
+          <BreederContactSidebar
+            kennelName={breeder.kennelName}
+            slug={params.slug}
+            city={breeder.city}
+            state={breeder.state}
+            phone={breeder.phone}
+            showPhone={breeder.showPhone}
+            website={breeder.website}
+            socialInstagram={breeder.socialInstagram}
+            socialFacebook={breeder.socialFacebook}
+            socialTiktok={breeder.socialTiktok}
+            socialYoutube={breeder.socialYoutube}
+            themeColor={breeder.themeColor}
+            themeAccentColor={breeder.themeAccentColor}
+          />
+        }>
           {/* Bio */}
           {breeder.bio && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
@@ -82,12 +99,6 @@ export default async function ZuechterProfilPage({
               </p>
             </div>
           )}
-
-          <div className="text-center">
-            <Link href="/zuechter" className="text-sm text-forest font-semibold hover:underline">
-              ← Alle Züchter durchsuchen
-            </Link>
-          </div>
         </BreederPageContent>
       </main>
       <BreederFooter

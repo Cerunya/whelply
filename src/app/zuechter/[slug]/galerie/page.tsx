@@ -4,7 +4,9 @@ import BreederNavbar from '@/components/BreederNavbar'
 import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
+import GalleryLightbox from '@/components/GalleryLightbox'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import BreederContactSidebar from '@/components/BreederContactSidebar'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,7 +32,23 @@ export default async function GaleriePage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="galerie" />
 
-        <BreederPageContent bgColor={breeder.themeBgColor}>
+        <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
+          <BreederContactSidebar
+            kennelName={breeder.kennelName}
+            slug={params.slug}
+            city={breeder.city}
+            state={breeder.state}
+            phone={breeder.phone}
+            showPhone={breeder.showPhone}
+            website={breeder.website}
+            socialInstagram={breeder.socialInstagram}
+            socialFacebook={breeder.socialFacebook}
+            socialTiktok={breeder.socialTiktok}
+            socialYoutube={breeder.socialYoutube}
+            themeColor={breeder.themeColor}
+            themeAccentColor={breeder.themeAccentColor}
+          />
+        }>
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Galerie</h2>
 
           {images.length === 0 ? (
@@ -38,38 +56,7 @@ export default async function GaleriePage({
               <p className="text-stone-400">Noch keine Fotos.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {images.map((img) => (
-                <div key={img.id}>
-                  <a
-                    href={`#foto-${img.id}`}
-                    className="aspect-square rounded-xl overflow-hidden border border-cream-deep block cursor-zoom-in hover:opacity-90 transition-opacity"
-                  >
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
-                  </a>
-
-                  {/* Lightbox: per CSS :target ein-/ausgeblendet, kein JS nötig */}
-                  <div
-                    id={`foto-${img.id}`}
-                    className="hidden target:flex fixed inset-0 z-50 items-center justify-center p-4 bg-black/90"
-                  >
-                    <a href="#" className="absolute inset-0" aria-label="Schließen" />
-                    <img
-                      src={img.url}
-                      alt=""
-                      className="relative max-w-full max-h-full object-contain rounded-lg"
-                    />
-                    <a
-                      href="#"
-                      aria-label="Schließen"
-                      className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white text-2xl leading-none hover:bg-white/20 transition-colors"
-                    >
-                      ×
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <GalleryLightbox images={images} />
           )}
         </BreederPageContent>
       </main>

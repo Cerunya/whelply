@@ -29,6 +29,20 @@ export default async function HundDetailPage({
       breed: { select: { nameDe: true, slug: true } },
       breeder: { select: { kennelName: true, displayName: true, city: true, state: true } },
       media: { take: 1, select: { url: true } },
+      parentSire: {
+        include: {
+          media: { take: 1, select: { url: true } },
+          parentSire: { select: { id: true, name: true } },
+          parentDam: { select: { id: true, name: true } },
+        },
+      },
+      parentDam: {
+        include: {
+          media: { take: 1, select: { url: true } },
+          parentSire: { select: { id: true, name: true } },
+          parentDam: { select: { id: true, name: true } },
+        },
+      },
       littersAsDam: {
         include: {
           breed: { select: { nameDe: true } },
@@ -212,6 +226,96 @@ export default async function HundDetailPage({
                       <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-stone-100 text-stone-500">
                         {LITTER_STATUS_LABELS[litter.status]}
                       </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Stammbaum (Eltern + Großeltern) */}
+          {(dog.parentSire || dog.parentDam) && (
+            <div className="mt-10 border-t border-cream-deep pt-10">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-6 text-center">Stammbaum</h2>
+
+              {/* Dieser Hund */}
+              <div className="flex justify-center mb-0">
+                <div className="bg-white rounded-2xl border-2 border-forest/30 p-4 w-44 text-center shadow-sm">
+                  {dog.media[0]?.url && (
+                    <img src={dog.media[0].url} alt={dog.name} className="w-16 h-16 rounded-xl object-cover mx-auto mb-2" />
+                  )}
+                  <p className="text-xs text-stone-400 uppercase tracking-wide mb-0.5">
+                    {dog.sex === 'male' ? 'Rüde' : dog.sex === 'female' ? 'Hündin' : ''}
+                  </p>
+                  <p className="font-serif font-bold text-stone-900 text-sm">{dog.name}</p>
+                </div>
+              </div>
+              <div className="flex justify-center"><div className="w-0.5 h-6 bg-stone-300" /></div>
+              <div className="flex justify-center"><div className="w-1/2 h-0.5 bg-stone-300" /></div>
+
+              {/* Eltern */}
+              <div className="grid grid-cols-2 gap-6 mb-0">
+                <div className="flex flex-col items-center">
+                  <div className="w-0.5 h-6 bg-stone-300" />
+                  {dog.parentDam ? (
+                    <Link href={`/hund/${dog.parentDam.id}`}
+                      className="bg-white rounded-2xl border-2 border-pink-200 p-4 w-full max-w-xs hover:border-pink-400 hover:shadow transition-all block">
+                      {dog.parentDam.media[0]?.url && (
+                        <img src={dog.parentDam.media[0].url} alt={dog.parentDam.name} className="w-14 h-14 rounded-xl object-cover mx-auto mb-2" />
+                      )}
+                      <p className="text-xs text-pink-500 font-bold uppercase tracking-wide text-center mb-1">Mutter</p>
+                      <p className="font-serif font-bold text-stone-900 text-sm text-center">{dog.parentDam.name}</p>
+                    </Link>
+                  ) : (
+                    <div className="bg-cream rounded-2xl border border-cream-deep p-4 w-full max-w-xs text-center text-stone-400 text-sm">Mutter nicht eingetragen</div>
+                  )}
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-0.5 h-6 bg-stone-300" />
+                  {dog.parentSire ? (
+                    <Link href={`/hund/${dog.parentSire.id}`}
+                      className="bg-white rounded-2xl border-2 border-blue-200 p-4 w-full max-w-xs hover:border-blue-400 hover:shadow transition-all block">
+                      {dog.parentSire.media[0]?.url && (
+                        <img src={dog.parentSire.media[0].url} alt={dog.parentSire.name} className="w-14 h-14 rounded-xl object-cover mx-auto mb-2" />
+                      )}
+                      <p className="text-xs text-blue-500 font-bold uppercase tracking-wide text-center mb-1">Vater</p>
+                      <p className="font-serif font-bold text-stone-900 text-sm text-center">{dog.parentSire.name}</p>
+                    </Link>
+                  ) : (
+                    <div className="bg-cream rounded-2xl border border-cream-deep p-4 w-full max-w-xs text-center text-stone-400 text-sm">Vater nicht eingetragen</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Großeltern */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex justify-center"><div className="w-0.5 h-5 bg-stone-200" /></div>
+                <div className="flex justify-center"><div className="w-0.5 h-5 bg-stone-200" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex justify-center"><div className="w-1/2 h-0.5 bg-stone-200" /></div>
+                <div className="flex justify-center"><div className="w-1/2 h-0.5 bg-stone-200" /></div>
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { dog: dog.parentDam?.parentSire ?? null, role: 'Großvater (m)', color: 'blue' },
+                  { dog: dog.parentDam?.parentDam ?? null, role: 'Großmutter (m)', color: 'pink' },
+                  { dog: dog.parentSire?.parentSire ?? null, role: 'Großvater (v)', color: 'blue' },
+                  { dog: dog.parentSire?.parentDam ?? null, role: 'Großmutter (v)', color: 'pink' },
+                ].map(({ dog: gp, role, color }) => (
+                  <div key={role} className="flex flex-col items-center">
+                    <div className="w-0.5 h-5 bg-stone-200" />
+                    {gp ? (
+                      <Link href={`/hund/${gp.id}`}
+                        className={`bg-white rounded-xl border-2 w-full p-3 block text-center hover:shadow transition-all ${color === 'pink' ? 'border-pink-100 hover:border-pink-200' : 'border-blue-100 hover:border-blue-200'}`}>
+                        <p className={`text-xs font-semibold mb-1 ${color === 'pink' ? 'text-pink-400' : 'text-blue-400'}`}>{role}</p>
+                        <p className="text-xs font-semibold text-stone-800 line-clamp-2">{gp.name}</p>
+                      </Link>
+                    ) : (
+                      <div className="bg-cream rounded-xl border border-cream-deep p-3 w-full text-center">
+                        <p className="text-xs text-stone-300">{role}</p>
+                        <p className="text-xs text-stone-300 mt-0.5">—</p>
+                      </div>
                     )}
                   </div>
                 ))}

@@ -6,6 +6,7 @@ import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import BreederContactSidebar from '@/components/BreederContactSidebar'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,8 +30,14 @@ export default async function ZuechterZuchthundePage({
     orderBy: { name: 'asc' },
   })
 
+  const featuredDogIds = featuredDogs.map((d) => d.id)
+
   const studDogs = await prisma.dog.findMany({
-    where: { breederId: breeder.id, isStud: true },
+    where: {
+      breederId: breeder.id,
+      isStud: true,
+      id: { notIn: featuredDogIds },
+    },
     include: {
       breed: { select: { nameDe: true } },
       media: { take: 1, select: { url: true } },
@@ -44,7 +51,23 @@ export default async function ZuechterZuchthundePage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="zuchthunde" />
 
-        <BreederPageContent bgColor={breeder.themeBgColor}>
+        <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
+          <BreederContactSidebar
+            kennelName={breeder.kennelName}
+            slug={params.slug}
+            city={breeder.city}
+            state={breeder.state}
+            phone={breeder.phone}
+            showPhone={breeder.showPhone}
+            website={breeder.website}
+            socialInstagram={breeder.socialInstagram}
+            socialFacebook={breeder.socialFacebook}
+            socialTiktok={breeder.socialTiktok}
+            socialYoutube={breeder.socialYoutube}
+            themeColor={breeder.themeColor}
+            themeAccentColor={breeder.themeAccentColor}
+          />
+        }>
           {featuredDogs.length === 0 && studDogs.length === 0 && (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400 text-sm">Noch keine Zuchthunde vorgestellt.</p>

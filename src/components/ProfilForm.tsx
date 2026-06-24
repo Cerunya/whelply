@@ -350,16 +350,6 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
                   className={inputClass}
                 />
               </div>
-              <div className="col-span-2">
-                <label className={labelClass}>Ort</label>
-                <input
-                  type="text"
-                  value={form.city}
-                  disabled
-                  className={inputClass + ' bg-stone-50 text-stone-400'}
-                />
-                <p className="text-xs text-stone-400 mt-1">Wird oben im öffentlichen Profil gepflegt.</p>
-              </div>
             </div>
           </div>
 

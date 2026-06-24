@@ -6,6 +6,7 @@ import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import ListingCard from '@/components/ListingCard'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import BreederContactSidebar from '@/components/BreederContactSidebar'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +37,23 @@ export default async function ZuechterErwachseneHundePage({
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="hunde" />
 
-        <BreederPageContent bgColor={breeder.themeBgColor}>
+        <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
+          <BreederContactSidebar
+            kennelName={breeder.kennelName}
+            slug={params.slug}
+            city={breeder.city}
+            state={breeder.state}
+            phone={breeder.phone}
+            showPhone={breeder.showPhone}
+            website={breeder.website}
+            socialInstagram={breeder.socialInstagram}
+            socialFacebook={breeder.socialFacebook}
+            socialTiktok={breeder.socialTiktok}
+            socialYoutube={breeder.socialYoutube}
+            themeColor={breeder.themeColor}
+            themeAccentColor={breeder.themeAccentColor}
+          />
+        }>
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
             Hunde zu vergeben
           </h2>

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { auth } from '@/lib/auth'
+import { auth, signOut } from '@/lib/auth'
 
 export default async function BreederNavbar() {
   const session = await auth()
@@ -9,11 +9,18 @@ export default async function BreederNavbar() {
       <Link href="/" className="font-serif font-bold text-stone-700 text-sm tracking-wide hover:text-forest transition-colors">
         Whelply
       </Link>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {session ? (
-          <Link href="/dashboard" className="text-xs text-stone-500 hover:text-stone-800 transition-colors font-medium">
-            Dashboard
-          </Link>
+          <>
+            <Link href="/dashboard" className="text-xs text-stone-500 hover:text-stone-800 transition-colors font-medium">
+              Dashboard
+            </Link>
+            <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
+              <button type="submit" className="text-xs text-stone-400 hover:text-stone-700 transition-colors">
+                Abmelden
+              </button>
+            </form>
+          </>
         ) : (
           <Link href="/login" className="text-xs text-stone-500 hover:text-stone-800 transition-colors font-medium">
             Anmelden
