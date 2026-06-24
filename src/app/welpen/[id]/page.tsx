@@ -374,9 +374,8 @@ export default async function WelpenDetailPage({
                 </div>
               </div>
 
-              {/* Großeltern */}
-              {(listing.litter?.dam?.parentSire || listing.litter?.dam?.parentDam ||
-                listing.litter?.sire?.parentSire || listing.litter?.sire?.parentDam) && (
+              {/* Großeltern — immer alle 4 Felder anzeigen */}
+              {(listing.litter?.dam || listing.litter?.sire || listing.litter?.sireExternal) && (
                 <>
                   <div className="grid grid-cols-2 gap-6 mb-0">
                     <div className="flex justify-center"><div className="w-0.5 h-6 bg-stone-200" /></div>

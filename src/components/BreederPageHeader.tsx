@@ -127,27 +127,33 @@ export default function BreederPageHeader({
         </div>
       </section>
 
-      {/* Tab-Navigation */}
+      {/* Tab-Navigation — nutzt Primärfarbe als Hintergrund wenn kein navColor gesetzt */}
       <nav
-        className="sticky top-10 z-40 border-b border-black/10"
-        style={{ backgroundColor: navColor ? navColor + 'F2' : 'rgba(255,255,255,0.95)' }}
+        className="sticky top-10 z-40 border-b border-black/10 shadow-sm"
+        style={{
+          backgroundColor: navColor
+            ? navColor + 'F2'
+            : themeColor
+            ? themeColor + 'EE'
+            : 'rgba(45,90,61,0.93)',
+        }}
       >
         <div className="max-w-5xl mx-auto px-4 flex gap-1 overflow-x-auto backdrop-blur-sm">
           {navItems.map((item) => {
             const isActive = active === item.id
-            const activeColor = accentColor || themeColor
+            const activeHighlight = accentColor || '#e0a72e'
             return (
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex-shrink-0 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex-shrink-0 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all ${
                   isActive
-                    ? activeColor ? '' : 'border-forest text-forest'
-                    : 'border-transparent opacity-70 hover:opacity-100'
+                    ? 'opacity-100'
+                    : 'border-transparent opacity-60 hover:opacity-90'
                 }`}
                 style={{
-                  color: navColor ? 'white' : (isActive && activeColor ? activeColor : undefined),
-                  borderColor: isActive && activeColor ? activeColor : (isActive && !activeColor ? undefined : 'transparent'),
+                  color: 'white',
+                  borderColor: isActive ? activeHighlight : 'transparent',
                 }}
               >
                 {item.label}

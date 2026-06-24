@@ -191,8 +191,8 @@ export default async function StammbaumPage({
             </div>
           </div>
 
-          {/* Generation 2: Großeltern */}
-          {(dam?.parentSire || dam?.parentDam || sire?.parentSire || sire?.parentDam) && (
+          {/* Generation 2: Großeltern — immer alle 4 Felder anzeigen */}
+          {(dam || sire || sireExternal) && (
             <>
               <div className="grid grid-cols-2 gap-6">
                 <Connector /><Connector />
@@ -207,34 +207,32 @@ export default async function StammbaumPage({
                 <div className="flex flex-col items-center"><Connector /><GrandCard dog={sire?.parentDam ?? null} role="Großmutter (v)" color="pink" /></div>
               </div>
 
-              {/* Generation 3: Urgroßeltern */}
-              {(dam?.parentSire && 'parentSire' in (dam.parentSire as object)) && (
-                <>
-                  <div className="grid grid-cols-4 gap-3 mt-0">
-                    {[0,1,2,3].map(i => <Connector key={i} />)}
-                  </div>
-                  <div className="grid grid-cols-4 gap-3">
-                    {[0,1,2,3].map(i => <Connector key={i} horizontal />)}
-                  </div>
-                  <div className="grid grid-cols-8 gap-2">
-                    {([
-                      [(dam?.parentSire as any)?.parentSire, 'Urgroßvater'],
-                      [(dam?.parentSire as any)?.parentDam, 'Urgroßmutter'],
-                      [(dam?.parentDam as any)?.parentSire, 'Urgroßvater'],
-                      [(dam?.parentDam as any)?.parentDam, 'Urgroßmutter'],
-                      [(sire?.parentSire as any)?.parentSire, 'Urgroßvater'],
-                      [(sire?.parentSire as any)?.parentDam, 'Urgroßmutter'],
-                      [(sire?.parentDam as any)?.parentSire, 'Urgroßvater'],
-                      [(sire?.parentDam as any)?.parentDam, 'Urgroßmutter'],
-                    ] as [{ id: string; name: string } | null, string][]).map(([dog, role], i) => (
-                      <div key={i} className="flex flex-col items-center">
-                        <div className="w-0.5 h-4 bg-stone-200" />
-                        <GreatCard dog={dog} role={role} />
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
+              {/* Generation 3: Urgroßeltern — immer alle 8 Felder */}
+              <>
+                <div className="grid grid-cols-4 gap-3 mt-0">
+                  {[0,1,2,3].map(i => <Connector key={i} />)}
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  {[0,1,2,3].map(i => <Connector key={i} horizontal />)}
+                </div>
+                <div className="grid grid-cols-8 gap-2">
+                  {([
+                    [(dam?.parentSire as any)?.parentSire, 'Urgroßvater'],
+                    [(dam?.parentSire as any)?.parentDam, 'Urgroßmutter'],
+                    [(dam?.parentDam as any)?.parentSire, 'Urgroßvater'],
+                    [(dam?.parentDam as any)?.parentDam, 'Urgroßmutter'],
+                    [(sire?.parentSire as any)?.parentSire, 'Urgroßvater'],
+                    [(sire?.parentSire as any)?.parentDam, 'Urgroßmutter'],
+                    [(sire?.parentDam as any)?.parentSire, 'Urgroßvater'],
+                    [(sire?.parentDam as any)?.parentDam, 'Urgroßmutter'],
+                  ] as [{ id: string; name: string } | null, string][]).map(([dog, role], i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <div className="w-0.5 h-4 bg-stone-200" />
+                      <GreatCard dog={dog} role={role} />
+                    </div>
+                  ))}
+                </div>
+              </>
             </>
           )}
 
