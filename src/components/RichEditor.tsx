@@ -58,11 +58,8 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()
       if (data.url) {
-        // Dateiname aus URL extrahieren (letzter Teil vor /view)
-        const urlParts = data.url.split('/')
-        const rawName = urlParts[urlParts.length - 2] || file.name
-        // Nur den originalen Dateinamen aus dem Storage-Key extrahieren
-        const cleanName = file.name || rawName
+        // Dateiname als lesbarer Anker, volle URL für Rendering
+        const cleanName = file.name
         insert(`\n![${cleanName}](${data.url})\n`)
       } else {
         alert('Upload fehlgeschlagen.')
@@ -133,8 +130,13 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
-        className={className}
+        className={className + ' text-xs text-stone-500 font-mono'}
       />
+      {value && value.includes('![') && (
+        <p className="text-xs text-stone-400 mt-1">
+          Bilder werden im gespeicherten Text als Markdown gespeichert und in der Vorschau korrekt angezeigt.
+        </p>
+      )}
     </div>
   )
 }

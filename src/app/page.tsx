@@ -181,18 +181,16 @@ export default async function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {featuredBreeders.map((breeder) => (
                   <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}
-                    className="group relative rounded-2xl overflow-hidden border border-cream-deep hover:shadow-lg transition-all">
-                    {/* Hintergrundbild */}
-                    <div className="h-32 bg-cream-dark overflow-hidden">
+                    className="group rounded-2xl overflow-hidden border border-white/10 hover:shadow-xl transition-all flex flex-col">
+                    <div className="h-40 overflow-hidden flex-shrink-0">
                       {breeder.media[0]?.url ? (
                         <img src={breeder.media[0].url} alt={breeder.kennelName}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        <div className="w-full h-full bg-forest/10" />
+                        <div className="w-full h-full bg-white/5" />
                       )}
                     </div>
-                    {/* Inhalt */}
-                    <div className="p-4 bg-white">
+                    <div className="p-4 bg-white flex-1 flex flex-col">
                       <p className="font-serif font-bold text-stone-900 text-base">{breeder.kennelName}</p>
                       {breeder.dogs[0]?.breed?.nameDe && (
                         <p className="text-xs text-forest font-semibold uppercase tracking-wider mt-0.5">
@@ -206,7 +204,6 @@ export default async function Home() {
                         <p className="text-xs text-stone-500 mt-2 line-clamp-2">{breeder.bio.replace(/\*\*|__|\*|_/g, '')}</p>
                       )}
                     </div>
-                    {/* Kaufen-Badge Platzhalter (Feature für später) */}
                   </Link>
                 ))}
               </div>

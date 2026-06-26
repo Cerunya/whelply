@@ -218,7 +218,7 @@ export default async function HundDetailPage({
                     </div>
                     {litter.listings.length > 0 ? (
                       <Link
-                        href={`/welpen/${litter.listings[0].id}`}
+                        href={`/zuechter/${slugify(dog.breeder.kennelName)}/wuerfe/${litter.id}`}
                         className="text-sm text-forest font-semibold hover:underline"
                       >
                         Welpen ansehen →

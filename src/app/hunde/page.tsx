@@ -60,7 +60,7 @@ export default async function HundePage({
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-cream">
         <section className="bg-forest px-4 py-12">
           <div className="max-w-6xl mx-auto">
             <h1 className="font-serif text-3xl font-bold text-white mb-2">
@@ -72,7 +72,7 @@ export default async function HundePage({
           </div>
         </section>
 
-        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
+        <div className="bg-cream px-4 pt-6 pb-2">
           <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
             <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
               <WelpenFilter breeds={breeds} basePath="/hunde" />
@@ -92,7 +92,7 @@ export default async function HundePage({
           </p>
 
           {listings.length === 0 ? (
-            <div className="text-center py-24 bg-stone-50 rounded-2xl border border-stone-200">
+            <div className="text-center py-24 bg-white rounded-2xl border border-cream-deep">
               <div className="text-5xl mb-4">🔍</div>
               <p className="text-stone-600 font-medium mb-2">Keine Inserate gefunden</p>
               <p className="text-stone-400 text-sm mb-6">Versuch einen anderen Filter oder schau später nochmal.</p>

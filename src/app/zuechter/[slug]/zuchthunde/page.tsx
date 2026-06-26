@@ -74,7 +74,7 @@ export default async function ZuechterZuchthundePage({
           {/* Zuchtrüden */}
           {studDogs.length > 0 && (
             <div className="mb-10 space-y-6">
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchtrueden</h2>
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchtrüden</h2>
               {studDogs.map((dog) => (
                 <Link key={dog.id} href={`/hund/${dog.id}`}
                   className="flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group">
@@ -89,7 +89,7 @@ export default async function ZuechterZuchthundePage({
                         </svg>
                       </div>
                     )}
-                    <span className="absolute top-3 left-3 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">Deckruede</span>
+                    <span className="absolute top-3 left-3 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">Deckrüde</span>
                   </div>
                   <div className="flex-1 p-6 md:p-7">
                     <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">{dog.breed.nameDe}</p>
@@ -111,7 +111,7 @@ export default async function ZuechterZuchthundePage({
           {/* Zuchthündinnen */}
           {breedingFemales.length > 0 && (
             <div className="space-y-6">
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchthuendinnen</h2>
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchthündinnen</h2>
               {breedingFemales.map((dog) => (
                 <Link key={dog.id} href={`/hund/${dog.id}`}
                   className="flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-pink-300 hover:shadow-md transition-all group">
@@ -126,7 +126,7 @@ export default async function ZuechterZuchthundePage({
                         </svg>
                       </div>
                     )}
-                    <span className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">Zuchthuendin</span>
+                    <span className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">Zuchthündin</span>
                   </div>
                   <div className="flex-1 p-6 md:p-7">
                     <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">{dog.breed.nameDe}</p>
