@@ -29,7 +29,7 @@ export default async function AktuellesPage({
   })
 
   // Alle Jahre aus den Posts ermitteln
-  const years = [...new Set(allPosts.map((p) => p.createdAt.getFullYear()))].sort((a, b) => b - a)
+  const years = Array.from(new Set(allPosts.map((p) => p.createdAt.getFullYear()))).sort((a, b) => b - a)
   const selectedYear = searchParams.jahr ? parseInt(searchParams.jahr) : years[0] ?? null
   const posts = selectedYear
     ? allPosts.filter((p) => p.createdAt.getFullYear() === selectedYear)
