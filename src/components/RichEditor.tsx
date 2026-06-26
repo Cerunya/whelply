@@ -58,7 +58,12 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()
       if (data.url) {
-        insert(`\n![](${data.url})\n`)
+        // Dateiname aus URL extrahieren (letzter Teil vor /view)
+        const urlParts = data.url.split('/')
+        const rawName = urlParts[urlParts.length - 2] || file.name
+        // Nur den originalen Dateinamen aus dem Storage-Key extrahieren
+        const cleanName = file.name || rawName
+        insert(`\n![${cleanName}](${data.url})\n`)
       } else {
         alert('Upload fehlgeschlagen.')
       }

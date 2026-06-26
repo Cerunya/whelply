@@ -31,7 +31,9 @@ export default async function HundBearbeitenPage({
   })
 
   // Alle Hunde aller Züchter für Elterntier-Auswahl (Stammbaum kann züchterübergreifend sein)
+  // Nur Zuchthunde (isStud=true) als Elterntier-Auswahl — keine Welpen
   const allDogs = await prisma.dog.findMany({
+    where: { isStud: true },
     select: { id: true, name: true, sex: true },
     orderBy: { name: 'asc' },
   })

@@ -34,14 +34,20 @@ export function renderRichText(text: string): React.ReactNode {
     // Image
     const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
     if (imgMatch) {
+      const alt = imgMatch[1]
+      const url = imgMatch[2]
+      const displayName = alt || url.split('/').slice(-2, -1)[0] || 'Bild'
       nodes.push(
-        <div key={i} className="my-4 flex justify-center">
+        <div key={i} className="my-4 flex flex-col items-center gap-2">
           <img
-            src={imgMatch[2]}
-            alt={imgMatch[1]}
+            src={url}
+            alt={alt}
             className="max-w-full rounded-xl shadow-sm"
             style={{ maxHeight: '500px' }}
           />
+          {alt && (
+            <p className="text-xs text-stone-400 italic">{displayName}</p>
+          )}
         </div>
       )
       continue

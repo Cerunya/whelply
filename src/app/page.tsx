@@ -82,7 +82,7 @@ export default async function Home() {
             style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}
           />
           <div className="max-w-6xl mx-auto relative">
-            <div className="max-w-xl">
+            <div className="max-w-2xl">
               <span className="inline-block text-xs font-semibold text-honey uppercase tracking-widest mb-5">
                 Nur FCI-anerkannte Rassen
               </span>
@@ -165,48 +165,16 @@ export default async function Home() {
           )}
         </section>
 
-        {/* ── Hunde zu vergeben ── */}
-        {adultListings.length > 0 && (
-          <section className="max-w-6xl mx-auto px-4 py-12">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Erwachsene Hunde</p>
-                <h2 className="font-serif text-3xl font-bold text-stone-900">Hunde zu vergeben</h2>
-              </div>
-              <Link href="/hunde" className="text-sm font-semibold text-forest hover:underline">
-                Alle anzeigen
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
-              {adultListings.slice(0, 4).map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  id={listing.id}
-                  breedName={listing.breed.nameDe}
-                  kennelName={listing.breeder.kennelName}
-                  puppyName={listing.title}
-                  city={listing.breeder.city}
-                  state={listing.breeder.state}
-                  priceCents={listing.priceCents}
-                  isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
-                  imageUrl={listing.media[0]?.url}
-                  tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* ── Züchter entdecken ── */}
         {featuredBreeders.length > 0 && (
-          <section className="bg-white border-y border-cream-deep py-16 px-4">
+          <section className="bg-forest-dark py-16 px-4">
             <div className="max-w-6xl mx-auto">
               <div className="flex items-end justify-between mb-8">
                 <div>
-                  <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Unsere Züchter</p>
-                  <h2 className="font-serif text-3xl font-bold text-stone-900">Züchter entdecken</h2>
+                  <p className="text-xs font-semibold text-honey uppercase tracking-widest mb-1">Unsere Züchter</p>
+                  <h2 className="font-serif text-3xl font-bold text-white">Züchter entdecken</h2>
                 </div>
-                <Link href="/zuechter" className="text-sm font-semibold text-forest hover:underline">
+                <Link href="/zuechter" className="text-sm font-semibold text-honey hover:underline">
                   Alle Züchter
                 </Link>
               </div>
@@ -244,6 +212,38 @@ export default async function Home() {
               </div>
             </div>
           </section>
+        )}
+
+        {/* ── Hunde zu vergeben ── */}
+        {adultListings.length > 0 && (
+          <section className="bg-white border-y border-cream-deep py-16 px-4"><div className="max-w-6xl mx-auto">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Erwachsene Hunde</p>
+                <h2 className="font-serif text-3xl font-bold text-stone-900">Hunde zu vergeben</h2>
+              </div>
+              <Link href="/hunde" className="text-sm font-semibold text-forest hover:underline">
+                Alle anzeigen
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
+              {adultListings.slice(0, 4).map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  id={listing.id}
+                  breedName={listing.breed.nameDe}
+                  kennelName={listing.breeder.kennelName}
+                  puppyName={listing.title}
+                  city={listing.breeder.city}
+                  state={listing.breeder.state}
+                  priceCents={listing.priceCents}
+                  isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                  imageUrl={listing.media[0]?.url}
+                  tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                />
+              ))}
+            </div>
+          </div></section>
         )}
 
         {/* ── Trust-Sektion ── */}

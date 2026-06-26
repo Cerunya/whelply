@@ -210,7 +210,8 @@ export default async function HundDetailPage({
                 {litters.map((litter) => (
                   <div key={litter.id} className="bg-white rounded-xl border border-cream-deep p-5 flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-stone-800 text-sm">{litter.breed.nameDe}</p>
+                      <p className="font-semibold text-stone-800 text-sm">{litter.name || litter.breed.nameDe}</p>
+                      {litter.name && <p className="text-xs text-stone-400">{litter.breed.nameDe}</p>}
                       <p className="text-xs text-stone-400 mt-0.5">
                         {LITTER_STATUS_LABELS[litter.status]}
                       </p>

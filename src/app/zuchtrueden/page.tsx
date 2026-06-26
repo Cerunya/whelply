@@ -15,6 +15,7 @@ export default async function ZuchtrudenPage({
   const dogs = await prisma.dog.findMany({
     where: {
       sex: 'male',
+      isStud: true,
       ...(searchParams.rasse ? { breed: { slug: searchParams.rasse } } : {}),
     },
     include: {
@@ -45,7 +46,7 @@ export default async function ZuchtrudenPage({
               Zuchtrüden
             </h1>
             <p className="text-white/70 text-sm">
-              Männliche Zuchthunde unserer Züchter — mit Kennzeichnung verfügbarer Deckrüden.
+              Deckrüden unserer Züchter — nur als Deckrüde freigegebene Hunde.
             </p>
           </div>
         </section>

@@ -32,7 +32,7 @@ export default function SearchForm({ breeds }: { breeds: Breed[] }) {
   `
 
   return (
-    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 w-full max-w-3xl">
+    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 w-full">
       <select value={breed} onChange={(e) => setBreed(e.target.value)} className={selectClass}>
         <option value="">Alle Rassen</option>
         {breeds.map((b) => (
