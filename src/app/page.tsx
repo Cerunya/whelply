@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { slugify } from '@/lib/slugify'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchForm from '@/components/SearchForm'
@@ -54,7 +55,6 @@ export default async function Home() {
       id: true,
       kennelName: true,
       displayName: true,
-      zuechterSlug: true,
       city: true,
       state: true,
       bio: true,
@@ -212,7 +212,7 @@ export default async function Home() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {featuredBreeders.map((breeder) => (
-                  <Link key={breeder.id} href={`/zuechter/${breeder.zuechterSlug}`}
+                  <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}
                     className="group relative rounded-2xl overflow-hidden border border-cream-deep hover:shadow-lg transition-all">
                     {/* Hintergrundbild */}
                     <div className="h-32 bg-cream-dark overflow-hidden">
