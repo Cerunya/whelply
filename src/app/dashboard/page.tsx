@@ -219,7 +219,8 @@ export default async function DashboardPage() {
                   className="bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors flex items-center justify-between"
                 >
                   <div>
-                    <p className="font-medium text-stone-800 text-sm">{litter.breed.nameDe}</p>
+                    <p className="font-medium text-stone-800 text-sm">{litter.name || litter.breed.nameDe}</p>
+                    {litter.name && <p className="text-xs text-stone-400">{litter.breed.nameDe}</p>}
                     <p className="text-xs text-stone-400 mt-0.5">
                       {litter.bornDate
                         ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}`

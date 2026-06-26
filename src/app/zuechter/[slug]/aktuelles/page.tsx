@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import BreederNavbar from '@/components/BreederNavbar'
 import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
@@ -11,19 +12,28 @@ export const dynamic = 'force-dynamic'
 
 export default async function AktuellesPage({
   params,
+  searchParams,
 }: {
   params: { slug: string }
+  searchParams: { jahr?: string }
 }) {
   const breeder = await getBreederBySlug(params.slug)
   if (!breeder) notFound()
 
   const tabs = await getBreederTabs(breeder.id)
 
-  const posts = await prisma.newsPost.findMany({
+  const allPosts = await prisma.newsPost.findMany({
     where: { breederId: breeder.id },
     orderBy: { createdAt: 'desc' },
     include: { media: { take: 1, select: { url: true } } },
   })
+
+  // Alle Jahre aus den Posts ermitteln
+  const years = [...new Set(allPosts.map((p) => p.createdAt.getFullYear()))].sort((a, b) => b - a)
+  const selectedYear = searchParams.jahr ? parseInt(searchParams.jahr) : years[0] ?? null
+  const posts = selectedYear
+    ? allPosts.filter((p) => p.createdAt.getFullYear() === selectedYear)
+    : allPosts
 
   return (
     <>
@@ -50,13 +60,34 @@ export default async function AktuellesPage({
             socialYoutube={breeder.socialYoutube}
             themeColor={breeder.themeColor}
             themeAccentColor={breeder.themeAccentColor}
+            verband={breeder.verband}
+            verificationLevel={breeder.verificationLevel}
           />
         }>
-          <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Aktuelles</h2>
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <h2 className="font-serif text-2xl font-bold text-stone-900">Aktuelles</h2>
+            {years.length > 1 && (
+              <div className="flex gap-2 flex-wrap">
+                {years.map((year) => (
+                  <Link
+                    key={year}
+                    href={`/zuechter/${params.slug}/aktuelles?jahr=${year}`}
+                    className={`px-4 py-1.5 rounded-xl text-sm font-semibold border-2 transition-colors ${
+                      selectedYear === year
+                        ? 'border-forest bg-forest text-white'
+                        : 'border-cream-deep text-stone-500 hover:border-stone-300'
+                    }`}
+                  >
+                    {year}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
 
           {posts.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
-              <p className="text-stone-400">Noch keine Beiträge.</p>
+              <p className="text-stone-400">Keine Beiträge für {selectedYear}.</p>
             </div>
           ) : (
             <div className="space-y-8">

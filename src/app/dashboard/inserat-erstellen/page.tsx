@@ -41,7 +41,7 @@ export default async function InseratErstellenPage() {
   const littersForForm = litters.map((l) => ({
     id: l.id,
     breedId: l.breedId,
-    label: `${l.breed.nameDe} — ${LITTER_STATUS_LABELS[l.status]}${
+    label: `${l.name ? l.name + ' · ' : ''}${l.breed.nameDe} — ${LITTER_STATUS_LABELS[l.status]}${
       l.bornDate ? ` (${l.bornDate.toLocaleDateString('de-DE')})` : ''
     }`,
   }))

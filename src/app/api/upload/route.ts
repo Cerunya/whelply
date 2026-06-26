@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Datei oder Ziel-ID fehlt' }, { status: 400 })
   }
 
-  if (purpose && !['header', 'background', 'gallery'].includes(purpose)) {
+  if (purpose && !['header', 'background', 'gallery', 'bio'].includes(purpose)) {
     return NextResponse.json({ error: 'Ungültiger purpose-Wert' }, { status: 400 })
   }
 
@@ -103,6 +103,12 @@ export async function POST(req: NextRequest) {
     // purpose-Zweig (Theme: Header-/Hintergrundbild oder Galerie-Bilder des Züchterprofils)
     const storageKey = `breeders/${breeder.id}/${purpose}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
     await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
+
+    if (purpose === 'bio') {
+      // Bio-Bild: nur hochladen, keine DB-Eintragung nötig
+      const url = `/api/media/${storageKey}/view`
+      return NextResponse.json({ url })
+    }
 
     if (purpose === 'gallery') {
       // Galerie: mehrere Bilder erlaubt, ans Ende anhängen

@@ -34,6 +34,35 @@ export default async function Home() {
     prisma.breederProfile.count().catch(() => 0),
   ])
 
+  const adultListings = await prisma.listing.findMany({
+    where: { status: 'available', type: 'adult_dog' },
+    orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
+    take: 6,
+    include: {
+      breed: { select: { nameDe: true } },
+      breeder: { select: { kennelName: true, city: true, state: true } },
+      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+    },
+  }).catch(() => [])
+
+  // Zufaellige Zuechterpräsentation: neueste mit Hintergrundbild zuerst
+  const featuredBreeders = await prisma.breederProfile.findMany({
+    where: { backgroundImageUrl: { not: null }, kennelName: { not: '' } },
+    orderBy: { createdAt: 'desc' },
+    take: 9,
+    select: {
+      id: true,
+      kennelName: true,
+      displayName: true,
+      zuechterSlug: true,
+      city: true,
+      state: true,
+      backgroundImageUrl: true,
+      bio: true,
+      dogs: { take: 1, select: { breed: { select: { nameDe: true } } } },
+    },
+  }).catch(() => [])
+
   const now = new Date()
 
   return (
@@ -130,6 +159,87 @@ export default async function Home() {
             </div>
           )}
         </section>
+
+        {/* ── Hunde zu vergeben ── */}
+        {adultListings.length > 0 && (
+          <section className="max-w-6xl mx-auto px-4 py-12">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Erwachsene Hunde</p>
+                <h2 className="font-serif text-3xl font-bold text-stone-900">Hunde zu vergeben</h2>
+              </div>
+              <Link href="/hunde" className="text-sm font-semibold text-forest hover:underline">
+                Alle anzeigen
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
+              {adultListings.slice(0, 4).map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  id={listing.id}
+                  breedName={listing.breed.nameDe}
+                  kennelName={listing.breeder.kennelName}
+                  puppyName={listing.title}
+                  city={listing.breeder.city}
+                  state={listing.breeder.state}
+                  priceCents={listing.priceCents}
+                  isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                  imageUrl={listing.media[0]?.url}
+                  tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Züchter entdecken ── */}
+        {featuredBreeders.length > 0 && (
+          <section className="bg-white border-y border-cream-deep py-16 px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Unsere Züchter</p>
+                  <h2 className="font-serif text-3xl font-bold text-stone-900">Züchter entdecken</h2>
+                </div>
+                <Link href="/zuechter" className="text-sm font-semibold text-forest hover:underline">
+                  Alle Züchter
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {featuredBreeders.map((breeder) => (
+                  <Link key={breeder.id} href={`/zuechter/${breeder.zuechterSlug}`}
+                    className="group relative rounded-2xl overflow-hidden border border-cream-deep hover:shadow-lg transition-all">
+                    {/* Hintergrundbild */}
+                    <div className="h-32 bg-cream-dark overflow-hidden">
+                      {breeder.backgroundImageUrl ? (
+                        <img src={breeder.backgroundImageUrl} alt={breeder.kennelName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full bg-forest/10" />
+                      )}
+                    </div>
+                    {/* Inhalt */}
+                    <div className="p-4 bg-white">
+                      <p className="font-serif font-bold text-stone-900 text-base">{breeder.kennelName}</p>
+                      {breeder.dogs[0]?.breed?.nameDe && (
+                        <p className="text-xs text-forest font-semibold uppercase tracking-wider mt-0.5">
+                          {breeder.dogs[0].breed.nameDe}
+                        </p>
+                      )}
+                      {(breeder.city || breeder.state) && (
+                        <p className="text-xs text-stone-400 mt-1">{[breeder.city, breeder.state].filter(Boolean).join(', ')}</p>
+                      )}
+                      {breeder.bio && (
+                        <p className="text-xs text-stone-500 mt-2 line-clamp-2">{breeder.bio.replace(/\*\*|__|\*|_/g, '')}</p>
+                      )}
+                    </div>
+                    {/* Kaufen-Badge Platzhalter (Feature für später) */}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── Trust-Sektion ── */}
         <section className="bg-white border-y border-cream-deep py-16 px-4">

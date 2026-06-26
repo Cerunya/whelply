@@ -428,7 +428,7 @@ export default async function WelpenDetailPage({
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">
                 Geschwister aus diesem Wurf
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:gap-4 sm:overflow-visible">
                 {siblings.map((sibling) => {
                   const sex = sibling.sex ?? sibling.dog?.sex
                   const borderClass = sex === 'male'
@@ -438,7 +438,7 @@ export default async function WelpenDetailPage({
                     : 'border-cream-deep bg-white'
                   return (
                     <Link key={sibling.id} href={`/welpen/${sibling.id}`}
-                      className={`rounded-xl border-2 overflow-hidden hover:shadow-md transition-all ${borderClass}`}>
+                      className={`flex-shrink-0 w-40 sm:w-auto rounded-xl border-2 overflow-hidden hover:shadow-md transition-all ${borderClass}`}>
                       <div className="bg-cream-dark aspect-square flex items-center justify-center">
                         {sibling.media[0]?.url ? (
                           <img src={sibling.media[0].url} alt={sibling.dog?.name ?? ''} className="w-full h-full object-cover" />

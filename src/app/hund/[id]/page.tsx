@@ -129,7 +129,7 @@ export default async function HundDetailPage({
               </h1>
               {dog.isStud && (
                 <span className="inline-block bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full mb-2">
-                  Deckrüde verfügbar
+                  {dog.sex === 'male' ? 'Deckrüde verfügbar' : 'Zuchthündin'}
                 </span>
               )}
               <p className="text-sm text-stone-400 mb-4">{breederName}{location && ` · ${location}`}</p>

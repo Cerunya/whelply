@@ -49,7 +49,7 @@ export default function SearchForm({ breeds }: { breeds: Breed[] }) {
 
       <button
         type="submit"
-        className="bg-honey text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors whitespace-nowrap shadow-sm"
+        className="flex-shrink-0 bg-honey text-white px-6 py-3.5 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors whitespace-nowrap shadow-sm"
       >
         Suchen
       </button>
