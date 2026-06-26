@@ -45,11 +45,11 @@ export default async function Home() {
     },
   }).catch(() => [])
 
-  // Zufaellige Zuechterpräsentation: neueste mit Hintergrundbild zuerst
-  const featuredBreeders = await prisma.breederProfile.findMany({
-    where: { backgroundImageUrl: { not: null }, kennelName: { not: '' } },
+  // Zuechterpraesentation: neueste Zuecher mit Hintergrundbild-Media
+  const allFeaturedBreeders = await prisma.breederProfile.findMany({
+    where: { kennelName: { not: '' } },
     orderBy: { createdAt: 'desc' },
-    take: 9,
+    take: 30,
     select: {
       id: true,
       kennelName: true,
@@ -57,11 +57,16 @@ export default async function Home() {
       zuechterSlug: true,
       city: true,
       state: true,
-      backgroundImageUrl: true,
       bio: true,
       dogs: { take: 1, select: { breed: { select: { nameDe: true } } } },
+      media: { where: { purpose: 'background' }, take: 1, select: { url: true } },
     },
   }).catch(() => [])
+
+  // Nur Zuecher mit Hintergrundbild anzeigen, max 9
+  const featuredBreeders = allFeaturedBreeders
+    .filter((b) => b.media[0]?.url)
+    .slice(0, 9)
 
   const now = new Date()
 
@@ -211,8 +216,8 @@ export default async function Home() {
                     className="group relative rounded-2xl overflow-hidden border border-cream-deep hover:shadow-lg transition-all">
                     {/* Hintergrundbild */}
                     <div className="h-32 bg-cream-dark overflow-hidden">
-                      {breeder.backgroundImageUrl ? (
-                        <img src={breeder.backgroundImageUrl} alt={breeder.kennelName}
+                      {breeder.media[0]?.url ? (
+                        <img src={breeder.media[0].url} alt={breeder.kennelName}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
                         <div className="w-full h-full bg-forest/10" />
