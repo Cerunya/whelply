@@ -51,7 +51,7 @@ export default async function ZuchtrudenPage({
           </div>
         </section>
 
-        <div className="bg-cream px-4 pt-6 pb-2">
+        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
           <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
             {breedOptions.length > 0 && (
               <form className="flex flex-wrap gap-3 items-center">

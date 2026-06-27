@@ -72,7 +72,7 @@ export default async function HundePage({
           </div>
         </section>
 
-        <div className="bg-cream px-4 pt-6 pb-2">
+        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
           <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
             <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
               <WelpenFilter breeds={breeds} basePath="/hunde" />

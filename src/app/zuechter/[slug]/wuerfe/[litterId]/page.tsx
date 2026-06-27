@@ -86,6 +86,8 @@ export default async function LitterDetailPage({
             socialYoutube={breeder.socialYoutube}
             themeColor={breeder.themeColor}
             themeAccentColor={breeder.themeAccentColor}
+            verband={breeder.verband}
+            verificationLevel={breeder.verificationLevel}
           />
         }>
           <Link href={`/zuechter/${params.slug}/wuerfe`} className="text-sm text-forest font-semibold hover:underline">
@@ -146,63 +148,59 @@ export default async function LitterDetailPage({
                 <p className="text-stone-400 text-sm">Noch keine Welpen eingetragen.</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {litter.listings.map((listing) => {
-                  const tint = listing.status === 'sold' ? 'sold' : listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null
-                  const borderClass = tint === 'sold' ? 'border-stone-300 bg-stone-100 opacity-60'
-                    : tint === 'male' ? 'border-blue-300 bg-blue-50'
-                    : tint === 'female' ? 'border-pink-300 bg-pink-50'
-                    : 'border-cream-deep bg-white hover:border-forest/20'
-                  const price = listing.priceCents
-                    ? (listing.priceCents / 100).toLocaleString('de-DE') + ' €'
-                    : 'Auf Anfrage'
-                  return (
-                    <a
-                      key={listing.id}
-                      href={`/welpen/${listing.id}`}
-                      className={`flex items-start gap-4 rounded-xl border p-4 hover:shadow-sm transition-all ${borderClass}`}
-                    >
-                      {listing.media[0]?.url ? (
-                        <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-24 h-24 rounded-lg bg-cream-dark flex-shrink-0 flex items-center justify-center">
-                          <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-semibold text-stone-800">{listing.title || listing.breed.nameDe}</p>
-                            {listing.sex && (
-                              <p className={`text-xs font-medium mt-0.5 ${listing.sex === 'male' ? 'text-blue-500' : 'text-pink-500'}`}>
-                                {listing.sex === 'male' ? 'Rüde' : 'Hündin'}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex-shrink-0 text-right space-y-1">
-                            {listing.status === 'available' && (
-                              <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700">Noch frei</span>
-                            )}
-                            {listing.status === 'reserved' && (
-                              <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Reserviert</span>
-                            )}
-                            {listing.status === 'sold' && (
-                              <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-600">Verkauft</span>
-                            )}
-                            <p className="text-sm font-bold text-stone-700">{price}</p>
-                          </div>
-                        </div>
-                        {listing.description && (
-                          <p className="text-xs text-stone-500 mt-1.5 line-clamp-2">{listing.description}</p>
-                        )}
-                        <p className="text-xs text-stone-400 mt-1">{listing.breed.nameDe}</p>
-                      </div>
-                    </a>
-                  )
-                })}
-              </div>
+               <div className="space-y-4">
+                 {litter.listings.map((listing) => {
+                   const tint = listing.status === 'sold' ? 'sold' : listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null
+                   const borderClass = tint === 'sold' ? 'border-stone-300 bg-stone-50 opacity-70'
+                     : tint === 'male' ? 'border-blue-200 bg-blue-50 hover:border-blue-300'
+                     : tint === 'female' ? 'border-pink-200 bg-pink-50 hover:border-pink-300'
+                     : 'border-cream-deep bg-white hover:border-forest/20'
+                   const price = listing.priceCents
+                     ? (listing.priceCents / 100).toLocaleString('de-DE') + ' €'
+                     : 'Auf Anfrage'
+                   return (
+                     <a
+                       key={listing.id}
+                       href={`/welpen/${listing.id}`}
+                       className={`flex flex-col sm:flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all ${borderClass}`}
+                     >
+                       {listing.media[0]?.url ? (
+                         <div className="sm:w-44 sm:flex-shrink-0 h-36 sm:h-auto overflow-hidden bg-cream-dark">
+                           <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-full h-full object-cover" />
+                         </div>
+                       ) : (
+                         <div className="sm:w-44 sm:flex-shrink-0 h-36 sm:h-auto bg-cream-dark flex items-center justify-center">
+                           <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                           </svg>
+                         </div>
+                       )}
+                       <div className="flex-1 p-5 flex flex-col justify-between">
+                         <div>
+                           <div className="flex items-start justify-between gap-2">
+                             <div>
+                               <p className="font-serif font-bold text-stone-900 text-lg">{listing.title || listing.breed.nameDe}</p>
+                               {listing.sex && (
+                                 <p className={`text-xs font-semibold mt-0.5 ${listing.sex === 'male' ? 'text-blue-500' : 'text-pink-500'}`}>
+                                   {listing.sex === 'male' ? 'Rüde' : 'Hündin'}
+                                 </p>
+                               )}
+                             </div>
+                             <div className="flex-shrink-0 text-right space-y-1">
+                               {listing.status === 'available' && <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700">Noch frei</span>}
+                               {listing.status === 'reserved' && <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Reserviert</span>}
+                               {listing.status === 'sold' && <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-600">Verkauft</span>}
+                               <p className="text-base font-bold text-stone-700">{price}</p>
+                             </div>
+                           </div>
+                           {listing.description && <p className="text-sm text-stone-500 mt-2 line-clamp-2">{listing.description}</p>}
+                         </div>
+                         <p className="text-xs text-stone-400 mt-3">{listing.breed.nameDe}</p>
+                       </div>
+                     </a>
+                   )
+                 })}
+               </div>
             )}
             {litter.listings.length > 0 && (
               <div className="flex items-center gap-4 mt-3 text-xs text-stone-400">

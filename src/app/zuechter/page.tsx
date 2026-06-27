@@ -62,9 +62,9 @@ export default async function ZuechterVerzeichnisPage({
           </div>
         </section>
 
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          {/* Filter */}
-          <form className="flex flex-col sm:flex-row gap-3 mb-8">
+        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
+          <div className="max-w-6xl mx-auto">
+          <form className="flex flex-col sm:flex-row gap-3 items-center">
             <select
               name="rasse"
               defaultValue={searchParams.rasse ?? ''}
@@ -100,7 +100,9 @@ export default async function ZuechterVerzeichnisPage({
               </Link>
             )}
           </form>
-
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-4 py-10">
           {filtered.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400 text-sm">Keine Züchter gefunden.</p>
