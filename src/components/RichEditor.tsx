@@ -10,23 +10,40 @@ type RichEditorProps = {
   className?: string
 }
 
-const IMG_RE = /!\[([^\]]*)\]\(([^)]+)\)/g
+// Wandelt Bild-Markdown in kurze Platzhalter um fuer die Textarea-Ansicht
+// ![dateiname.png](url) → [📷 dateiname.png]
+function toDisplay(md: string): string {
+  return md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt) => `[📷 ${alt || 'Bild'}]`)
+}
+
+// Wandelt Platzhalter zurueck zu Bild-Markdown, mit Hilfe der Image-Map
+function fromDisplay(display: string, images: { alt: string; url: string }[]): string {
+  let result = display
+  // Ersetze jeden Platzhalter durch den entsprechenden Bild-Markdown
+  // Wir matchen [📷 name] und schauen welches Bild dazu passt
+  let imgIdx = 0
+  result = result.replace(/\[📷\s+([^\]]+)\]/g, (_, name) => {
+    // Suche das naechste Bild mit passendem Alt-Text
+    const matched = images.find((img) => img.alt === name)
+    if (matched) return `![${matched.alt}](${matched.url})`
+    // Fallback: nimm das naechste verfuegbare Bild
+    if (imgIdx < images.length) {
+      const img = images[imgIdx++]
+      return `![${img.alt}](${img.url})`
+    }
+    return ''
+  })
+  return result
+}
 
 function extractImages(md: string) {
   const imgs: { alt: string; url: string }[] = []
-  const re = new RegExp(IMG_RE.source, 'g')
+  const re = /!\[([^\]]*)\]\(([^)]+)\)/g
   let m: RegExpExecArray | null
   while ((m = re.exec(md)) !== null) {
     imgs.push({ alt: m[1], url: m[2] })
   }
   return imgs
-}
-
-function stripImages(md: string) {
-  return md
-    .replace(/\n?!\[[^\]]*\]\([^)]+\)\n?/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
 }
 
 export default function RichEditor({ value, onChange, placeholder, rows = 6, className = '' }: RichEditorProps) {
@@ -35,16 +52,36 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
   const [uploading, setUploading] = useState(false)
 
   const images = extractImages(value)
-  const textOnly = stripImages(value)
+  const displayValue = toDisplay(value)
 
-  // Textarea-Aenderung: text + vorhandene Bilder
-  function onTextChange(newText: string) {
-    const imgMd = images.map((i) => `\n![${i.alt}](${i.url})`).join('')
-    onChange(newText + imgMd)
+  // Textarea-Aenderung: Platzhalter zurueck zu Markdown konvertieren
+  function onDisplayChange(newDisplay: string) {
+    onChange(fromDisplay(newDisplay, images))
+  }
+
+  function insertAtCursor(text: string) {
+    const el = ref.current
+    if (!el) {
+      // Fallback: am Ende anhaengen
+      onChange(value.trimEnd() + '\n' + text + '\n')
+      return
+    }
+    const s = el.selectionStart
+    const v = el.value
+    const newDisplay = v.slice(0, s) + text + v.slice(s)
+    onDisplayChange(newDisplay)
+    requestAnimationFrame(() => {
+      el.focus()
+      const pos = s + text.length
+      el.setSelectionRange(pos, pos)
+    })
   }
 
   function addImage(alt: string, url: string) {
-    onChange(value.trimEnd() + `\n![${alt}](${url})\n`)
+    // Bild am Cursor einfuegen als Platzhalter (wird beim Speichern als Markdown gespeichert)
+    // Aber zuerst muessen wir das Bild zur Liste hinzufuegen, sonst kann fromDisplay es nicht finden
+    const newValue = value.trimEnd() + `\n![${alt}](${url})\n`
+    onChange(newValue)
   }
 
   function removeImage(url: string) {
@@ -63,7 +100,8 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const e = el.selectionEnd
     const txt = el.value
     const sel = txt.slice(s, e) || 'Text'
-    onTextChange(txt.slice(0, s) + marker + sel + marker + txt.slice(e))
+    const newDisplay = txt.slice(0, s) + marker + sel + marker + txt.slice(e)
+    onDisplayChange(newDisplay)
     requestAnimationFrame(() => {
       el.focus()
       el.setSelectionRange(s + marker.length, s + marker.length + sel.length)
@@ -100,7 +138,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const input = window.prompt('YouTube-URL oder Video-ID:')
     if (!input) return
     const m = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
-    onTextChange(textOnly.trimEnd() + `\n@youtube[${m ? m[1] : input.trim()}]\n`)
+    insertAtCursor(`\n@youtube[${m ? m[1] : input.trim()}]\n`)
   }
 
   const btn = 'w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors text-xs flex-shrink-0'
@@ -126,18 +164,18 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         </button>
       </div>
 
-      {/* Textarea: zeigt nur Textinhalt, keine Bildpfade */}
+      {/* Textarea: Bilder erscheinen als kompakte Platzhalter, keine URLs */}
       <textarea
         ref={ref}
-        value={textOnly}
-        onChange={(e) => onTextChange(e.target.value)}
+        value={displayValue}
+        onChange={(e) => onDisplayChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
         className={className + ' resize-y'}
         style={{ minHeight: `${rows * 1.5}rem` }}
       />
 
-      {/* Bild-Chips */}
+      {/* Bild-Liste mit Vorschau */}
       {images.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {images.map((img, i) => (
@@ -145,7 +183,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
               <img src={img.url} alt={img.alt} className="w-8 h-8 rounded object-cover flex-shrink-0" />
               <span className="truncate max-w-[120px]">{img.alt || 'Bild'}</span>
               <button type="button" onClick={() => removeImage(img.url)}
-                className="text-stone-400 hover:text-red-500 ml-1 flex-shrink-0">×</button>
+                className="text-stone-400 hover:text-red-500 ml-1 flex-shrink-0" title="Bild entfernen">×</button>
             </div>
           ))}
         </div>
