@@ -47,15 +47,17 @@ export default async function ZuechterProfilPage({
             socialYoutube={breeder.socialYoutube}
             themeColor={breeder.themeColor}
             themeAccentColor={breeder.themeAccentColor}
+            verband={breeder.verband}
+            verificationLevel={breeder.verificationLevel}
           />
         }>
           {/* Bio */}
           {breeder.bio && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">Über uns</h2>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <div className="text-stone-600 text-sm leading-relaxed">
                 {renderRichText(breeder.bio)}
-              </p>
+              </div>
               {breeder.website && (
                 <a
                   href={breeder.website}
