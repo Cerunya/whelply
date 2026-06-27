@@ -84,8 +84,7 @@ export default async function ZuechterZuchthundePage({
           {/* Zuchthündinnen */}
           {breedingFemales.length > 0 && (
             <div className="space-y-6">
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchthündinnen</h2>
-              {breedingFemales.map((dog) => (
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchthündinnen</h2>              {breedingFemales.map((dog) => (
                 <Link key={dog.id} href={`/hund/${dog.id}`}
                   className="flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-pink-300 hover:shadow-md transition-all group">
                   <div className="md:w-64 md:flex-shrink-0 bg-cream-dark aspect-[4/3] md:aspect-auto overflow-hidden relative">
@@ -119,7 +118,7 @@ export default async function ZuechterZuchthundePage({
           )}
           {/* Zuchtrüden */}
           {studDogs.length > 0 && (
-            <div className="mb-10 space-y-6">
+            <div className={`space-y-6 ${breedingFemales.length > 0 ? 'mt-12' : ''}`}>
               <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchtrüden</h2>
               {studDogs.map((dog) => (
                 <Link key={dog.id} href={`/hund/${dog.id}`}
@@ -157,7 +156,7 @@ export default async function ZuechterZuchthundePage({
 
           {/* Zuchtrente */}
           {retiredDogs.length > 0 && (
-            <div className="space-y-6 mt-2">
+            <div className={`space-y-6 ${(studDogs.length > 0 || breedingFemales.length > 0) ? 'mt-12' : ''}`}>
               <h2 className="font-serif text-2xl font-bold text-stone-900">In Zuchtrente</h2>
               {retiredDogs.map((dog) => (
                 <Link key={dog.id} href={`/hund/${dog.id}`}

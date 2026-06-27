@@ -192,19 +192,25 @@ export default async function Home() {
                 {featuredBreeders.map((breeder) => (
                   <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}
                     className="group rounded-2xl overflow-hidden border border-white/10 hover:shadow-xl transition-all flex flex-col relative">
-                    {/* Status-Badge oben links */}
+                    {/* Runder Badge an der Bild/Text-Grenze */}
                     {breeder.listings.length > 0 && (
-                      <div className="absolute top-3 left-3 z-10">
-                        <span className="bg-honey text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                          Welpen verfügbar
-                        </span>
+                      <div className="absolute right-4 z-10" style={{ bottom: '95px' }}>
+                        <div className="w-16 h-16 rounded-full bg-honey text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white translate-y-1/2">
+                          <span className="text-[10px] font-black leading-tight uppercase">Welpen</span>
+                          <span className="text-[10px] font-black leading-tight uppercase">Dispo</span>
+                        </div>
                       </div>
                     )}
                     {breeder.listings.length === 0 && breeder.litters.length > 0 && (
-                      <div className="absolute top-3 left-3 z-10">
-                        <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                          {breeder.litters[0].status === 'pregnant' ? 'Wurf erwartet' : 'Wurf geplant'}
-                        </span>
+                      <div className="absolute right-4 z-10" style={{ bottom: '95px' }}>
+                        <div className="w-16 h-16 rounded-full bg-blue-400 text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white translate-y-1/2">
+                          <span className="text-[10px] font-black leading-tight uppercase">
+                            {breeder.litters[0].status === 'pregnant' ? 'Wurf' : 'Wurf'}
+                          </span>
+                          <span className="text-[10px] font-black leading-tight uppercase">
+                            {breeder.litters[0].status === 'pregnant' ? 'Erwartet' : 'Geplant'}
+                          </span>
+                        </div>
                       </div>
                     )}
                     <div className="h-40 overflow-hidden flex-shrink-0">

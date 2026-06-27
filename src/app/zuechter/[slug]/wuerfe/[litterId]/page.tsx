@@ -34,8 +34,9 @@ export default async function LitterDetailPage({
         include: {
           breed: { select: { nameDe: true } },
           media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+          // health fields sind Skalare, automatisch inklusive
         },
-        orderBy: { createdAt: 'asc' },
+        orderBy: [{ status: 'asc' }, { createdAt: 'asc' }],
       },
     },
   })
@@ -162,40 +163,48 @@ export default async function LitterDetailPage({
                      <a
                        key={listing.id}
                        href={`/welpen/${listing.id}`}
-                       className={`flex flex-col sm:flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all sm:min-h-[140px] ${borderClass}`}
+                       className={`flex flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all ${borderClass}`}
                      >
-                       {listing.media[0]?.url ? (
-                         <div className="sm:w-44 sm:flex-shrink-0 h-40 sm:h-full sm:min-h-[140px] overflow-hidden bg-cream-dark">
+                       {/* Bild — feste Groesse so dass alle Karten gleich hoch sind */}
+                       <div className="w-36 h-36 flex-shrink-0 overflow-hidden bg-cream-dark">
+                         {listing.media[0]?.url ? (
                            <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-full h-full object-cover" />
-                         </div>
-                       ) : (
-                         <div className="sm:w-44 sm:flex-shrink-0 h-40 sm:h-full sm:min-h-[140px] bg-cream-dark flex items-center justify-center">
-                           <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                           </svg>
-                         </div>
-                       )}
-                       <div className="flex-1 p-5 flex flex-col justify-between">
+                         ) : (
+                           <div className="w-full h-full flex items-center justify-center">
+                             <svg className="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                             </svg>
+                           </div>
+                         )}
+                       </div>
+                       {/* Inhalt */}
+                       <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
                          <div>
                            <div className="flex items-start justify-between gap-2">
                              <div>
-                               <p className="font-serif font-bold text-stone-900 text-lg">{listing.title || listing.breed.nameDe}</p>
+                               <p className="font-semibold text-stone-900">{listing.title || listing.breed.nameDe}</p>
                                {listing.sex && (
                                  <p className={`text-xs font-semibold mt-0.5 ${listing.sex === 'male' ? 'text-blue-500' : 'text-pink-500'}`}>
                                    {listing.sex === 'male' ? 'Rüde' : 'Hündin'}
                                  </p>
                                )}
                              </div>
-                             <div className="flex-shrink-0 text-right space-y-1">
+                             <div className="flex-shrink-0 text-right space-y-0.5">
                                {listing.status === 'available' && <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700">Noch frei</span>}
                                {listing.status === 'reserved' && <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Reserviert</span>}
                                {listing.status === 'sold' && <span className="block text-xs font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-600">Verkauft</span>}
-                               <p className="text-base font-bold text-stone-700">{price}</p>
+                               <p className="text-sm font-bold text-stone-700 mt-0.5">{price}</p>
                              </div>
                            </div>
-                           {listing.description && <p className="text-sm text-stone-500 mt-2 line-clamp-2">{listing.description}</p>}
+                           {listing.description && <p className="text-xs text-stone-500 mt-1.5 line-clamp-1">{listing.description}</p>}
                          </div>
-                         <p className="text-xs text-stone-400 mt-3">{listing.breed.nameDe}</p>
+                         {/* Gesundheits-Badges */}
+                         <div className="flex flex-wrap gap-1 mt-2">
+                           {listing.hasPedigree && <span className="text-xs bg-forest/10 text-forest font-medium px-2 py-0.5 rounded-full">Ahnentafel</span>}
+                           {listing.isVaccinated && <span className="text-xs bg-blue-50 text-blue-700 font-medium px-2 py-0.5 rounded-full">Geimpft</span>}
+                           {listing.isDewormed && <span className="text-xs bg-amber-50 text-amber-700 font-medium px-2 py-0.5 rounded-full">Entwurmt</span>}
+                           {listing.isChipped && <span className="text-xs bg-purple-50 text-purple-700 font-medium px-2 py-0.5 rounded-full">Gechipt</span>}
+                         </div>
                        </div>
                      </a>
                    )
