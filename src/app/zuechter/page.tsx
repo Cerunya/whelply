@@ -52,7 +52,7 @@ export default async function ZuechterVerzeichnisPage({
       <Navbar />
       <main className="min-h-screen bg-cream">
         <section className="bg-forest px-4 py-12">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h1 className="font-serif text-3xl font-bold text-white mb-2">
               Züchter-Verzeichnis
             </h1>
@@ -62,7 +62,7 @@ export default async function ZuechterVerzeichnisPage({
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="max-w-6xl mx-auto px-4 py-10">
           {/* Filter */}
           <form className="flex flex-col sm:flex-row gap-3 mb-8">
             <select

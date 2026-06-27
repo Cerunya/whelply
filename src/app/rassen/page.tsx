@@ -27,7 +27,7 @@ export default async function RassenlexikonPage() {
       <Navbar />
       <main className="min-h-screen bg-cream">
         <section className="bg-forest px-4 py-12">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h1 className="font-serif text-3xl font-bold text-white mb-2">
               Rasselexikon
             </h1>
@@ -37,7 +37,7 @@ export default async function RassenlexikonPage() {
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
+        <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
           {groupNumbers.map((groupNum) => (
             <div key={groupNum}>
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-1">

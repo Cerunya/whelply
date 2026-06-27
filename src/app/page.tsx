@@ -175,7 +175,7 @@ export default async function Home() {
                   <h2 className="font-serif text-3xl font-bold text-white">Züchter entdecken</h2>
                 </div>
                 <Link href="/zuechter" className="text-sm font-semibold text-honey hover:underline">
-                  Alle Züchter
+                  Alle Züchter →
                 </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -220,7 +220,7 @@ export default async function Home() {
                 <h2 className="font-serif text-3xl font-bold text-stone-900">Hunde zu vergeben</h2>
               </div>
               <Link href="/hunde" className="text-sm font-semibold text-forest hover:underline">
-                Alle anzeigen
+                Alle anzeigen →
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">

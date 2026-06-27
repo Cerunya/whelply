@@ -41,7 +41,7 @@ export default async function ZuchtrudenPage({
       <Navbar />
       <main className="min-h-screen bg-cream">
         <section className="bg-forest px-4 py-12">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h1 className="font-serif text-3xl font-bold text-white mb-2">
               Zuchtrüden
             </h1>
@@ -51,34 +51,35 @@ export default async function ZuchtrudenPage({
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto px-4 py-10">
-          {/* Filter */}
-          {breedOptions.length > 0 && (
-            <form className="flex flex-wrap gap-3 mb-8">
-              <select
-                name="rasse"
-                defaultValue={searchParams.rasse ?? ''}
-                className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-forest/30"
-              >
-                <option value="">Alle Rassen</option>
-                {breedOptions.map(([slug, name]) => (
-                  <option key={slug} value={slug}>{name}</option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                className="bg-honey text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors"
-              >
-                Filtern
-              </button>
-              {searchParams.rasse && (
-                <Link href="/zuchtrueden" className="px-4 py-2.5 text-sm text-stone-400 hover:text-stone-700 transition-colors">
-                  Filter zurücksetzen
-                </Link>
-              )}
-            </form>
-          )}
-
+        <div className="bg-cream px-4 pt-6 pb-2">
+          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
+            {breedOptions.length > 0 && (
+              <form className="flex flex-wrap gap-3 items-center">
+                <select
+                  name="rasse"
+                  defaultValue={searchParams.rasse ?? ''}
+                  className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-forest/30"
+                >
+                  <option value="">Alle Rassen</option>
+                  {breedOptions.map(([slug, name]) => (
+                    <option key={slug} value={slug}>{name}</option>
+                  ))}
+                </select>
+                <button type="submit"
+                  className="bg-honey text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors">
+                  Filtern
+                </button>
+                {searchParams.rasse && (
+                  <Link href="/zuchtrueden" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
+                    Filter zurücksetzen
+                  </Link>
+                )}
+              </form>
+            )}
+            <p className="text-xs text-stone-400">{dogs.length} {dogs.length === 1 ? 'Deckrüde' : 'Deckrüden'}</p>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-4 py-10">
           {dogs.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-cream-deep">
               <svg className="w-12 h-12 mx-auto text-stone-200 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

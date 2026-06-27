@@ -10,10 +10,19 @@ type RichEditorProps = {
   className?: string
 }
 
+// Konvertiert Markdown-Bildlinks zu einem leserlichen Format für die Anzeige
+// ![name.jpg](url) → [Bild: name.jpg]
+function toDisplayText(md: string): string {
+  return md.replace(/!\[([^\]]*)\]\([^)]+\)/g, (_, alt) => `[Bild: ${alt || 'Bild'}]`)
+}
+
+// Konvertiert Display-Text zurück zu Markdown (zum Editieren)  
+// Nötig wenn der User direkt im Display-Modus tippt (wir nutzen aber separate Modi)
 export default function RichEditor({ value, onChange, placeholder, rows = 6, className = '' }: RichEditorProps) {
   const ref = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [showRaw, setShowRaw] = useState(false)
 
   const wrap = useCallback((marker: string) => {
     const el = ref.current
@@ -58,9 +67,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()
       if (data.url) {
-        // Dateiname als lesbarer Anker, volle URL für Rendering
-        const cleanName = file.name
-        insert(`\n![${cleanName}](${data.url})\n`)
+        insert(`\n![${file.name}](${data.url})\n`)
       } else {
         alert('Upload fehlgeschlagen.')
       }
@@ -80,30 +87,22 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     insert(`\n@youtube[${id}]\n`)
   }
 
+  const hasImages = /!\[([^\]]*)\]\([^)]+\)/.test(value)
   const btnClass = 'w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors text-xs'
 
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1 flex-wrap">
-        <button type="button" onClick={() => wrap('**')} className={btnClass} title="Fett">
-          <strong>B</strong>
-        </button>
-        <button type="button" onClick={() => wrap('*')} className={`${btnClass} italic`} title="Kursiv">
-          I
-        </button>
+        <button type="button" onClick={() => wrap('**')} className={btnClass} title="Fett"><strong>B</strong></button>
+        <button type="button" onClick={() => wrap('*')} className={`${btnClass} italic`} title="Kursiv">I</button>
         <div className="w-px h-5 bg-stone-200 mx-1" />
-        <button type="button" onClick={handleImageUrl} className={btnClass} title="Bild per URL einfuegen">
+        <button type="button" onClick={handleImageUrl} className={btnClass} title="Bild per URL einfügen">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
         </button>
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          disabled={uploading}
-          className={btnClass + (uploading ? ' opacity-50' : '')}
-          title="Bild hochladen"
-        >
+        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+          className={btnClass + (uploading ? ' opacity-50' : '')} title="Bild hochladen">
           {uploading ? (
             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -121,21 +120,37 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
             <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
           </svg>
         </button>
-        <p className="text-xs text-stone-400 ml-1">**fett**, *kursiv*</p>
+        {hasImages && (
+          <button type="button" onClick={() => setShowRaw(!showRaw)}
+            className="ml-auto text-xs text-stone-400 hover:text-stone-600 underline">
+            {showRaw ? 'Kompaktansicht' : 'Markdown anzeigen'}
+          </button>
+        )}
       </div>
 
-      <textarea
-        ref={ref}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={rows}
-        placeholder={placeholder}
-        className={className + ' text-xs text-stone-500 font-mono'}
-      />
-      {value && value.includes('![') && (
-        <p className="text-xs text-stone-400 mt-1">
-          Bilder werden im gespeicherten Text als Markdown gespeichert und in der Vorschau korrekt angezeigt.
-        </p>
+      {/* Kompaktansicht: Bilder als [Bild: name] Token, kein roher URL-Pfad */}
+      {!showRaw && hasImages ? (
+        <div
+          className={className + ' cursor-text whitespace-pre-wrap text-sm leading-relaxed'}
+          onClick={() => setShowRaw(true)}
+          title="Klicken zum Bearbeiten"
+        >
+          {toDisplayText(value) || <span className="text-stone-400">{placeholder}</span>}
+          <p className="text-xs text-stone-400 mt-2 border-t border-stone-100 pt-2">
+            Klicken zum Bearbeiten · Bilder sind im Text eingebettet
+          </p>
+        </div>
+      ) : (
+        <textarea
+          ref={ref}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={() => hasImages && setShowRaw(false)}
+          rows={rows}
+          placeholder={placeholder}
+          className={className + ' resize-y'}
+          autoFocus={showRaw}
+        />
       )}
     </div>
   )
