@@ -50,7 +50,7 @@ export default function BreederPageHeader({
     { id: 'profil', label: 'Profil', href: `/zuechter/${slug}`, show: true },
     { id: 'wuerfe', label: 'Würfe & Planung', href: `/zuechter/${slug}/wuerfe`, show: tabs.wuerfe },
     { id: 'hunde', label: 'Hunde zu vergeben', href: `/zuechter/${slug}/hunde`, show: tabs.erwachseneHunde },
-    { id: 'zuchthunde', label: 'Zuchthunde', href: `/zuechter/${slug}/zuchthunde`, show: tabs.zuchthunde },
+    { id: 'zuchthunde', label: 'Unsere Hunde', href: `/zuechter/${slug}/zuchthunde`, show: tabs.zuchthunde },
     { id: 'aktuelles', label: 'Aktuelles', href: `/zuechter/${slug}/aktuelles`, show: tabs.aktuelles },
     { id: 'galerie', label: 'Galerie', href: `/zuechter/${slug}/galerie`, show: tabs.galerie },
   ].filter((item) => item.show)

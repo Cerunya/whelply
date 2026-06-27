@@ -3,6 +3,8 @@ import { slugify } from '@/lib/slugify'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import { Suspense } from 'react'
+import ListingFilter from '@/components/ListingFilter'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -63,43 +65,17 @@ export default async function ZuechterVerzeichnisPage({
         </section>
 
         <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
-          <div className="max-w-6xl mx-auto">
-          <form className="flex flex-col sm:flex-row gap-3 items-center">
-            <select
-              name="rasse"
-              defaultValue={searchParams.rasse ?? ''}
-              className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-forest/30"
-            >
-              <option value="">Alle Rassen</option>
-              {breedOptions.map((breed) => (
-                <option key={breed} value={breed}>{breed}</option>
-              ))}
-            </select>
-            <select
-              name="bundesland"
-              defaultValue={searchParams.bundesland ?? ''}
-              className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-forest/30"
-            >
-              <option value="">Alle Bundesländer</option>
-              {states.map((state) => (
-                <option key={state} value={state}>{state}</option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="bg-honey text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors"
-            >
-              Filtern
-            </button>
-            {(searchParams.rasse || searchParams.bundesland) && (
-              <Link
-                href="/zuechter"
-                className="px-4 py-2.5 text-sm text-stone-400 hover:text-stone-700 transition-colors"
-              >
-                Filter zurücksetzen
-              </Link>
-            )}
-          </form>
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
+              <ListingFilter
+                basePath="/zuechter"
+                filters={[
+                  { key: 'rasse', placeholder: 'Alle Rassen', options: breedOptions.map((b) => ({ value: b, label: b })) },
+                  { key: 'bundesland', placeholder: 'Alle Bundesländer', options: states.map((s) => ({ value: s, label: s })) },
+                ]}
+              />
+            </Suspense>
+            <p className="text-xs text-stone-400 flex-shrink-0">{filtered.length} Züchter</p>
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-4 py-10">

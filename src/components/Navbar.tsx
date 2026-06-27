@@ -7,7 +7,7 @@ export default async function Navbar() {
 
   const navItems = [
     { href: '/welpen', label: 'Welpen' },
-    { href: '/hunde', label: 'Unsere Hunde' },
+    { href: '/hunde', label: 'Erwachsene Hunde' },
     { href: '/zuchtrueden', label: 'Zuchtrüden' },
     { href: '/zuechter', label: 'Züchter' },
     { href: '/rassen', label: 'Rassen' },

@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import { Suspense } from 'react'
+import ListingFilter from '@/components/ListingFilter'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -52,31 +54,16 @@ export default async function ZuchtrudenPage({
         </section>
 
         <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
-          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
-            {breedOptions.length > 0 && (
-              <form className="flex flex-wrap gap-3 items-center">
-                <select
-                  name="rasse"
-                  defaultValue={searchParams.rasse ?? ''}
-                  className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-forest/30"
-                >
-                  <option value="">Alle Rassen</option>
-                  {breedOptions.map(([slug, name]) => (
-                    <option key={slug} value={slug}>{name}</option>
-                  ))}
-                </select>
-                <button type="submit"
-                  className="bg-honey text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors">
-                  Filtern
-                </button>
-                {searchParams.rasse && (
-                  <Link href="/zuchtrueden" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-                    Filter zurücksetzen
-                  </Link>
-                )}
-              </form>
-            )}
-            <p className="text-xs text-stone-400">{dogs.length} {dogs.length === 1 ? 'Deckrüde' : 'Deckrüden'}</p>
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
+              <ListingFilter
+                basePath="/zuchtrueden"
+                filters={[
+                  { key: 'rasse', placeholder: 'Alle Rassen', options: breedOptions.map(([slug, name]) => ({ value: slug, label: name })) },
+                ]}
+              />
+            </Suspense>
+            <p className="text-xs text-stone-400 flex-shrink-0">{dogs.length} {dogs.length === 1 ? 'Deckrüde' : 'Deckrüden'}</p>
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-4 py-10">

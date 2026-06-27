@@ -10,23 +10,35 @@ type RichEditorProps = {
   className?: string
 }
 
+// Split value into text parts and image parts
+function splitContent(md: string) {
+  const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g
+  const images: { alt: string; url: string; full: string }[] = []
+  let textOnly = md
+
+  let match
+  while ((match = imgRegex.exec(md)) !== null) {
+    images.push({ alt: match[1], url: match[2], full: match[0] })
+  }
+  // Remove image markdown from textarea text (keep surrounding newlines tidy)
+  textOnly = md.replace(/\n?!\[[^\]]*\]\([^)]+\)\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
+
+  return { textOnly, images }
+}
+
 export default function RichEditor({ value, onChange, placeholder, rows = 6, className = '' }: RichEditorProps) {
   const ref = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
 
-  const insert = useCallback((text: string) => {
-    const el = ref.current
-    if (!el) return
-    const s = el.selectionStart
-    const v = el.value
-    const newVal = v.slice(0, s) + text + v.slice(s)
-    onChange(newVal)
-    requestAnimationFrame(() => {
-      el.focus()
-      el.setSelectionRange(s + text.length, s + text.length)
-    })
-  }, [onChange])
+  // Text without images (shown in textarea)
+  const { textOnly, images } = splitContent(value)
+
+  // When textarea changes, rebuild full value with images appended
+  function handleTextChange(newText: string) {
+    const imageMarkdown = images.map((img) => `\n![${img.alt}](${img.url})`).join('')
+    onChange(newText + imageMarkdown)
+  }
 
   const wrap = useCallback((marker: string) => {
     const el = ref.current
@@ -35,13 +47,19 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const e = el.selectionEnd
     const v = el.value
     const selected = v.slice(s, e) || 'Text'
-    const newVal = v.slice(0, s) + marker + selected + marker + v.slice(e)
-    onChange(newVal)
+    const newText = v.slice(0, s) + marker + selected + marker + v.slice(e)
+    handleTextChange(newText)
     requestAnimationFrame(() => {
       el.focus()
       el.setSelectionRange(s + marker.length, s + marker.length + selected.length)
     })
-  }, [onChange])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
+  const insertImage = useCallback((alt: string, url: string) => {
+    // Add image to the end of value
+    onChange(value.trimEnd() + `\n![${alt}](${url})\n`)
+  }, [value, onChange])
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -54,7 +72,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()
       if (data.url) {
-        insert(`\n![${file.name}](${data.url})\n`)
+        insertImage(file.name, data.url)
       } else {
         alert('Upload fehlgeschlagen.')
       }
@@ -70,7 +88,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const url = window.prompt('Bild-URL eingeben:')
     if (!url) return
     const alt = window.prompt('Bildbeschreibung (optional):') ?? ''
-    insert(`\n![${alt}](${url})\n`)
+    insertImage(alt, url)
   }
 
   function handleYoutube() {
@@ -78,13 +96,18 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     if (!input) return
     const match = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
     const id = match ? match[1] : input.trim()
-    insert(`\n@youtube[${id}]\n`)
+    handleTextChange(textOnly.trimEnd() + `\n@youtube[${id}]\n`)
+  }
+
+  function removeImage(url: string) {
+    onChange(value.replace(new RegExp(`\\n?!\\[[^\\]]*\\]\\(${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)\\n?`, 'g'), '\n').replace(/\n{3,}/g, '\n\n'))
   }
 
   const btnClass = 'w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors text-xs flex-shrink-0'
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
+      {/* Toolbar */}
       <div className="flex items-center gap-1 flex-wrap">
         <button type="button" onClick={() => wrap('**')} className={btnClass} title="Fett"><strong>B</strong></button>
         <button type="button" onClick={() => wrap('*')} className={`${btnClass} italic`} title="Kursiv">I</button>
@@ -115,30 +138,27 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         </button>
       </div>
 
-      {/* Textarea — immer sichtbar, keine Kompaktansicht die Probleme verursacht */}
+      {/* Textarea — zeigt nur Text ohne Bildpfade */}
       <textarea
         ref={ref}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={textOnly}
+        onChange={(e) => handleTextChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
         className={className + ' resize-y'}
         style={{ minHeight: `${rows * 1.5}rem` }}
       />
 
-      {/* Bildvorschau unter dem Textarea — zeigt hochgeladene Bilder sauber an */}
-      {/!\[([^\]]*)\]\(([^)]+)\)/.test(value) && (
+      {/* Bild-Chips — zeigen Vorschau mit Dateiname, kein Pfad sichtbar */}
+      {images.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-1">
-          {Array.from(value.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)).map(([, alt, url], i) => (
-            <div key={i} className="flex items-center gap-1.5 bg-cream border border-cream-deep rounded-lg px-2.5 py-1.5 text-xs text-stone-600">
-              <img src={url} alt={alt} className="w-8 h-8 rounded object-cover flex-shrink-0" />
-              <span className="max-w-[120px] truncate">{alt || 'Bild'}</span>
-              <button
-                type="button"
-                onClick={() => onChange(value.replace(`![${alt}](${url})`, '').replace(/\n{3,}/g, '\n\n'))}
-                className="text-stone-400 hover:text-red-500 transition-colors ml-1"
-                title="Bild entfernen"
-              >×</button>
+          {images.map((img, i) => (
+            <div key={i} className="flex items-center gap-2 bg-cream border border-cream-deep rounded-lg px-2.5 py-1.5 text-xs text-stone-700 max-w-[200px]">
+              <img src={img.url} alt={img.alt} className="w-8 h-8 rounded object-cover flex-shrink-0" />
+              <span className="truncate">{img.alt || 'Bild'}</span>
+              <button type="button" onClick={() => removeImage(img.url)}
+                className="text-stone-400 hover:text-red-500 transition-colors flex-shrink-0 ml-1"
+                title="Bild entfernen">×</button>
             </div>
           ))}
         </div>

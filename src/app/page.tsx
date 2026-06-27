@@ -60,6 +60,16 @@ export default async function Home() {
       bio: true,
       dogs: { take: 1, select: { breed: { select: { nameDe: true } } } },
       media: { where: { purpose: 'background' }, take: 1, select: { url: true } },
+      listings: {
+        where: { status: 'available', type: 'puppy' },
+        take: 1,
+        select: { id: true },
+      },
+      litters: {
+        where: { status: { in: ['planned', 'pregnant'] } },
+        take: 1,
+        select: { id: true, status: true },
+      },
     },
   }).catch(() => [])
 
@@ -181,7 +191,22 @@ export default async function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {featuredBreeders.map((breeder) => (
                   <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}
-                    className="group rounded-2xl overflow-hidden border border-white/10 hover:shadow-xl transition-all flex flex-col">
+                    className="group rounded-2xl overflow-hidden border border-white/10 hover:shadow-xl transition-all flex flex-col relative">
+                    {/* Status-Badge oben links */}
+                    {breeder.listings.length > 0 && (
+                      <div className="absolute top-3 left-3 z-10">
+                        <span className="bg-honey text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                          Welpen verfügbar
+                        </span>
+                      </div>
+                    )}
+                    {breeder.listings.length === 0 && breeder.litters.length > 0 && (
+                      <div className="absolute top-3 left-3 z-10">
+                        <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                          {breeder.litters[0].status === 'pregnant' ? 'Wurf erwartet' : 'Wurf geplant'}
+                        </span>
+                      </div>
+                    )}
                     <div className="h-40 overflow-hidden flex-shrink-0">
                       {breeder.media[0]?.url ? (
                         <img src={breeder.media[0].url} alt={breeder.kennelName}
