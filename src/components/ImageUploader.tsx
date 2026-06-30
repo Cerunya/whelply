@@ -83,8 +83,12 @@ export default function ImageUploader({
           handleFiles(e.dataTransfer.files)
         }}
         onDragOver={(e) => e.preventDefault()}
-        onClick={() => inputRef.current?.click()}
-        className="border-2 border-dashed border-stone-200 rounded-xl p-6 text-center cursor-pointer hover:border-forest/40 hover:bg-cream/50 transition-colors"
+        onClick={() => !uploading && inputRef.current?.click()}
+        className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors relative ${
+          uploading
+            ? 'border-forest/30 bg-cream/80 cursor-wait'
+            : 'border-stone-200 cursor-pointer hover:border-forest/40 hover:bg-cream/50'
+        }`}
       >
         <input
           ref={inputRef}
@@ -94,13 +98,24 @@ export default function ImageUploader({
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        <svg className="w-8 h-8 mx-auto text-stone-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-        </svg>
-        <p className="text-sm text-stone-500">
-          {uploading ? 'Wird hochgeladen...' : 'Bilder hierher ziehen oder klicken'}
-        </p>
-        <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, max. 25 MB</p>
+        {uploading ? (
+          <div className="flex flex-col items-center gap-2">
+            <svg className="w-7 h-7 text-forest animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <p className="text-sm font-medium text-forest">Wird hochgeladen …</p>
+            <p className="text-xs text-stone-400">Bitte warten</p>
+          </div>
+        ) : (
+          <>
+            <svg className="w-8 h-8 mx-auto text-stone-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p className="text-sm text-stone-500">Bilder hierher ziehen oder klicken</p>
+            <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, max. 25 MB</p>
+          </>
+        )}
       </div>
 
       {error && (

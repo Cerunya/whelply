@@ -87,7 +87,7 @@ export default function GalleryManager({ initialImages }: { initialImages: Galle
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
         <p className="text-sm text-stone-500">
-          {uploading ? 'Wird hochgeladen...' : 'Bilder hochladen (mehrere möglich)'}
+          {uploading ? (<><svg className="w-4 h-4 animate-spin mr-1.5 inline" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Wird hochgeladen …</>) : 'Bilder hochladen (mehrere möglich)'}
         </p>
         <p className="text-xs text-stone-400 mt-1">JPG, PNG oder WebP, je max. 25 MB</p>
       </div>
