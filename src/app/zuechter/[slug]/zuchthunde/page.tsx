@@ -73,6 +73,8 @@ export default async function ZuechterZuchthundePage({
             themeAccentColor={breeder.themeAccentColor}
             verband={breeder.verband}
             verificationLevel={breeder.verificationLevel}
+            fullName={breeder.fullName}
+            showFullName={breeder.showFullName}
           />
         }>
           {studDogs.length === 0 && breedingFemales.length === 0 && retiredDogs.length === 0 && (

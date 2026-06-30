@@ -8,6 +8,8 @@ const HEX_COLOR = /^#[0-9a-fA-F]{6}$/
 
 const schema = z.object({
   displayName: z.string().max(80).optional(),
+  fullName: z.string().max(120).optional(),
+  showFullName: z.boolean().optional(),
   bio: z.string().max(2000).optional(),
   website: z.string().url().or(z.literal('')).optional(),
   socialInstagram: z.string().url().or(z.literal('')).nullable().optional(),

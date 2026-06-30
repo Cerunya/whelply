@@ -62,6 +62,8 @@ export default async function AktuellesPage({
             themeAccentColor={breeder.themeAccentColor}
             verband={breeder.verband}
             verificationLevel={breeder.verificationLevel}
+            fullName={breeder.fullName}
+            showFullName={breeder.showFullName}
           />
         }>
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">

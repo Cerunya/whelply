@@ -59,6 +59,10 @@ export default async function ZuechterWuerfePage({
             socialYoutube={breeder.socialYoutube}
             themeColor={breeder.themeColor}
             themeAccentColor={breeder.themeAccentColor}
+            verband={breeder.verband}
+            verificationLevel={breeder.verificationLevel}
+            fullName={breeder.fullName}
+            showFullName={breeder.showFullName}
           />
         }>
           <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">

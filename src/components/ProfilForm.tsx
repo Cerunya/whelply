@@ -16,6 +16,8 @@ const BUNDESLAENDER = [
 type BreederData = {
   kennelName: string
   displayName: string | null
+  fullName: string
+  showFullName: boolean
   bio: string | null
   website: string | null
   socialInstagram: string | null
@@ -40,6 +42,8 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     displayName: breeder.displayName ?? '',
+    fullName: breeder.fullName ?? '',
+    showFullName: breeder.showFullName ?? false,
     bio: breeder.bio ?? '',
     website: breeder.website ?? '',
     socialInstagram: breeder.socialInstagram ?? '',
@@ -147,6 +151,31 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
               <p className="text-xs text-stone-400 mt-1">
                 Leer lassen um deinen Zwingernamen ({breeder.kennelName}) zu verwenden.
               </p>
+            </div>
+
+            <div>
+              <label className={labelClass}>Vor- / Nachname</label>
+              <input
+                type="text"
+                name="fullName"
+                value={form.fullName}
+                onChange={handleChange}
+                placeholder="z.B. Maria Mustermann"
+                className={inputClass}
+              />
+              <p className="text-xs text-stone-400 mt-1">
+                Optionaler echter Name — wird nur angezeigt wenn unten aktiviert.
+              </p>
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="showFullName"
+                  checked={form.showFullName}
+                  onChange={handleChange}
+                  className="w-4 h-4 rounded border-stone-300 text-forest accent-forest"
+                />
+                <span className="text-sm text-stone-700">Namen auf der Züchterseite anzeigen</span>
+              </label>
             </div>
 
             <div>

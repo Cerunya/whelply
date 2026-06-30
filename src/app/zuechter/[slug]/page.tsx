@@ -49,6 +49,8 @@ export default async function ZuechterProfilPage({
             themeAccentColor={breeder.themeAccentColor}
             verband={breeder.verband}
             verificationLevel={breeder.verificationLevel}
+            fullName={breeder.fullName}
+            showFullName={breeder.showFullName}
           />
         }>
           {/* Bio */}

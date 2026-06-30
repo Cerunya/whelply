@@ -89,6 +89,8 @@ export default async function LitterDetailPage({
             themeAccentColor={breeder.themeAccentColor}
             verband={breeder.verband}
             verificationLevel={breeder.verificationLevel}
+            fullName={breeder.fullName}
+            showFullName={breeder.showFullName}
           />
         }>
           <Link href={`/zuechter/${params.slug}/wuerfe`} className="text-sm text-forest font-semibold hover:underline">

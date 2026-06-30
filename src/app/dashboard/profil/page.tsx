@@ -17,6 +17,8 @@ export default async function ProfilPage() {
       breeder={{
         kennelName: breeder.kennelName,
         displayName: breeder.displayName,
+        fullName: breeder.fullName ?? '',
+        showFullName: breeder.showFullName ?? false,
         bio: breeder.bio,
         website: breeder.website,
         socialInstagram: breeder.socialInstagram,

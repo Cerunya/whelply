@@ -1,0 +1,2 @@
+ALTER TABLE "breeder_profiles" ADD COLUMN IF NOT EXISTS "full_name" TEXT;
+ALTER TABLE "breeder_profiles" ADD COLUMN IF NOT EXISTS "show_full_name" BOOLEAN NOT NULL DEFAULT FALSE;
