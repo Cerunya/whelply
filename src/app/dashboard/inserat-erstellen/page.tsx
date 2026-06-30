@@ -15,7 +15,7 @@ export default async function InseratErstellenPage() {
 
   // Free-Plan Limit prüfen
   const plan = breeder.subscription?.plan ?? 'free'
-  if (plan === 'free' && breeder._count.listings >= 3) {
+  if (plan === 'free' && breeder._count.listings >= 15) {
     redirect('/dashboard')
   }
 
