@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
     const activeCount = await prisma.listing.count({
       where: { breederId: breeder.id, status: 'available' },
     })
-    if (activeCount >= 3) {
-      return NextResponse.json({ error: 'Free-Plan erlaubt maximal 3 aktive Inserate' }, { status: 403 })
+    if (activeCount >= 15) {
+      return NextResponse.json({ error: 'Free-Plan erlaubt maximal 15 aktive Inserate' }, { status: 403 })
     }
   }
 

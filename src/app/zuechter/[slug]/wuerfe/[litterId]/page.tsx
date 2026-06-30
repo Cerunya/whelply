@@ -165,10 +165,10 @@ export default async function LitterDetailPage({
                      <a
                        key={listing.id}
                        href={`/welpen/${listing.id}`}
-                       className={`flex flex-col sm:flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all ${borderClass}`}
+                       className={`flex flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all ${borderClass}`}
                      >
                        {/* Bild — wie Zuchthunde-Karte */}
-                       <div className="sm:w-48 sm:flex-shrink-0 h-44 sm:h-auto overflow-hidden bg-cream-dark">
+                       <div className="w-40 flex-shrink-0 self-stretch overflow-hidden bg-cream-dark">
                          {listing.media[0]?.url ? (
                            <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-full h-full object-cover" />
                          ) : (
@@ -180,7 +180,7 @@ export default async function LitterDetailPage({
                          )}
                        </div>
                        {/* Inhalt */}
-                       <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between min-w-0">
+                       <div className="flex-1 p-5 flex flex-col justify-between min-w-0 min-h-[160px]">
                          <div>
                            <div className="flex items-start justify-between gap-3">
                              <div>
