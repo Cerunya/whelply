@@ -19,7 +19,7 @@ const schema = z.object({
   socialYoutube: z.string().url().or(z.literal('')).nullable().optional(),
   verband: z.string().max(50).optional(),
   mitgliedsnummer: z.string().max(50).optional(),
-  phone: z.string().max(30).optional(),
+  phone: z.string().max(20).optional(),
   street: z.string().max(120).optional(),
   zip: z.string().max(5).optional(),
   city: z.string().max(80).optional(),

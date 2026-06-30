@@ -40,7 +40,6 @@ export default async function WelpenDetailPage({
             },
           },
           listings: {
-            where: { status: 'available' },
             include: {
               dog: { select: { id: true, name: true, sex: true } },
               media: { where: { isPrimary: true }, take: 1, select: { url: true } },

@@ -5,6 +5,7 @@ import BreederNavbar from '@/components/BreederNavbar'
 import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
+import { renderRichText } from '@/lib/richtext'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 
@@ -104,7 +105,7 @@ export default async function AktuellesPage({
                       {post.createdAt.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
                     <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">{post.title}</h2>
-                    <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">{post.content}</p>
+                    <div className="text-stone-600 text-sm leading-relaxed">{renderRichText(post.content)}</div>
                   </div>
                 </article>
               ))}

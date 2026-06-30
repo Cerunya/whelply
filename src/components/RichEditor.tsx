@@ -50,9 +50,23 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
   const ref = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [showEmoji, setShowEmoji] = useState(false)
 
   const images = extractImages(value)
   const displayValue = toDisplay(value)
+
+  function insertEmoji(emoji: string) {
+    const el = ref.current
+    if (el) {
+      const s = el.selectionStart
+      const v = el.value
+      const newDisplay = v.slice(0, s) + emoji + v.slice(s)
+      onDisplayChange(newDisplay)
+      requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + emoji.length, s + emoji.length) })
+    } else {
+      onDisplayChange(displayValue + emoji)
+    }
+  }
 
   // Textarea-Aenderung: Platzhalter zurueck zu Markdown konvertieren
   function onDisplayChange(newDisplay: string) {
@@ -177,6 +191,22 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         <button type="button" onClick={handleYoutube} className={btn} title="YouTube">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
         </button>
+        <div className="relative">
+          <button type="button" onClick={() => setShowEmoji(!showEmoji)} className={btn} title="Emoji einfügen">
+            😊
+          </button>
+          {showEmoji && (
+            <div className="absolute top-10 left-0 z-50 bg-white border border-stone-200 rounded-xl shadow-lg p-2 grid grid-cols-8 gap-1 w-64">
+              {['😀','😂','🥰','😍','🐕','🐾','🐶','🦮','🐩','🐕‍🦺','❤️','🎉','✨','🌟','💪','👏','🙏','✅','🔥','💯','🌿','🍀','🌸','🌺','📸','📅','🏆','🎖️','💉','🩺','📋','🔬'].map((e) => (
+                <button key={e} type="button"
+                  onClick={() => { insertEmoji(e); setShowEmoji(false) }}
+                  className="text-lg hover:bg-cream rounded p-1 transition-colors">
+                  {e}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Textarea: Bilder erscheinen als kompakte Platzhalter, keine URLs */}

@@ -26,7 +26,7 @@ export default async function WelpenPage({
   const selectedBreed = breeds.find((b) => b.slug === searchParams.rasse)
 
   const where = {
-    status: 'available' as const,
+    status: { in: ['available', 'reserved', 'sold'] as const },
     type: 'puppy' as const,
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
     ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),

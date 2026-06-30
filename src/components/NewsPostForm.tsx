@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import NewsImageUploader from './NewsImageUploader'
+import RichEditor from './RichEditor'
 import SaveToast from './SaveToast'
 
 type Post = {
@@ -122,13 +123,10 @@ export default function NewsPostForm({ post }: { post?: Post }) {
 
           <div>
             <label className={labelClass}>Text <span className="text-red-400">*</span></label>
-            <textarea
-              name="content"
+            <RichEditor
               value={form.content}
-              onChange={handleChange}
-              required
+              onChange={(val) => setForm({ ...form, content: val })}
               rows={10}
-              maxLength={5000}
               placeholder="Was gibt's Neues aus deinem Zwinger?"
               className={inputClass}
             />

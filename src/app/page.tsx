@@ -232,7 +232,7 @@ export default async function Home() {
                         <p className="text-xs text-stone-400 mt-1">{[breeder.city, breeder.state].filter(Boolean).join(', ')}</p>
                       )}
                       {breeder.bio && (
-                        <p className="text-xs text-stone-500 mt-2 line-clamp-2">{breeder.bio.replace(/\*\*|__|\*|_/g, '')}</p>
+                        <p className="text-xs text-stone-500 mt-2 line-clamp-2">{breeder.bio.replace(/!\[[^\]]*\]\([^)]+\)/g, '').replace(/\*\*|__|\*|_|@youtube\[[^\]]*\]/g, '').trim()}</p>
                       )}
                     </div>
                   </Link>
