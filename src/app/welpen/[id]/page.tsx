@@ -268,7 +268,12 @@ export default async function WelpenDetailPage({
                 )}
                 <Link href={`/zuechter/${slugify(listing.breeder.kennelName)}`}
                   className="block w-full bg-white/10 text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors">
+                  Züchter-Profil ansehen
+                </Link>
+              </div>
+            </div>
 
+          </div>
 
           {/* Beschreibung — volle Breite unter den 3 Blöcken */}
           {listing.description && (
@@ -277,13 +282,6 @@ export default async function WelpenDetailPage({
               <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">{listing.description}</p>
             </div>
           )}
-
-                  Züchter-Profil ansehen
-                </Link>
-              </div>
-            </div>
-
-          </div>
 
 
           {/* Stammbaum (Eltern + Großeltern) — ganz unten, nach Geschwistern */}
