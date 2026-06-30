@@ -34,7 +34,6 @@ type BreederData = {
   state: string | null
   showPhone: boolean
   showAddress: boolean
-  isPublished: boolean
 }
 
 export default function ProfilForm({ breeder }: { breeder: BreederData }) {
@@ -316,6 +315,7 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
               <input
                 type="tel"
                 name="phone"
+                maxLength={20}
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="+49 ..."
