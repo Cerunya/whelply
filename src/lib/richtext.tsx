@@ -36,7 +36,7 @@ export function renderRichText(text: string): React.ReactNode {
     if (imgMatch) {
       const alt = imgMatch[1]
       const url = imgMatch[2]
-      const displayName = alt || url.split('/').slice(-2, -1)[0] || 'Bild'
+      const isFilename = /\.(jpe?g|png|gif|webp|svg|avif)$/i.test(alt)
       nodes.push(
         <div key={i} className="my-4 flex flex-col items-center gap-2">
           <img
@@ -45,8 +45,8 @@ export function renderRichText(text: string): React.ReactNode {
             className="max-w-full rounded-xl shadow-sm"
             style={{ maxHeight: '500px' }}
           />
-          {alt && (
-            <p className="text-xs text-stone-400 italic">{displayName}</p>
+          {alt && !isFilename && (
+            <p className="text-xs text-stone-400 italic">{alt}</p>
           )}
         </div>
       )

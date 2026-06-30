@@ -155,7 +155,7 @@ export default async function Home() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
               {listings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -254,7 +254,7 @@ export default async function Home() {
                 Alle anzeigen →
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
               {adultListings.slice(0, 4).map((listing) => (
                 <ListingCard
                   key={listing.id}

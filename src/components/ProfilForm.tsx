@@ -154,31 +154,6 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
             </div>
 
             <div>
-              <label className={labelClass}>Vor- / Nachname</label>
-              <input
-                type="text"
-                name="fullName"
-                value={form.fullName}
-                onChange={handleChange}
-                placeholder="z.B. Maria Mustermann"
-                className={inputClass}
-              />
-              <p className="text-xs text-stone-400 mt-1">
-                Optionaler echter Name — wird nur angezeigt wenn unten aktiviert.
-              </p>
-              <label className="flex items-center gap-2 mt-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="showFullName"
-                  checked={form.showFullName}
-                  onChange={handleChange}
-                  className="w-4 h-4 rounded border-stone-300 text-forest accent-forest"
-                />
-                <span className="text-sm text-stone-700">Namen auf der Züchterseite anzeigen</span>
-              </label>
-            </div>
-
-            <div>
               <label className={labelClass}>Über dich / deine Zucht</label>
               <RichEditor
                 value={form.bio}
@@ -284,6 +259,31 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
               Standardmäßig nicht öffentlich sichtbar. Nötig für Verifizierung und Kontaktaufnahme durch Whelply.
               Du kannst unten festlegen, ob diese Angaben auf deiner Züchter-Seite angezeigt werden sollen.
             </p>
+
+            <div>
+              <label className={labelClass}>Vor- / Nachname</label>
+              <input
+                type="text"
+                name="fullName"
+                value={form.fullName}
+                onChange={handleChange}
+                placeholder="z.B. Maria Mustermann"
+                className={inputClass}
+              />
+              <p className="text-xs text-stone-400 mt-1">
+                Optionaler echter Name — wird nur angezeigt wenn unten aktiviert.
+              </p>
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="showFullName"
+                  checked={form.showFullName}
+                  onChange={handleChange}
+                  className="w-4 h-4 rounded border-stone-300 text-forest accent-forest"
+                />
+                <span className="text-sm text-stone-700">Namen auf der Züchterseite anzeigen</span>
+              </label>
+            </div>
 
             <div>
               <label className={labelClass}>Telefonnummer</label>

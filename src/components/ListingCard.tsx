@@ -38,7 +38,7 @@ export default function ListingCard({
     <Link href={`/welpen/${id}`} className="group block h-full">
       <div className={cardClasses + ' flex flex-col h-full'}>
         {/* Bild oder Platzhalter */}
-        <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative overflow-hidden">
+        <div className="bg-cream-dark aspect-[3/2] flex items-center justify-center relative overflow-hidden">
           {imageUrl ? (
             <img src={imageUrl} alt={breedName} className="w-full h-full object-cover" />
           ) : (

@@ -129,7 +129,7 @@ export default async function WelpenPage({
                 ))}
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
                 {listings.map((listing) => (
                   <ListingCard
                     key={listing.id}

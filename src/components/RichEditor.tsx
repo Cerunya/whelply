@@ -78,10 +78,25 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
   }
 
   function addImage(alt: string, url: string) {
-    // Bild am Cursor einfuegen als Platzhalter (wird beim Speichern als Markdown gespeichert)
-    // Aber zuerst muessen wir das Bild zur Liste hinzufuegen, sonst kann fromDisplay es nicht finden
-    const newValue = value.trimEnd() + `\n![${alt}](${url})\n`
-    onChange(newValue)
+    // Erst das neue Bild zum Wert hinzufuegen (damit fromDisplay es kennt)
+    // Dann den Platzhalter an der Cursorposition einfuegen
+    const el = ref.current
+    const placeholder = `[📷 ${alt || 'Bild'}]`
+
+    if (el) {
+      // Wir haben die neue Bildliste: vorhandene + neues Bild
+      const newImages = [...images, { alt, url }]
+      const s = el.selectionStart
+      const currentDisplay = el.value
+      const newDisplay = currentDisplay.slice(0, s) + placeholder + currentDisplay.slice(s)
+      onChange(fromDisplay(newDisplay, newImages))
+      requestAnimationFrame(() => {
+        el.focus()
+        el.setSelectionRange(s + placeholder.length, s + placeholder.length)
+      })
+    } else {
+      onChange(value.trimEnd() + `\n![${alt}](${url})\n`)
+    }
   }
 
   function removeImage(url: string) {
