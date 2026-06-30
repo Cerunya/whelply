@@ -184,7 +184,7 @@ export default async function WelpenDetailPage({
           </div>
 
           {/* === INFO-KACHELN: 3-spaltig auf Desktop === */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
             {/* Eckdaten */}
             <div className="bg-white rounded-2xl border border-cream-deep p-5">
@@ -220,34 +220,34 @@ export default async function WelpenDetailPage({
                     <span className="font-medium text-stone-800">{listing.dog.color}</span>
                   </div>
                 )}
+                {listing.birthLocation && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Geburtsort</span>
+                    <span className="font-medium text-stone-800">{listing.birthLocation}</span>
+                  </div>
+                )}
+                {listing.chipNumber && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Chip-Nr.</span>
+                    <span className="font-medium text-stone-800">{listing.chipNumber}</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Beschreibung + Gesundheit */}
+            {/* Gesundheit & Dokumente */}
             <div className="bg-white rounded-2xl border border-cream-deep p-5">
-              {listing.description && (
-                <div className="mb-4">
-                  <h2 className="font-semibold text-stone-800 text-sm mb-2">Beschreibung</h2>
-                  <p className="text-stone-500 text-sm leading-relaxed">{listing.description}</p>
+              <h2 className="font-semibold text-stone-800 text-sm mb-3">Gesundheit & Dokumente</h2>
+              {(listing.hasPedigree || listing.isVaccinated || listing.isDewormed || listing.isChipped || listing.isInsured) ? (
+                <div className="flex flex-wrap gap-2">
+                  {listing.hasPedigree && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Ahnentafel</span>}
+                  {listing.isVaccinated && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Geimpft</span>}
+                  {listing.isDewormed && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Entwurmt</span>}
+                  {listing.isChipped && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Gechipt</span>}
+                  {listing.isInsured && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Versichert</span>}
                 </div>
-              )}
-              {(listing.hasPedigree || listing.isVaccinated || listing.isDewormed || listing.isChipped || listing.isInsured) && (
-                <div className={listing.description ? 'pt-3 border-t border-cream-deep' : ''}>
-                  <h2 className="font-semibold text-stone-800 text-sm mb-2">Gesundheit & Dokumente</h2>
-                  <div className="flex flex-wrap gap-1.5">
-                    {listing.hasPedigree && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-0.5">Ahnentafel</span>}
-                    {listing.isVaccinated && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-0.5">Geimpft</span>}
-                    {listing.isDewormed && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-0.5">Entwurmt</span>}
-                    {listing.isChipped && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-0.5">Gechipt</span>}
-                    {listing.isInsured && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-0.5">Versichert</span>}
-                  </div>
-                  {listing.birthLocation && (
-                    <p className="text-xs text-stone-500 mt-2"><span className="font-medium text-stone-700">Geburtsort:</span> {listing.birthLocation}</p>
-                  )}
-                  {listing.chipNumber && (
-                    <p className="text-xs text-stone-500 mt-1"><span className="font-medium text-stone-700">Chip-Nr.:</span> {listing.chipNumber}</p>
-                  )}
-                </div>
+              ) : (
+                <p className="text-stone-400 text-sm">Noch keine Angaben</p>
               )}
             </div>
 
@@ -268,6 +268,16 @@ export default async function WelpenDetailPage({
                 )}
                 <Link href={`/zuechter/${slugify(listing.breeder.kennelName)}`}
                   className="block w-full bg-white/10 text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors">
+
+
+          {/* Beschreibung — volle Breite unter den 3 Blöcken */}
+          {listing.description && (
+            <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-8">
+              <h2 className="font-semibold text-stone-800 text-sm mb-3">Beschreibung</h2>
+              <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">{listing.description}</p>
+            </div>
+          )}
+
                   Züchter-Profil ansehen
                 </Link>
               </div>

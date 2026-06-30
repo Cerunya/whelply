@@ -46,7 +46,7 @@ export default async function DashboardPage() {
   const draftListings = breeder.listings.filter((l) => l.status === 'draft')
   const totalViews = breeder.listings.reduce((sum, l) => sum + l.viewCount, 0)
   const plan = breeder.subscription?.plan ?? 'free'
-  const maxFree = 3
+  const maxFree = 15
   const canAddMore = plan !== 'free' || activeListings.length < maxFree
 
   return (
