@@ -152,7 +152,7 @@ export default function WelpeForm({ litter }: { litter: LitterInfo }) {
               onChange={handleChange}
               placeholder='leer lassen für "Auf Anfrage"'
               min="0"
-              step="50"
+              step="1"
               className={inputClass}
             />
           </div>

@@ -17,6 +17,7 @@ export default async function LitterDetailPage({
 }) {
   const breeder = await getBreederBySlug(params.slug)
   if (!breeder) notFound()
+  if (breeder.isPublished === false) notFound()
 
   const tabs = await getBreederTabs(breeder.id)
   const displayName = breeder.displayName || breeder.kennelName
@@ -165,10 +166,10 @@ export default async function LitterDetailPage({
                      <a
                        key={listing.id}
                        href={`/welpen/${listing.id}`}
-                       className={`flex flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all h-52 ${borderClass}`}
+                       className={`flex flex-col sm:flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all sm:h-52 ${borderClass}`}
                      >
                        {/* Bild — wie Zuchthunde-Karte */}
-                       <div className="w-52 flex-shrink-0 overflow-hidden bg-cream-dark">
+                       <div className="w-full h-48 sm:w-52 sm:h-auto flex-shrink-0 overflow-hidden bg-cream-dark">
                          {listing.media[0]?.url ? (
                            <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-full h-full object-cover" />
                          ) : (

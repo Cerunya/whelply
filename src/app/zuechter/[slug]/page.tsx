@@ -19,6 +19,7 @@ export default async function ZuechterProfilPage({
 }) {
   const breeder = await getBreederBySlug(params.slug)
   if (!breeder) notFound()
+  if (breeder.isPublished === false) notFound()
 
   const tabs = await getBreederTabs(breeder.id)
 

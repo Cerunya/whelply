@@ -18,6 +18,7 @@ type BreederData = {
   displayName: string | null
   fullName: string
   showFullName: boolean
+  isPublished: boolean
   bio: string | null
   website: string | null
   socialInstagram: string | null
@@ -33,6 +34,7 @@ type BreederData = {
   state: string | null
   showPhone: boolean
   showAddress: boolean
+  isPublished: boolean
 }
 
 export default function ProfilForm({ breeder }: { breeder: BreederData }) {
@@ -44,6 +46,7 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
     displayName: breeder.displayName ?? '',
     fullName: breeder.fullName ?? '',
     showFullName: breeder.showFullName ?? false,
+    isPublished: breeder.isPublished ?? true,
     bio: breeder.bio ?? '',
     website: breeder.website ?? '',
     socialInstagram: breeder.socialInstagram ?? '',
@@ -131,12 +134,35 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
 
           {/* Öffentliches Profil */}
           <div className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">
-            <h3 className="font-semibold text-stone-800 text-sm uppercase tracking-wide">
-              Öffentliches Profil
-            </h3>
-            <p className="text-xs text-stone-400 -mt-3">
-              Diese Angaben sind für Besucher auf deiner Züchter-Seite sichtbar.
-            </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="font-semibold text-stone-800 text-sm uppercase tracking-wide">
+                  Öffentliches Profil
+                </h3>
+                <p className="text-xs text-stone-400 mt-1">
+                  Diese Angaben sind für Besucher auf deiner Züchter-Seite sichtbar.
+                </p>
+              </div>
+              {/* Sichtbarkeits-Toggle */}
+              <label className="flex items-center gap-2 cursor-pointer flex-shrink-0">
+                <span className="text-xs text-stone-500 font-medium">
+                  {form.isPublished ? 'Seite sichtbar' : 'Seite versteckt'}
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.isPublished}
+                  onClick={() => setForm({ ...form, isPublished: !form.isPublished })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    form.isPublished ? 'bg-forest' : 'bg-stone-300'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                    form.isPublished ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </label>
+            </div>
 
             <div>
               <label className={labelClass}>Anzeigename</label>

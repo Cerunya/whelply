@@ -1,0 +1,1 @@
+ALTER TABLE "breeder_profiles" ADD COLUMN IF NOT EXISTS "is_published" BOOLEAN NOT NULL DEFAULT TRUE;

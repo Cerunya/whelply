@@ -34,6 +34,7 @@ export default async function ProfilPage() {
         state: breeder.state,
         showPhone: breeder.showPhone,
         showAddress: breeder.showAddress,
+        isPublished: breeder.isPublished ?? true,
       }}
     />
   )

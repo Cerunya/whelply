@@ -17,6 +17,7 @@ export default async function ZuechterZuchthundePage({
 }) {
   const breeder = await getBreederBySlug(params.slug)
   if (!breeder) notFound()
+  if (breeder.isPublished === false) notFound()
 
   const tabs = await getBreederTabs(breeder.id)
   const studDogs = await prisma.dog.findMany({

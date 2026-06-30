@@ -164,7 +164,7 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
               onChange={handleChange}
               placeholder="z.B. 1200 — leer lassen für &quot;Auf Anfrage&quot;"
               min="0"
-              step="50"
+              step="1"
               className={inputClass}
             />
           </div>

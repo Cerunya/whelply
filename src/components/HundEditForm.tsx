@@ -222,7 +222,17 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
           )}
           {success && (
             <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
-              ✓ Gespeichert.
+              <p className="font-medium mb-2">✓ Gespeichert.</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Link href="/dashboard/hund-erstellen"
+                  className="inline-flex items-center gap-1 text-xs font-semibold bg-white border border-green-200 text-green-700 rounded-lg px-3 py-1.5 hover:bg-green-100 transition-colors">
+                  + Weiteren Hund eintragen
+                </Link>
+                <Link href={`/hund/${dog.id}`}
+                  className="inline-flex items-center gap-1 text-xs font-semibold bg-white border border-green-200 text-green-700 rounded-lg px-3 py-1.5 hover:bg-green-100 transition-colors">
+                  Profil ansehen →
+                </Link>
+              </div>
             </div>
           )}
 
