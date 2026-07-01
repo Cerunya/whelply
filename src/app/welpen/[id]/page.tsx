@@ -265,10 +265,12 @@ export default async function WelpenDetailPage({
                     Anrufen
                   </a>
                 )}
-                <Link href={`/zuechter/${slugify(listing.breeder.kennelName)}`}
-                  className="block w-full bg-white/10 text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors">
-                  Züchter-Profil ansehen
-                </Link>
+                {listing.breeder.isPublished !== false && (
+                  <Link href={`/zuechter/${slugify(listing.breeder.kennelName)}`}
+                    className="block w-full bg-white/10 text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors">
+                    Züchter-Profil ansehen
+                  </Link>
+                )}
               </div>
             </div>
 

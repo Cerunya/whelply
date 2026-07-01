@@ -75,7 +75,7 @@ export default async function Home() {
 
   // Nur Zuecher mit Hintergrundbild anzeigen, max 9
   const featuredBreeders = allFeaturedBreeders
-    .filter((b) => b.media[0]?.url)
+    .filter((b) => b.media[0]?.url && b.isPublished !== false)
     .slice(0, 9)
 
   const now = new Date()

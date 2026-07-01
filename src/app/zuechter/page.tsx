@@ -89,22 +89,28 @@ export default async function ZuechterVerzeichnisPage({
                 const displayName = breeder.displayName || breeder.kennelName
                 const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
                 const breeds = Array.from(new Set(breeder.listings.map((l) => l.breed.nameDe)))
+                const published = breeder.isPublished !== false
 
-                return (
-                  <Link
-                    key={breeder.id}
-                    href={`/zuechter/${slugify(breeder.kennelName)}`}
-                    className="bg-white rounded-2xl border border-cream-deep p-6 hover:border-forest/30 hover:shadow-md transition-all"
-                  >
+                const cardContent = (
+                  <div className={`bg-white rounded-2xl border p-6 transition-all ${
+                    published
+                      ? 'border-cream-deep hover:border-forest/30 hover:shadow-md cursor-pointer'
+                      : 'border-cream-deep opacity-50 cursor-default'
+                  }`}>
                     <div className="flex items-start justify-between mb-2">
                       <h2 className="font-serif text-lg font-bold text-stone-900">
                         {displayName}
                       </h2>
-                      {breeder.verificationLevel !== 'none' && (
-                        <span className="text-xs text-honey font-semibold whitespace-nowrap ml-2">
-                          ✓ Verifiziert
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                        {!published && (
+                          <span className="text-xs text-stone-400 font-medium">Seite deaktiviert</span>
+                        )}
+                        {breeder.verificationLevel !== 'none' && (
+                          <span className="text-xs text-honey font-semibold whitespace-nowrap">
+                            ✓ Verifiziert
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {location && (
                       <p className="text-sm text-stone-400 mb-3 flex items-center gap-1">
@@ -126,7 +132,15 @@ export default async function ZuechterVerzeichnisPage({
                     ) : (
                       <p className="text-xs text-stone-300">Aktuell keine Inserate</p>
                     )}
+                  </div>
+                )
+
+                return published ? (
+                  <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}>
+                    {cardContent}
                   </Link>
+                ) : (
+                  <div key={breeder.id}>{cardContent}</div>
                 )
               })}
             </div>
