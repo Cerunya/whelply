@@ -92,10 +92,10 @@ export default async function ZuechterVerzeichnisPage({
                 const published = breeder.isPublished !== false
 
                 const cardContent = (
-                  <div className={`bg-white rounded-2xl border p-6 transition-all ${
+                  <div className={`bg-white rounded-2xl border border-cream-deep p-6 transition-all ${
                     published
-                      ? 'border-cream-deep hover:border-forest/30 hover:shadow-md cursor-pointer'
-                      : 'border-cream-deep opacity-50 cursor-default'
+                      ? 'hover:border-forest/30 hover:shadow-md cursor-pointer'
+                      : 'cursor-default'
                   }`}>
                     <div className="flex items-start justify-between mb-2">
                       <h2 className="font-serif text-lg font-bold text-stone-900">
