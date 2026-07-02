@@ -55,7 +55,7 @@ export default async function Navbar() {
                 href="/register"
                 className="bg-forest text-white text-sm px-4 py-2 rounded-lg hover:bg-forest-light transition-colors font-medium"
               >
-                Züchter werden
+                Registrieren
               </Link>
             </>
           )}
@@ -81,7 +81,7 @@ export default async function Navbar() {
                   Anmelden
                 </Link>
                 <Link href="/register" className="font-semibold text-forest hover:underline">
-                  Züchter werden
+                  Registrieren
                 </Link>
               </>
             )

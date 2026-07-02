@@ -7,9 +7,13 @@ const registerSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse'),
   password: z.string().min(8, 'Passwort muss mindestens 8 Zeichen haben'),
   role: z.enum(['buyer', 'breeder', 'service']).default('buyer'),
-  // Nur für Züchter
   kennelName: z.string().min(2).max(80).optional(),
-})
+}).refine((data) => {
+  if (data.role === 'breeder' && (!data.kennelName || data.kennelName.trim().length < 2)) {
+    return false
+  }
+  return true
+}, { message: 'Zwingername muss mindestens 2 Zeichen haben', path: ['kennelName'] })
 
 export async function POST(req: NextRequest) {
   try {
