@@ -89,7 +89,7 @@ export default async function ZuechterVerzeichnisPage({
               <p className="text-stone-400 text-sm">Keine Züchter gefunden.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pb-6">
               {filtered.map((breeder) => {
                 const displayName = breeder.displayName || breeder.kennelName
                 const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
@@ -100,7 +100,7 @@ export default async function ZuechterVerzeichnisPage({
                 const hasLitter = breeder.litters.length > 0
 
                 const cardContent = (
-                  <div className={`bg-white rounded-2xl border border-cream-deep p-6 transition-all h-full flex flex-col ${
+                  <div className={`relative bg-white rounded-2xl border border-cream-deep p-6 pb-8 transition-all h-full flex flex-col ${
                     published && active
                       ? 'hover:border-forest/30 hover:shadow-md cursor-pointer'
                       : 'cursor-default'
@@ -144,20 +144,24 @@ export default async function ZuechterVerzeichnisPage({
                     ) : (
                       <p className="text-xs text-stone-300 mb-3">Aktuell keine Inserate</p>
                     )}
-                    {/* Status-Badges: Welpen / Wurf erwartet */}
+                    {/* Runde Badges wie auf der Startseite — überlappen den Kartenrand */}
                     {(hasWelpen || hasLitter) && (
-                      <div className="flex gap-2 mt-auto pt-2">
+                      <div className="absolute -bottom-5 right-4 flex gap-2">
                         {hasWelpen && (
-                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-honey text-white">
-                            Welpen verfügbar
-                          </span>
+                          <div className="w-14 h-14 rounded-full bg-honey text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
+                            <span className="text-[9px] font-black leading-tight uppercase">Welpen</span>
+                            <span className="text-[9px] font-black leading-tight uppercase">Dispo</span>
+                          </div>
                         )}
                         {!hasWelpen && hasLitter && (
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full text-white ${
+                          <div className={`w-14 h-14 rounded-full text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white ${
                             breeder.litters[0]?.status === 'pregnant' ? 'bg-blue-400' : 'bg-blue-300'
                           }`}>
-                            {breeder.litters[0]?.status === 'pregnant' ? 'Wurf erwartet' : 'Wurf geplant'}
-                          </span>
+                            <span className="text-[9px] font-black leading-tight uppercase">Wurf</span>
+                            <span className="text-[9px] font-black leading-tight uppercase">
+                              {breeder.litters[0]?.status === 'pregnant' ? 'Erwartet' : 'Geplant'}
+                            </span>
+                          </div>
                         )}
                       </div>
                     )}
