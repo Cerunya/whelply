@@ -96,6 +96,9 @@ model User {
   // Profile-Verknüpfungen
   breederProfile  BreederProfile?
   serviceProvider ServiceProvider?
+  reviews         Review[]
+  reports         Report[]
+  bookmarks       Bookmark[]
 
   @@map("users")
 }
@@ -153,6 +156,10 @@ model BreederProfile {
   showFullName      Boolean           @default(false) @map("show_full_name")
   isPublished       Boolean           @default(true) @map("is_published")
   isActive          Boolean           @default(true) @map("is_active")
+  // Übergabe-Optionen
+  handoverLocation  String?           @map("handover_location")   // Ort der Übergabe
+  visitPossible     Boolean           @default(false) @map("visit_possible")
+  damVisitPossible  Boolean           @default(false) @map("dam_visit_possible")
   // Züchterverband (VDH, ÖKV, SKG, ASCA, etc.) — optional
   verband           String?
   // Mitgliedsnummer im Rassezuchtverein — optional, für Badge
@@ -192,6 +199,8 @@ model BreederProfile {
   listings     Listing[]
   media        Media[]       @relation("BreederMedia")
   newsPosts    NewsPost[]
+  reviews      Review[]
+  bookmarks    Bookmark[]    @relation("BookmarkedBreeder")
 
   @@map("breeder_profiles")
 }
@@ -283,9 +292,10 @@ model Litter {
   breeder  BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
   breed    Breed          @relation(fields: [breedId], references: [id])
   dam      Dog?           @relation("DamLitters", fields: [damId], references: [id])
-  sire     Dog?           @relation("SireLitters", fields: [sireId], references: [id])
-  listings Listing[]
-  media    Media[]        @relation("LitterMedia")
+  sire      Dog?           @relation("SireLitters", fields: [sireId], references: [id])
+  listings  Listing[]
+  media     Media[]        @relation("LitterMedia")
+  bookmarks Bookmark[]
 
   @@map("litters")
 }
@@ -334,8 +344,10 @@ model Listing {
   breed   Breed          @relation(fields: [breedId], references: [id])
   litter  Litter?        @relation(fields: [litterId], references: [id])
   dog     Dog?           @relation(fields: [dogId], references: [id])
-  boosts  Boost[]
-  media   Media[]        @relation("ListingMedia")
+  boosts    Boost[]
+  media     Media[]    @relation("ListingMedia")
+  reports   Report[]
+  bookmarks Bookmark[]
 
   @@map("listings")
 }
@@ -454,4 +466,63 @@ model NewsPost {
 
   @@map("news_posts")
   @@index([breederId])
+}
+
+// ─────────────────────────────────────────────
+// BEWERTUNGEN — Nutzer bewerten Züchter
+// ─────────────────────────────────────────────
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  breederId String   @map("breeder_id")
+  rating    Int      // 1-5
+  title     String?
+  content   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  breeder BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, breederId])
+  @@map("reviews")
+}
+
+// ─────────────────────────────────────────────
+// MELDUNGEN — Nutzer melden Inserate
+// ─────────────────────────────────────────────
+
+model Report {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  listingId String   @map("listing_id")
+  reason    String   // z.B. "spam", "falsche_infos", "betrug", "sonstiges"
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+// ─────────────────────────────────────────────
+// MERKLISTE — Nutzer merken Inserate, Würfe, Züchter
+// ─────────────────────────────────────────────
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  listingId String?  @map("listing_id")
+  litterId  String?  @map("litter_id")
+  breederId String?  @map("breeder_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing?        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  litter  Litter?         @relation(fields: [litterId], references: [id], onDelete: Cascade)
+  breeder BreederProfile? @relation("BookmarkedBreeder", fields: [breederId], references: [id], onDelete: Cascade)
+
+  @@map("bookmarks")
 }

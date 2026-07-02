@@ -36,6 +36,9 @@ export default async function ProfilPage() {
         showAddress: breeder.showAddress,
         isPublished: breeder.isPublished ?? true,
         isActive: breeder.isActive ?? true,
+        handoverLocation: breeder.handoverLocation ?? '',
+        visitPossible: breeder.visitPossible ?? false,
+        damVisitPossible: breeder.damVisitPossible ?? false,
       }}
     />
   )

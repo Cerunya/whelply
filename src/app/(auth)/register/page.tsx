@@ -5,13 +5,18 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 
+type Role = 'buyer' | 'breeder' | 'service'
+
+const ROLES: { value: Role; label: string; desc: string; icon: string }[] = [
+  { value: 'buyer', label: 'Welpensucher', desc: 'Ich suche einen Welpen oder Hund', icon: '🐾' },
+  { value: 'breeder', label: 'Züchter', desc: 'Ich züchte und biete Welpen an', icon: '🏡' },
+  { value: 'service', label: 'Dienstleister', desc: 'Ich biete Dienstleistungen an', icon: '🔧' },
+]
+
 export default function RegisterPage() {
   const router = useRouter()
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    kennelName: '',
-  })
+  const [role, setRole] = useState<Role>('buyer')
+  const [form, setForm] = useState({ email: '', password: '', kennelName: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -24,11 +29,10 @@ export default function RegisterPage() {
     setError('')
     setLoading(true)
 
-    // Registrierung
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, role }),
     })
 
     const data = await res.json()
@@ -39,7 +43,6 @@ export default function RegisterPage() {
       return
     }
 
-    // Nach erfolgreicher Registrierung direkt einloggen
     await signIn('credentials', {
       email: form.email,
       password: form.password,
@@ -50,92 +53,101 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-gray-900">
-            Whelply
-          </Link>
-          <p className="text-gray-500 mt-2 text-sm">Züchter-Konto erstellen</p>
+          <Link href="/" className="font-serif text-2xl font-bold text-stone-900">Whelply</Link>
+          <h1 className="text-xl font-semibold text-stone-800 mt-4">Konto erstellen</h1>
+          <p className="text-stone-400 text-sm mt-1">Wähle, wie du Whelply nutzen möchtest</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-              {error}
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-8 space-y-6 shadow-sm">
+
+          {/* Rollenauswahl */}
+          <div className="grid grid-cols-3 gap-2">
+            {ROLES.map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => setRole(r.value)}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-center ${
+                  role === r.value
+                    ? 'border-forest bg-forest/5 text-forest'
+                    : 'border-cream-deep text-stone-400 hover:border-stone-300'
+                }`}
+              >
+                <span className="text-2xl">{r.icon}</span>
+                <span className="text-xs font-semibold">{r.label}</span>
+                <span className="text-[10px] leading-tight text-stone-400">{r.desc}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Zwingername nur für Züchter */}
+          {role === 'breeder' && (
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                Zwingername <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text"
+                name="kennelName"
+                value={form.kennelName}
+                onChange={handleChange}
+                required
+                placeholder="Mein Zwingername"
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+              />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              FCI-Zwingername <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="kennelName"
-              required
-              value={form.kennelName}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="z.B. vom Schwarzen Tal"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Dein bei der FCI registrierter Zwingername. Muss eindeutig sein.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              E-Mail <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-stone-700 mb-1.5">E-Mail</label>
             <input
               type="email"
               name="email"
-              required
               value={form.email}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="name@beispiel.de"
+              required
+              placeholder="deine@email.de"
+              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Passwort <span className="text-red-500">*</span>
-            </label>
+            <label className="block text-sm font-medium text-stone-700 mb-1.5">Passwort</label>
             <input
               type="password"
               name="password"
-              required
-              minLength={8}
               value={form.password}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              required
+              minLength={8}
               placeholder="Mindestens 8 Zeichen"
+              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
             />
           </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gray-900 text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
           >
-            {loading ? 'Konto wird erstellt...' : 'Konto erstellen'}
+            {loading ? 'Wird registriert...' : 'Konto erstellen'}
           </button>
 
-          <p className="text-xs text-gray-400 text-center">
-            Mit der Registrierung bestätigst du, dass dein Zwingername bei der FCI registriert ist.
-            Falsche Angaben führen zur sofortigen Sperrung.
+          <p className="text-center text-sm text-stone-400">
+            Bereits registriert?{' '}
+            <Link href="/login" className="text-forest font-medium hover:underline">Anmelden</Link>
           </p>
         </form>
-
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Bereits registriert?{' '}
-          <Link href="/login" className="text-gray-900 font-medium hover:underline">
-            Anmelden
-          </Link>
-        </p>
       </div>
-    </main>
+    </div>
   )
 }

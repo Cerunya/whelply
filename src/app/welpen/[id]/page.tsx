@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/slugify'
 import { auth } from '@/lib/auth'
 import ListingImageGallery from '@/components/ListingImageGallery'
+import BookmarkButton from '@/components/BookmarkButton'
+import ReportButton from '@/components/ReportButton'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -53,10 +55,15 @@ export default async function WelpenDetailPage({
   if (!listing) notFound()
 
   const session = await auth()
+  const isLoggedIn = !!session?.user?.id
   const viewerBreeder = session?.user
     ? await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
     : null
   const isOwner = !!viewerBreeder && viewerBreeder.id === listing.breederId
+
+  const isBookmarked = session?.user?.id
+    ? !!(await prisma.bookmark.findFirst({ where: { userId: session.user.id, listingId: listing.id } }))
+    : false
 
   // Entwürfe sind nur für den Eigentümer sichtbar. Reservierte/verkaufte Inserate
   // bleiben (vorerst) für alle sichtbar — Dauer kann später noch festgelegt werden.
@@ -161,8 +168,16 @@ export default async function WelpenDetailPage({
                   )}
                 </div>
               </div>
-              <div className="text-right flex-shrink-0">
+              <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
                 <p className="text-2xl font-bold text-forest">{price}</p>
+                <div className="flex items-center gap-2">
+                  <BookmarkButton
+                    listingId={listing.id}
+                    initialBookmarked={isBookmarked}
+                    isLoggedIn={isLoggedIn}
+                  />
+                  <ReportButton listingId={listing.id} isLoggedIn={isLoggedIn} />
+                </div>
               </div>
             </div>
 

@@ -6,14 +6,9 @@ import { z } from 'zod'
 const registerSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse'),
   password: z.string().min(8, 'Passwort muss mindestens 8 Zeichen haben'),
-  kennelName: z
-    .string()
-    .min(2, 'Zwingername muss mindestens 2 Zeichen haben')
-    .max(80, 'Zwingername zu lang')
-    .regex(
-      /^[a-zA-ZäöüÄÖÜß\s\-']+$/,
-      'Zwingername darf nur Buchstaben, Leerzeichen und Bindestriche enthalten'
-    ),
+  role: z.enum(['buyer', 'breeder', 'service']).default('buyer'),
+  // Nur für Züchter
+  kennelName: z.string().min(2).max(80).optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -28,9 +23,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { email, password, kennelName } = parsed.data
+    const { email, password, role, kennelName } = parsed.data
 
-    // Prüfen ob E-Mail bereits vergeben
+    // Züchter braucht Zwingernamen
+    if (role === 'breeder' && !kennelName) {
+      return NextResponse.json(
+        { error: 'Zwingername ist für Züchter erforderlich' },
+        { status: 400 }
+      )
+    }
+
+    // E-Mail prüfen
     const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser) {
       return NextResponse.json(
@@ -39,48 +42,36 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Prüfen ob Zwingername bereits vergeben (UNIQUE constraint)
-    const existingKennel = await prisma.breederProfile.findUnique({
-      where: { kennelName },
-    })
-    if (existingKennel) {
-      return NextResponse.json(
-        { error: 'Dieser Zwingername ist bereits registriert' },
-        { status: 409 }
-      )
+    // Zwingername prüfen
+    if (role === 'breeder' && kennelName) {
+      const existingKennel = await prisma.breederProfile.findUnique({ where: { kennelName } })
+      if (existingKennel) {
+        return NextResponse.json(
+          { error: 'Dieser Zwingername ist bereits registriert' },
+          { status: 409 }
+        )
+      }
     }
 
-    // Passwort hashen
     const passwordHash = await bcrypt.hash(password, 12)
 
-    // User + BreederProfile in einer Transaktion anlegen
     const user = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
-        data: {
-          email,
-          passwordHash,
-          role: 'breeder',
-        },
+        data: { email, passwordHash, role },
       })
 
-      await tx.breederProfile.create({
-        data: {
-          userId: newUser.id,
-          kennelName,
-          verificationLevel: 'email_verified',
-        },
-      })
-
-      await tx.subscription.create({
-        data: {
-          breederId: (
-            await tx.breederProfile.findUnique({
-              where: { userId: newUser.id },
-            })
-          )!.id,
-          plan: 'free',
-        },
-      })
+      if (role === 'breeder' && kennelName) {
+        const breeder = await tx.breederProfile.create({
+          data: {
+            userId: newUser.id,
+            kennelName,
+            verificationLevel: 'email_verified',
+          },
+        })
+        await tx.subscription.create({
+          data: { breederId: breeder.id, plan: 'free' },
+        })
+      }
 
       return newUser
     })

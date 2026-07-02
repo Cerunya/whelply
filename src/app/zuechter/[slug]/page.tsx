@@ -7,6 +7,9 @@ import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 import { renderRichText } from '@/lib/richtext'
+import ReviewSection from '@/components/ReviewSection'
+import BookmarkButton from '@/components/BookmarkButton'
+import { auth } from '@/lib/auth'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -20,6 +23,12 @@ export default async function ZuechterProfilPage({
   const breeder = await getBreederBySlug(params.slug)
   if (!breeder) notFound()
   if (breeder.isPublished === false) notFound()
+
+  const session = await auth()
+  const isLoggedIn = !!session?.user?.id
+  const isBookmarked = session?.user?.id
+    ? !!(await import('@/lib/prisma').then(m => m.prisma.bookmark.findFirst({ where: { userId: session.user.id, breederId: breeder.id } })))
+    : false
 
   const tabs = await getBreederTabs(breeder.id)
 
@@ -81,6 +90,50 @@ export default async function ZuechterProfilPage({
               </p>
             </div>
           )}
+
+          {/* Übergabe-Infos */}
+          {(breeder.handoverLocation || breeder.visitPossible || breeder.damVisitPossible) && (
+            <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-6">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-3">Übergabe & Besuch</h2>
+              <div className="space-y-2">
+                {breeder.handoverLocation && (
+                  <div className="flex items-center gap-2 text-sm text-stone-600">
+                    <svg className="w-4 h-4 text-forest flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <span>Übergabe: {breeder.handoverLocation}</span>
+                  </div>
+                )}
+                {breeder.visitPossible && (
+                  <div className="flex items-center gap-2 text-sm text-stone-600">
+                    <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Besuch des Wurfes möglich</span>
+                  </div>
+                )}
+                {breeder.damVisitPossible && (
+                  <div className="flex items-center gap-2 text-sm text-stone-600">
+                    <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Besuch des Muttertiers möglich</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Bewertungen */}
+          <div className="mb-6">
+            <ReviewSection breederId={breeder.id} isLoggedIn={isLoggedIn} />
+          </div>
+
+          {/* Merken-Button */}
+          <div className="flex justify-end mb-2">
+            <BookmarkButton breederId={breeder.id} initialBookmarked={isBookmarked} isLoggedIn={isLoggedIn} />
+          </div>
+
         </BreederPageContent>
       </main>
       <BreederFooter
