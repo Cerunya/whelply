@@ -59,6 +59,7 @@ export default async function Home() {
       state: true,
       bio: true,
       isPublished: true,
+      isActive: true,
       dogs: { take: 1, select: { breed: { select: { nameDe: true } } } },
       media: { where: { purpose: 'background' }, take: 1, select: { url: true } },
       listings: {
