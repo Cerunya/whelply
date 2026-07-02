@@ -20,7 +20,7 @@ export default async function Home() {
   }).catch(() => [])
 
   const listings = await prisma.listing.findMany({
-    where: { status: 'available', type: 'puppy' },
+    where: { status: 'available', type: 'puppy', breeder: { isActive: true } },
     orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
     take: 8,
     include: {
@@ -36,7 +36,7 @@ export default async function Home() {
   ])
 
   const adultListings = await prisma.listing.findMany({
-    where: { status: 'available', type: 'adult_dog' },
+    where: { status: 'available', type: 'adult_dog', breeder: { isActive: true } },
     orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
     take: 6,
     include: {
@@ -76,7 +76,7 @@ export default async function Home() {
 
   // Nur Zuecher mit Hintergrundbild anzeigen, max 9
   const featuredBreeders = allFeaturedBreeders
-    .filter((b) => b.media[0]?.url && b.isPublished !== false)
+    .filter((b) => b.media[0]?.url && b.isPublished !== false && b.isActive !== false)
     .slice(0, 9)
 
   const now = new Date()

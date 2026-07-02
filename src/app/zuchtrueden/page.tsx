@@ -18,6 +18,7 @@ export default async function ZuchtrudenPage({
     where: {
       sex: 'male',
       isStud: true,
+      breeder: { isActive: true },
       ...(searchParams.rasse ? { breed: { slug: searchParams.rasse } } : {}),
     },
     include: {

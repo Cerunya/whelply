@@ -28,8 +28,11 @@ export default async function WelpenPage({
   const where = {
     status: { in: ['available', 'reserved', 'sold'] as ('available' | 'reserved' | 'sold')[] },
     type: 'puppy' as const,
+    breeder: {
+      isActive: true,
+      ...(searchParams.region ? { state: searchParams.region } : {}),
+    },
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
-    ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
     ...(searchParams.geschlecht === 'male' ? { sex: 'male' as const } : {}),
     ...(searchParams.geschlecht === 'female' ? { sex: 'female' as const } : {}),
   }

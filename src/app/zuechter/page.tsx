@@ -44,7 +44,8 @@ export default async function ZuechterVerzeichnisPage({
   ).sort() as string[]
 
   // Filtern
-  let filtered = breeders
+  // Inaktive Züchter komplett ausblenden
+  let filtered = breeders.filter((b) => b.isActive !== false)
   if (searchParams.rasse) {
     filtered = filtered.filter((b) =>
       b.listings.some((l) => l.breed.nameDe === searchParams.rasse)
@@ -95,13 +96,12 @@ export default async function ZuechterVerzeichnisPage({
                 const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
                 const breeds = Array.from(new Set(breeder.listings.map((l) => l.breed.nameDe)))
                 const published = breeder.isPublished !== false
-                const active = breeder.isActive !== false
                 const hasWelpen = breeder.listings.length > 0
                 const hasLitter = breeder.litters.length > 0
 
                 const cardContent = (
                   <div className={`relative bg-white rounded-2xl border border-cream-deep p-6 pb-8 transition-all h-full flex flex-col ${
-                    published && active
+                    published
                       ? 'hover:border-forest/30 hover:shadow-md cursor-pointer'
                       : 'cursor-default'
                   }`}>
@@ -112,13 +112,7 @@ export default async function ZuechterVerzeichnisPage({
                           <p className="text-xs text-stone-400 mt-0.5">{breeder.fullName}</p>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
-                        {!active && (
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Profil inaktiv</span>
-                        )}
-                        {!published && (
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">Seite deaktiviert</span>
-                        )}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
                         {breeder.verificationLevel !== 'none' && (
                           <span className="text-xs text-honey font-semibold whitespace-nowrap">✓ Verifiziert</span>
                         )}
@@ -168,7 +162,7 @@ export default async function ZuechterVerzeichnisPage({
                   </div>
                 )
 
-                return published && active ? (
+                return published ? (
                   <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}>
                     {cardContent}
                   </Link>
