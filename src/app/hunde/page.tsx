@@ -28,8 +28,11 @@ export default async function HundePage({
   const where = {
     status: 'available' as const,
     type: 'adult_dog' as const,
+    breeder: {
+      isActive: true,
+      ...(searchParams.region ? { state: searchParams.region } : {}),
+    },
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
-    ...(searchParams.region ? { breeder: { state: searchParams.region } } : {}),
   }
 
   const [listings, total] = await Promise.all([

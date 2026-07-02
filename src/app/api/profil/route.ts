@@ -76,6 +76,11 @@ export async function PATCH(req: NextRequest) {
     ])
   )
 
+  // Wenn Profil inaktiv → Seite automatisch ausschalten
+  if (data.isActive === false) {
+    data.isPublished = false
+  }
+
   await prisma.breederProfile.update({
     where: { userId: session.user.id },
     data,

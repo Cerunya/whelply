@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
 import { slugify } from '@/lib/slugify'
+import BreederStatusToggles from '@/components/BreederStatusToggles'
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -99,18 +100,24 @@ export default async function DashboardPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-10">
-        {/* Begrüßung */}
-        <div className="mb-10">
-          <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
-            {breeder.kennelName}
-          </h1>
-          <p className="text-stone-400 text-sm">
-            {breeder.city ? `${breeder.city} · ` : ''}
-            Plan: <span className="font-medium text-forest capitalize">{plan}</span>
-            {plan === 'free' && (
-              <span className="text-stone-400"> · {activeListings.length}/{maxFree} Inserate</span>
-            )}
-          </p>
+        {/* Begrüßung + Status-Toggles */}
+        <div className="flex items-start justify-between gap-4 mb-10">
+          <div>
+            <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
+              {breeder.kennelName}
+            </h1>
+            <p className="text-stone-400 text-sm">
+              {breeder.city ? `${breeder.city} · ` : ''}
+              Plan: <span className="font-medium text-forest capitalize">{plan}</span>
+              {plan === 'free' && (
+                <span className="text-stone-400"> · {activeListings.length}/{maxFree} Inserate</span>
+              )}
+            </p>
+          </div>
+          <BreederStatusToggles
+            initialPublished={breeder.isPublished ?? true}
+            initialActive={breeder.isActive ?? true}
+          />
         </div>
 
         {/* Stat-Karten */}
