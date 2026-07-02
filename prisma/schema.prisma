@@ -534,11 +534,13 @@ model Bookmark {
 // ─────────────────────────────────────────────
 
 model WelpenAlert {
-  id        String   @id @default(cuid())
-  email     String
-  breedId   Int?     @map("breed_id")
-  state     String?  // Bundesland-Filter
-  createdAt DateTime @default(now()) @map("created_at")
+  id               String    @id @default(cuid())
+  email            String
+  breedId          Int?      @map("breed_id")
+  state            String?
+  unsubscribeToken String    @unique @map("unsubscribe_token")
+  lastSentAt       DateTime? @map("last_sent_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
 
   breed Breed? @relation(fields: [breedId], references: [id], onDelete: SetNull)
 
