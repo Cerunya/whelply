@@ -32,7 +32,12 @@ export default function RegisterPage() {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, role }),
+      body: JSON.stringify({
+        email: form.email,
+        password: form.password,
+        role,
+        ...(role === 'breeder' && form.kennelName ? { kennelName: form.kennelName } : {}),
+      }),
     })
 
     const data = await res.json()

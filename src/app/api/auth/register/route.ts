@@ -18,6 +18,10 @@ const registerSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+    // Leeren kennelName-String als undefined behandeln
+    if (body.kennelName === '' || body.kennelName === null) {
+      delete body.kennelName
+    }
     const parsed = registerSchema.safeParse(body)
 
     if (!parsed.success) {
