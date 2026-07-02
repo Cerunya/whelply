@@ -27,7 +27,7 @@ export default async function HundDetailPage({
     where: { id: params.id },
     include: {
       breed: { select: { nameDe: true, slug: true } },
-      breeder: { select: { kennelName: true, displayName: true, city: true, state: true } },
+      breeder: { select: { kennelName: true, displayName: true, city: true, state: true, isPublished: true } },
       media: { take: 1, select: { url: true } },
       parentSire: {
         include: {
@@ -167,12 +167,14 @@ export default async function HundDetailPage({
                 )}
               </div>
 
-              <Link
-                href={`/zuechter/${slugify(dog.breeder.kennelName)}`}
-                className="block text-center border-2 border-forest text-forest font-semibold py-3 rounded-xl hover:bg-forest/5 transition-colors"
-              >
-                Züchter-Profil ansehen
-              </Link>
+              {dog.breeder.isPublished !== false && (
+                <Link
+                  href={`/zuechter/${slugify(dog.breeder.kennelName)}`}
+                  className="block text-center border-2 border-forest text-forest font-semibold py-3 rounded-xl hover:bg-forest/5 transition-colors"
+                >
+                  Züchter-Profil ansehen
+                </Link>
+              )}
             </div>
           </div>
 

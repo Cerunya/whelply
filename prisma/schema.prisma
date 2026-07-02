@@ -152,6 +152,7 @@ model BreederProfile {
   fullName          String?           @map("full_name")
   showFullName      Boolean           @default(false) @map("show_full_name")
   isPublished       Boolean           @default(true) @map("is_published")
+  isActive          Boolean           @default(true) @map("is_active")
   // Züchterverband (VDH, ÖKV, SKG, ASCA, etc.) — optional
   verband           String?
   // Mitgliedsnummer im Rassezuchtverein — optional, für Badge

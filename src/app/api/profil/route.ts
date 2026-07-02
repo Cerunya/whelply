@@ -11,6 +11,7 @@ const schema = z.object({
   fullName: z.string().max(120).optional(),
   showFullName: z.boolean().optional(),
   isPublished: z.boolean().optional(),
+  isActive: z.boolean().optional(),
   bio: z.string().max(2000).optional(),
   website: z.string().url().or(z.literal('')).optional(),
   socialInstagram: z.string().url().or(z.literal('')).nullable().optional(),

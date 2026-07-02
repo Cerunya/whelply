@@ -25,6 +25,11 @@ export default async function ZuechterVerzeichnisPage({
         where: { status: 'available', type: 'puppy' },
         select: { id: true, breed: { select: { nameDe: true } } },
       },
+      litters: {
+        where: { status: { in: ['planned', 'pregnant'] } },
+        select: { id: true, status: true },
+        take: 1,
+      },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -90,30 +95,37 @@ export default async function ZuechterVerzeichnisPage({
                 const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
                 const breeds = Array.from(new Set(breeder.listings.map((l) => l.breed.nameDe)))
                 const published = breeder.isPublished !== false
+                const active = breeder.isActive !== false
+                const hasWelpen = breeder.listings.length > 0
+                const hasLitter = breeder.litters.length > 0
 
                 const cardContent = (
-                  <div className={`bg-white rounded-2xl border border-cream-deep p-6 transition-all ${
-                    published
+                  <div className={`bg-white rounded-2xl border border-cream-deep p-6 transition-all h-full flex flex-col ${
+                    published && active
                       ? 'hover:border-forest/30 hover:shadow-md cursor-pointer'
                       : 'cursor-default'
                   }`}>
-                    <div className="flex items-start justify-between mb-2">
-                      <h2 className="font-serif text-lg font-bold text-stone-900">
-                        {displayName}
-                      </h2>
-                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <h2 className="font-serif text-lg font-bold text-stone-900">{displayName}</h2>
+                        {breeder.showFullName && breeder.fullName && (
+                          <p className="text-xs text-stone-400 mt-0.5">{breeder.fullName}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
+                        {!active && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Profil inaktiv</span>
+                        )}
                         {!published && (
-                          <span className="text-xs text-stone-400 font-medium">Seite deaktiviert</span>
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">Seite deaktiviert</span>
                         )}
                         {breeder.verificationLevel !== 'none' && (
-                          <span className="text-xs text-honey font-semibold whitespace-nowrap">
-                            ✓ Verifiziert
-                          </span>
+                          <span className="text-xs text-honey font-semibold whitespace-nowrap">✓ Verifiziert</span>
                         )}
                       </div>
                     </div>
                     {location && (
-                      <p className="text-sm text-stone-400 mb-3 flex items-center gap-1">
+                      <p className="text-sm text-stone-400 mb-2 flex items-center gap-1">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -122,7 +134,7 @@ export default async function ZuechterVerzeichnisPage({
                       </p>
                     )}
                     {breeds.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1.5 mb-3">
                         {breeds.map((breed) => (
                           <span key={breed} className="text-xs bg-forest/5 text-forest font-medium px-2 py-1 rounded-full">
                             {breed}
@@ -130,12 +142,29 @@ export default async function ZuechterVerzeichnisPage({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-stone-300">Aktuell keine Inserate</p>
+                      <p className="text-xs text-stone-300 mb-3">Aktuell keine Inserate</p>
+                    )}
+                    {/* Status-Badges: Welpen / Wurf erwartet */}
+                    {(hasWelpen || hasLitter) && (
+                      <div className="flex gap-2 mt-auto pt-2">
+                        {hasWelpen && (
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-honey text-white">
+                            Welpen verfügbar
+                          </span>
+                        )}
+                        {!hasWelpen && hasLitter && (
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full text-white ${
+                            breeder.litters[0]?.status === 'pregnant' ? 'bg-blue-400' : 'bg-blue-300'
+                          }`}>
+                            {breeder.litters[0]?.status === 'pregnant' ? 'Wurf erwartet' : 'Wurf geplant'}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 )
 
-                return published ? (
+                return published && active ? (
                   <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}>
                     {cardContent}
                   </Link>

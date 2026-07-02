@@ -19,6 +19,7 @@ type BreederData = {
   fullName: string
   showFullName: boolean
   isPublished: boolean
+  isActive: boolean
   bio: string | null
   website: string | null
   socialInstagram: string | null
@@ -46,6 +47,7 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
     fullName: breeder.fullName ?? '',
     showFullName: breeder.showFullName ?? false,
     isPublished: breeder.isPublished ?? true,
+    isActive: breeder.isActive ?? true,
     bio: breeder.bio ?? '',
     website: breeder.website ?? '',
     socialInstagram: breeder.socialInstagram ?? '',
@@ -143,24 +145,44 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
                 </p>
               </div>
               {/* Sichtbarkeits-Toggle */}
-              <label className="flex items-center gap-2 cursor-pointer flex-shrink-0">
-                <span className="text-xs text-stone-500 font-medium">
-                  {form.isPublished ? 'Seite sichtbar' : 'Seite versteckt'}
-                </span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={form.isPublished}
-                  onClick={() => setForm({ ...form, isPublished: !form.isPublished })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    form.isPublished ? 'bg-forest' : 'bg-stone-300'
-                  }`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                    form.isPublished ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </button>
-              </label>
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <span className="text-xs text-stone-500 font-medium w-28 text-right">
+                    {form.isPublished ? 'Seite sichtbar' : 'Seite versteckt'}
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={form.isPublished}
+                    onClick={() => setForm({ ...form, isPublished: !form.isPublished })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      form.isPublished ? 'bg-forest' : 'bg-stone-300'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                      form.isPublished ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <span className="text-xs text-stone-500 font-medium w-28 text-right">
+                    {form.isActive ? 'Profil aktiv' : 'Profil inaktiv'}
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={form.isActive}
+                    onClick={() => setForm({ ...form, isActive: !form.isActive })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      form.isActive ? 'bg-forest' : 'bg-amber-400'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                      form.isActive ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </label>
+              </div>
             </div>
 
             <div>
