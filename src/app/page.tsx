@@ -22,7 +22,7 @@ export default async function Home() {
   const listings = await prisma.listing.findMany({
     where: { status: 'available', type: 'puppy', breeder: { isActive: true } },
     orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
-    take: 8,
+    take: 15,
     include: {
       breed: { select: { nameDe: true } },
       breeder: { select: { kennelName: true, city: true, state: true } },
@@ -257,7 +257,7 @@ export default async function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
-              {adultListings.slice(0, 4).map((listing) => (
+              {adultListings.slice(0, 6).map((listing) => (
                 <ListingCard
                   key={listing.id}
                   id={listing.id}

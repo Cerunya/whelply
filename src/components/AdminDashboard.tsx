@@ -69,6 +69,7 @@ export default function AdminDashboard({
   const router = useRouter()
   const [tab, setTab] = useState<'overview' | 'breeders' | 'listings' | 'reports' | 'users'>('overview')
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
 
   async function deleteListing(id: string) {
     if (!confirm('Inserat wirklich endgültig löschen?')) return
@@ -83,6 +84,15 @@ export default function AdminDashboard({
     if (!confirm('Züchter-Konto wirklich endgültig löschen? Alle Inserate, Würfe und Hunde werden mitgelöscht.')) return
     setBusyId(id)
     const res = await fetch(`/api/admin/breeders/${id}`, { method: 'DELETE' })
+    setBusyId(null)
+    if (res.ok) router.refresh()
+    else alert('Fehler beim Löschen.')
+  }
+
+  async function deleteReport(id: string) {
+    if (!confirm('Meldung wirklich löschen?')) return
+    setBusyId(id)
+    const res = await fetch(`/api/admin/reports/${id}`, { method: 'DELETE' })
     setBusyId(null)
     if (res.ok) router.refresh()
     else alert('Fehler beim Löschen.')
@@ -109,6 +119,20 @@ export default function AdminDashboard({
     if (res.ok) router.refresh()
     else alert('Fehler beim Aktualisieren.')
   }
+
+  const q = search.toLowerCase()
+  const filteredBreeders = breeders.filter((b) =>
+    !q || b.kennelName.toLowerCase().includes(q) || b.email.toLowerCase().includes(q)
+  )
+  const filteredListings = listings.filter((l) =>
+    !q || (l.title ?? '').toLowerCase().includes(q) || l.breedName.toLowerCase().includes(q) || l.kennelName.toLowerCase().includes(q)
+  )
+  const filteredReports = reports.filter((r) =>
+    !q || r.kennelName.toLowerCase().includes(q) || r.reporterEmail.toLowerCase().includes(q) || r.reason.toLowerCase().includes(q)
+  )
+  const filteredUsers = allUsers.filter((u) =>
+    !q || u.email.toLowerCase().includes(q) || (u.displayName ?? '').toLowerCase().includes(q)
+  )
 
   const tabClass = (active: boolean) =>
     `px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
@@ -153,6 +177,16 @@ export default function AdminDashboard({
           </button>
           <button onClick={() => setTab('users')} className={tabClass(tab === 'users')}>Nutzer ({allUsers.length})</button>
         </div>
+
+        {tab !== 'overview' && (
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Suchen…"
+            className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-forest/30"
+          />
+        )}
 
         {tab === 'overview' && (
           <div className="bg-white rounded-2xl border border-cream-deep p-7">
@@ -237,7 +271,7 @@ export default function AdminDashboard({
                 </tr>
               </thead>
               <tbody className="divide-y divide-cream-deep">
-                {listings.map((l) => (
+                {filteredListings.map((l) => (
                   <tr key={l.id}>
                     <td className="px-4 py-3 font-medium text-stone-800">
                       <Link href={`/welpen/${l.id}`} target="_blank" className="hover:text-forest">
@@ -288,7 +322,7 @@ export default function AdminDashboard({
                 {reports.length === 0 && (
                   <tr><td colSpan={5} className="px-4 py-8 text-center text-stone-400">Keine Meldungen</td></tr>
                 )}
-                {reports.map((r) => (
+                {filteredReports.map((r) => (
                   <tr key={r.id} className="hover:bg-cream/30">
                     <td className="px-4 py-3">
                       <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{r.reason}</span>
@@ -301,6 +335,12 @@ export default function AdminDashboard({
                     <td className="px-4 py-3 text-stone-500 text-xs">{r.reporterEmail}</td>
                     <td className="px-4 py-3 text-stone-500 text-xs max-w-xs truncate">{r.comment ?? '—'}</td>
                     <td className="px-4 py-3 text-stone-400 text-xs">{new Date(r.createdAt).toLocaleDateString('de-DE')}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button onClick={() => deleteReport(r.id)} disabled={busyId === r.id}
+                        className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40">
+                        Löschen
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -321,7 +361,7 @@ export default function AdminDashboard({
                 </tr>
               </thead>
               <tbody className="divide-y divide-cream-deep">
-                {allUsers.map((u) => (
+                {filteredUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-cream/30">
                     <td className="px-4 py-3 text-stone-800">{u.email}</td>
                     <td className="px-4 py-3 text-stone-600">{u.displayName ?? '—'}</td>

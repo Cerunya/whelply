@@ -16,7 +16,7 @@ export default async function WelpenPage({
   searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string }
 }) {
   const page = Number(searchParams.seite ?? 1)
-  const perPage = 24
+  const perPage = 36
 
   const breeds = await prisma.breed.findMany({
     orderBy: { nameDe: 'asc' },
@@ -55,6 +55,23 @@ export default async function WelpenPage({
 
   const now = new Date()
   const totalPages = Math.ceil(total / perPage)
+
+  // Würfe mit erwarteten Welpen (pregnant / planned) für die Sektion unten
+  const expectedLitters = await prisma.litter.findMany({
+    where: {
+      status: { in: ['pregnant', 'planned'] as const },
+      breeder: { isActive: true, isPublished: true },
+    },
+    include: {
+      breed: { select: { nameDe: true } },
+      breeder: { select: { kennelName: true, city: true, state: true } },
+      dam: { include: { media: { where: { isPrimary: true }, take: 1, select: { url: true } } } },
+      sire: { include: { media: { where: { isPrimary: true }, take: 1, select: { url: true } } } },
+      media: { take: 2, select: { url: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 12,
+  })
 
   function buildUrl(params: Record<string, string | undefined>) {
     const p = new URLSearchParams()
@@ -170,6 +187,65 @@ export default async function WelpenPage({
             </>
           )}
         </div>
+
+        {/* Welpen erwartet — Sektion wie auf französischen Seiten */}
+        {expectedLitters.length > 0 && (
+          <div className="mt-16 mb-8">
+            <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Welpen demnächst erwartet</h2>
+            <p className="text-stone-400 text-sm mb-8">Züchter mit geplanten oder bestätigten Würfen</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {expectedLitters.map((litter) => (
+                <div key={litter.id} className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md transition-all">
+                  {/* Bilder-Reihe */}
+                  <div className="flex h-40">
+                    {litter.dam?.media[0]?.url ? (
+                      <div className="flex-1 overflow-hidden">
+                        <img src={litter.dam.media[0].url} alt="Mutter" className="w-full h-full object-cover" />
+                      </div>
+                    ) : litter.media[0]?.url ? (
+                      <div className="flex-1 overflow-hidden">
+                        <img src={litter.media[0].url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ) : null}
+                    {litter.sire?.media[0]?.url && (
+                      <div className="flex-1 overflow-hidden">
+                        <img src={litter.sire.media[0].url} alt="Vater" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <p className="font-semibold text-forest text-sm">{litter.breeder.kennelName}</p>
+                    <p className="text-xs text-stone-500 mt-0.5">
+                      {litter.status === 'pregnant' ? 'Trächtigkeit bestätigt' : 'Wurf geplant'}
+                      {litter.expectedDate && ` · ${litter.expectedDate}`}
+                    </p>
+                    {(litter.breeder.city || litter.breeder.state) && (
+                      <p className="text-xs text-stone-400 mt-0.5">{[litter.breeder.city, litter.breeder.state].filter(Boolean).join(', ')}</p>
+                    )}
+                    <div className="flex gap-3 mt-3">
+                      {litter.dam && (
+                        <div className="flex-1 text-center">
+                          <p className="text-[10px] font-semibold text-pink-500 uppercase">Mutter</p>
+                          <p className="text-xs text-stone-700 truncate">{litter.dam.name}</p>
+                        </div>
+                      )}
+                      {(litter.sire || litter.sireExternal) && (
+                        <div className="flex-1 text-center">
+                          <p className="text-[10px] font-semibold text-blue-500 uppercase">Vater</p>
+                          <p className="text-xs text-stone-700 truncate">{litter.sire?.name ?? litter.sireExternal}</p>
+                        </div>
+                      )}
+                    </div>
+                    <Link href={`/zuechter/${litter.breeder.kennelName.toLowerCase().replace(/\s+/g, '-')}/wuerfe/${litter.id}`}
+                      className="block mt-3 text-center text-xs font-semibold text-forest border border-forest/30 py-1.5 rounded-lg hover:bg-forest/5 transition-colors">
+                      Zum Wurf →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
       <Footer />
     </>

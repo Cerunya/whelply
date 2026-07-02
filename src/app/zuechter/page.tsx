@@ -21,6 +21,16 @@ export default async function ZuechterVerzeichnisPage({
         include: { breed: { select: { nameDe: true } } },
         take: 1,
       },
+      media: {
+        where: { purpose: 'background' },
+        take: 1,
+        select: { url: true },
+      },
+      _count: {
+        select: {
+          dogs: { where: { isStud: true } },
+        },
+      },
       listings: {
         where: { status: 'available', type: 'puppy' },
         select: { id: true, breed: { select: { nameDe: true } } },
@@ -98,57 +108,67 @@ export default async function ZuechterVerzeichnisPage({
                 const published = breeder.isPublished !== false
                 const hasWelpen = breeder.listings.length > 0
                 const hasLitter = breeder.litters.length > 0
+                const hasStud = (breeder._count?.dogs ?? 0) > 0
+                const bgImage = breeder.media[0]?.url
 
                 const cardContent = (
-                  <div className={`relative bg-white rounded-2xl border border-cream-deep p-6 pb-8 transition-all h-full flex flex-col ${
+                  <div className={`bg-white rounded-2xl border border-cream-deep transition-all h-full flex flex-col overflow-hidden ${
                     published
                       ? 'hover:border-forest/30 hover:shadow-md cursor-pointer'
                       : 'cursor-default'
                   }`}>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <h2 className="font-serif text-lg font-bold text-stone-900">{displayName}</h2>
-                        {breeder.showFullName && breeder.fullName && (
-                          <p className="text-xs text-stone-400 mt-0.5">{breeder.fullName}</p>
-                        )}
+                    {/* Hintergrundbild */}
+                    {bgImage && (
+                      <div className="relative h-36 overflow-hidden flex-shrink-0">
+                        <img src={bgImage} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        {breeder.verificationLevel !== 'none' && (
-                          <span className="text-xs text-honey font-semibold whitespace-nowrap">✓ Verifiziert</span>
-                        )}
-                      </div>
-                    </div>
-                    {location && (
-                      <p className="text-sm text-stone-400 mb-2 flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {location}
-                      </p>
                     )}
-                    {breeds.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {breeds.map((breed) => (
-                          <span key={breed} className="text-xs bg-forest/5 text-forest font-medium px-2 py-1 rounded-full">
-                            {breed}
-                          </span>
-                        ))}
+                    <div className="relative p-6 pb-8 flex flex-col flex-1">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                          <h2 className="font-serif text-lg font-bold text-stone-900">{displayName}</h2>
+                          {breeder.showFullName && breeder.fullName && (
+                            <p className="text-xs text-stone-400 mt-0.5">{breeder.fullName}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {breeder.verificationLevel !== 'none' && (
+                            <span className="text-xs text-honey font-semibold whitespace-nowrap">✓ Verifiziert</span>
+                          )}
+                        </div>
                       </div>
-                    ) : (
-                      <p className="text-xs text-stone-300 mb-3">Aktuell keine Inserate</p>
-                    )}
-                    {/* Runde Badges wie auf der Startseite — überlappen den Kartenrand */}
-                    {(hasWelpen || hasLitter) && (
+                      {location && (
+                        <p className="text-sm text-stone-400 mb-2 flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {location}
+                        </p>
+                      )}
+                      {breeds.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {breeds.map((breed) => (
+                            <span key={breed} className="text-xs bg-forest/5 text-forest font-medium px-2 py-1 rounded-full">
+                              {breed}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-stone-300 mb-2">Aktuell keine Inserate</p>
+                      )}
+
+                      {/* Runde Badges — überlappen den Kartenrand */}
                       <div className="absolute -bottom-5 right-4 flex gap-2">
                         {hasWelpen && (
-                          <div className="w-14 h-14 rounded-full bg-honey text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
+                          <div className="w-16 h-16 rounded-full bg-honey text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
                             <span className="text-[9px] font-black leading-tight uppercase">Welpen</span>
                             <span className="text-[9px] font-black leading-tight uppercase">Dispo</span>
                           </div>
                         )}
                         {!hasWelpen && hasLitter && (
-                          <div className={`w-14 h-14 rounded-full text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white ${
+                          <div className={`w-16 h-16 rounded-full text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white ${
                             breeder.litters[0]?.status === 'pregnant' ? 'bg-blue-400' : 'bg-blue-300'
                           }`}>
                             <span className="text-[9px] font-black leading-tight uppercase">Wurf</span>
@@ -157,8 +177,14 @@ export default async function ZuechterVerzeichnisPage({
                             </span>
                           </div>
                         )}
+                        {hasStud && (
+                          <div className="w-16 h-16 rounded-full bg-forest text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
+                            <span className="text-[9px] font-black leading-tight uppercase">Zucht</span>
+                            <span className="text-[9px] font-black leading-tight uppercase">Rüde</span>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 )
 
