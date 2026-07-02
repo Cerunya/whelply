@@ -402,51 +402,6 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
             </div>
           </div>
 
-          {/* Übergabe-Optionen */}
-          <div className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">
-            <h3 className="font-semibold text-stone-800 text-sm uppercase tracking-wide">
-              Übergabe & Besuch
-            </h3>
-            <p className="text-xs text-stone-400 -mt-3">
-              Diese Angaben helfen Interessenten bei der Planung.
-            </p>
-
-            <div>
-              <label className={labelClass}>Ort der Übergabe</label>
-              <input
-                type="text"
-                name="handoverLocation"
-                value={form.handoverLocation}
-                onChange={handleChange}
-                placeholder="z.B. Beim Züchter, Treffpunkt Autobahn, bundesweit"
-                className={inputClass}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="visitPossible"
-                  checked={form.visitPossible}
-                  onChange={handleChange}
-                  className="w-4 h-4 accent-forest"
-                />
-                <span className="text-sm text-stone-700">Besuch des Wurfes möglich</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="damVisitPossible"
-                  checked={form.damVisitPossible}
-                  onChange={handleChange}
-                  className="w-4 h-4 accent-forest"
-                />
-                <span className="text-sm text-stone-700">Besuch des Muttertiers möglich</span>
-              </label>
-            </div>
-          </div>
-
           <button
             type="submit"
             disabled={loading}

@@ -26,6 +26,25 @@ type Listing = {
   createdAt: string
 }
 
+type Report = {
+  id: string
+  reason: string
+  comment: string | null
+  createdAt: string
+  reporterEmail: string
+  listingId: string
+  listingBreed: string
+  kennelName: string
+}
+
+type AdminUser = {
+  id: string
+  email: string
+  displayName: string | null
+  role: string
+  createdAt: string
+}
+
 type Stats = {
   totalUsers: number
   totalBreeders: number
@@ -38,13 +57,17 @@ export default function AdminDashboard({
   breeders,
   listings,
   stats,
+  reports,
+  allUsers,
 }: {
   breeders: Breeder[]
   listings: Listing[]
   stats: Stats
+  reports: Report[]
+  allUsers: AdminUser[]
 }) {
   const router = useRouter()
-  const [tab, setTab] = useState<'overview' | 'breeders' | 'listings'>('overview')
+  const [tab, setTab] = useState<'overview' | 'breeders' | 'listings' | 'reports' | 'users'>('overview')
   const [busyId, setBusyId] = useState<string | null>(null)
 
   async function deleteListing(id: string) {
@@ -60,6 +83,15 @@ export default function AdminDashboard({
     if (!confirm('Züchter-Konto wirklich endgültig löschen? Alle Inserate, Würfe und Hunde werden mitgelöscht.')) return
     setBusyId(id)
     const res = await fetch(`/api/admin/breeders/${id}`, { method: 'DELETE' })
+    setBusyId(null)
+    if (res.ok) router.refresh()
+    else alert('Fehler beim Löschen.')
+  }
+
+  async function deleteUser(id: string) {
+    if (!confirm('Nutzer-Konto wirklich löschen?')) return
+    setBusyId(id)
+    const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
     setBusyId(null)
     if (res.ok) router.refresh()
     else alert('Fehler beim Löschen.')
@@ -112,10 +144,14 @@ export default function AdminDashboard({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 flex-wrap">
           <button onClick={() => setTab('overview')} className={tabClass(tab === 'overview')}>Übersicht</button>
           <button onClick={() => setTab('breeders')} className={tabClass(tab === 'breeders')}>Züchter ({breeders.length})</button>
           <button onClick={() => setTab('listings')} className={tabClass(tab === 'listings')}>Inserate ({listings.length})</button>
+          <button onClick={() => setTab('reports')} className={tabClass(tab === 'reports')}>
+            Meldungen {reports.length > 0 && <span className="ml-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{reports.length}</span>}
+          </button>
+          <button onClick={() => setTab('users')} className={tabClass(tab === 'users')}>Nutzer ({allUsers.length})</button>
         </div>
 
         {tab === 'overview' && (
@@ -225,6 +261,82 @@ export default function AdminDashboard({
                       <button
                         onClick={() => deleteListing(l.id)}
                         disabled={busyId === l.id}
+                        className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                      >
+                        Löschen
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {tab === 'reports' && (
+          <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-cream text-left text-xs text-stone-500 uppercase tracking-wide">
+                <tr>
+                  <th className="px-4 py-3">Grund</th>
+                  <th className="px-4 py-3">Inserat</th>
+                  <th className="px-4 py-3">Melder</th>
+                  <th className="px-4 py-3">Kommentar</th>
+                  <th className="px-4 py-3">Datum</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cream-deep">
+                {reports.length === 0 && (
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-stone-400">Keine Meldungen</td></tr>
+                )}
+                {reports.map((r) => (
+                  <tr key={r.id} className="hover:bg-cream/30">
+                    <td className="px-4 py-3">
+                      <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{r.reason}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link href={`/welpen/${r.listingId}`} className="text-forest hover:underline text-xs">
+                        {r.listingBreed} · {r.kennelName}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-stone-500 text-xs">{r.reporterEmail}</td>
+                    <td className="px-4 py-3 text-stone-500 text-xs max-w-xs truncate">{r.comment ?? '—'}</td>
+                    <td className="px-4 py-3 text-stone-400 text-xs">{new Date(r.createdAt).toLocaleDateString('de-DE')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {tab === 'users' && (
+          <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-cream text-left text-xs text-stone-500 uppercase tracking-wide">
+                <tr>
+                  <th className="px-4 py-3">E-Mail</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Rolle</th>
+                  <th className="px-4 py-3">Registriert</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cream-deep">
+                {allUsers.map((u) => (
+                  <tr key={u.id} className="hover:bg-cream/30">
+                    <td className="px-4 py-3 text-stone-800">{u.email}</td>
+                    <td className="px-4 py-3 text-stone-600">{u.displayName ?? '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        u.role === 'breeder' ? 'bg-forest/10 text-forest' :
+                        u.role === 'service' ? 'bg-blue-100 text-blue-700' :
+                        'bg-stone-100 text-stone-600'
+                      }`}>{u.role}</span>
+                    </td>
+                    <td className="px-4 py-3 text-stone-400 text-xs">{new Date(u.createdAt).toLocaleDateString('de-DE')}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => deleteUser(u.id)}
+                        disabled={busyId === u.id}
                         className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
                       >
                         Löschen

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
 import { slugify } from '@/lib/slugify'
+import BookmarkButton from '@/components/BookmarkButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,17 +60,19 @@ export default async function MerklistePage() {
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Welpen & Hunde</h2>
               <div className="space-y-3">
                 {listings.map((b) => (
-                  <Link key={b.id} href={`/welpen/${b.listing!.id}`}
-                    className="flex items-center gap-4 bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors">
-                    {b.listing!.media[0]?.url
-                      ? <img src={b.listing!.media[0].url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
-                      : <div className="w-16 h-16 rounded-lg bg-cream-dark flex-shrink-0" />
-                    }
-                    <div>
-                      <p className="font-semibold text-stone-900">{b.listing!.title || b.listing!.breed.nameDe}</p>
-                      <p className="text-xs text-stone-400">{b.listing!.breed.nameDe} · {b.listing!.breeder.kennelName}</p>
-                    </div>
-                  </Link>
+                  <div key={b.id} className="flex items-center gap-4 bg-white rounded-xl border border-cream-deep p-4">
+                    <Link href={`/welpen/${b.listing!.id}`} className="flex items-center gap-4 flex-1 hover:opacity-80 transition-opacity">
+                      {b.listing!.media[0]?.url
+                        ? <img src={b.listing!.media[0].url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                        : <div className="w-16 h-16 rounded-lg bg-cream-dark flex-shrink-0" />
+                      }
+                      <div>
+                        <p className="font-semibold text-stone-900">{b.listing!.title || b.listing!.breed.nameDe}</p>
+                        <p className="text-xs text-stone-400">{b.listing!.breed.nameDe} · {b.listing!.breeder.kennelName}</p>
+                      </div>
+                    </Link>
+                    <BookmarkButton listingId={b.listing!.id} initialBookmarked={true} isLoggedIn={true} />
+                  </div>
                 ))}
               </div>
             </section>
@@ -80,17 +83,19 @@ export default async function MerklistePage() {
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Würfe</h2>
               <div className="space-y-3">
                 {litters.map((b) => (
-                  <Link key={b.id} href={`/zuechter/${slugify(b.litter!.breeder.kennelName)}/wuerfe/${b.litter!.id}`}
-                    className="flex items-center gap-4 bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors">
-                    {b.litter!.media[0]?.url
-                      ? <img src={b.litter!.media[0].url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
-                      : <div className="w-16 h-16 rounded-lg bg-cream-dark flex-shrink-0" />
-                    }
-                    <div>
-                      <p className="font-semibold text-stone-900">{b.litter!.breed.nameDe}</p>
-                      <p className="text-xs text-stone-400">{b.litter!.breeder.kennelName}</p>
-                    </div>
-                  </Link>
+                  <div key={b.id} className="flex items-center gap-4 bg-white rounded-xl border border-cream-deep p-4">
+                    <Link href={`/zuechter/${slugify(b.litter!.breeder.kennelName)}/wuerfe/${b.litter!.id}`} className="flex items-center gap-4 flex-1 hover:opacity-80 transition-opacity">
+                      {b.litter!.media[0]?.url
+                        ? <img src={b.litter!.media[0].url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                        : <div className="w-16 h-16 rounded-lg bg-cream-dark flex-shrink-0" />
+                      }
+                      <div>
+                        <p className="font-semibold text-stone-900">{b.litter!.breed.nameDe}</p>
+                        <p className="text-xs text-stone-400">{b.litter!.breeder.kennelName}</p>
+                      </div>
+                    </Link>
+                    <BookmarkButton litterId={b.litter!.id} initialBookmarked={true} isLoggedIn={true} />
+                  </div>
                 ))}
               </div>
             </section>
@@ -101,16 +106,18 @@ export default async function MerklistePage() {
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Züchter</h2>
               <div className="space-y-3">
                 {breeders.map((b) => (
-                  <Link key={b.id} href={`/zuechter/${slugify(b.breeder!.kennelName)}`}
-                    className="flex items-center gap-4 bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors">
-                    {b.breeder!.media[0]?.url
-                      ? <img src={b.breeder!.media[0].url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
-                      : <div className="w-16 h-16 rounded-lg bg-cream-dark flex-shrink-0" />
-                    }
-                    <div>
-                      <p className="font-semibold text-stone-900">{b.breeder!.kennelName}</p>
-                    </div>
-                  </Link>
+                  <div key={b.id} className="flex items-center gap-4 bg-white rounded-xl border border-cream-deep p-4">
+                    <Link href={`/zuechter/${slugify(b.breeder!.kennelName)}`} className="flex items-center gap-4 flex-1 hover:opacity-80 transition-opacity">
+                      {b.breeder!.media[0]?.url
+                        ? <img src={b.breeder!.media[0].url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                        : <div className="w-16 h-16 rounded-lg bg-cream-dark flex-shrink-0" />
+                      }
+                      <div>
+                        <p className="font-semibold text-stone-900">{b.breeder!.kennelName}</p>
+                      </div>
+                    </Link>
+                    <BookmarkButton breederId={b.breeder!.id} initialBookmarked={true} isLoggedIn={true} />
+                  </div>
                 ))}
               </div>
             </section>

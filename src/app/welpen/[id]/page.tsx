@@ -170,14 +170,13 @@ export default async function WelpenDetailPage({
               </div>
               <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
                 <p className="text-2xl font-bold text-forest">{price}</p>
-                <div className="flex items-center gap-2">
+                {isLoggedIn && !viewerBreeder && (
                   <BookmarkButton
                     listingId={listing.id}
                     initialBookmarked={isBookmarked}
                     isLoggedIn={isLoggedIn}
                   />
-                  <ReportButton listingId={listing.id} isLoggedIn={isLoggedIn} />
-                </div>
+                )}
               </div>
             </div>
 
@@ -461,6 +460,13 @@ export default async function WelpenDetailPage({
                   )
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Melden — ganz unten */}
+          {!isOwner && (
+            <div className="flex justify-center pt-4 pb-2">
+              <ReportButton listingId={listing.id} isLoggedIn={isLoggedIn} />
             </div>
           )}
         </div>

@@ -15,6 +15,7 @@ export default function WelpeForm({ litter }: { litter: LitterInfo }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successId, setSuccessId] = useState<string | null>(null)
   const [form, setForm] = useState({
     name: '',
     sex: 'male',
@@ -55,13 +56,35 @@ export default function WelpeForm({ litter }: { litter: LitterInfo }) {
       return
     }
 
-    // Direkt zur Bearbeitung — dort können Fotos hinzugefügt werden
-    router.push(`/dashboard/inserat/${data.listingId}`)
-    router.refresh()
+    setLoading(false)
+    setSuccessId(data.listingId)
   }
 
   const labelClass = 'block text-sm font-medium text-stone-700 mb-1.5'
   const inputClass = 'w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest bg-white'
+
+  if (successId) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center space-y-4">
+        <p className="text-green-700 font-semibold text-lg">✓ Welpe eingetragen!</p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href={`/welpen/${successId}`}
+            className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-white border border-green-200 text-green-700 rounded-xl px-4 py-2.5 hover:bg-green-50 transition-colors">
+            Inserat ansehen →
+          </a>
+          <a href={`/dashboard/inserat/${successId}`}
+            className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-white border border-green-200 text-green-700 rounded-xl px-4 py-2.5 hover:bg-green-50 transition-colors">
+            Fotos hinzufügen
+          </a>
+          <button
+            onClick={() => { setSuccessId(null); setForm({ name: '', sex: 'male', birthDate: litter.bornDate ?? '', color: '', chipNumber: '', priceCents: '', status: 'draft' }) }}
+            className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-forest text-white rounded-xl px-4 py-2.5 hover:bg-forest-light transition-colors">
+            + Weiteren Welpen anlegen
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-cream font-sans">

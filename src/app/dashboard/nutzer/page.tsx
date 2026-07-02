@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
+import NutzerNameForm from '@/components/NutzerNameForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +13,7 @@ export default async function NutzerDashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { email: true, role: true, createdAt: true },
+    select: { email: true, role: true, displayName: true, createdAt: true },
   })
   if (!user) redirect('/login')
 
@@ -26,7 +27,9 @@ export default async function NutzerDashboardPage() {
 
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">Mein Konto</h1>
+              <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
+                {user.displayName ?? 'Mein Konto'}
+              </h1>
               <p className="text-stone-400 text-sm">{user.email}</p>
             </div>
             <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
@@ -36,6 +39,13 @@ export default async function NutzerDashboardPage() {
             </form>
           </div>
 
+          {/* Name bearbeiten */}
+          <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-4">
+            <h2 className="font-semibold text-stone-800 text-sm mb-3">Mein Name</h2>
+            <NutzerNameForm initialName={user.displayName ?? ''} />
+          </div>
+
+          {/* Links */}
           <div className="grid grid-cols-1 gap-4 mb-8">
             <Link href="/dashboard/merkliste"
               className="bg-white rounded-2xl border border-cream-deep p-6 hover:border-forest/30 hover:shadow-sm transition-all flex items-center justify-between">
