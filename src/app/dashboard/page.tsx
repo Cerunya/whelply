@@ -10,6 +10,13 @@ export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
+  // Nutzer-Rolle prüfen
+  const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } })
+  if (!user) redirect('/login')
+
+  // Nicht-Züchter → eigene Seite
+  if (user.role !== 'breeder' && user.role !== 'admin') redirect('/dashboard/nutzer')
+
   const breeder = await prisma.breederProfile.findUnique({
     where: { userId: session.user.id },
     include: {
@@ -41,7 +48,7 @@ export default async function DashboardPage() {
     },
   })
 
-  if (!breeder) redirect('/login')
+  if (!breeder) redirect('/dashboard/upgrade')
 
   const activeListings = breeder.listings.filter((l) => l.status === 'available')
   const draftListings = breeder.listings.filter((l) => l.status === 'draft')

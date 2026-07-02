@@ -89,7 +89,7 @@ export default function LoginPage() {
         <p className="text-center text-sm text-gray-500 mt-4">
           Noch kein Konto?{' '}
           <Link href="/register" className="text-gray-900 font-medium hover:underline">
-            Als Züchter registrieren
+            Registrieren
           </Link>
         </p>
       </div>
