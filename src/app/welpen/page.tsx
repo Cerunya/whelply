@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ListingCard from '@/components/ListingCard'
 import WelpenFilter from '@/components/WelpenFilter'
+import WelpenAlertButton from '@/components/WelpenAlertButton'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
@@ -107,12 +108,21 @@ export default async function WelpenPage({
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-10">
-          <p className="text-sm text-stone-400 mb-6">
-            <Link href="/" className="hover:text-stone-700">Startseite</Link>
-            {' / '}
-            <span className="text-stone-700">Welpen</span>
-            {selectedBreed && <> / <span className="text-stone-700">{selectedBreed.nameDe}</span></>}
-          </p>
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <p className="text-sm text-stone-400">
+              <Link href="/" className="hover:text-stone-700">Startseite</Link>
+              {' / '}
+              <span className="text-stone-700">Welpen</span>
+              {selectedBreed && <> / <span className="text-stone-700">{selectedBreed.nameDe}</span></>}
+            </p>
+            {(selectedBreed || searchParams.region || true) && (
+              <WelpenAlertButton
+                breedName={selectedBreed?.nameDe}
+                breedId={selectedBreed?.id}
+                state={searchParams.region}
+              />
+            )}
+          </div>
 
           {listings.length === 0 ? (
             <div className="text-center py-24 bg-stone-50 rounded-2xl border border-stone-200">

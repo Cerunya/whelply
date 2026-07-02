@@ -44,6 +44,12 @@ export default async function ZuechterVerzeichnisPage({
     orderBy: { createdAt: 'desc' },
   })
 
+  // Neu eingetragene Züchter (letzte 30 Tage)
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+  const newestBreeders = breeders
+    .filter((b) => b.isActive !== false && new Date(b.createdAt) > thirtyDaysAgo)
+    .slice(0, 10)
+
   // Eindeutige Rassen über alle Inserate sammeln (für Filter)
   const allBreeds = new Set<string>()
   breeders.forEach((b) => b.listings.forEach((l) => allBreeds.add(l.breed.nameDe)))
@@ -95,6 +101,38 @@ export default async function ZuechterVerzeichnisPage({
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-4 py-10">
+          {/* Neu eingetragene Züchter */}
+          {newestBreeders.length > 0 && !searchParams.rasse && !searchParams.bundesland && (
+            <div className="mb-10">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Zuletzt eingetragene Züchter</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+                {newestBreeders.map((b) => {
+                  const breeds = Array.from(new Set(b.listings.map((l) => l.breed.nameDe)))
+                  return (
+                    <div key={b.id} className="bg-white rounded-xl border border-cream-deep p-4 text-sm">
+                      <p className="font-semibold text-stone-900 truncate">{b.displayName || b.kennelName}</p>
+                      {breeds[0] && <p className="text-stone-500 text-xs truncate">{breeds[0]}</p>}
+                      {(b.city || b.state) && (
+                        <p className="text-forest text-xs mt-0.5 truncate">{[b.city, b.state].filter(Boolean).join(', ')}</p>
+                      )}
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        {b.listings.length > 0 && (
+                          <span className="text-[10px] border border-stone-200 rounded px-1.5 py-0.5 text-stone-500">Welpen Dispo</span>
+                        )}
+                        {b.litters.some((l) => l.status === 'pregnant' || l.status === 'planned') && (
+                          <span className="text-[10px] border border-stone-200 rounded px-1.5 py-0.5 text-stone-500">Welpen à venir</span>
+                        )}
+                        {(b._count?.dogs ?? 0) > 0 && (
+                          <span className="text-[10px] border border-stone-200 rounded px-1.5 py-0.5 text-stone-500">Deckrüde</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {filtered.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400 text-sm">Keine Züchter gefunden.</p>

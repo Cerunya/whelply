@@ -222,6 +222,7 @@ model Breed {
   dogs    Dog[]
   litters Litter[]
   listings Listing[]
+  alerts  WelpenAlert[]
 
   @@map("breeds")
 }
@@ -526,4 +527,21 @@ model Bookmark {
   breeder BreederProfile? @relation("BookmarkedBreeder", fields: [breederId], references: [id], onDelete: Cascade)
 
   @@map("bookmarks")
+}
+
+// ─────────────────────────────────────────────
+// MAIL-ALERTS — Nutzer abonnieren Suchalarme
+// ─────────────────────────────────────────────
+
+model WelpenAlert {
+  id        String   @id @default(cuid())
+  email     String
+  breedId   Int?     @map("breed_id")
+  state     String?  // Bundesland-Filter
+  createdAt DateTime @default(now()) @map("created_at")
+
+  breed Breed? @relation(fields: [breedId], references: [id], onDelete: SetNull)
+
+  @@map("welpen_alerts")
+  @@index([email])
 }
