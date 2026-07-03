@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import DashboardHeader from './DashboardHeader'
 
 type Breed = { id: number; nameDe: string }
 type Litter = { id: string; breedId: number; label: string }
@@ -75,15 +76,7 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
 
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
-          <Link href="/dashboard" className="text-stone-400 hover:text-stone-700 transition-colors text-sm">
-            ← Dashboard
-          </Link>
-          <span className="text-stone-300">|</span>
-          <h1 className="font-semibold text-stone-800 text-sm">Neues Inserat erstellen</h1>
-        </div>
-      </header>
+      <DashboardHeader title="Neues Inserat erstellen" />
 
       <main className="max-w-xl mx-auto px-4 py-12">
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Inserat erstellen</h2>

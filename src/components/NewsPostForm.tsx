@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import DashboardHeader from './DashboardHeader'
 import NewsImageUploader from './NewsImageUploader'
 import RichEditor from './RichEditor'
 import SaveToast from './SaveToast'
@@ -82,17 +83,7 @@ export default function NewsPostForm({ post }: { post?: Post }) {
 
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center gap-4">
-          <Link href="/dashboard/news" className="text-stone-400 hover:text-stone-700 transition-colors text-sm">
-            ← Aktuelles
-          </Link>
-          <span className="text-stone-300">|</span>
-          <h1 className="font-semibold text-stone-800 text-sm">
-            {isEdit ? 'Beitrag bearbeiten' : 'Neuer Beitrag'}
-          </h1>
-        </div>
-      </header>
+      <DashboardHeader title={isEdit ? "Beitrag bearbeiten" : "Neuer Beitrag"} backHref="/dashboard/news" backLabel="Aktuelles" />
 
       <main className="max-w-3xl mx-auto px-4 py-10">
         <form onSubmit={handleSubmit} className="space-y-5">
