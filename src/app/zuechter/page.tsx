@@ -118,14 +118,11 @@ export default async function ZuechterVerzeichnisPage({
                 const bgImage = breeder.media[0]?.url
 
                 const cardContent = (
-                  <div className={`bg-white rounded-2xl border border-cream-deep transition-all h-full flex flex-col overflow-hidden ${
-                    published
-                      ? 'hover:border-forest/30 hover:shadow-md cursor-pointer'
-                      : 'cursor-default'
-                  }`}>
+                  <div className="relative pb-10">
+                  <div className={`bg-white rounded-2xl border border-cream-deep transition-all flex flex-col ${ published ? 'hover:border-forest/30 hover:shadow-md cursor-pointer' : 'cursor-default' }`}>
                     {/* Hintergrundbild */}
                     {bgImage && (
-                      <div className="relative h-36 overflow-hidden flex-shrink-0">
+                      <div className="relative h-36 flex-shrink-0 overflow-hidden rounded-t-2xl">
                         <img src={bgImage} alt="" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
                       </div>
@@ -165,32 +162,33 @@ export default async function ZuechterVerzeichnisPage({
                         <p className="text-xs text-stone-300 mb-2">Aktuell keine Inserate</p>
                       )}
 
-                      {/* Runde Badges — überlappen den Kartenrand */}
-                      <div className="absolute -bottom-8 right-4 flex gap-2">
+                      {/* Runde Badges — außerhalb der Karte, überlappen nach unten */}
+                    </div>
+                    </div>
+                    <div className="absolute -bottom-2 right-4 flex gap-2">
                         {hasWelpen && (
-                          <div className="w-16 h-16 rounded-full bg-honey text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
-                            <span className="text-[9px] font-black leading-tight uppercase">Welpen</span>
-                            <span className="text-[9px] font-black leading-tight uppercase">Dispo</span>
+                          <div className="w-20 h-20 rounded-full bg-honey text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
+                            <span className="text-[10px] font-black leading-tight uppercase">Welpen</span>
+                            <span className="text-[10px] font-black leading-tight uppercase">Dispo</span>
                           </div>
                         )}
                         {!hasWelpen && hasLitter && (
-                          <div className={`w-16 h-16 rounded-full text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white ${
+                          <div className={`w-20 h-20 rounded-full text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white ${
                             breeder.litters[0]?.status === 'pregnant' ? 'bg-blue-400' : 'bg-blue-300'
                           }`}>
-                            <span className="text-[9px] font-black leading-tight uppercase">Wurf</span>
-                            <span className="text-[9px] font-black leading-tight uppercase">
+                            <span className="text-[10px] font-black leading-tight uppercase">Wurf</span>
+                            <span className="text-[10px] font-black leading-tight uppercase">
                               {breeder.litters[0]?.status === 'pregnant' ? 'Erwartet' : 'Geplant'}
                             </span>
                           </div>
                         )}
                         {hasStud && (
-                          <div className="w-16 h-16 rounded-full bg-forest text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
-                            <span className="text-[9px] font-black leading-tight uppercase">Zucht</span>
-                            <span className="text-[9px] font-black leading-tight uppercase">Rüde</span>
+                          <div className="w-20 h-20 rounded-full bg-forest text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white">
+                            <span className="text-[10px] font-black leading-tight uppercase">Zucht</span>
+                            <span className="text-[10px] font-black leading-tight uppercase">Rüde</span>
                           </div>
                         )}
                       </div>
-                    </div>
                   </div>
                 )
 
@@ -212,8 +210,9 @@ export default async function ZuechterVerzeichnisPage({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
                 {newestBreeders.map((b) => {
                   const breeds = Array.from(new Set(b.listings.map((l) => l.breed.nameDe)))
-                  return (
-                    <div key={b.id} className="bg-white rounded-xl border border-cream-deep p-4 text-sm">
+                  const slug = b.kennelName.toLowerCase().replace(/\s+/g, '-')
+                  const card = (
+                    <div className="bg-white rounded-xl border border-cream-deep p-4 text-sm h-full hover:border-forest/30 hover:shadow-sm transition-all">
                       <p className="font-semibold text-stone-900 truncate">{b.displayName || b.kennelName}</p>
                       {breeds[0] && <p className="text-stone-500 text-xs truncate">{breeds[0]}</p>}
                       {(b.city || b.state) && (
@@ -231,6 +230,11 @@ export default async function ZuechterVerzeichnisPage({
                         )}
                       </div>
                     </div>
+                  )
+                  return b.isPublished !== false ? (
+                    <Link key={b.id} href={`/zuechter/${slug}`}>{card}</Link>
+                  ) : (
+                    <div key={b.id}>{card}</div>
                   )
                 })}
               </div>

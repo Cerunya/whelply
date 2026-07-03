@@ -152,45 +152,6 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
                   Diese Angaben sind für Besucher auf deiner Züchter-Seite sichtbar.
                 </p>
               </div>
-              {/* Sichtbarkeits-Toggle */}
-              <div className="flex flex-col gap-2 flex-shrink-0">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <span className="text-xs text-stone-500 font-medium w-28 text-right">
-                    {form.isPublished ? 'Seite sichtbar' : 'Seite versteckt'}
-                  </span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={form.isPublished}
-                    onClick={() => setForm({ ...form, isPublished: !form.isPublished })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      form.isPublished ? 'bg-forest' : 'bg-stone-300'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                      form.isPublished ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <span className="text-xs text-stone-500 font-medium w-28 text-right">
-                    {form.isActive ? 'Profil aktiv' : 'Profil inaktiv'}
-                  </span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={form.isActive}
-                    onClick={() => setForm({ ...form, isActive: !form.isActive })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      form.isActive ? 'bg-forest' : 'bg-amber-400'
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                      form.isActive ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                  </button>
-                </label>
-              </div>
             </div>
 
             <div>
@@ -208,24 +169,12 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
               </p>
             </div>
 
-            <div>
-              <label className={labelClass}>Über dich / deine Zucht</label>
-              <RichEditor
-                value={form.bio}
-                onChange={(val) => setForm({ ...form, bio: val })}
-                rows={6}
-                placeholder={'Erzähl etwas über deine Zucht, Philosophie, Erfahrung...\n\nDu kannst auch Bilder (URL) und YouTube-Videos einfügen.'}
-                className={inputClass + ' resize-y'}
-              />
-              <p className="text-xs text-stone-400 mt-1">
-                Nutze die Toolbar für Formatierung, Bilder und Videos.
-              </p>
-            </div>
+
 
             <div>
               <label className={labelClass}>Vorschaubild für Züchter-Verzeichnis</label>
               <p className="text-xs text-stone-400 mb-3">
-                Dieses Bild erscheint auf der Züchter-Übersichtsseite als Hintergrund deiner Karte. Empfohlen: Querformat, min. 600×300 px.
+                Erscheint als Hintergrund deiner Karte im Züchter-Verzeichnis. Querformat empfohlen, min. 600×300 px.
               </p>
               <BreederImageUploader
                 purpose="card"
