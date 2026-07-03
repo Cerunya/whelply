@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import DashboardHeader from '@/components/DashboardHeader'
 import MobileNav from '@/components/MobileNav'
 
 export default async function NewsListPage() {
@@ -21,24 +22,7 @@ export default async function NewsListPage() {
 
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-stone-400 hover:text-stone-700 transition-colors text-sm">
-              ← Dashboard
-            </Link>
-            <span className="text-stone-300">|</span>
-            <h1 className="font-semibold text-stone-800 text-sm">Aktuelles</h1>
-          </div>
-          <Link
-            href="/dashboard/news/neu"
-            className="hidden md:inline-block bg-forest text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-forest-light transition-colors"
-          >
-            + Neuer Beitrag
-          </Link>
-          <MobileNav links={[{ href: '/dashboard/news/neu', label: '+ Neuer Beitrag' }]} />
-        </div>
-      </header>
+      <DashboardHeader title="Aktuelles" />
 
       <main className="max-w-5xl mx-auto px-4 py-10">
         <div className="mb-8">

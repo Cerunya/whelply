@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import RichEditor from './RichEditor'
 import SaveToast from './SaveToast'
-import Link from 'next/link'
+import DashboardHeader from './DashboardHeader'
 
 export default function UeberUnsForm({
   initialBio,
@@ -32,13 +32,8 @@ export default function UeberUnsForm({
 
   return (
     <div className="min-h-screen bg-cream">
+      <DashboardHeader title="Über uns" />
       <div className="max-w-2xl mx-auto px-4 py-10">
-        <div className="flex items-center gap-3 mb-8">
-          <Link href="/dashboard" className="text-stone-400 hover:text-stone-600 text-sm">
-            ← Dashboard
-          </Link>
-        </div>
-
         <h1 className="font-serif text-2xl font-bold text-stone-900 mb-6">Über uns</h1>
 
         <div className="space-y-5">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import DashboardHeader from './DashboardHeader'
 import BreederImageUploader from './BreederImageUploader'
 import SaveToast from './SaveToast'
 
@@ -176,24 +177,7 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
 
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
-          <Link href="/dashboard" className="text-stone-400 hover:text-stone-700 transition-colors text-sm">
-            Dashboard
-          </Link>
-          <span className="text-stone-300">/</span>
-          <h1 className="font-serif text-lg font-bold text-stone-900">Theme &amp; Branding</h1>
-          <div className="ml-auto">
-            <Link
-              href={`/zuechter/${breeder.zuechterSlug}`}
-              target="_blank"
-              className="text-sm text-forest font-semibold hover:underline"
-            >
-              Seite ansehen {'->'}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader title="Theme & Branding" />
 
       <main className="max-w-5xl mx-auto px-4 py-10 space-y-8">
         {error && (
