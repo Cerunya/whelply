@@ -100,6 +100,7 @@ model User {
   reviews         Review[]
   reports         Report[]
   bookmarks       Bookmark[]
+  conversations   Conversation[]
 
   @@map("users")
 }
@@ -202,6 +203,7 @@ model BreederProfile {
   newsPosts    NewsPost[]
   reviews      Review[]
   bookmarks    Bookmark[]    @relation("BookmarkedBreeder")
+  conversations Conversation[]
 
   @@map("breeder_profiles")
 }
@@ -546,4 +548,37 @@ model WelpenAlert {
 
   @@map("welpen_alerts")
   @@index([email])
+}
+
+// ─────────────────────────────────────────────
+// NACHRICHTEN — Nutzer schreiben Züchtern
+// ─────────────────────────────────────────────
+
+model Conversation {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  breederId String   @map("breeder_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  breeder  BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([userId, breederId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  senderRole     String       @map("sender_role") // 'user' | 'breeder'
+  content        String       @db.Text
+  readAt         DateTime?    @map("read_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+  @@index([conversationId])
 }

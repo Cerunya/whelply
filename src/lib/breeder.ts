@@ -5,7 +5,7 @@ export async function getBreederBySlug(slug: string) {
   // Alle Züchter laden und nach Slug matchen
   // (Hinweis: bei vielen Züchtern später durch eine echte slug-Spalte ersetzen)
   const breeders = await prisma.breederProfile.findMany({
-    select: { id: true, kennelName: true },
+    select: { id: true, userId: true, kennelName: true },
   })
   const match = breeders.find((b) => slugify(b.kennelName) === slug)
   if (!match) return null

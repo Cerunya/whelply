@@ -205,8 +205,7 @@ export default async function DashboardPage() {
               className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
               Über uns
-            </Link>
-            <Link
+            </Link>            <Link
               href="/dashboard/theme"
               className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
@@ -223,6 +222,12 @@ export default async function DashboardPage() {
               className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
               Galerie
+            </Link>
+            <Link
+              href="/dashboard/nachrichten"
+              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+            >
+              Nachrichten
             </Link>
           </div>
         </div>

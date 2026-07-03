@@ -9,6 +9,7 @@ import BreederContactSidebar from '@/components/BreederContactSidebar'
 import { renderRichText } from '@/lib/richtext'
 import ReviewSection from '@/components/ReviewSection'
 import BookmarkButton from '@/components/BookmarkButton'
+import NachrichtButton from '@/components/NachrichtButton'
 import { auth } from '@/lib/auth'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
@@ -26,6 +27,7 @@ export default async function ZuechterProfilPage({
 
   const session = await auth()
   const isLoggedIn = !!session?.user?.id
+  const isOwnProfile = session?.user?.id === breeder.userId
   const isBookmarked = session?.user?.id
     ? !!(await import('@/lib/prisma').then(m => m.prisma.bookmark.findFirst({ where: { userId: session.user.id, breederId: breeder.id } })))
     : false
@@ -129,8 +131,14 @@ export default async function ZuechterProfilPage({
             <ReviewSection breederId={breeder.id} isLoggedIn={isLoggedIn} />
           </div>
 
-          {/* Merken-Button */}
-          <div className="flex justify-end mb-2">
+          {/* Aktionen — Merken + Nachricht */}
+          <div className="flex justify-end gap-3 mb-2">
+            <NachrichtButton
+              breederId={breeder.id}
+              kennelName={breeder.kennelName}
+              isLoggedIn={isLoggedIn}
+              isOwnProfile={isOwnProfile}
+            />
             <BookmarkButton breederId={breeder.id} initialBookmarked={isBookmarked} isLoggedIn={isLoggedIn} />
           </div>
 
