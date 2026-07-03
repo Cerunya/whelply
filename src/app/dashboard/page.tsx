@@ -204,7 +204,7 @@ export default async function DashboardPage() {
               href="/dashboard/ueber-uns"
               className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
-              Über uns & Karten-Bild
+              Über uns
             </Link>
             <Link
               href="/dashboard/theme"

@@ -39,7 +39,7 @@ export default function UeberUnsForm({
           </Link>
         </div>
 
-        <h1 className="font-serif text-2xl font-bold text-stone-900 mb-6">Über uns & Karten-Bild</h1>
+        <h1 className="font-serif text-2xl font-bold text-stone-900 mb-6">Über uns</h1>
 
         <div className="space-y-5">
           {/* Bio */}

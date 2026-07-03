@@ -33,7 +33,7 @@ export default async function ProfilPage() {
         socialYoutube: breeder.socialYoutube,
         verband: breeder.verband,
         mitgliedsnummer: breeder.mitgliedsnummer,
-        phone: breeder.phone,
+        phone: (breeder.phone ?? '').slice(0, 20),
         street: breeder.street,
         zip: breeder.zip,
         city: breeder.city,
