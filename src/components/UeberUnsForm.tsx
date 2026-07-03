@@ -70,6 +70,7 @@ export default function UeberUnsForm({
               {loading ? 'Wird gespeichert...' : 'Text speichern'}
             </button>
           </div>
+        </div>
       </div>
       <SaveToast show={success} />
     </div>
