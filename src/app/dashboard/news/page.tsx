@@ -22,17 +22,7 @@ export default async function NewsListPage() {
 
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <DashboardHeader
-        title="Aktuelles"
-        action={
-          <Link
-            href="/dashboard/news/neu"
-            className="bg-forest text-white px-4 py-1.5 rounded-xl text-xs font-semibold hover:bg-forest-light transition-colors"
-          >
-            + Neuer Beitrag
-          </Link>
-        }
-      />
+      <DashboardHeader title="Aktuelles" />
 
       <main className="max-w-5xl mx-auto px-4 py-10">
         <div className="mb-8">
@@ -40,6 +30,15 @@ export default async function NewsListPage() {
           <p className="text-stone-400 text-sm">
             Neuigkeiten aus deinem Zwinger — erscheinen auf deiner öffentlichen Züchterseite unter "Aktuelles".
           </p>
+        </div>
+
+        <div className="flex justify-end mb-4">
+          <Link
+            href="/dashboard/news/neu"
+            className="bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest-light transition-colors"
+          >
+            + Neuer Beitrag
+          </Link>
         </div>
 
         {posts.length === 0 ? (

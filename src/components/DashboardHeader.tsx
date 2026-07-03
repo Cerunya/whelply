@@ -12,6 +12,10 @@ export default function DashboardHeader({ title, backHref = '/dashboard', backLa
   return (
     <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-4">
+        <Link href="/" className="font-serif font-bold text-stone-900 text-base flex-shrink-0">
+          Whelply
+        </Link>
+        <span className="text-stone-200">|</span>
         <Link
           href={backHref}
           className="text-sm text-stone-400 hover:text-stone-700 transition-colors flex items-center gap-1.5 flex-shrink-0"
