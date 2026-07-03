@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SaveToast from './SaveToast'
 import RichEditor from './RichEditor'
+import BreederImageUploader from './BreederImageUploader'
 
 const BUNDESLAENDER = [
   'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
@@ -21,6 +22,7 @@ type BreederData = {
   isPublished: boolean
   isActive: boolean
   bio: string | null
+  cardImageUrl: string | null
   website: string | null
   socialInstagram: string | null
   socialFacebook: string | null
@@ -218,6 +220,20 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
               <p className="text-xs text-stone-400 mt-1">
                 Nutze die Toolbar für Formatierung, Bilder und Videos.
               </p>
+            </div>
+
+            <div>
+              <label className={labelClass}>Vorschaubild für Züchter-Verzeichnis</label>
+              <p className="text-xs text-stone-400 mb-3">
+                Dieses Bild erscheint auf der Züchter-Übersichtsseite als Hintergrund deiner Karte. Empfohlen: Querformat, min. 600×300 px.
+              </p>
+              <BreederImageUploader
+                purpose="card"
+                initialUrl={breeder.cardImageUrl}
+                label="Karten-Vorschaubild"
+                hint="Querformat empfohlen · JPG, PNG oder WebP"
+                aspect="aspect-[2/1]"
+              />
             </div>
 
             <div>

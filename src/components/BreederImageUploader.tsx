@@ -10,7 +10,7 @@ export default function BreederImageUploader({
   hint,
   aspect = 'aspect-video',
 }: {
-  purpose: 'header' | 'background'
+  purpose: 'header' | 'background' | 'card'
   initialUrl?: string | null
   label: string
   hint?: string

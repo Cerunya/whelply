@@ -115,7 +115,7 @@ export default async function WelpenPage({
               <span className="text-stone-700">Welpen</span>
               {selectedBreed && <> / <span className="text-stone-700">{selectedBreed.nameDe}</span></>}
             </p>
-            {(selectedBreed || searchParams.region || true) && (
+            {(selectedBreed || searchParams.region) && (
               <WelpenAlertButton
                 breedName={selectedBreed?.nameDe}
                 breedId={selectedBreed?.id}

@@ -9,8 +9,13 @@ export default async function ProfilPage() {
 
   const breeder = await prisma.breederProfile.findUnique({
     where: { userId: session.user.id },
+    include: {
+      media: { where: { purpose: 'card' }, take: 1, select: { url: true } },
+    },
   })
   if (!breeder) redirect('/login')
+
+  const cardImageUrl = breeder.media[0]?.url ?? null
 
   return (
     <ProfilForm
@@ -20,6 +25,7 @@ export default async function ProfilPage() {
         fullName: breeder.fullName ?? '',
         showFullName: breeder.showFullName ?? false,
         bio: breeder.bio,
+        cardImageUrl,
         website: breeder.website,
         socialInstagram: breeder.socialInstagram,
         socialFacebook: breeder.socialFacebook,
