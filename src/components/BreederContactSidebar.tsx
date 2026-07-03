@@ -1,5 +1,7 @@
 'use client'
 
+import NachrichtButton from './NachrichtButton'
+
 type BreederContactSidebarProps = {
   kennelName: string
   displayName: string | null
@@ -22,6 +24,9 @@ type BreederContactSidebarProps = {
   themeAccentColor: string | null
   verband?: string | null
   verificationLevel?: string
+  breederId?: string
+  isLoggedIn?: boolean
+  isOwnProfile?: boolean
 }
 
 export default function BreederContactSidebar({
@@ -30,6 +35,7 @@ export default function BreederContactSidebar({
   phone, showPhone, website,
   socialInstagram, socialFacebook, socialTiktok, socialYoutube,
   verband, verificationLevel,
+  breederId, isLoggedIn = false, isOwnProfile = false,
 }: BreederContactSidebarProps) {
   const shownName = displayName || kennelName
 
@@ -138,11 +144,15 @@ export default function BreederContactSidebar({
         </div>
       )}
 
-      {/* Kontakt-Button */}
-      <a href={`mailto:?subject=Anfrage über Whelply`}
-        className="block w-full bg-stone-900 hover:bg-stone-700 text-white text-sm font-semibold py-3 rounded-xl text-center transition-colors">
-        Kontakt aufnehmen
-      </a>
+      {/* Nachricht schreiben */}
+      {breederId && (
+        <NachrichtButton
+          breederId={breederId}
+          kennelName={kennelName}
+          isLoggedIn={isLoggedIn}
+          isOwnProfile={isOwnProfile}
+        />
+      )}
 
     </div>
   )

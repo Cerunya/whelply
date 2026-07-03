@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import ListingImageGallery from '@/components/ListingImageGallery'
 import BookmarkButton from '@/components/BookmarkButton'
 import ReportButton from '@/components/ReportButton'
+import NachrichtButton from '@/components/NachrichtButton'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -284,6 +285,17 @@ export default async function WelpenDetailPage({
                     className="block w-full bg-white/10 text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors">
                     Züchter-Profil ansehen
                   </Link>
+                )}
+                {!isOwner && (
+                  <div className="pt-1">
+                    <NachrichtButton
+                      breederId={listing.breeder.id}
+                      kennelName={listing.breeder.kennelName}
+                      isLoggedIn={isLoggedIn}
+                      isOwnProfile={false}
+                      variant="dark"
+                    />
+                  </div>
                 )}
               </div>
             </div>

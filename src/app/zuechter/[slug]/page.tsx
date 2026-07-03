@@ -8,7 +8,6 @@ import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 import { renderRichText } from '@/lib/richtext'
 import ReviewSection from '@/components/ReviewSection'
-import BookmarkButton from '@/components/BookmarkButton'
 import NachrichtButton from '@/components/NachrichtButton'
 import { auth } from '@/lib/auth'
 
@@ -28,9 +27,6 @@ export default async function ZuechterProfilPage({
   const session = await auth()
   const isLoggedIn = !!session?.user?.id
   const isOwnProfile = session?.user?.id === breeder.userId
-  const isBookmarked = session?.user?.id
-    ? !!(await import('@/lib/prisma').then(m => m.prisma.bookmark.findFirst({ where: { userId: session.user.id, breederId: breeder.id } })))
-    : false
 
   const tabs = await getBreederTabs(breeder.id)
 
@@ -63,6 +59,9 @@ export default async function ZuechterProfilPage({
             verificationLevel={breeder.verificationLevel}
             fullName={breeder.fullName}
             showFullName={breeder.showFullName}
+            breederId={breeder.id}
+            isLoggedIn={isLoggedIn}
+            isOwnProfile={isOwnProfile}
           />
         }>
           {/* Bio */}
@@ -129,17 +128,6 @@ export default async function ZuechterProfilPage({
           {/* Bewertungen */}
           <div className="mb-6">
             <ReviewSection breederId={breeder.id} isLoggedIn={isLoggedIn} />
-          </div>
-
-          {/* Aktionen — Merken + Nachricht */}
-          <div className="flex justify-end gap-3 mb-2">
-            <NachrichtButton
-              breederId={breeder.id}
-              kennelName={breeder.kennelName}
-              isLoggedIn={isLoggedIn}
-              isOwnProfile={isOwnProfile}
-            />
-            <BookmarkButton breederId={breeder.id} initialBookmarked={isBookmarked} isLoggedIn={isLoggedIn} />
           </div>
 
         </BreederPageContent>

@@ -8,11 +8,13 @@ export default function NachrichtButton({
   kennelName,
   isLoggedIn,
   isOwnProfile,
+  variant = 'light',
 }: {
   breederId: string
   kennelName: string
   isLoggedIn: boolean
   isOwnProfile: boolean
+  variant?: 'light' | 'dark'
 }) {
   const [open, setOpen] = useState(false)
   const [content, setContent] = useState('')
@@ -46,7 +48,11 @@ export default function NachrichtButton({
     <>
       <button
         onClick={() => isLoggedIn ? setOpen(true) : router.push('/login')}
-        className="flex items-center gap-2 text-sm font-semibold text-forest border-2 border-forest/30 px-4 py-2.5 rounded-xl hover:bg-forest/5 transition-colors"
+        className={`w-full flex items-center justify-center gap-2 text-sm font-semibold py-3 rounded-xl transition-colors ${
+          variant === 'dark'
+            ? 'bg-white/10 text-white hover:bg-white/20'
+            : 'text-forest border-2 border-forest/30 px-4 py-2.5 hover:bg-forest/5'
+        }`}
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
