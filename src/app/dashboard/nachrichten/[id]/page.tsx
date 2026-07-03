@@ -45,7 +45,11 @@ export default async function ConversationPage({ params }: { params: { id: strin
       <DashboardHeader title={otherName} backHref="/dashboard/nachrichten" backLabel="Nachrichten" />
       <ConversationView
         conversationId={params.id}
-        initialMessages={conversation.messages}
+        initialMessages={conversation.messages.map((m) => ({
+          ...m,
+          createdAt: m.createdAt.toISOString(),
+          readAt: m.readAt?.toISOString() ?? null,
+        }))}
         myRole={myRole}
         otherName={otherName}
       />
