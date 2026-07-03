@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { signOut } from '@/lib/auth'
+import { signOutAction } from '@/app/actions/auth'
 
 export default function DashboardHeader({ title }: { title: string }) {
   return (
@@ -17,7 +17,7 @@ export default function DashboardHeader({ title }: { title: string }) {
 
         <h1 className="font-semibold text-stone-800 text-sm">{title}</h1>
 
-        <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
+        <form action={signOutAction}>
           <button type="submit" className="text-sm text-stone-400 hover:text-stone-700 transition-colors flex-shrink-0">
             Abmelden
           </button>
