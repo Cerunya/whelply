@@ -18,6 +18,13 @@ export default async function NutzerDashboardPage() {
   if (!user) redirect('/login')
 
   const bookmarkCount = await prisma.bookmark.count({ where: { userId: session.user.id } })
+  const unreadCount = await prisma.message.count({
+    where: {
+      senderRole: 'breeder',
+      readAt: null,
+      conversation: { userId: session.user.id },
+    },
+  })
 
   return (
     <>
@@ -59,14 +66,21 @@ export default async function NutzerDashboardPage() {
             </Link>
 
             <Link href="/dashboard/nachrichten"
-              className="bg-white rounded-2xl border border-cream-deep p-6 hover:border-forest/30 hover:shadow-sm transition-all flex items-center justify-between">
+              className="relative bg-white rounded-2xl border border-cream-deep p-6 hover:border-forest/30 hover:shadow-sm transition-all flex items-center justify-between">
               <div>
                 <p className="font-semibold text-stone-900">Nachrichten</p>
                 <p className="text-sm text-stone-400 mt-0.5">Deine Konversationen mit Züchtern</p>
               </div>
-              <svg className="w-5 h-5 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount} neu
+                  </span>
+                )}
+                <svg className="w-5 h-5 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </Link>
 
             <Link href="/welpen"

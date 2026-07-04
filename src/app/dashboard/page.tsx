@@ -50,6 +50,15 @@ export default async function DashboardPage() {
 
   if (!breeder) redirect('/dashboard/upgrade')
 
+  // Ungelesene Nachrichten zählen
+  const unreadCount = await prisma.message.count({
+    where: {
+      senderRole: 'user',
+      readAt: null,
+      conversation: { breederId: breeder.id },
+    },
+  })
+
   const activeListings = breeder.listings.filter((l) => l.status === 'available')
   const draftListings = breeder.listings.filter((l) => l.status === 'draft')
   const totalViews = breeder.listings.reduce((sum, l) => sum + l.viewCount, 0)
@@ -225,9 +234,14 @@ export default async function DashboardPage() {
             </Link>
             <Link
               href="/dashboard/nachrichten"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+              className="relative border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
               Nachrichten
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>

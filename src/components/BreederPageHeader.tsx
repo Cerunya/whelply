@@ -18,7 +18,7 @@ type BreederHeaderData = {
   dogs?: { breed: { nameDe: string } }[]
 }
 
-type TabId = 'profil' | 'zuchthunde' | 'wuerfe' | 'hunde' | 'aktuelles' | 'galerie'
+type TabId = 'profil' | 'zuchthunde' | 'wuerfe' | 'hunde' | 'aktuelles' | 'galerie' | 'kontakt'
 
 export default function BreederPageHeader({
   breeder,
@@ -53,6 +53,7 @@ export default function BreederPageHeader({
     { id: 'zuchthunde', label: 'Unsere Hunde', href: `/zuechter/${slug}/zuchthunde`, show: tabs.zuchthunde },
     { id: 'aktuelles', label: 'Aktuelles', href: `/zuechter/${slug}/aktuelles`, show: tabs.aktuelles },
     { id: 'galerie', label: 'Galerie', href: `/zuechter/${slug}/galerie`, show: tabs.galerie },
+    { id: 'kontakt', label: 'Kontakt', href: `/zuechter/${slug}/kontakt`, show: true },
   ].filter((item) => item.show)
 
   return (
