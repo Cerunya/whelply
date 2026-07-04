@@ -88,6 +88,7 @@ export default async function KontaktPage({ params }: { params: { slug: string }
         slug={params.slug}
         themeColor={breeder.themeColor}
         themeAccentColor={breeder.themeAccentColor}
+        website={breeder.website}
         socialInstagram={breeder.socialInstagram}
         socialFacebook={breeder.socialFacebook}
         socialTiktok={breeder.socialTiktok}
