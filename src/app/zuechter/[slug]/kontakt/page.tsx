@@ -7,7 +7,6 @@ import BreederContactSidebar from '@/components/BreederContactSidebar'
 import BreederFooter from '@/components/BreederFooter'
 import KontaktForm from '@/components/KontaktForm'
 import { auth } from '@/lib/auth'
-import { slugify } from '@/lib/slugify'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,29 +20,10 @@ export default async function KontaktPage({ params }: { params: { slug: string }
   const isLoggedIn = !!session?.user?.id
   const isOwnProfile = session?.user?.id === breeder.userId
 
-  const headerImage = breeder.media.find((m) => m.purpose === 'header')?.url ?? null
-  const bgImage = breeder.media.find((m) => m.purpose === 'background')?.url ?? null
-
   return (
     <>
-      <BreederNavbar
-        kennelName={breeder.kennelName}
-        slug={params.slug}
-        themeNavColor={breeder.themeNavColor}
-        themeFont={breeder.themeFont}
-      />
-      <BreederPageHeader
-        kennelName={breeder.kennelName}
-        displayName={breeder.displayName}
-        slug={params.slug}
-        headerImageUrl={headerImage}
-        backgroundImageUrl={bgImage}
-        tabs={tabs}
-        activeTab="kontakt"
-        themeColor={breeder.themeBgColor}
-        themeAccentColor={breeder.themeAccentColor}
-        themeAlign={breeder.themeAlign}
-      />
+      <BreederNavbar />
+      <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="kontakt" />
       <main>
         <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
           <BreederContactSidebar
@@ -87,7 +67,6 @@ export default async function KontaktPage({ params }: { params: { slug: string }
             />
           </div>
 
-          {/* Adresse & Karte */}
           {breeder.showAddress && (breeder.street || breeder.city) && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
               <h3 className="font-semibold text-stone-800 mb-3">Adresse</h3>
@@ -104,7 +83,16 @@ export default async function KontaktPage({ params }: { params: { slug: string }
           )}
         </BreederPageContent>
       </main>
-      <BreederFooter kennelName={breeder.kennelName} slug={params.slug} themeNavColor={breeder.themeNavColor} />
+      <BreederFooter
+        kennelName={breeder.kennelName}
+        slug={params.slug}
+        themeColor={breeder.themeColor}
+        themeAccentColor={breeder.themeAccentColor}
+        socialInstagram={breeder.socialInstagram}
+        socialFacebook={breeder.socialFacebook}
+        socialTiktok={breeder.socialTiktok}
+        socialYoutube={breeder.socialYoutube}
+      />
     </>
   )
 }
