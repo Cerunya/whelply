@@ -28,6 +28,7 @@ export default function KontaktForm({
     phone: '',
     subject: SUBJECTS[0],
     message: '',
+    honeypot: '', // verstecktes Feld — Bots füllen es aus, Menschen nicht
   })
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -42,6 +43,12 @@ export default function KontaktForm({
     if (!isLoggedIn) { router.push('/login'); return }
     setLoading(true)
     setError('')
+
+    // Honeypot: wenn ausgefüllt → Bot
+    if (form.honeypot) {
+      setDone(true) // fake success für den Bot
+      return
+    }
 
     const content = `**${form.subject}**\n\nVon: ${form.firstName} ${form.lastName}\nE-Mail: ${form.email}${form.phone ? `\nTelefon: ${form.phone}` : ''}\n\n${form.message}`
 
@@ -75,6 +82,18 @@ export default function KontaktForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Honeypot — versteckt für Menschen, Bots füllen es aus */}
+      <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+        <input
+          type="text"
+          name="website_url"
+          value={form.honeypot}
+          onChange={(e) => setForm({ ...form, honeypot: e.target.value })}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelClass}>Nachname <span className="text-red-400">*</span></label>

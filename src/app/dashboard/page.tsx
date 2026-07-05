@@ -202,7 +202,7 @@ export default async function DashboardPage() {
               Seite ansehen →
             </Link>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 overflow-visible">
             <Link
               href="/dashboard/profil"
               className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
@@ -234,11 +234,11 @@ export default async function DashboardPage() {
             </Link>
             <Link
               href="/dashboard/nachrichten"
-              className="relative border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+              className="relative inline-flex items-center border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
               Nachrichten
               {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute -top-2.5 -right-2.5 bg-red-500 text-white text-[10px] font-bold min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-sm">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}

@@ -28,7 +28,7 @@ export default async function HundDetailPage({
     include: {
       breed: { select: { nameDe: true, slug: true } },
       breeder: { select: { kennelName: true, displayName: true, city: true, state: true, isPublished: true } },
-      media: { take: 1, select: { url: true } },
+      media: { orderBy: { sortOrder: 'asc' }, select: { id: true, url: true, isPrimary: true, sortOrder: true, purpose: true } },
       parentSire: {
         include: {
           media: { take: 1, select: { url: true } },
@@ -106,19 +106,43 @@ export default async function HundDetailPage({
             <span className="text-stone-700">{dog.name}</span>
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Foto */}
-            <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden aspect-square flex items-center justify-center">
-              {dog.media[0]?.url ? (
-                <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
-              ) : (
-                <svg className="w-16 h-16 text-stone-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              )}
-            </div>
+          {/* Foto-Grid — wie auf der französischen Vorlage */}
+          {(() => {
+            const primary = dog.media.find((m) => m.purpose === 'primary') ?? dog.media[0]
+            const grid_tl = dog.media.find((m) => m.purpose === 'grid_tl')
+            const grid_bl = dog.media.find((m) => m.purpose === 'grid_bl')
+            const grid_tr = dog.media.find((m) => m.purpose === 'grid_tr')
+            const grid_br = dog.media.find((m) => m.purpose === 'grid_br')
+            const hasGrid = grid_tl || grid_bl || grid_tr || grid_br
 
+            if (!primary && !hasGrid) return null
+
+            return hasGrid ? (
+              <div className="rounded-2xl overflow-hidden mb-8" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gridTemplateRows: '1fr 1fr', gap: '3px', height: '480px' }}>
+                <div style={{ gridColumn: '1', gridRow: '1' }} className="overflow-hidden bg-cream-dark">
+                  {grid_tl && <img src={grid_tl.url} alt="" className="w-full h-full object-cover" />}
+                </div>
+                <div style={{ gridColumn: '2', gridRow: '1 / 3' }} className="overflow-hidden bg-cream-dark">
+                  {primary && <img src={primary.url} alt={dog.name} className="w-full h-full object-cover" />}
+                </div>
+                <div style={{ gridColumn: '3', gridRow: '1' }} className="overflow-hidden bg-cream-dark">
+                  {grid_tr && <img src={grid_tr.url} alt="" className="w-full h-full object-cover" />}
+                </div>
+                <div style={{ gridColumn: '1', gridRow: '2' }} className="overflow-hidden bg-cream-dark">
+                  {grid_bl && <img src={grid_bl.url} alt="" className="w-full h-full object-cover" />}
+                </div>
+                <div style={{ gridColumn: '3', gridRow: '2' }} className="overflow-hidden bg-cream-dark">
+                  {grid_br && <img src={grid_br.url} alt="" className="w-full h-full object-cover" />}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl overflow-hidden mb-8 aspect-video bg-cream-dark">
+                {primary && <img src={primary.url} alt={dog.name} className="w-full h-full object-cover" />}
+              </div>
+            )
+          })()}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Infos */}
             <div>
               <p className="text-xs font-semibold text-forest uppercase tracking-wider mb-2">

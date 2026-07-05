@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
-import DogImageUploader from './DogImageUploader'
+import DogGalleryUploader from './DogGalleryUploader'
 import SaveToast from './SaveToast'
 
 type Breed = { id: number; nameDe: string }
@@ -20,6 +20,7 @@ type DogData = {
   isStud: boolean
   description: string | null
   imageUrl: string | null
+  media?: { id: string; url: string; isPrimary: boolean; sortOrder: number; purpose: string | null }[]
   healthInfo: string | null
   parentSireId: string | null
   parentDamId: string | null
@@ -203,8 +204,8 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
         </p>
 
         <div className="mb-6">
-          <label className={labelClass}>Profilbild</label>
-          <DogImageUploader dogId={dog.id} initialUrl={dog.imageUrl} />
+          <label className={labelClass}>Fotos</label>
+          <DogGalleryUploader dogId={dog.id} initialImages={dog.media ?? []} />
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">

@@ -50,3 +50,24 @@ export async function DELETE(
 
   return NextResponse.json({ ok: true })
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await auth()
+  if (!session?.user?.id) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
+
+  const { purpose } = await req.json()
+
+  // Verify ownership
+  const media = await prisma.media.findUnique({ where: { id: params.id } })
+  if (!media) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
+
+  await prisma.media.update({
+    where: { id: params.id },
+    data: { purpose: purpose ?? null },
+  })
+
+  return NextResponse.json({ ok: true })
+}
