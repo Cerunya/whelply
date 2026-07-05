@@ -186,7 +186,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Meine Züchterseite */}
-        <div className="bg-white rounded-2xl border border-cream-deep p-5 mb-10">
+        <div className="bg-white rounded-2xl border border-cream-deep p-5 mb-10" style={{overflow: 'visible'}}>
           <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
             <div>
               <h3 className="font-serif text-base font-bold text-stone-900">Meine Züchterseite</h3>
@@ -234,11 +234,11 @@ export default async function DashboardPage() {
             </Link>
             <Link
               href="/dashboard/nachrichten"
-              className="relative inline-flex items-center border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+              className="relative inline-flex items-center gap-2 border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
               Nachrichten
               {unreadCount > 0 && (
-                <span className="absolute -top-2.5 -right-2.5 bg-red-500 text-white text-[10px] font-bold min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-sm">
+                <span className="bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}

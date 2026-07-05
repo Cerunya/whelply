@@ -11,34 +11,36 @@ export async function DELETE(
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
 
+  const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
+
   const media = await prisma.media.findUnique({
     where: { id: params.id },
-    include: { listing: { include: { breeder: true } } },
+    include: {
+      listing: { include: { breeder: true } },
+      dog: true,
+    },
   })
 
-  if (!media || !media.listing) {
-    return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
-  }
+  if (!media) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
 
-  const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
-  if (!breeder || media.listing.breederId !== breeder.id) {
+  // Ownership check: listing media or dog media
+  if (media.listing && (!breeder || media.listing.breederId !== breeder.id)) {
+    return NextResponse.json({ error: 'Nicht erlaubt' }, { status: 403 })
+  }
+  if (media.dog && (!breeder || media.dog.breederId !== breeder.id)) {
     return NextResponse.json({ error: 'Nicht erlaubt' }, { status: 403 })
   }
 
   const wasPrimary = media.isPrimary
-  const listingId = media.listingId!
+  const listingId = media.listingId
 
-  // Aus MinIO löschen
   try {
     await s3.send(new DeleteObjectCommand({ Bucket: MINIO_BUCKET, Key: media.storageKey }))
-  } catch {
-    // Ignorieren falls Datei bereits weg
-  }
+  } catch { /* ignorieren */ }
 
   await prisma.media.delete({ where: { id: params.id } })
 
-  // Falls das Titelbild gelöscht wurde, das nächste verbleibende Bild zum neuen Titelbild machen
-  if (wasPrimary) {
+  if (wasPrimary && listingId) {
     const next = await prisma.media.findFirst({
       where: { listingId },
       orderBy: { sortOrder: 'asc' },

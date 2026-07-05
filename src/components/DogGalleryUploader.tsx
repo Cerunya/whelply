@@ -13,11 +13,11 @@ type DogImage = {
 
 // purpose values: null=gallery, 'primary'=main, 'grid_tl'=top-left, etc.
 const POSITION_LABELS: Record<string, string> = {
-  primary: 'Hauptbild (groß, Mitte)',
-  grid_tl: 'Oben links',
-  grid_bl: 'Unten links',
-  grid_tr: 'Oben rechts',
-  grid_br: 'Unten rechts',
+  primary: '📷 Hauptbild (Mitte groß)',
+  grid_tl: '↖ Oben links',
+  grid_bl: '↙ Unten links',
+  grid_tr: '↗ Oben rechts',
+  grid_br: '↘ Unten rechts',
 }
 
 export default function DogGalleryUploader({
