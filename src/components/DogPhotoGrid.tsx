@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 type DogMedia = {
   id: string
@@ -83,9 +84,9 @@ export default function DogPhotoGrid({ media, dogName }: { media: DogMedia[]; do
       )}
       {galleryOnly.length === 0 && <div className="mb-8" />}
 
-      {/* Lightbox */}
-      {lightboxIdx !== null && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center" onClick={() => setLightboxIdx(null)}>
+      {/* Lightbox via Portal — damit sie nicht von Eltern-Containern beschnitten wird */}
+      {lightboxIdx !== null && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center" onClick={() => setLightboxIdx(null)}>
           <button
             className="absolute top-4 right-4 text-white text-3xl font-bold hover:text-stone-300 z-10"
             onClick={() => setLightboxIdx(null)}
@@ -120,7 +121,8 @@ export default function DogPhotoGrid({ media, dogName }: { media: DogMedia[]; do
           <div className="absolute bottom-4 text-white text-sm">
             {lightboxIdx + 1} / {allUrls.length}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
