@@ -272,9 +272,9 @@ export default async function HundDetailPage({
               {/* Dieser Hund */}
               <div className="flex justify-center mb-0">
                 <div className="bg-white rounded-2xl border-2 border-forest/30 p-4 w-44 text-center shadow-sm">
-                  {dog.media[0]?.url && (
-                    <img src={dog.media[0].url} alt={dog.name} className="w-16 h-16 rounded-xl object-cover mx-auto mb-2" />
-                  )}
+                  {(() => { const img = dog.media.find((m) => m.purpose === 'primary')?.url ?? dog.media.find((m) => m.purpose !== 'dog_bg')?.url; return img ? (
+                    <img src={img} alt={dog.name} className="w-16 h-16 rounded-xl object-cover mx-auto mb-2" />
+                  ) : null })()}
                   <p className="text-xs text-stone-400 uppercase tracking-wide mb-0.5">
                     {dog.sex === 'male' ? 'Rüde' : dog.sex === 'female' ? 'Hündin' : ''}
                   </p>
