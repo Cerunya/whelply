@@ -169,13 +169,6 @@ export default async function ZuechterZuchthundePage({
                         <p className="text-sm text-pink-500 font-semibold mt-4 group-hover:underline">Mehr erfahren {'→'}</p>
                       </div>
                     </div>
-                    {dog.media.length > 1 && (
-                      <div className="px-6 pb-4 flex gap-2 overflow-x-auto">
-                        {dog.media.slice(1).map((m, i) => (
-                          <img key={i} src={m.url} alt="" className="h-16 w-16 object-cover rounded-lg flex-shrink-0 border border-cream-deep" />
-                        ))}
-                      </div>
-                    )}
                   </Link>
                 )
               })}
