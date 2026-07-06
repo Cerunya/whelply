@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import MobileNav from '@/components/MobileNav'
+
+export const dynamic = 'force-dynamic'
 import { slugify } from '@/lib/slugify'
 import BreederStatusToggles from '@/components/BreederStatusToggles'
 
