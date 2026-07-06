@@ -24,7 +24,7 @@ export default async function ZuchtrudenPage({
     include: {
       breed: { select: { nameDe: true, slug: true } },
       breeder: { select: { kennelName: true, displayName: true, city: true, state: true } },
-      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+      media: { where: { purpose: { not: 'dog_bg' } }, orderBy: { sortOrder: 'asc' }, take: 6, select: { url: true, purpose: true, isPrimary: true } },
     },
     orderBy: [{ isStud: 'desc' }, { createdAt: 'desc' }],
   })
@@ -95,14 +95,17 @@ export default async function ZuchtrudenPage({
                     className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all"
                   >
                     <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative">
-                      {dog.media[0]?.url ? (
-                        <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
-                      ) : (
+                      {(() => {
+                        const cardImg = dog.media.find((m: any) => m.purpose === 'primary') ?? dog.media[0]
+                        return cardImg?.url ? (
+                          <img src={cardImg.url} alt={dog.name} className="w-full h-full object-cover" />
+                        ) : (
                         <svg className="w-12 h-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                      )}
+                      )
+                      })()}
                       {dog.isStud && (
                         <span className="absolute top-2 left-2 bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full">
                           Deckrüde verfügbar

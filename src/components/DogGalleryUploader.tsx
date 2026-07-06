@@ -38,7 +38,6 @@ export default function DogGalleryUploader({
     if (!files || files.length === 0) return
     setError('')
     setUploading(true)
-
     for (const file of Array.from(files)) {
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) continue
       try {
@@ -49,25 +48,15 @@ export default function DogGalleryUploader({
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
         if (res.ok) {
           const data = await res.json()
-          setImages((prev) => [...prev, {
-            id: data.id,
-            url: data.url,
-            isPrimary: false,
-            sortOrder: prev.length,
-            purpose: null,
-          }])
+          setImages((prev) => [...prev, { id: data.id, url: data.url, isPrimary: false, sortOrder: prev.length, purpose: null }])
         }
-      } catch {
-        setError('Fehler beim Hochladen.')
-      }
+      } catch { setError('Fehler beim Hochladen.') }
     }
     setUploading(false)
   }
 
   async function changePurpose(mediaId: string, purpose: string | null) {
-    setImages((prev) => prev.map((img) =>
-      img.id === mediaId ? { ...img, purpose } : img
-    ))
+    setImages((prev) => prev.map((img) => img.id === mediaId ? { ...img, purpose } : img))
     await fetch(`/api/media-item/${mediaId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -80,7 +69,6 @@ export default function DogGalleryUploader({
     await fetch(`/api/media-item/${mediaId}`, { method: 'DELETE' })
   }
 
-  // Grid-Vorschau Daten
   const primary = images.find((i) => i.purpose === 'primary')
   const grid_tl = images.find((i) => i.purpose === 'grid_tl')
   const grid_tr = images.find((i) => i.purpose === 'grid_tr')
@@ -95,38 +83,32 @@ export default function DogGalleryUploader({
         <div>
           <p className="text-xs text-stone-400 mb-2 font-medium">Vorschau der Anordnung:</p>
           <div className="rounded-xl overflow-hidden" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gridTemplateRows: '1fr 1fr', gap: '2px', height: '200px' }}>
-            <Cell img={grid_tl} label="O.L." />
+            <GridCell img={grid_tl} label="O.L." />
             <div style={{ gridColumn: '2', gridRow: '1 / 3' }} className="overflow-hidden bg-stone-100">
               {primary ? <img src={primary.url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-stone-300 text-[10px]">Hauptbild</div>}
             </div>
-            <Cell img={grid_tr} label="O.R." />
-            <Cell img={grid_bl} label="U.L." />
-            <Cell img={grid_br} label="U.R." />
+            <GridCell img={grid_tr} label="O.R." />
+            <GridCell img={grid_bl} label="U.L." />
+            <GridCell img={grid_br} label="U.R." />
           </div>
         </div>
       )}
 
-      {/* Alle Bilder mit Position-Auswahl */}
+      {/* Alle Bilder */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {images.map((img) => (
             <div key={img.id} className="bg-white rounded-xl border border-cream-deep overflow-hidden">
               <div className="relative aspect-square">
                 <img src={img.url} className="w-full h-full object-cover" />
-                <button
-                  onClick={() => deleteImage(img.id)}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
-                >
+                <button onClick={() => deleteImage(img.id)}
+                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">
                   ✕
                 </button>
-                {img.purpose && (
-                  <span className="absolute bottom-1.5 left-1.5 bg-forest text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                    {POSITIONS.find((p) => p.value === img.purpose)?.label.split(' ')[0]}
-                  </span>
-                )}
               </div>
-              <div className="p-1.5">
-                {!simpleMode && (
+              {/* Position-Auswahl nur für Deckrüden */}
+              {!simpleMode && (
+                <div className="p-1.5">
                   <select
                     value={img.purpose ?? ''}
                     onChange={(e) => changePurpose(img.id, e.target.value || null)}
@@ -136,8 +118,8 @@ export default function DogGalleryUploader({
                       <option key={p.value} value={p.value}>{p.label}</option>
                     ))}
                   </select>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -164,20 +146,19 @@ export default function DogGalleryUploader({
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      {!simpleMode && (
+      {!simpleMode ? (
         <p className="text-xs text-stone-400">
           Weise jedem Bild eine Position zu. Das <strong>Hauptbild</strong> wird groß in der Mitte angezeigt, die vier Nebenbilder darum herum.
-          Bilder ohne zugewiesene Position erscheinen nur beim Durchklicken in der Galerie.
+          Bilder ohne Position erscheinen nur beim Durchklicken in der Galerie.
         </p>
-      )}
-      {simpleMode && (
+      ) : (
         <p className="text-xs text-stone-400">Das erste Bild wird als Hauptbild angezeigt, weitere erscheinen als Thumbnails.</p>
       )}
     </div>
   )
 }
 
-function Cell({ img, label }: { img?: DogImage; label: string }) {
+function GridCell({ img, label }: { img?: DogImage; label: string }) {
   return (
     <div className="overflow-hidden bg-stone-100">
       {img ? <img src={img.url} className="w-full h-full object-cover" /> : (

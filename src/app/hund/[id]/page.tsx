@@ -107,37 +107,40 @@ export default async function HundDetailPage({
             <span className="text-stone-700">{dog.name}</span>
           </p>
 
-          {/* Hintergrundbild für Deckrüden */}
-          {dog.isStud && dog.media.find((m) => m.purpose === 'dog_bg') && (
-            <div className="rounded-2xl overflow-hidden mb-6" style={{ height: '280px' }}>
-              <img
-                src={dog.media.find((m) => m.purpose === 'dog_bg')!.url}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          {/* Fotos — Deckrüden: 5er-Grid, andere: großes Bild + Thumbnails */}
+          {/* Hintergrundbild für Deckrüden — ganzseitig */}
           {(() => {
+            const bgImg = dog.isStud ? dog.media.find((m) => m.purpose === 'dog_bg') : null
             const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
-            return dog.isStud ? (
-              <DogPhotoGrid media={photos} dogName={dog.name} />
-            ) : (
-              photos.length > 0 && (
-                <div className="mb-8">
-                  <div className="rounded-2xl overflow-hidden bg-cream-dark mb-3" style={{ height: '400px' }}>
-                    <img src={photos[0].url} alt={dog.name} className="w-full h-full object-cover" />
+
+            return (
+              <>
+                {bgImg && (
+                  <div className="fixed inset-0 -z-10">
+                    <img src={bgImg.url} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-cream/80" />
                   </div>
-                  {photos.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                      {photos.slice(1).map((img) => (
-                        <img key={img.id} src={img.url} alt="" className="h-20 w-20 object-cover rounded-xl flex-shrink-0 border border-cream-deep" />
-                      ))}
+                )}
+
+                {/* Fotos — Deckrüden: 5er-Grid, andere: großes Bild + Thumbnails */}
+                {dog.isStud ? (
+                  <DogPhotoGrid media={photos} dogName={dog.name} />
+                ) : (
+                  photos.length > 0 && (
+                    <div className="mb-8">
+                      <div className="rounded-2xl overflow-hidden bg-cream-dark mb-3" style={{ height: '400px' }}>
+                        <img src={photos[0].url} alt={dog.name} className="w-full h-full object-cover" />
+                      </div>
+                      {photos.length > 1 && (
+                        <div className="flex gap-2 overflow-x-auto pb-2">
+                          {photos.slice(1).map((img) => (
+                            <img key={img.id} src={img.url} alt="" className="h-20 w-20 object-cover rounded-xl flex-shrink-0 border border-cream-deep" />
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )
+                  )
+                )}
+              </>
             )
           })()}
 
