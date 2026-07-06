@@ -109,7 +109,8 @@ export default async function HundDetailPage({
 
           {/* Hintergrundbild für Deckrüden — ganzseitig */}
           {(() => {
-            const bgImg = dog.isStud ? dog.media.find((m) => m.purpose === 'dog_bg') : null
+            const isStud = dog.isStud && dog.sex === 'male'
+            const bgImg = isStud ? dog.media.find((m) => m.purpose === 'dog_bg') : null
             const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
 
             return (
@@ -122,7 +123,7 @@ export default async function HundDetailPage({
                 )}
 
                 {/* Fotos — Deckrüden: 5er-Grid, andere: großes Bild + Thumbnails */}
-                {dog.isStud ? (
+                {isStud ? (
                   <DogPhotoGrid media={photos} dogName={dog.name} />
                 ) : (
                   photos.length > 0 && (

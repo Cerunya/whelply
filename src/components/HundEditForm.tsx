@@ -207,13 +207,13 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
 
         <div className="mb-6">
           <label className={labelClass}>Fotos</label>
-          {dog.isStud && (
+          {dog.isStud && dog.sex === 'male' && (
             <div className="mb-4">
               <p className="text-xs text-stone-500 font-medium mb-2">Hintergrundbild der Deckrüden-Seite</p>
               <DogBgUploader dogId={dog.id} initialUrl={dog.bgUrl} />
             </div>
           )}
-          {dog.isStud ? (
+          {dog.isStud && dog.sex === 'male' ? (
             <DogGalleryUploader dogId={dog.id} initialImages={dog.media ?? []} />
           ) : (
             <DogGalleryUploader dogId={dog.id} initialImages={dog.media ?? []} simpleMode />
