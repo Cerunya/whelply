@@ -81,7 +81,16 @@ export default async function HundDetailPage({
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-cream">
+      {(() => {
+        const hasBg = dog.isStud && dog.sex === 'male' && dog.media.some((m) => m.purpose === 'dog_bg')
+        return (
+          <main className={`min-h-screen ${hasBg ? 'bg-transparent' : 'bg-cream'}`}>
+            {hasBg && (
+              <div className="fixed inset-0 -z-10">
+                <img src={dog.media.find((m) => m.purpose === 'dog_bg')!.url} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-cream/80" />
+              </div>
+            )}
         <div className="max-w-4xl mx-auto px-4 py-10">
           {/* Eigentümer-Hinweis */}
           {isOwner && (
@@ -110,18 +119,10 @@ export default async function HundDetailPage({
           {/* Hintergrundbild für Deckrüden — ganzseitig */}
           {(() => {
             const isStud = dog.isStud && dog.sex === 'male'
-            const bgImg = isStud ? dog.media.find((m) => m.purpose === 'dog_bg') : null
             const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
 
             return (
               <>
-                {bgImg && (
-                  <div className="fixed inset-0 -z-10">
-                    <img src={bgImg.url} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-cream/80" />
-                  </div>
-                )}
-
                 {/* Fotos — Deckrüden: 5er-Grid, andere: großes Bild + Thumbnails */}
                 {isStud ? (
                   <DogPhotoGrid media={photos} dogName={dog.name} />
@@ -354,6 +355,8 @@ export default async function HundDetailPage({
           )}
         </div>
       </main>
+        )
+      })()}
       <Footer />
     </>
   )
