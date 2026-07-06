@@ -183,19 +183,16 @@ export async function POST(req: NextRequest) {
   const storageKey = `dogs/${dogId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
   await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
 
-  // Hund hat nur ein Profilbild — alte Bilder ersetzen
-  const oldDogMedia = await prisma.media.findMany({ where: { dogId: dogId! } })
-  for (const old of oldDogMedia) {
-    await prisma.media.delete({ where: { id: old.id } })
-  }
+  // Multi-Bild: bestehende Bilder behalten, sortOrder anhängen
+  const existingCount = await prisma.media.count({ where: { dogId: dogId! } })
 
   const media = await prisma.media.create({
     data: {
       storageKey,
       url: `/api/media/${storageKey}/view`,
       dogId: dogId!,
-      isPrimary: true,
-      sortOrder: 0,
+      isPrimary: existingCount === 0,
+      sortOrder: existingCount,
     },
   })
 

@@ -62,15 +62,12 @@ export async function POST(req: NextRequest) {
   if (breeder.userId === session.user.id) return NextResponse.json({ error: 'Du kannst dir nicht selbst schreiben' }, { status: 400 })
 
   // Conversation erstellen oder finden
-  const senderRole = user.role === 'breeder' ? 'breeder' : 'user'
-  const userId = user.role === 'breeder'
-    ? (await prisma.user.findFirst({ where: { breederProfile: { id: breederId } } }))?.id ?? session.user.id
-    : session.user.id
-
+  // Wer eine Nachricht schickt, ist immer der 'user' in der Conversation
+  // (egal ob das Konto ein Züchter ist — als Kontaktierender agiert man als Nutzer)
   const conversation = await prisma.conversation.upsert({
-    where: { userId_breederId: { userId, breederId } },
-    create: { userId, breederId, messages: { create: { senderRole, content } } },
-    update: { updatedAt: new Date(), messages: { create: { senderRole, content } } },
+    where: { userId_breederId: { userId: session.user.id, breederId } },
+    create: { userId: session.user.id, breederId, messages: { create: { senderRole: 'user', content } } },
+    update: { updatedAt: new Date(), messages: { create: { senderRole: 'user', content } } },
   })
 
   return NextResponse.json({ conversationId: conversation.id })
