@@ -174,7 +174,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: media.id, url: media.url })
   }
 
-  // dogId-Zweig (Zuchthund-Profilbild)
+  // dogId-Zweig (Zuchthund-Bilder)
+  const dogPurpose = formData.get('dogPurpose') as string | null // 'dog_bg' für Hintergrundbild
   const dog = await prisma.dog.findUnique({ where: { id: dogId! } })
   if (!dog || dog.breederId !== breeder.id) {
     return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
@@ -183,8 +184,21 @@ export async function POST(req: NextRequest) {
   const storageKey = `dogs/${dogId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
   await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
 
-  // Multi-Bild: bestehende Bilder behalten, sortOrder anhängen
-  const existingCount = await prisma.media.count({ where: { dogId: dogId! } })
+  if (dogPurpose === 'dog_bg') {
+    // Hintergrundbild — altes ersetzen
+    const oldBg = await prisma.media.findFirst({ where: { dogId: dogId!, purpose: 'dog_bg' } })
+    if (oldBg) {
+      try { await s3.send(new DeleteObjectCommand({ Bucket: MINIO_BUCKET, Key: oldBg.storageKey })) } catch {}
+      await prisma.media.delete({ where: { id: oldBg.id } })
+    }
+    const media = await prisma.media.create({
+      data: { storageKey, url: `/api/media/${storageKey}/view`, dogId: dogId!, isPrimary: false, sortOrder: 0, purpose: 'dog_bg' },
+    })
+    return NextResponse.json({ id: media.id, url: media.url })
+  }
+
+  // Multi-Bild: bestehende Bilder behalten (ohne dog_bg mitzählen), sortOrder anhängen
+  const existingCount = await prisma.media.count({ where: { dogId: dogId!, purpose: { not: 'dog_bg' } } })
 
   const media = await prisma.media.create({
     data: {

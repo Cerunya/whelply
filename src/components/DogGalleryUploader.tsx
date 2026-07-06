@@ -23,9 +23,11 @@ const POSITIONS = [
 export default function DogGalleryUploader({
   dogId,
   initialImages,
+  simpleMode = false,
 }: {
   dogId: string
   initialImages: DogImage[]
+  simpleMode?: boolean
 }) {
   const [images, setImages] = useState<DogImage[]>(initialImages)
   const [uploading, setUploading] = useState(false)
@@ -88,8 +90,8 @@ export default function DogGalleryUploader({
 
   return (
     <div className="space-y-5">
-      {/* Vorschau-Grid */}
-      {hasGrid && (
+      {/* Vorschau-Grid — nur für Deckrüden */}
+      {!simpleMode && hasGrid && (
         <div>
           <p className="text-xs text-stone-400 mb-2 font-medium">Vorschau der Anordnung:</p>
           <div className="rounded-xl overflow-hidden" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gridTemplateRows: '1fr 1fr', gap: '2px', height: '200px' }}>
@@ -124,15 +126,17 @@ export default function DogGalleryUploader({
                 )}
               </div>
               <div className="p-1.5">
-                <select
-                  value={img.purpose ?? ''}
-                  onChange={(e) => changePurpose(img.id, e.target.value || null)}
-                  className="w-full text-[11px] border border-stone-200 rounded-lg px-2 py-1.5 bg-white text-stone-600 focus:outline-none focus:ring-1 focus:ring-forest/30"
-                >
-                  {POSITIONS.map((p) => (
-                    <option key={p.value} value={p.value}>{p.label}</option>
-                  ))}
-                </select>
+                {!simpleMode && (
+                  <select
+                    value={img.purpose ?? ''}
+                    onChange={(e) => changePurpose(img.id, e.target.value || null)}
+                    className="w-full text-[11px] border border-stone-200 rounded-lg px-2 py-1.5 bg-white text-stone-600 focus:outline-none focus:ring-1 focus:ring-forest/30"
+                  >
+                    {POSITIONS.map((p) => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
           ))}
@@ -160,10 +164,15 @@ export default function DogGalleryUploader({
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <p className="text-xs text-stone-400">
-        Weise jedem Bild eine Position zu. Das <strong>Hauptbild</strong> wird groß in der Mitte angezeigt, die vier Nebenbilder darum herum.
-        Bilder ohne zugewiesene Position erscheinen nur beim Durchklicken in der Galerie.
-      </p>
+      {!simpleMode && (
+        <p className="text-xs text-stone-400">
+          Weise jedem Bild eine Position zu. Das <strong>Hauptbild</strong> wird groß in der Mitte angezeigt, die vier Nebenbilder darum herum.
+          Bilder ohne zugewiesene Position erscheinen nur beim Durchklicken in der Galerie.
+        </p>
+      )}
+      {simpleMode && (
+        <p className="text-xs text-stone-400">Das erste Bild wird als Hauptbild angezeigt, weitere erscheinen als Thumbnails.</p>
+      )}
     </div>
   )
 }

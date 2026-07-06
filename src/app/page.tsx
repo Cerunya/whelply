@@ -1,499 +1,367 @@
-import { auth, signOut } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import MobileNav from '@/components/MobileNav'
-
-export const dynamic = 'force-dynamic'
+import { auth } from '@/lib/auth'
 import { slugify } from '@/lib/slugify'
-import BreederStatusToggles from '@/components/BreederStatusToggles'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import SearchForm from '@/components/SearchForm'
+import ListingCard from '@/components/ListingCard'
+import Link from 'next/link'
 
-export default async function DashboardPage() {
+// Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
+// sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
+export const dynamic = 'force-dynamic'
+
+export default async function Home() {
   const session = await auth()
-  if (!session?.user) redirect('/login')
 
-  // Nutzer-Rolle prüfen
-  const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } })
-  if (!user) redirect('/login')
+  const breeds = await prisma.breed.findMany({
+    orderBy: { nameDe: 'asc' },
+    select: { id: true, nameDe: true, slug: true },
+  }).catch(() => [])
 
-  // Nicht-Züchter → eigene Seite
-  if (user.role !== 'breeder' && user.role !== 'admin') redirect('/dashboard/nutzer')
-
-  const breeder = await prisma.breederProfile.findUnique({
-    where: { userId: session.user.id },
+  const listings = await prisma.listing.findMany({
+    where: { status: 'available', type: 'puppy', breeder: { isActive: true } },
+    orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
+    take: 15,
     include: {
+      breed: { select: { nameDe: true } },
+      breeder: { select: { kennelName: true, city: true, state: true } },
+      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+    },
+  }).catch(() => [])
+
+  const [totalListings, totalBreeders] = await Promise.all([
+    prisma.listing.count({ where: { status: 'available' } }).catch(() => 0),
+    prisma.breederProfile.count().catch(() => 0),
+  ])
+
+  const adultListings = await prisma.listing.findMany({
+    where: { status: 'available', type: 'adult_dog', breeder: { isActive: true } },
+    orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
+    take: 6,
+    include: {
+      breed: { select: { nameDe: true } },
+      breeder: { select: { kennelName: true, city: true, state: true } },
+      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+    },
+  }).catch(() => [])
+
+  // Zuechterpraesentation: neueste Zuecher mit Hintergrundbild-Media
+  const allFeaturedBreeders = await prisma.breederProfile.findMany({
+    where: { kennelName: { not: '' } },
+    orderBy: { createdAt: 'desc' },
+    take: 30,
+    select: {
+      id: true,
+      kennelName: true,
+      displayName: true,
+      city: true,
+      state: true,
+      bio: true,
+      isPublished: true,
+      isActive: true,
+      dogs: { take: 1, select: { breed: { select: { nameDe: true } } } },
+      media: { where: { purpose: 'background' }, take: 1, select: { url: true } },
       listings: {
-        where: { status: { in: ['available', 'draft', 'reserved', 'sold'] } },
-        include: { breed: { select: { nameDe: true } } },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
+        where: { status: 'available', type: 'puppy' },
+        take: 1,
+        select: { id: true },
       },
       litters: {
-        include: {
-          breed: { select: { nameDe: true } },
-          _count: { select: { listings: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
+        where: { status: { in: ['planned', 'pregnant'] } },
+        take: 1,
+        select: { id: true, status: true },
       },
-      dogs: {
-        include: {
-          breed: { select: { nameDe: true } },
-          media: { take: 1, select: { url: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 20,
-      },
-      subscription: true,
-      user: { select: { role: true } },
-      _count: { select: { listings: true } },
     },
-  })
+  }).catch(() => [])
 
-  if (!breeder) redirect('/dashboard/upgrade')
+  // Nur Zuecher mit Hintergrundbild anzeigen, max 9
+  const featuredBreeders = allFeaturedBreeders
+    .filter((b) => b.media[0]?.url && b.isPublished !== false && b.isActive !== false)
+    .slice(0, 9)
 
-  // Ungelesene Nachrichten zählen — als Züchter UND als Nutzer in Konversationen
-  const unreadCount = await prisma.message.count({
-    where: {
-      readAt: null,
-      OR: [
-        // Nachrichten in Konversationen wo ich der Züchter bin (von Nutzern gesendet)
-        { senderRole: 'user', conversation: { breederId: breeder.id } },
-        // Nachrichten in Konversationen wo ich der kontaktierende Nutzer bin (Antworten vom Züchter)
-        { senderRole: 'breeder', conversation: { userId: session.user.id } },
-      ],
-    },
-  })
-
-  const activeListings = breeder.listings.filter((l) => l.status === 'available')
-  const draftListings = breeder.listings.filter((l) => l.status === 'draft')
-  const totalViews = breeder.listings.reduce((sum, l) => sum + l.viewCount, 0)
-  const plan = breeder.subscription?.plan ?? 'free'
-  const maxFree = 15
-  const canAddMore = plan !== 'free' || activeListings.length < maxFree
+  const now = new Date()
 
   return (
-    <div className="min-h-screen bg-cream font-sans">
-      {/* Navbar */}
-      <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="font-serif font-bold text-forest text-xl">Whelply</Link>
-            <span className="text-stone-300">|</span>
-            <span className="text-sm text-stone-500 font-medium">Mein Dashboard</span>
-          </div>
-          <div className="hidden md:flex items-center gap-4">
-            {breeder.user.role === 'admin' && (
-              <Link href="/admin" className="text-sm text-honey font-semibold hover:text-honey-light transition-colors">
-                Admin
-              </Link>
-            )}
-            <Link href="/" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-              Zur Website
-            </Link>
-            <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
-              <button type="submit" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-                Abmelden
-              </button>
-            </form>
-          </div>
+    <>
+      <Navbar />
+      <main className="bg-cream">
 
-          <MobileNav
-            links={[]}
-            extra={
-              <>
-                {breeder.user.role === 'admin' && (
-                  <Link href="/admin" className="font-semibold text-honey hover:text-honey-light transition-colors">
-                    Admin
-                  </Link>
-                )}
-                <Link href="/" className="font-medium text-stone-700 hover:text-forest transition-colors">
-                  Zur Website
-                </Link>
-                <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
-                  <button type="submit" className="text-stone-400 hover:text-stone-700 transition-colors">
-                    Abmelden
-                  </button>
-                </form>
-              </>
-            }
+        {/* ── Hero ── */}
+        <section className="bg-forest px-4 py-20 md:py-28 relative overflow-hidden">
+          {/* Subtile Textur-Punkte */}
+          <div className="absolute inset-0 opacity-5"
+            style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}
           />
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 py-10">
-        {/* Begrüßung + Status-Toggles */}
-        <div className="flex items-start justify-between gap-4 mb-10">
-          <div>
-            <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
-              {breeder.kennelName}
-            </h1>
-            <p className="text-stone-400 text-sm">
-              {breeder.city ? `${breeder.city} · ` : ''}
-              Plan: <span className="font-medium text-forest capitalize">{plan}</span>
-              {plan === 'free' && (
-                <span className="text-stone-400"> · {activeListings.length}/{maxFree} Inserate</span>
-              )}
-            </p>
-          </div>
-          <BreederStatusToggles
-            initialPublished={breeder.isPublished ?? true}
-            initialActive={breeder.isActive ?? true}
-          />
-        </div>
-
-        {/* Stat-Karten */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
-          {[
-            { label: 'Aktive Inserate', value: activeListings.length },
-            { label: 'Entwürfe', value: draftListings.length },
-            { label: 'Profilaufrufe', value: totalViews },
-            { label: 'Inserate gesamt', value: breeder._count.listings },
-            { label: 'Verifizierung', value: breeder.verificationLevel === 'none' ? '—' : '✓' },
-          ].map((s) => (
-            <div key={s.label} className="bg-white rounded-2xl border border-cream-deep p-5">
-              <p className="text-2xl font-bold text-stone-900 font-serif">{s.value}</p>
-              <p className="text-xs text-stone-400 mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Aktionen */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          {canAddMore ? (
-            <Link
-              href="/dashboard/inserat-erstellen"
-              className="bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest-light transition-colors"
-            >
-              + Neues Inserat
-            </Link>
-          ) : (
-            <div className="flex items-center gap-3 bg-honey-pale border border-honey/30 rounded-xl px-5 py-2.5">
-              <p className="text-sm text-stone-700">
-                Free-Limit erreicht ({maxFree} Inserate).
+          <div className="max-w-6xl mx-auto relative">
+            <div className="max-w-2xl">
+              <span className="inline-block text-xs font-semibold text-honey uppercase tracking-widest mb-5">
+                Nur FCI-anerkannte Rassen
+              </span>
+              <h1 className="font-serif text-5xl md:text-6xl font-bold text-white leading-tight mb-5">
+                Finde deinen<br />
+                <span className="text-honey">Rassewelpen.</span>
+              </h1>
+              <p className="text-white/75 text-lg mb-10 leading-relaxed">
+                Whelply verbindet dich mit geprüften Züchtern in ganz Deutschland —
+                mit FCI-Stammbaum, ohne Vermehrer.
               </p>
-              <Link href="/dashboard/upgrade" className="text-sm font-semibold text-honey hover:underline">
-                Pro werden →
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2">
+                <SearchForm breeds={breeds} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Statistiken ── */}
+        <section className="bg-forest-dark px-4 py-5">
+          <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-10 md:gap-20">
+            {[
+              { value: totalListings, label: 'aktive Inserate' },
+              { value: totalBreeders, label: 'Züchter' },
+              { value: breeds.length, label: 'Rassen' },
+              { value: '100%', label: 'FCI-anerkannt' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <p className="text-2xl font-bold text-white font-serif">{stat.value}</p>
+                <p className="text-xs text-white/60 mt-0.5">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Aktuelle Welpen ── */}
+        <section className="max-w-6xl mx-auto px-4 py-16">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="font-serif text-3xl font-bold text-stone-900">Aktuelle Welpen</h2>
+              <p className="text-stone-400 text-sm mt-1">Zuletzt eingetragene Inserate</p>
+            </div>
+            <Link href="/welpen" className="text-sm text-forest font-semibold hover:text-forest-light transition-colors">
+              Alle anzeigen →
+            </Link>
+          </div>
+
+          {listings.length === 0 ? (
+            <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-cream-deep">
+              <p className="text-5xl mb-5">🐾</p>
+              <p className="font-serif text-xl font-semibold text-stone-700 mb-2">Noch keine Inserate</p>
+              <p className="text-stone-400 text-sm mb-8 max-w-xs mx-auto">
+                Sei der erste Züchter auf Whelply und trag deinen nächsten Wurf ein.
+              </p>
+              <Link
+                href="/register"
+                className="bg-forest text-white text-sm px-6 py-3 rounded-xl hover:bg-forest-light transition-colors font-semibold"
+              >
+                Jetzt registrieren
               </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
+              {listings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  id={listing.id}
+                  breedName={listing.breed.nameDe}
+                  kennelName={listing.breeder.kennelName}
+                  puppyName={listing.title}
+                  city={listing.breeder.city}
+                  state={listing.breeder.state}
+                  priceCents={listing.priceCents}
+                  isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                  imageUrl={listing.media[0]?.url}
+                  tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                />
+              ))}
             </div>
           )}
-          <Link
-            href="/dashboard/wurf-eintragen"
-            className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
-          >
-            + Wurf eintragen
-          </Link>
-          <Link
-            href="/dashboard/hund-eintragen"
-            className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
-          >
-            + Zuchthund eintragen
-          </Link>
-        </div>
+        </section>
 
-        {/* Meine Züchterseite */}
-        <div className="bg-white rounded-2xl border border-cream-deep p-5 mb-10" style={{overflow: 'visible'}}>
-          <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
-            <div>
-              <h3 className="font-serif text-base font-bold text-stone-900">Meine Züchterseite</h3>
-              <p className="text-xs text-stone-400 mt-0.5">
-                Branding, Neuigkeiten und Fotos für deine öffentliche Profilseite
-              </p>
-            </div>
-            <Link
-              href={`/zuechter/${slugify(breeder.kennelName)}`}
-              target="_blank"
-              className="text-sm text-forest font-semibold hover:underline whitespace-nowrap"
-            >
-              Seite ansehen →
-            </Link>
-          </div>
-          <div className="flex flex-wrap gap-3 overflow-visible">
-            <Link
-              href="/dashboard/profil"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Profil bearbeiten
-            </Link>
-            <Link
-              href="/dashboard/ueber-uns"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Über uns
-            </Link>            <Link
-              href="/dashboard/theme"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Theme & Branding
-            </Link>
-            <Link
-              href="/dashboard/news"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Aktuelles
-            </Link>
-            <Link
-              href="/dashboard/galerie"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Galerie
-            </Link>
-            <Link
-              href="/dashboard/nachrichten"
-              className="relative border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Nachrichten
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-sm ring-2 ring-white">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-
-        {/* Würfe */}
-        {breeder.litters.length > 0 && (
-          <div className="mb-10">
-            <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Würfe</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {breeder.litters.map((litter) => (
-                <Link
-                  key={litter.id}
-                  href={`/dashboard/wurf/${litter.id}`}
-                  className="bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors flex items-center justify-between"
-                >
-                  <div>
-                    <p className="font-medium text-stone-800 text-sm">{litter.name || litter.breed.nameDe}</p>
-                    {litter.name && <p className="text-xs text-stone-400">{litter.breed.nameDe}</p>}
-                    <p className="text-xs text-stone-400 mt-0.5">
-                      {litter.bornDate
-                        ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}`
-                        : litter.expectedDate
-                        ? `Erwartet: ${litter.expectedDate}`
-                        : 'Geplant'}
-                      {' · '}{litter._count.listings} Welpe{litter._count.listings !== 1 ? 'n' : ''}
-                    </p>
-                  </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
-                    litter.status === 'available' ? 'bg-green-50 text-green-700'
-                    : litter.status === 'sold_out' ? 'bg-stone-200 text-stone-600'
-                    : 'bg-stone-100 text-stone-500'
-                  }`}>
-                    {litter.status === 'available' ? 'Verfügbar'
-                      : litter.status === 'sold_out' ? 'Ausverkauft'
-                      : litter.status === 'born' ? 'Geboren'
-                      : litter.status === 'pregnant' ? 'Trächtig'
-                      : 'Geplant'}
-                  </span>
+        {/* ── Züchter entdecken ── */}
+        {featuredBreeders.length > 0 && (
+          <section className="bg-forest-dark py-16 px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <p className="text-xs font-semibold text-honey uppercase tracking-widest mb-1">Unsere Züchter</p>
+                  <h2 className="font-serif text-3xl font-bold text-white">Züchter entdecken</h2>
+                </div>
+                <Link href="/zuechter" className="text-sm font-semibold text-honey hover:underline">
+                  Alle Züchter →
                 </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Zuchthunde — nur isStud=true */}
-        {breeder.dogs.filter((d) => d.isStud).length > 0 && (
-          <div className="mb-10">
-            <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Meine Zuchthunde</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {breeder.dogs.filter((d) => d.isStud).map((dog) => (
-                <Link
-                  key={dog.id}
-                  href={`/dashboard/hund/${dog.id}`}
-                  className="bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors flex items-center gap-3"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-cream-dark overflow-hidden flex items-center justify-center flex-shrink-0">
-                    {dog.media[0]?.url ? (
-                      <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {featuredBreeders.map((breeder) => (
+                  <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}
+                    className="group rounded-2xl overflow-hidden border border-white/10 hover:shadow-xl transition-all flex flex-col relative">
+                    {/* Runder Badge an der Bild/Text-Grenze */}
+                    {breeder.listings.length > 0 && (
+                      <div className="absolute right-4 z-10" style={{ bottom: '95px' }}>
+                        <div className="w-16 h-16 rounded-full bg-honey text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white translate-y-1/2">
+                          <span className="text-[10px] font-black leading-tight uppercase">Welpen</span>
+                          <span className="text-[10px] font-black leading-tight uppercase">Dispo</span>
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-stone-800 text-sm truncate">{dog.name}</p>
-                    <p className="text-xs text-stone-400 truncate">
-                      {dog.sex === 'male' ? 'Rüde' : 'Hündin'} · {dog.breed.nameDe}
-                      {dog.sex === 'male' ? ' · Deckrüde' : ' · Zuchthündin'}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+                    {breeder.listings.length === 0 && breeder.litters.length > 0 && (
+                      <div className="absolute right-4 z-10" style={{ bottom: '95px' }}>
+                        <div className="w-16 h-16 rounded-full bg-blue-400 text-white flex flex-col items-center justify-center text-center shadow-lg border-[3px] border-white translate-y-1/2">
+                          <span className="text-[10px] font-black leading-tight uppercase">
+                            {breeder.litters[0].status === 'pregnant' ? 'Wurf' : 'Wurf'}
+                          </span>
+                          <span className="text-[10px] font-black leading-tight uppercase">
+                            {breeder.litters[0].status === 'pregnant' ? 'Erwartet' : 'Geplant'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="h-40 overflow-hidden flex-shrink-0">
+                      {breeder.media[0]?.url ? (
+                        <img src={breeder.media[0].url} alt={breeder.kennelName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full bg-white/5" />
+                      )}
+                    </div>
+                    <div className="p-4 bg-white flex-1 flex flex-col">
+                      <p className="font-serif font-bold text-stone-900 text-base">{breeder.kennelName}</p>
+                      {breeder.dogs[0]?.breed?.nameDe && (
+                        <p className="text-xs text-forest font-semibold uppercase tracking-wider mt-0.5">
+                          {breeder.dogs[0].breed.nameDe}
+                        </p>
+                      )}
+                      {(breeder.city || breeder.state) && (
+                        <p className="text-xs text-stone-400 mt-1">{[breeder.city, breeder.state].filter(Boolean).join(', ')}</p>
+                      )}
+                      {breeder.bio && (
+                        <p className="text-xs text-stone-500 mt-2 line-clamp-2">{breeder.bio.replace(/!\[[^\]]*\]\([^)]+\)/g, '').replace(/\*\*|__|\*|_|@youtube\[[^\]]*\]/g, '').trim()}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Inserate-Tabelle */}
-        <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden">
-          <div className="px-6 py-4 border-b border-cream-deep flex items-center justify-between">
-            <h2 className="font-semibold text-stone-900">Meine Inserate</h2>
-          </div>
-
-          {breeder.listings.length === 0 ? (
-            <div className="text-center py-16 px-4">
-              <p className="text-stone-400 text-sm mb-4">Noch keine Inserate.</p>
-              <Link
-                href="/dashboard/inserat-erstellen"
-                className="text-forest font-semibold text-sm hover:underline"
-              >
-                Erstes Inserat erstellen →
+        {/* ── Hunde zu vergeben ── */}
+        {adultListings.length > 0 && (
+          <section className="bg-white border-y border-cream-deep py-16 px-4"><div className="max-w-6xl mx-auto">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Erwachsene Hunde</p>
+                <h2 className="font-serif text-3xl font-bold text-stone-900">Hunde zu vergeben</h2>
+              </div>
+              <Link href="/hunde" className="text-sm font-semibold text-forest hover:underline">
+                Alle anzeigen →
               </Link>
             </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
+              {adultListings.slice(0, 6).map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  id={listing.id}
+                  breedName={listing.breed.nameDe}
+                  kennelName={listing.breeder.kennelName}
+                  puppyName={listing.title}
+                  city={listing.breeder.city}
+                  state={listing.breeder.state}
+                  priceCents={listing.priceCents}
+                  isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
+                  imageUrl={listing.media[0]?.url}
+                  tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                />
+              ))}
+            </div>
+          </div></section>
+        )}
+
+        {/* ── Trust-Sektion ── */}
+        <section className="bg-white border-y border-cream-deep py-16 px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="font-serif text-3xl font-bold text-stone-900 text-center mb-12">
+              Warum Whelply?
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: '✓',
+                  title: 'Nur echte Züchter',
+                  desc: 'Jeder Züchter muss seinen FCI-Zwingernamen angeben. Vermehrer und Händler haben keinen — das ist unser einziger Filter, aber er wirkt.',
+                },
+                {
+                  icon: '♦',
+                  title: 'Nur FCI-Rassen',
+                  desc: 'Kein Maltipoo, kein Labradoodle, kein F1B-Irgendwas. Nur die offiziell anerkannten Rassen der FCI — etwa 355 an der Zahl.',
+                },
+                {
+                  icon: '€',
+                  title: 'Kostenlos für Züchter',
+                  desc: 'Ein Basis-Account ist dauerhaft gratis. Mehr Sichtbarkeit gibt es ab 1 € für 24 Stunden — kein Monats-Abo, kein Risiko.',
+                },
+              ].map((item) => (
+                <div key={item.title} className="bg-cream rounded-2xl p-7 border border-cream-deep">
+                  <div className="w-10 h-10 bg-forest rounded-xl flex items-center justify-center text-honey font-bold text-lg mb-5">
+                    {item.icon}
+                  </div>
+                  <h3 className="font-serif font-semibold text-stone-900 text-lg mb-2">{item.title}</h3>
+                  <p className="text-stone-500 text-sm leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Züchter-CTA ── */}
+        <section className="max-w-6xl mx-auto px-4 py-20 text-center">
+          {session?.user ? (
+            <>
+              <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-4">Für Züchter</p>
+              <h2 className="font-serif text-4xl font-bold text-stone-900 mb-4">
+                Willkommen zurück.
+              </h2>
+              <p className="text-stone-500 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
+                Verwalte deine Inserate, Würfe und Zuchthunde in deinem Dashboard.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/dashboard"
+                  className="bg-forest text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors shadow-sm"
+                >
+                  Zum Dashboard
+                </Link>
+              </div>
+            </>
           ) : (
             <>
-              {/* Desktop: Tabelle */}
-              <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-cream-deep bg-cream">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Rasse</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Preis</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Status</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Aufrufe</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Boost</th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-cream-deep">
-                  {breeder.listings.map((listing) => {
-                    const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date()
-                    return (
-                      <tr key={listing.id} className="hover:bg-cream/50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-stone-800">
-                          <Link
-                            href={`/welpen/${listing.id}`}
-                            target="_blank"
-                            className="hover:text-forest transition-colors"
-                          >
-                            {listing.title || listing.breed.nameDe}
-                          </Link>
-                          {listing.title && (
-                            <span className="text-stone-400 font-normal"> · {listing.breed.nameDe}</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-stone-500">
-                          {listing.priceCents
-                            ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
-                            : '—'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            listing.status === 'available' ? 'bg-green-50 text-green-700'
-                            : listing.status === 'reserved' ? 'bg-amber-50 text-amber-700'
-                            : listing.status === 'sold' ? 'bg-stone-200 text-stone-600'
-                            : 'bg-stone-100 text-stone-500'
-                          }`}>
-                            {listing.status === 'available' ? 'Aktiv'
-                              : listing.status === 'reserved' ? 'Reserviert'
-                              : listing.status === 'sold' ? 'Verkauft'
-                              : 'Entwurf'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-stone-500">
-                          <span className="inline-flex items-center gap-1.5">
-                            <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            {listing.viewCount}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {isBoosted ? (
-                            <span className="text-xs text-honey font-semibold">★ Aktiv</span>
-                          ) : (
-                            <Link
-                              href={`/dashboard/boost/${listing.id}`}
-                              className="text-xs text-stone-400 hover:text-honey transition-colors font-medium"
-                            >
-                              1 € buchen
-                            </Link>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <Link
-                            href={`/dashboard/inserat/${listing.id}`}
-                            className="text-xs text-stone-400 hover:text-forest transition-colors"
-                          >
-                            Bearbeiten
-                          </Link>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-              </div>
-
-              {/* Mobile: Karten */}
-              <div className="md:hidden divide-y divide-cream-deep">
-                {breeder.listings.map((listing) => {
-                  const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date()
-                  return (
-                    <div key={listing.id} className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="min-w-0">
-                          <Link
-                            href={`/welpen/${listing.id}`}
-                            target="_blank"
-                            className="font-medium text-stone-800 hover:text-forest transition-colors block"
-                          >
-                            {listing.title || listing.breed.nameDe}
-                          </Link>
-                          {listing.title && (
-                            <p className="text-xs text-stone-400">{listing.breed.nameDe}</p>
-                          )}
-                        </div>
-                        <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          listing.status === 'available' ? 'bg-green-50 text-green-700'
-                          : listing.status === 'reserved' ? 'bg-amber-50 text-amber-700'
-                          : listing.status === 'sold' ? 'bg-stone-200 text-stone-600'
-                          : 'bg-stone-100 text-stone-500'
-                        }`}>
-                          {listing.status === 'available' ? 'Aktiv'
-                            : listing.status === 'reserved' ? 'Reserviert'
-                            : listing.status === 'sold' ? 'Verkauft'
-                            : 'Entwurf'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-stone-500 mb-3">
-                        <span>
-                          {listing.priceCents
-                            ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
-                            : 'Preis auf Anfrage'}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <svg className="w-3.5 h-3.5 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          {listing.viewCount}
-                        </span>
-                        {isBoosted ? (
-                          <span className="text-honey font-semibold">★ Boost aktiv</span>
-                        ) : (
-                          <Link href={`/dashboard/boost/${listing.id}`} className="text-stone-400 hover:text-honey transition-colors font-medium">
-                            Boost: 1 € buchen
-                          </Link>
-                        )}
-                      </div>
-                      <Link
-                        href={`/dashboard/inserat/${listing.id}`}
-                        className="block text-center bg-cream border border-cream-deep rounded-lg py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
-                      >
-                        Bearbeiten
-                      </Link>
-                    </div>
-                  )
-                })}
+              <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-4">Für Züchter</p>
+              <h2 className="font-serif text-4xl font-bold text-stone-900 mb-4">
+                Dein Zwinger auf Whelply.
+              </h2>
+              <p className="text-stone-500 mb-10 max-w-lg mx-auto text-lg leading-relaxed">
+                Profil anlegen, Würfe eintragen, Käufer in ganz Deutschland erreichen.
+                Kostenlos, ohne versteckte Gebühren.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/register"
+                  className="bg-forest text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors shadow-sm"
+                >
+                  Kostenlos registrieren
+                </Link>
+                <Link
+                  href="/welpen"
+                  className="border-2 border-forest/20 text-forest px-8 py-3.5 rounded-xl text-sm font-bold hover:bg-forest/5 transition-colors"
+                >
+                  Inserate durchsuchen
+                </Link>
               </div>
             </>
           )}
-        </div>
+        </section>
+
       </main>
-    </div>
+      <Footer />
+    </>
   )
 }

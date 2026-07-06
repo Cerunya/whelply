@@ -98,18 +98,15 @@ NIXPACKS_NODE_VERSION=22
   psql -U whelply -d whelply -c "ALTER TABLE litters ALTER COLUMN dam_id DROP NOT NULL;"
   ```
 - Danach: `npx prisma db seed` im App-Container für deutsche Rassenamen
-- **Zu prüfen (2026-06-15)**: User berichtet, dass ein gesetzter "Vorstellungstext"
-  (Dog.description) nirgends erscheint. Im Code sieht alles korrekt aus (Formular,
-  API, Query, Tab-Flag). Hauptverdacht: die Spalte `dogs.description` wurde beim
-  ersten Migrations-Batch (20260614010000) eventuell nicht angelegt (User hatte
-  initial rohes SQL statt psql -c ausgeführt). Diagnose:
-  ```bash
-  psql -U whelply -d whelply -c "\d dogs"
-  ```
-  Falls `description` fehlt, idempotent nachziehen:
-  ```bash
-  psql -U whelply -d whelply -c "ALTER TABLE dogs ADD COLUMN IF NOT EXISTS description TEXT;"
-  ```
+- Migrations-Reihenfolge (Stand 2026-06-23, alle müssen applied sein):
+  - `20260614010000_initial` (oder ähnlich — erster Batch)
+  - `20260615010000_litter_name_health_tests`
+  - `20260615020000_dog_health_info_text`
+  - `20260615030000_litter_handover_date`
+  - `20260615040000_theme_and_listing_fields`
+  - `20260623010000_dog_parent_links`
+  - `20260623020000_social_links`
+  Nach jedem psql-Batch: `npx prisma migrate resolve --applied <migration_name>`
 
 ## Abgeschlossene Tasks
 - [x] Task 1: Analyse chiens-de-france.com
@@ -357,6 +354,141 @@ Migration `20260615030000_litter_handover_date`: `litters.handover_date DATE`.
   das den Seiteninhalt umschließt und so trotz sichtbarem Hintergrundbild lesbar
   bleibt. Auf allen 7 Unterseiten der Züchterseite eingebunden.
 
+### ✅ Theme-Erweiterung + neue Navbar/Footer + Social Media (2026-06-15) — FERTIG
+Migration `20260615040000_theme_and_listing_fields`: neue Theme-Felder in
+`breeder_profiles` (`theme_bg_color`, `theme_nav_color`, `theme_font`, `theme_align`),
+neue Welpen-Zusatzfelder in `listings` (`has_pedigree`, `is_vaccinated`, `is_dewormed`,
+`is_chipped`, `is_insured`, `birth_location`, `chip_number`).
+- **Slim-Navbar** `src/components/BreederNavbar.tsx` für alle Züchterseiten: nur
+  "Whelply" links (→ `/`) + Dashboard-Link rechts, `h-10`, halbtransparent.
+  Alle 7 Unterseiten nutzen `BreederNavbar` statt `Navbar`.
+- **Header-Redesign** (`BreederPageHeader.tsx`): kein separates Headerbild mehr —
+  nur noch das Hintergrundbild. Züchtername sehr groß (`text-5xl/6xl`), Google Font
+  wählbar, Links/Mitte/Rechts-Ausrichtung, Rasse unter Name (aus `dogs[].breed`),
+  Verband/Verifiziert nur noch kleine Badges. Tab-Nav nutzt `themeColor` als
+  Hintergrund (weiße Tabs, Akzentfarbe für aktiven Tab-Unterstrich).
+- **Theme-Dashboard** (`ThemeEditor.tsx`): 4 neue Sektionen — Schriftart (10 Google-
+  Font-Optionen + Freitext + Live-Vorschau), Ausrichtung (Links/Mitte/Rechts),
+  Hintergrundfarbe der Inhalts-Panels, Tab-Navigationsfarbe. `BreederPageContent`
+  nimmt `bgColor` prop und rendert es als halbtransparentes Panel.
+- **Social Media**: `socialInstagram`, `socialFacebook`, `socialTiktok`,
+  `socialYoutube` in `breeder_profiles`. In "Profil bearbeiten" als URL-Felder.
+- **Züchter-Footer** `src/components/BreederFooter.tsx`: Primärfarbe als Hintergrund,
+  Social-Icons (Instagram, Facebook, TikTok, YouTube) mit SVG-Logos, Navigationslinks,
+  Copyright. Auf allen 7 Unterseiten aktiv.
+- **Welpen-Zusatzfelder** in `InseratEditForm.tsx`: Checkboxen für
+  Ahnentafel/Geimpft/Entwurmt/Gechipt/Versichert, Geburtsort, Chipnummer — werden
+  auf `/welpen/[id]` als grüne Badges + Detailzeilen angezeigt.
+- **`/api/middleware.ts`**: `/api/hunde` muss in `alwaysAllowed` stehen (bereits drin).
+
+### ✅ Stammbaum + Elterntier-Verknüpfung (2026-06-23) — FERTIG
+Migration `20260623010000_dog_parent_links`: `dogs.parent_sire_id` + `dogs.parent_dam_id`
+(self-referential FK mit `ON DELETE SET NULL`). Ersetzt die fehlerhafte
+Wurf-Approximation (Hund erschien als sein eigener Vorfahre).
+Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtube`
+(falls noch nicht aus vorheriger Migration vorhanden — mit `IF NOT EXISTS` sicher).
+- **"Elterntiere"-Sektion** in `HundEditForm.tsx`: Dropdown-Auswahl für Vater/Mutter
+  aus allen auf Whelply eingetragenen Hunden (nach Geschlecht gefiltert, eigener Hund
+  ausgeschlossen). `allDogs`-Prop vom Dashboard-Page übergeben.
+- **Mini-Stammbaum** auf `/welpen/[id]`: Eltern (rosa/blau) + Großeltern darunter —
+  jetzt immer alle 4 Großeltern-Slots sichtbar (leere = grauer Platzhalter).
+  Zeigt Stammbaum nur wenn Litter `dam` oder `sire` hat.
+- **Vollständiger Stammbaum** `/welpen/[id]/stammbaum`: 4 Generationen (Welpe →
+  Eltern → Großeltern → Urgroßeltern) als verschachteltes Grid. Immer alle Felder
+  angezeigt; leere Positionen grau mit "—". `parentSire`/`parentDam`-Relationen
+  3 Ebenen tief abgefragt. Link vom Inserat direkt dorthin.
+- **Bekannte Einschränkung**: Urgroßeltern-Ebene nur sichtbar wenn `parentSire` des
+  Elternteils selbst `parentSire`/`parentDam` in Prisma includet hat — TypeScript-
+  Casting mit `as any` für die 3. Ebene nötig (Prisma-Include-Tiefengrenze).
+
+### Workflow-Hinweis (ergänzt 2026-06-23)
+- Neue Komponenten (`BreederNavbar`, `BreederFooter`) wurden als "neue Dateien" in
+  `src/components/` angelegt — müssen beim ersten Mal manuell in den Repo-Ordner
+  kopiert werden, GitHub Desktop erkennt sie dann als neue Dateien.
+- **PFLICHT: Nach jeder Dateiänderung IMMER die vollständigen Zielpfade aller geänderten
+  Dateien in einer Tabelle angeben.** Keine Ausnahmen, auch nicht bei kleinen Fixes.
+  Format: `| Dateiname | src/pfad/zur/datei/ |`
+- Wenn GitHub Desktop keine Änderung an einer Datei erkennt, obwohl der Inhalt
+  sich geändert hat: Datei im Texteditor öffnen, gesamten Inhalt ersetzen, speichern.
+  Drag-&-Drop-Kopieren reicht manchmal nicht (Timestamp-Problem).
+
+---
+
+### ✅ Großes UI-Overhaul (2026-06-24 bis 2026-06-27) — FERTIG
+
+#### Züchterseiten-Architektur
+- **Tab-Nav** (`BreederTabNav.tsx`, Client): schmaler Balken im Normalzustand,
+  bei Sticky auf volle Breite (IntersectionObserver). Nutzt `themeColor` als Hintergrund.
+- **Kontakt-Sidebar** (`BreederContactSidebar.tsx`): sticky rechts neben Inhalt auf allen
+  7 Unterseiten (nur `lg:`). Zeigt Zwingername, Anzeigename, Straße/PLZ/Ort (wenn freigegeben),
+  Telefon, Website, Social-Icons, Verband/Verifiziert-Badge, "Kontakt aufnehmen"-Button.
+  Props: `kennelName`, `displayName`, `street`, `zip`, `showAddress`, `phone`, `showPhone`,
+  `website`, `social*`, `themeColor`, `themeAccentColor`, `verband`, `verificationLevel`.
+- **BreederPageContent** unterstützt `sidebar` prop — rendert 2-Spalten-Layout auf Desktop.
+- **Verband/Verifiziert** aus dem Header entfernt → nur noch in der Kontakt-Sidebar.
+- **Header**: Rassenname jetzt `font-bold`, kein separater Header-Block mehr.
+- `getBreederTabs` zählt jetzt `isStud=true` für beide Geschlechter.
+
+#### Galerie-Lightbox
+- `GalleryLightbox.tsx` nutzt `createPortal` → rendert in `document.body`,
+  umgeht Stacking-Context-Probleme mit Sidebar. `z-[9999]`, sperrt Scroll.
+- Keyboard-Navigation (←/→/Esc), Pfeile, Zähler.
+
+#### Rich-Text-Bio + Bild-Upload
+- `RichEditor.tsx`: Toolbar (B/I/Bild-URL/Bild-Upload/YouTube), stabiler Textarea.
+  Hochgeladene Bilder erscheinen als Thumbnail-Chips unter dem Textarea (Dateiname
+  sichtbar, kein langer API-Pfad). `×`-Button entfernt Bild aus dem Markdown.
+- `src/lib/richtext.tsx`: rendert `**bold**`, `*italic*`, `![alt](url)` als Bild
+  mit Bildunterschrift, `@youtube[id]` als responsive 16:9-Embed.
+- Upload-Route (`/api/upload`) erlaubt jetzt `purpose=bio` — gibt nur URL zurück,
+  kein DB-Eintrag. Bild landet in `breeders/<id>/bio-<timestamp>-<random>.<ext>`.
+
+#### Zuchthunde-Seite (`/zuechter/[slug]/zuchthunde`)
+- Neue Reihenfolge: **Zuchthündinnen** → **Zuchtrüden** → **In Zuchtrente**.
+- Zuchtrente: Hunde mit `isStud=false` aber vorhandenem `description`-Text.
+- Layout: große horizontale Karten (Bild links, Text rechts) für alle Sektionen.
+- `isStud`-Checkbox für beide Geschlechter in `HundEditForm.tsx`.
+- Elterntier-Auswahl (`ParentSearch`): Dropdown mit Echtzeitsuche, nur `isStud=true`-Hunde
+  als Optionen (keine Welpen mehr auswählbar als Eltern).
+
+#### Welpen/Würfe
+- Welpenkarten in Wurfdetail: horizontales Layout wie Zuchthunde-Karten.
+- Geschwister auf `/welpen/[id]`: farbcodiert (blau=Rüde, rosa=Hündin),
+  auf Mobile horizontal scrollbar (`flex overflow-x-auto`, `w-40 flex-shrink-0`).
+- "Würfe als Vater/Mutter" auf Hundeprofil: Link geht jetzt zur Wurfseite
+  (`/zuechter/[slug]/wuerfe/[litterId]`), nicht mehr zum ersten Welpen.
+- Wurfname in Elterntier-Auswahl und Dashboard immer prominent angezeigt.
+
+#### Startseite
+- Neue Sektionen nach "Aktuelle Welpen": **Züchter entdecken** (dunkler `bg-forest`-Hintergrund,
+  Karten mit Hintergrundbild aus `media WHERE purpose='background'`) und
+  **Hunde zu vergeben** (weiß, ListingCards für `type='adult_dog'`).
+- Züchter-Karten: `flex flex-col` → weißer Inhalt immer bis unten bündig.
+- Slug wird via `slugify(kennelName)` berechnet (kein DB-Feld `zuechterSlug`).
+
+#### Layout-Vereinheitlichung
+- Alle Listing-Seiten: `max-w-6xl`, `bg-cream` Hintergrund, `bg-forest` Header,
+  Filterleiste mit `border-b border-stone-200 bg-stone-50`.
+- Navbar: "Hunde" → "Unsere Hunde".
+- Aktuelles-Seite: Jahresfilter mit `?jahr=` searchParam, `Array.from(new Set(...))`.
+
+#### Upload-Limits
+- Max. Dateigröße: 25MB in allen Uploadern und der API-Route.
+- `next.config.js`: `experimental.serverActions.bodySizeLimit: '30mb'`.
+- API-Route hat kein deprecated `export const config` mehr (App Router).
+
+#### Kleinere Fixes
+- Einzahl/Mehrzahl: "1 Rüde" / "1 Hündin" korrekt (nicht "1 Rüden").
+- Farbcodierung (blau=Rüde, rosa=Hündin) auf allen ListingCard-Seiten (Startseite,
+  `/welpen`, `/hunde`, `/rassen/[slug]`), inkl. Geschlechtsfilter auf `/welpen`.
+- `zuchtrueden/page.tsx`: filtert jetzt `isStud: true` (vorher nur `sex: 'male'`).
+- Jahresfilter Aktuelles: `Array.from(new Set(...))` statt `[...new Set()]`
+  (TypeScript downlevel-Iterator-Kompatibilität).
+- Dashboard "Meine Zuchthunde": zeigt nur `isStud=true`-Hunde.
+- Galerie: Thumbnail-Grid, Lightbox via Portal.
+- ThemeEditor: alle 4 Farben in einem Block, Schriftart mit Google-Fonts-Link,
+  Header-Bild-Option entfernt (nur noch Hintergrundbild), Reihenfolge:
+  Tab-Nav → Hintergrundfarbe → Ausrichtung → Schriftart.
 
 - **GROSS — Subdomain-Routing Phase 2 (später):**
   - Wildcard-DNS (`*.whelply.de`) + Wildcard-TLS-Zertifikat (DNS-01-Challenge, braucht
@@ -411,6 +543,159 @@ Migration `20260615030000_litter_handover_date`: `litters.handover_date DATE`.
 - [ ] Task 10: SEO + Bildupload (MinIO einrichten)
 - [ ] Task 11: Pflichtseiten (Impressum, Datenschutz, AGB)
 
+---
+
+### ✅ Session 2026-06-27 bis 2026-06-30 — FERTIG
+
+#### Neue DB-Felder (Migrations erforderlich)
+- `breeder_profiles.full_name` (TEXT, nullable) — echter Vor-/Nachname
+- `breeder_profiles.show_full_name` (BOOLEAN, default false) — Anzeige auf Züchterseite
+- `breeder_profiles.is_published` (BOOLEAN, default true) — Züchterseite ein-/ausschaltbar
+- Migration: `20260627010000_full_name`, `20260627020000_is_published`
+- DB-Befehle:
+  ```sql
+  ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+  ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS show_full_name BOOLEAN NOT NULL DEFAULT FALSE;
+  ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS is_published BOOLEAN NOT NULL DEFAULT TRUE;
+  ```
+
+#### Inserate-Limit
+- Free-Plan Limit: 3 → **15** Inserate
+- Geändert in: `api/inserate/route.ts`, `dashboard/inserat-erstellen/page.tsx`, `dashboard/page.tsx`
+
+#### Welpen-Detailseite `/welpen/[id]` — komplett überarbeitet
+- Neues Layout: Hero-Galerie oben (volle Breite, max 520px hoch), darunter 3-Spalten-Info-Grid
+  (Eckdaten / Gesundheit & Dokumente / Züchter+Kontakt), dann Beschreibung (volle Breite), dann Stammbaum
+- Galerie: Thumbnails, Prev/Next-Pfeile, Zoom-Icon, Lightbox per `createPortal` (klickbar, ESC, Pfeile)
+- `ListingImageGallery.tsx` komplett neu
+
+#### Wurfdetail Welpenkarten
+- Layout: `h-52` fixe Höhe auf Desktop, Bild `w-52` (breit), alle Karten identisch hoch
+- Mobile: `flex-col` (Bild oben h-48, Text darunter), Desktop `sm:flex-row`
+- Gesundheits-Badges: einheitlich weiß mit `border border-stone-300`
+
+#### BreederContactSidebar — neu
+- Übersichtlicher, mehr Luft, klare Hierarchie
+- Anzeigename, optional echter Name (wenn `showFullName=true`)
+- Verband + Verifiziert-Badge
+- Adresse, Telefon, Website, Social-Pill-Links
+- Einheitlich auf allen 7 Züchter-Unterseiten
+
+#### ProfilForm — Erweiterungen
+- "Vor-/Nachname" + Checkbox "auf Züchterseite anzeigen" → jetzt in "Private Kontaktdaten"
+- Toggle-Switch oben rechts: Züchterseite ein-/ausschalten (`isPublished`)
+- Alle Züchter-Subpages gaten auf `isPublished === false` → `notFound()`
+
+#### RichEditor — finale stabile Version
+- Bilder werden als `[📷 dateiname.jpg]` Platzhalter im Textarea gezeigt (kein URL-Pfad)
+- `toDisplay()` / `fromDisplay()` konvertieren sauber hin und zurück
+- Bild wird an Cursorposition eingefügt (nicht ans Ende)
+- Chips unter Textarea mit Thumbnail + Dateiname + ×-Button
+- `renderRichText`: Dateinamen als Alt-Text werden NICHT als Bildunterschrift angezeigt
+
+#### Startseite
+- Neue Sektion "Züchter entdecken" (dunkelgrüner Hintergrund)
+- Runde Badges (französischer Stil) an Bild/Text-Grenze: "Welpen Dispo" (Honig) / "Wurf Erwartet" (Blau)
+- "Hunde zu vergeben" Sektion mit ListingCards
+- Breiter-Karten: `aspect-[3/2]`, max 3 Spalten statt 4
+
+#### Upload-Indikator
+- `ImageUploader`: Spinner + "Wird hochgeladen… / Bitte warten" während Upload, Klick gesperrt
+- `DogImageUploader`, `BreederImageUploader`, `LitterImageUploader`, `GalleryManager`:
+  Inline-Spinner im Button + `disabled={uploading}`
+
+#### Preis-Eingabe
+- `step="50"` → `step="1"` in `InseratForm`, `WelpeForm`, `InseratEditForm` — jede ganze Zahl erlaubt
+
+#### Zuchthunde-Seite
+- Reihenfolge: Zuchthündinnen → Zuchtrüden → In Zuchtrente
+- Große horizontale Karten (Bild links, Text rechts)
+- `mt-12` Abstände zwischen den Sektionen
+
+#### HundEditForm
+- Nach erfolgreichem Speichern: Buttons "+ Weiteren Hund eintragen" und "Profil ansehen →"
+
+#### Aktuelles-Seite
+- Jahresfilter mit `Array.from(new Set(...))` (TS-kompatibel)
+- Filter-Buttons für jedes Jahr in dem Posts existieren
+
+#### Diverses
+- Navbar: "Hunde" → "Erwachsene Hunde"
+- Züchter-Tab-Nav: "Zuchthunde" → "Unsere Hunde"
+- Zuchtrüden-Seite filtert jetzt `isStud: true` (nicht nur `sex: male`)
+- Dashboard "Meine Zuchthunde" zeigt nur `isStud: true`
+- Elterntier-Auswahl: nur `isStud: true` Hunde (keine Welpen)
+- Geschwister auf `/welpen/[id]`: farbcodiert, auf Mobile horizontal scrollbar
+- Wurflink auf Hundeprofil → Wurfseite (nicht erster Welpe)
+- `ListingFilter.tsx` (neu): onChange-Client-Komponente ohne Submit-Button
+- `renderRichText`: `<p>` durch `<div>` ersetzt (kein ungültiges `<div>` in `<p>`)
+
+---
+
+### ✅ Weitere Änderungen (2026-07-01) — FERTIG
+
+#### Migrationen (müssen in dieser Reihenfolge applied werden)
+- `20260627010000_full_name` — `full_name TEXT`, `show_full_name BOOLEAN DEFAULT FALSE`
+- `20260627020000_is_published` — `is_published BOOLEAN DEFAULT TRUE`
+- `20260701010000_is_active` — `is_active BOOLEAN DEFAULT TRUE`
+
+#### BreederProfile — neue Felder
+- `fullName` / `showFullName` — optionaler echter Name, auf Wunsch öffentlich sichtbar
+- `isPublished` — Züchterseite ein-/ausschaltbar (alle 7 Unterseiten → `notFound()`)
+- `isActive` — "Profil inaktiv" Status (Karte im Verzeichnis nicht klickbar, amber Badge)
+
+#### Welpen-Detailseite — neues Layout
+- Galerie oben groß (volle Breite, max 520px), klickbar mit Lightbox (`createPortal`)
+- Thumbnails darunter scrollbar
+- 3 Info-Kacheln: Eckdaten / Gesundheit & Dokumente / Züchter+Kontakt
+- Beschreibung als volle Breite-Box darunter
+- "Züchter-Profil ansehen" nur wenn `isPublished !== false`
+
+#### Wurfdetail-Welpenkarten
+- Feste Höhe `h-52`, Bild `w-52 object-cover` (alle Karten gleich hoch)
+- Auf Mobile: Bild oben voll (`h-48`), Text darunter; ab `sm:`: horizontal `h-52`
+- Gesundheits-Badges (Ahnentafel/Geimpft/Entwurmt/Gechipt) — einheitlich weiß mit Border
+
+#### Züchter-Verzeichnis (`/zuechter`)
+- Karten zeigen: Vor-/Nachname (wenn freigegeben), Ort, Rassen, Status-Badges
+- "Welpen verfügbar" (Honey) / "Wurf erwartet/geplant" (Blau) als Status-Badges
+- "Profil inaktiv" (Amber) / "Seite deaktiviert" (Grau) als Warn-Badges
+- Karte nicht klickbar wenn `isActive=false` oder `isPublished=false`
+- Litter-Status in Query (planned/pregnant) für Badge
+
+#### ProfilForm — neue Toggles (im Abschnitt "Öffentliches Profil")
+- "Seite sichtbar/versteckt" Toggle (isPublished)
+- "Profil aktiv/inaktiv" Toggle (isActive, Amber wenn inaktiv)
+- Vor-/Nachname + Checkbox "Namen anzeigen" → in "Private Kontaktdaten" verschoben
+
+#### RichEditor + News
+- `NewsPostForm` nutzt jetzt `RichEditor` (Bild-Upload, Formatierung, YouTube)
+- News-Content auf Aktuelles-Seite wird mit `renderRichText` gerendert
+- Emoji-Picker in Toolbar (32 Emojis als Dropdown)
+- Bild an Cursorposition eingefügt (nicht ans Ende)
+- Dateiname wird NICHT als Bildunterschrift angezeigt (nur echte Alt-Texte)
+
+#### Inserate-Limit
+- Free-Plan: 3 → **15** aktive Inserate (in API-Route, Dashboard-Anzeige und inserat-erstellen)
+
+#### Upload-Indikator
+- Alle Uploader: Spinner + gesperrter Button während Upload
+
+#### Preis
+- `step="1"` in allen Formularen — jede ganze Zahl erlaubt
+
+#### Welpen-Übersicht (`/welpen`)
+- Zeigt auch reservierte und verkaufte Welpen (`status: { in: [...] }`)
+
+#### Deckrüden-Detail (`/hund/[id]`)
+- "Züchter-Profil ansehen" und Badge zeigen korrektes Geschlecht ("Zuchthündin" / "Deckrüde verfügbar")
+- Link nur wenn `isPublished !== false`
+
+#### HundEditForm
+- Nach Speichern: Buttons "+ Weiteren Hund eintragen" + "Profil ansehen →"
+
+
+
 ## Wichtige Entscheidungen
 - Projektname: **Whelply** — Domain whelply.de
 - Keine Mischlinge, kein Tierschutz — FCI-Rassenliste
@@ -418,3 +703,215 @@ Migration `20260615030000_litter_handover_date`: `litters.handover_date DATE`.
 - Vorschaltseite aktiv (PREVIEW_PASSWORD in Coolify)
 - Middleware: alwaysAllowed = ['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/api/upload', '/api/media', '/api/media-item', '/api/profil', '/api/hunde', '/api/news', '/api/admin', '/admin', '/preview', '/_next', '/favicon.ico']
   → Jede neue API-Route (und neue Top-Level-Seiten wie /admin, die eigene Auth-Logik haben) muss hier eingetragen werden!
+
+---
+
+### ✅ Weitere Änderungen (2026-07-02) — FERTIG
+
+#### Migrationen
+- `20260702010000_reviews_reports_bookmarks` — neue Tabellen `reviews`, `reports`, `bookmarks` + neue Felder auf `breeder_profiles` (`handover_location`, `visit_possible`, `dam_visit_possible`)
+
+#### Neue Schema-Modelle
+- `Review` — Nutzer bewertet Züchter (1-5 Sterne, Titel, Text; unique pro User+Züchter)
+- `Report` — Nutzer meldet Inserat (Grund + optionaler Kommentar)
+- `Bookmark` — Nutzer merkt sich Listing, Litter oder BreederProfile (toggle)
+
+#### Neue API-Routen (alle in `middleware.ts` unter `alwaysAllowed`)
+- `POST /api/auth/register` — jetzt mit `role` (buyer/breeder/service); `kennelName` nur für Züchter pflicht; `kennelName` Zod-Validierung per `.refine()` nur für `role=breeder`
+- `POST /api/upgrade-to-breeder` — Konto zu Züchter upgraden (nicht rückgängig machbar)
+- `GET/POST /api/bookmarks` — Merkliste abrufen / togglen
+- `POST /api/reports` — Inserat melden
+- `GET/POST /api/reviews` — Bewertungen abrufen / erstellen (upsert)
+
+#### Neue Seiten
+- `/dashboard/upgrade` — Formular zum Upgrade auf Züchter-Konto
+- `/dashboard/merkliste` — Übersicht aller Bookmarks (Listings, Würfe, Züchter)
+
+#### Neue Komponenten
+- `BookmarkButton.tsx` — Toggle-Button (Lesezeichen-Icon), nutzt `/api/bookmarks`
+- `ReportButton.tsx` — "Melden"-Link + Modal mit Grund-Auswahl
+- `ReviewSection.tsx` — Bewertungen anzeigen + Formular (für eingeloggte Nutzer)
+- `BreederStatusToggles.tsx` — Zwei Toggles (Seite öffentlich / Profil aktiv) direkt im Dashboard-Header rechts neben Zwingernamen; speichert sofort per PATCH ohne Reload
+
+#### ProfilForm — neue Felder
+- Übergabe & Besuch-Block: `handoverLocation`, `visitPossible`, `damVisitPossible`
+- Toggles aus ProfilForm in `BreederStatusToggles` ausgelagert (Dashboard)
+
+#### Registrierung
+- Rollenauswahl (Welpensucher / Züchter / Dienstleister) mit Icon-Buttons
+- Navbar: "Züchter werden" → "Registrieren"
+- Zwingername-Feld erscheint nur bei Rolle=Züchter
+
+#### isActive / isPublished Logik
+- `isActive=false` → API setzt automatisch auch `isPublished=false`
+- Inaktive Züchter verschwinden aus allen öffentlichen Seiten: `/zuechter`, `/welpen`, `/zuchtrueden`, `/hunde`, Startseite
+- `/hunde` filtert `breeder: { isActive: true }`
+
+#### Züchter-Profilseite (`/zuechter/[slug]`)
+- Übergabe-Infos-Block (Ort, Besuch, Muttertier-Besuch)
+- `ReviewSection` mit Sternebewertung
+- `BookmarkButton` zum Merken
+
+#### Welpen-Detailseite (`/welpen/[id]`)
+- `BookmarkButton` + `ReportButton` im Preis-Bereich
+
+---
+
+### ✅ Weitere Änderungen (2026-07-03) — FERTIG
+
+#### Infrastruktur
+- `resend` npm-Package installiert (`npm install resend`)
+- `.gitignore` eingerichtet — schließt `node_modules/`, `.next/`, `.env*` aus
+- Umgebungsvariablen in Coolify: `RESEND_API_KEY` (von resend.com) + `CRON_SECRET` (selbst gewählt)
+- Täglicher Cron-Job via cron-job.org: `GET https://whelply.de/api/cron/welpen-alerts?secret=CRON_SECRET` täglich 08:00 Uhr
+
+#### Migrationen
+- `20260702030000_welpen_alerts` — neue Tabelle `welpen_alerts` (`id`, `email`, `breed_id`, `state`, `created_at`)
+- `20260702040000_welpen_alert_token` — `unsubscribe_token` (unique, NOT NULL) + `last_sent_at` auf `welpen_alerts`
+
+#### Neues Schema-Modell: `WelpenAlert`
+- Felder: `email`, `breedId?` (FK auf breeds), `state?`, `unsubscribeToken` (unique), `lastSentAt?`
+- Relation: `Breed.alerts WelpenAlert[]`
+
+#### Neue API-Routen (alle in middleware `alwaysAllowed`)
+- `POST /api/welpen-alert` — Alert anlegen; generiert `unsubscribeToken` via `crypto.randomBytes`; verhindert Duplikate
+- `GET /api/cron/welpen-alerts?secret=` — Cron-Endpoint; prüft `CRON_SECRET`; ruft `sendWelpenAlerts()` auf
+- `DELETE /api/admin/reports/[id]` — Admin kann Meldungen löschen
+
+#### Neue Seiten
+- `/welpen-alert/abmelden/[token]` — DSGVO-konforme Abmeldeseite; löscht Alert sofort beim Aufruf; zeigt Bestätigung
+
+#### Neue Komponenten
+- `WelpenAlertButton.tsx` — Honey-Button "Alert einrichten" auf Welpen-Seite; öffnet Modal mit E-Mail-Eingabe + Filter-Anzeige + Datenschutzhinweis
+
+#### Neue Lib
+- `src/lib/mail-alerts.ts` — `sendWelpenAlerts()`:
+  - Lädt alle neuen Listings der letzten 24h
+  - Matched jeden Alert mit passenden Listings (Rasse + Bundesland)
+  - Sendet HTML-Mail via Resend API (`fetch` direkt, kein SDK nötig)
+  - Setzt `List-Unsubscribe` + `List-Unsubscribe-Post` Header (DSGVO/RFC 8058)
+  - Aktualisiert `lastSentAt` nach erfolgreichem Versand
+  - Überspringt wenn `RESEND_API_KEY` nicht gesetzt
+
+#### Admin-Dashboard
+- Neuer Tab "Meldungen" mit Lösch-Button pro Eintrag
+- Neuer Tab "Nutzer" mit Lösch-Button (via `DELETE /api/admin/users/[id]`)
+- Suchfeld in allen Tabs (Züchter, Inserate, Meldungen, Nutzer)
+- Neue Nutzer-Tab zeigt E-Mail, Name, Rolle, Registrierungsdatum
+
+#### Züchter-Verzeichnis (`/zuechter`)
+- "Zuletzt eingetragene Züchter" Sektion (letzte 30 Tage, max 10, nur ohne aktive Filter)
+- Kompakte Karten mit Zwingername, Rasse, Ort, Status-Badges (Welpen Dispo / Welpen à venir / Deckrüde)
+- Karten zeigen jetzt Hintergrundbild (falls vorhanden)
+- Drei runde Badges (Welpen Dispo Honey / Wurf erwartet Blau / Deckrüde Forest), Größe `w-16 h-16`
+- `_count.dogs` (isStud) in Query für Deckrüden-Badge
+
+#### Welpen-Seite (`/welpen`)
+- 36 Inserate pro Seite (war 24)
+- `WelpenAlertButton` erscheint rechts neben Breadcrumb (immer sichtbar)
+- "Welpen demnächst erwartet"-Sektion nach der Pagination: zeigt bis zu 12 Würfe mit Status `pregnant`/`planned`, Mutter+Vater-Bild, Züchter, Ort, Datum
+
+#### Homepage (`/`)
+- 15 Welpen (war 8), 9 Züchter (unverändert), 6 Erwachsene Hunde (war 4 angezeigt)
+
+#### Nutzer-Dashboard (`/dashboard/nutzer`)
+- Name-Eingabe via `NutzerNameForm` + `PATCH /api/user-profile`
+- `displayName` auf User-Modell (`display_name TEXT`)
+- Migration `20260702020000_user_display_name`
+
+#### Diverse Fixes
+- Registrierung: `kennelName` nur für `role=breeder` validiert (`.refine()`); leere Strings werden vor Zod-Validierung entfernt
+- Navbar: "Züchter werden" → "Registrieren"
+- Login-Seite: "Als Züchter registrieren" → "Registrieren"
+- Dashboard: Buyer/Service werden zu `/dashboard/nutzer` redirected (kein Loop mehr)
+- `WelpeForm`: nach Speichern → Erfolgs-Screen mit "Inserat ansehen", "Fotos hinzufügen", "+ Weiteren Welpen anlegen"
+- ProfilForm: Übergabe-Block entfernt (war redundant zur Züchter-Profilseite)
+- Merkliste: BookmarkButton auf jeder Karte zum direkten Entmerken
+- Welpen-Detail: BookmarkButton nur für Nicht-Züchter; ReportButton ganz unten
+
+---
+
+### ✅ Weitere Änderungen (2026-07-04) — FERTIG
+
+#### Messaging-System
+- Neue DB-Tabellen: `conversations` (unique user+breeder), `messages` (senderRole: 'user'|'breeder')
+- Migration: `20260703010000_messaging`
+- API: `POST /api/messages` — Conversation erstellen + erste Nachricht senden
+- API: `GET /api/messages` — alle Conversations des eingeloggten Nutzers/Züchters
+- API: `GET/POST /api/messages/[id]` — Einzelne Conversation + Antwort senden; markiert Nachrichten als gelesen
+- `NachrichtButton.tsx` — Modal mit Texteingabe; `variant='dark'` für dunkle Hintergründe
+- `ConversationView.tsx` — Client-Component mit Chatverlauf, Enter zum Senden, Auto-Scroll
+- `/dashboard/nachrichten` — Posteingang für Züchter und Nutzer mit Ungelesen-Indikator
+- `/dashboard/nachrichten/[id]` — Einzelne Konversation; Date-Serialisierung via `.toISOString()`
+- Nachrichten-Link im Züchter-Dashboard mit rotem Badge (Zahl ungelesener Nachrichten)
+- Nachrichten-Link im Nutzer-Dashboard mit rotem "X neu"-Badge
+- `NachrichtButton` in `BreederContactSidebar` (ersetzt mailto-Link) — auf allen Züchter-Unterseiten
+- `NachrichtButton` im Züchter-Kontaktkasten auf Welpen-Detailseite (`variant="dark"`)
+- Kein Bookmark mehr auf Züchter-Profilseiten; nur noch auf Welpen/Hunde-Inseraten
+
+#### Kontaktseite auf Züchterseiten
+- Neuer Tab "Kontakt" auf allen Züchterseiten (immer sichtbar, auch ohne Inhalte)
+- `/zuechter/[slug]/kontakt` — Kontaktformular mit Nachname, Vorname, E-Mail, Telefon, Betreff (Dropdown), Nachricht
+- `KontaktForm.tsx` — sendet über `/api/messages`; zeigt Login-Hinweis wenn nicht angemeldet
+- Adressblock unter dem Formular (wenn showAddress=true)
+- Sidebar mit Kontaktdaten + NachrichtButton
+
+#### Dashboard-Header vereinheitlicht
+- `DashboardHeader.tsx` — Server Component mit importierter `signOutAction` aus `src/app/actions/auth.ts`
+- Props: `title`, `backHref` (default: '/dashboard'), `backLabel` (default: 'Dashboard'), `action?`
+- Layout: Whelply | ← Zurück | Titel (links) … Abmelden (rechts)
+- Alle Formular-Komponenten nutzen `DashboardHeader`: ProfilForm, UeberUnsForm, ThemeEditor, HundForm, HundEditForm, InseratForm, InseratEditForm, LitterDashboard, NewsPostForm, RuedeForm, WelpeForm, WurfForm
+- `WelpeForm`: zurück zu Wurf (`backHref={/dashboard/wurf/${litter.id}}`)
+- `NewsPostForm`: zurück zu Aktuelles (`backHref="/dashboard/news"`)
+
+#### Aktuelles-Dashboard
+- "+ Neuer Beitrag"-Button rechtsbündig über der Beitragsliste (nicht mehr im Header)
+
+#### "Über uns"-Seite im Dashboard
+- Neuer Link "Über uns" zwischen "Profil bearbeiten" und "Theme & Branding"
+- `/dashboard/ueber-uns` — nur Bio-Text (RichEditor); Karten-Bild bleibt in ProfilForm
+- `UeberUnsForm.tsx` mit eigenem DashboardHeader
+
+#### Züchter-Verzeichnis (`/zuechter`)
+- Karten-Vorschaubild (`purpose='card'`) als Hintergrundbild der Karte
+- Drei runde Badges `w-20 h-20` außerhalb der Karte (overflow-Problem gelöst durch separaten Wrapper)
+- "Zuletzt eingetragene Züchter" am Ende der Seite (nicht oben), mit Link wenn isPublished=true
+- Alert-Button nur bei aktiver Filterauswahl (Rasse oder Bundesland)
+
+#### Welpen-Seite (`/welpen`)
+- 36 Inserate pro Seite
+- Alert-Button nur bei aktiver Filterauswahl
+
+#### Sonstiges
+- `breeder.ts`: `userId` in `getBreederBySlug` select hinzugefügt (für isOwnProfile-Check)
+- ProfilForm: Telefon-Länge bleibt max. 20; bestehende Werte werden beim Laden auf 20 Zeichen gekürzt
+- Middleware: `/api/messages`, `/api/cron`, `/welpen-alert` in alwaysAllowed
+
+---
+
+### ✅ Weitere Änderungen (2026-07-05) — FERTIG
+
+#### Deckrüden Multi-Bild-Galerie
+- `DogGalleryUploader.tsx` — komplett neu: Multi-Upload, Positions-Dropdown (Hauptbild/OL/OR/UL/UR/Galerie), Lösch-Button, Live-Vorschau-Grid
+- `DogPhotoGrid.tsx` ← neu — Client-Component mit klickbarer Lightbox (Vor/Zurück, Zähler), 5er-Grid wenn Positionen gesetzt, sonst Einzelbild
+- Galerie mit Positionen **nur für Deckrüden** (isStud=true). Für Zuchthündinnen: simpleMode ohne Positions-Dropdown — ein großes Bild + Thumbnails
+- `HundEditForm.tsx` nutzt `DogGalleryUploader` mit `simpleMode` prop für nicht-Deckrüden
+- Upload-API: dogId-Zweig hängt Bilder an statt sie zu überschreiben (existingCount + sortOrder)
+- `media-item/[id]` PATCH für purpose-Updates; DELETE funktioniert jetzt auch für Hunde-Medien
+
+#### Nachrichten-Badge Fix
+- Root Cause: Züchter der anderen Züchter kontaktiert wird als `userId` (nicht `breederId`) in der Konversation gespeichert. Badge-Query suchte nur `conversation.breederId`
+- Fix: `unreadCount` Query prüft jetzt BEIDE Seiten — als `breederId` UND als `userId` in Konversationen
+- `sender_role='user'` für neue Nachrichten (Initiator), `sender_role='breeder'` für Antworten
+- WhatsApp-Stil Badge: `ring-2 ring-white`, absolute `-top-2 -right-2`, halb überlappend
+- `force-dynamic` auf Dashboard-Seite hinzugefügt (fehlte!)
+
+#### Dashboard
+- `export const dynamic = 'force-dynamic'` auf `/dashboard/page.tsx`
+- `overflow: visible` inline auf "Meine Züchterseite"-Card für Badge-Sichtbarkeit
+
+#### Kontaktformular
+- Honeypot-Spam-Schutz in `KontaktForm.tsx`: verstecktes `website_url` Feld, bei Ausfüllung → fake success ohne Nachricht
+
+#### Header
+- `DashboardHeader.tsx` Höhe `h-16` (war `h-14`, jetzt gleich wie Dashboard-Hauptseite)

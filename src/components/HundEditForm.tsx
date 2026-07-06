@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import DogGalleryUploader from './DogGalleryUploader'
+import DogBgUploader from './DogBgUploader'
 import SaveToast from './SaveToast'
 
 type Breed = { id: number; nameDe: string }
@@ -20,6 +21,7 @@ type DogData = {
   isStud: boolean
   description: string | null
   imageUrl: string | null
+  bgUrl: string | null
   media?: { id: string; url: string; isPrimary: boolean; sortOrder: number; purpose: string | null }[]
   healthInfo: string | null
   parentSireId: string | null
@@ -205,7 +207,17 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
 
         <div className="mb-6">
           <label className={labelClass}>Fotos</label>
-          <DogGalleryUploader dogId={dog.id} initialImages={dog.media ?? []} />
+          {dog.isStud && (
+            <div className="mb-4">
+              <p className="text-xs text-stone-500 font-medium mb-2">Hintergrundbild der Deckrüden-Seite</p>
+              <DogBgUploader dogId={dog.id} initialUrl={dog.bgUrl} />
+            </div>
+          )}
+          {dog.isStud ? (
+            <DogGalleryUploader dogId={dog.id} initialImages={dog.media ?? []} />
+          ) : (
+            <DogGalleryUploader dogId={dog.id} initialImages={dog.media ?? []} simpleMode />
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">
