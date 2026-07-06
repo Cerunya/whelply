@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import DogPhotoGrid from '@/components/DogPhotoGrid'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -106,56 +107,8 @@ export default async function HundDetailPage({
             <span className="text-stone-700">{dog.name}</span>
           </p>
 
-          {/* Foto-Grid — wie auf der französischen Vorlage */}
-          {(() => {
-            const primary = dog.media.find((m) => m.purpose === 'primary') ?? dog.media[0]
-            const grid_tl = dog.media.find((m) => m.purpose === 'grid_tl')
-            const grid_bl = dog.media.find((m) => m.purpose === 'grid_bl')
-            const grid_tr = dog.media.find((m) => m.purpose === 'grid_tr')
-            const grid_br = dog.media.find((m) => m.purpose === 'grid_br')
-            const hasGrid = grid_tl || grid_bl || grid_tr || grid_br
-            const galleryImages = dog.media.filter((m) => !m.purpose)
-            const allUrls = dog.media.map((m) => m.url)
-
-            if (!primary && !hasGrid) return null
-
-            return (
-              <>
-                {hasGrid ? (
-                  <div className="rounded-2xl overflow-hidden mb-4" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gridTemplateRows: '1fr 1fr', gap: '3px', height: '480px' }}>
-                    <div style={{ gridColumn: '1', gridRow: '1' }} className="overflow-hidden bg-cream-dark">
-                      {grid_tl && <img src={grid_tl.url} alt="" className="w-full h-full object-cover" />}
-                    </div>
-                    <div style={{ gridColumn: '2', gridRow: '1 / 3' }} className="overflow-hidden bg-cream-dark">
-                      {primary && <img src={primary.url} alt={dog.name} className="w-full h-full object-cover" />}
-                    </div>
-                    <div style={{ gridColumn: '3', gridRow: '1' }} className="overflow-hidden bg-cream-dark">
-                      {grid_tr && <img src={grid_tr.url} alt="" className="w-full h-full object-cover" />}
-                    </div>
-                    <div style={{ gridColumn: '1', gridRow: '2' }} className="overflow-hidden bg-cream-dark">
-                      {grid_bl && <img src={grid_bl.url} alt="" className="w-full h-full object-cover" />}
-                    </div>
-                    <div style={{ gridColumn: '3', gridRow: '2' }} className="overflow-hidden bg-cream-dark">
-                      {grid_br && <img src={grid_br.url} alt="" className="w-full h-full object-cover" />}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-2xl overflow-hidden mb-4 bg-cream-dark" style={{ height: '400px' }}>
-                    {primary && <img src={primary.url} alt={dog.name} className="w-full h-full object-cover" />}
-                  </div>
-                )}
-                {/* Galerie-Thumbnails */}
-                {galleryImages.length > 0 && (
-                  <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-                    {galleryImages.map((img) => (
-                      <img key={img.id} src={img.url} alt="" className="h-20 w-20 object-cover rounded-xl flex-shrink-0 border border-cream-deep" />
-                    ))}
-                  </div>
-                )}
-                {!galleryImages.length && <div className="mb-8" />}
-              </>
-            )
-          })()}
+          {/* Foto-Grid mit Lightbox */}
+          <DogPhotoGrid media={dog.media} dogName={dog.name} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Infos */}
