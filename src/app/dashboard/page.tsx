@@ -52,12 +52,16 @@ export default async function DashboardPage() {
 
   if (!breeder) redirect('/dashboard/upgrade')
 
-  // Ungelesene Nachrichten zählen
+  // Ungelesene Nachrichten zählen — als Züchter UND als Nutzer in Konversationen
   const unreadCount = await prisma.message.count({
     where: {
-      senderRole: 'user',
       readAt: null,
-      conversation: { breederId: breeder.id },
+      OR: [
+        // Nachrichten in Konversationen wo ich der Züchter bin (von Nutzern gesendet)
+        { senderRole: 'user', conversation: { breederId: breeder.id } },
+        // Nachrichten in Konversationen wo ich der kontaktierende Nutzer bin (Antworten vom Züchter)
+        { senderRole: 'breeder', conversation: { userId: session.user.id } },
+      ],
     },
   })
 
