@@ -10,6 +10,12 @@ import BreederContactSidebar from '@/components/BreederContactSidebar'
 
 export const dynamic = 'force-dynamic'
 
+function getBestImage(media: { url: string; purpose: string | null }[]) {
+  return media.find((m) => m.purpose === 'primary')?.url
+    ?? media.find((m) => m.purpose !== 'dog_bg')?.url
+    ?? null
+}
+
 export default async function ZuechterZuchthundePage({
   params,
 }: {
@@ -20,11 +26,12 @@ export default async function ZuechterZuchthundePage({
   if (breeder.isPublished === false) notFound()
 
   const tabs = await getBreederTabs(breeder.id)
+
   const studDogs = await prisma.dog.findMany({
     where: { breederId: breeder.id, isStud: true, sex: 'male' },
     include: {
       breed: { select: { nameDe: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { url: true } },
+      media: { orderBy: { sortOrder: 'asc' }, select: { url: true, purpose: true } },
     },
     orderBy: { name: 'asc' },
   })
@@ -33,20 +40,20 @@ export default async function ZuechterZuchthundePage({
     where: { breederId: breeder.id, isStud: true, sex: 'female' },
     include: {
       breed: { select: { nameDe: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { url: true } },
+      media: { where: { purpose: { not: 'dog_bg' } }, orderBy: { sortOrder: 'asc' }, select: { url: true, purpose: true } },
     },
     orderBy: { name: 'asc' },
   })
 
-  // Hunde in Zuchtrente (isStud=false, aber mit Beschreibung = ehemals aktiv)
   const retiredDogs = await prisma.dog.findMany({
     where: { breederId: breeder.id, isStud: false, description: { not: null } },
     include: {
       breed: { select: { nameDe: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { url: true } },
+      media: { where: { purpose: { not: 'dog_bg' } }, orderBy: { sortOrder: 'asc' }, take: 1, select: { url: true } },
     },
     orderBy: { name: 'asc' },
   })
+
   return (
     <>
       <BreederNavbar />
@@ -84,109 +91,119 @@ export default async function ZuechterZuchthundePage({
             </div>
           )}
 
-          {/* Zuchthündinnen */}
-          {breedingFemales.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchthündinnen</h2>              {breedingFemales.map((dog) => (
-                <Link key={dog.id} href={`/hund/${dog.id}`}
-                  className="flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-pink-300 hover:shadow-md transition-all group">
-                  <div className="md:w-64 md:flex-shrink-0 bg-cream-dark aspect-[4/3] md:aspect-auto overflow-hidden relative">
-                    {dog.media[0]?.url ? (
-                      <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-16 h-16 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                    )}
-                    <span className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">Zuchthündin</span>
-                  </div>
-                  <div className="flex-1 p-6 md:p-7">
-                    <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">{dog.breed.nameDe}</p>
-                    <h3 className="font-serif text-2xl font-bold text-stone-900 mb-3">{dog.name}</h3>
-                    {dog.description && <p className="text-stone-600 text-sm leading-relaxed mb-3">{dog.description}</p>}
-                    {dog.healthInfo && (
-                      <div className="border-t border-cream-deep pt-3 mt-3">
-                        <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Gesundheit</p>
-                        <p className="text-sm text-stone-600">{dog.healthInfo}</p>
-                      </div>
-                    )}
-                    <p className="text-sm text-forest font-semibold mt-4">Profil ansehen {'->'}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-          {/* Zuchtrüden */}
+          {/* Zuchtrüden — Karten mit Link zur Deckrüden-Seite */}
           {studDogs.length > 0 && (
-            <div className={`space-y-6 ${breedingFemales.length > 0 ? 'mt-12' : ''}`}>
+            <div className="space-y-6">
               <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchtrüden</h2>
-              {studDogs.map((dog) => (
-                <Link key={dog.id} href={`/hund/${dog.id}`}
-                  className="flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group">
-                  <div className="md:w-64 md:flex-shrink-0 bg-cream-dark aspect-[4/3] md:aspect-auto overflow-hidden relative">
-                    {dog.media[0]?.url ? (
-                      <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-16 h-16 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                    )}
-                    <span className="absolute top-3 left-3 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">Deckrüde</span>
-                  </div>
-                  <div className="flex-1 p-6 md:p-7">
-                    <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">{dog.breed.nameDe}</p>
-                    <h3 className="font-serif text-2xl font-bold text-stone-900 mb-3">{dog.name}</h3>
-                    {dog.description && <p className="text-stone-600 text-sm leading-relaxed mb-3">{dog.description}</p>}
-                    {dog.healthInfo && (
-                      <div className="border-t border-cream-deep pt-3 mt-3">
-                        <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Gesundheit</p>
-                        <p className="text-sm text-stone-600">{dog.healthInfo}</p>
-                      </div>
-                    )}
-                    <p className="text-sm text-forest font-semibold mt-4">Profil ansehen {'->'}</p>
-                  </div>
-                </Link>
-              ))}
+              {studDogs.map((dog) => {
+                const img = getBestImage(dog.media)
+                return (
+                  <Link key={dog.id} href={`/hund/${dog.id}`}
+                    className="flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group">
+                    <div className="md:w-64 md:flex-shrink-0 bg-cream-dark aspect-[4/3] md:aspect-auto overflow-hidden relative">
+                      {img ? (
+                        <img src={img} alt={dog.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-16 h-16 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                      )}
+                      <span className="absolute top-3 left-3 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">Deckrüde</span>
+                    </div>
+                    <div className="flex-1 p-6 md:p-7">
+                      <p className="text-xs text-forest font-semibold uppercase tracking-wider mb-1">{dog.breed.nameDe}</p>
+                      <h3 className="font-serif text-2xl font-bold text-stone-900 mb-3">{dog.name}</h3>
+                      {dog.description && <p className="text-stone-600 text-sm leading-relaxed mb-3">{dog.description}</p>}
+                      {dog.healthInfo && (
+                        <div className="border-t border-cream-deep pt-3 mt-3">
+                          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Gesundheit</p>
+                          <p className="text-sm text-stone-600">{dog.healthInfo}</p>
+                        </div>
+                      )}
+                      <p className="text-sm text-forest font-semibold mt-4">Profil ansehen {'→'}</p>
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           )}
 
+          {/* Zuchthündinnen — direkt eingebettet in die Seite (kein Link zu separater Seite) */}
+          {breedingFemales.length > 0 && (
+            <div className={`space-y-6 ${studDogs.length > 0 ? 'mt-12 pt-10 border-t border-cream-deep' : ''}`}>
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchthündinnen</h2>
+              {breedingFemales.map((dog) => {
+                const img = dog.media[0]?.url ?? null
+                return (
+                  <div key={dog.id} className="bg-white rounded-2xl border border-cream-deep overflow-hidden">
+                    {/* Bild + Infos nebeneinander */}
+                    <div className="flex flex-col md:flex-row">
+                      {img && (
+                        <div className="md:w-72 md:flex-shrink-0 bg-cream-dark overflow-hidden">
+                          <img src={img} alt={dog.name} className="w-full h-full object-cover" style={{ maxHeight: '300px' }} />
+                        </div>
+                      )}
+                      <div className="flex-1 p-6 md:p-7">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Zuchthündin</span>
+                          <span className="text-xs text-stone-400">{dog.breed.nameDe}</span>
+                        </div>
+                        <h3 className="font-serif text-xl font-bold text-stone-900 mb-3">{dog.name}</h3>
+                        {dog.description && <p className="text-stone-600 text-sm leading-relaxed mb-3">{dog.description}</p>}
+                        {dog.healthInfo && (
+                          <div className="border-t border-cream-deep pt-3 mt-3">
+                            <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Gesundheit</p>
+                            <p className="text-sm text-stone-600">{dog.healthInfo}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Weitere Fotos als Thumbnails */}
+                    {dog.media.length > 1 && (
+                      <div className="px-6 pb-4 flex gap-2 overflow-x-auto">
+                        {dog.media.slice(1).map((m, i) => (
+                          <img key={i} src={m.url} alt="" className="h-16 w-16 object-cover rounded-lg flex-shrink-0 border border-cream-deep" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
           {/* Zuchtrente */}
           {retiredDogs.length > 0 && (
-            <div className={`space-y-6 ${(studDogs.length > 0 || breedingFemales.length > 0) ? 'mt-12' : ''}`}>
-              <h2 className="font-serif text-2xl font-bold text-stone-900">In Zuchtrente</h2>
-              {retiredDogs.map((dog) => (
-                <Link key={dog.id} href={`/hund/${dog.id}`}
-                  className="flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-stone-300 hover:shadow-sm transition-all opacity-75 group">
-                  <div className="md:w-64 md:flex-shrink-0 bg-cream-dark aspect-[4/3] md:aspect-auto overflow-hidden relative">
-                    {dog.media[0]?.url ? (
-                      <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-16 h-16 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </div>
-                    )}
-                    <span className="absolute top-3 left-3 bg-stone-400 text-white text-xs font-bold px-3 py-1 rounded-full">In Rente</span>
+            <div className={`space-y-6 ${(studDogs.length > 0 || breedingFemales.length > 0) ? 'mt-12 pt-10 border-t border-cream-deep' : ''}`}>
+              <h2 className="font-serif text-xl font-bold text-stone-500">In Zuchtrente</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {retiredDogs.map((dog) => (
+                  <div key={dog.id} className="bg-white rounded-xl border border-cream-deep overflow-hidden opacity-75">
+                    <div className="aspect-square bg-cream-dark overflow-hidden">
+                      {dog.media[0]?.url ? (
+                        <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-10 h-10 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="font-semibold text-stone-700 text-sm">{dog.name}</p>
+                      <p className="text-xs text-stone-400">{dog.breed.nameDe}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 p-6 md:p-7">
-                    <p className="text-xs text-stone-400 font-semibold uppercase tracking-wider mb-1">{dog.breed.nameDe}</p>
-                    <h3 className="font-serif text-2xl font-bold text-stone-700 mb-3">{dog.name}</h3>
-                    {dog.description && <p className="text-stone-500 text-sm leading-relaxed">{dog.description}</p>}
-                  </div>
-                </Link>
-              ))}
+                ))}
+              </div>
             </div>
           )}
-                </BreederPageContent>
+        </BreederPageContent>
       </main>
       <BreederFooter
         kennelName={breeder.kennelName}
