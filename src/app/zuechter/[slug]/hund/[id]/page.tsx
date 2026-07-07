@@ -17,10 +17,21 @@ const LITTER_STATUS: Record<string, string> = {
   available: 'Abgabebereit', sold_out: 'Vergeben',
 }
 
+// Level 3: Urgroßeltern — nur Name+ID
+const ggpSelect = { select: { id: true, name: true } }
+
+// Level 2: Großeltern — Bild + deren Eltern (Urgroßeltern)
 const gpInclude = {
   media: { take: 1, select: { url: true } },
-  parentSire: { include: { media: { take: 1, select: { url: true } } } },
-  parentDam: { include: { media: { take: 1, select: { url: true } } } },
+  parentSire: ggpSelect,
+  parentDam: ggpSelect,
+}
+
+// Level 1: Eltern — Bild + deren Eltern (Großeltern) die wiederum Urgroßeltern haben
+const parentInclude = {
+  media: { take: 1, select: { url: true } },
+  parentSire: { include: gpInclude },
+  parentDam: { include: gpInclude },
 }
 
 export default async function ZuechterHundPage({ params }: { params: { slug: string; id: string } }) {
@@ -35,7 +46,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
     where: { id: params.id },
     include: {
       breed: { select: { nameDe: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { id: true, url: true, purpose: true, isPrimary: true } },
+      media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { id: true, url: true, purpose: true, isPrimary: true } },
       littersAsSire: {
         include: { breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
         orderBy: { expectedDate: 'desc' },
@@ -44,8 +55,8 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
         include: { breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
         orderBy: { expectedDate: 'desc' },
       },
-      parentSire: { include: { ...gpInclude, parentSire: { include: gpInclude }, parentDam: { include: gpInclude } } },
-      parentDam: { include: { ...gpInclude, parentSire: { include: gpInclude }, parentDam: { include: gpInclude } } },
+      parentSire: { include: parentInclude },
+      parentDam: { include: parentInclude },
     },
   })
 
