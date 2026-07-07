@@ -110,8 +110,8 @@ function DogCard({ dog, img, href, badge, badgeColor, hoverColor, linkColor }: {
   img: string | null; href: string; badge: string; badgeColor: string; hoverColor: string; linkColor: string
 }) {
   return (
-    <Link href={href} className={`flex bg-white rounded-2xl border border-cream-deep overflow-hidden ${hoverColor} hover:shadow-md transition-all group`} style={{ height: '220px' }}>
-      <div className="w-56 flex-shrink-0 overflow-hidden bg-cream-dark">
+    <Link href={href} className={`flex flex-col md:flex-row bg-white rounded-2xl border border-cream-deep overflow-hidden ${hoverColor} hover:shadow-md transition-all group md:h-[220px]`}>
+      <div className="h-48 md:h-full md:w-56 flex-shrink-0 overflow-hidden bg-cream-dark">
         {img ? (
           <img src={img} alt={dog.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (

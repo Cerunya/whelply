@@ -94,7 +94,7 @@ export default async function ZuchtrudenPage({
                     href={`/hund/${dog.id}`}
                     className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:border-forest/30 hover:shadow-md transition-all"
                   >
-                    <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative">
+                    <div className="bg-cream-dark aspect-square sm:aspect-[4/3] flex items-center justify-center relative">
                       {(() => {
                         // 1. Bild mit purpose='primary' (vom User im Grid gesetzt)
                         // 2. isPrimary=true das KEIN Hintergrund ist

@@ -33,7 +33,7 @@ export default function ImageUploader({
       }
 
       try {
-        const resized = await resizeImage(file, 1920, 0.85)
+        const resized = await resizeImage(file, 1200, 0.80)
 
         const formData = new FormData()
         formData.append('file', resized)
