@@ -37,6 +37,7 @@ export default async function DashboardPage() {
         take: 10,
       },
       dogs: {
+        where: { listings: { none: { type: 'puppy' } } },
         include: {
           breed: { select: { nameDe: true } },
           media: { take: 1, select: { url: true } },

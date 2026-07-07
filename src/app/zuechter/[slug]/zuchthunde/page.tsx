@@ -20,7 +20,7 @@ export default async function ZuechterZuchthundePage({ params }: { params: { slu
   const isOwner = session?.user?.id === breeder.userId
 
   const allDogs = await prisma.dog.findMany({
-    where: { breederId: breeder.id },
+    where: { breederId: breeder.id, listings: { none: { type: 'puppy' } } },
     include: {
       breed: { select: { nameDe: true } },
       media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { url: true, purpose: true, isPrimary: true } },
