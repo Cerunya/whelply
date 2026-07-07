@@ -21,13 +21,9 @@ const POSITIONS = [
 ]
 
 export default function DogGalleryUploader({
-  dogId,
-  initialImages,
-  simpleMode = false,
+  dogId, initialImages, simpleMode = false,
 }: {
-  dogId: string
-  initialImages: DogImage[]
-  simpleMode?: boolean
+  dogId: string; initialImages: DogImage[]; simpleMode?: boolean
 }) {
   const [images, setImages] = useState<DogImage[]>(initialImages)
   const [uploading, setUploading] = useState(false)
@@ -48,7 +44,7 @@ export default function DogGalleryUploader({
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
         if (res.ok) {
           const data = await res.json()
-          setImages((prev) => [...prev, { id: data.id, url: data.url, isPrimary: false, sortOrder: prev.length, purpose: null }])
+          setImages((prev) => [...prev, { id: data.id, url: data.url, isPrimary: prev.length === 0, sortOrder: prev.length, purpose: null }])
         }
       } catch { setError('Fehler beim Hochladen.') }
     }
@@ -57,11 +53,12 @@ export default function DogGalleryUploader({
 
   async function changePurpose(mediaId: string, purpose: string | null) {
     setImages((prev) => prev.map((img) => img.id === mediaId ? { ...img, purpose } : img))
-    await fetch(`/api/media-item/${mediaId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ purpose }),
-    })
+    await fetch(`/api/media-item/${mediaId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ purpose }) })
+  }
+
+  async function setAsPrimary(mediaId: string) {
+    setImages((prev) => prev.map((img) => ({ ...img, isPrimary: img.id === mediaId })))
+    await fetch(`/api/media-item/${mediaId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPrimary: true }) })
   }
 
   async function deleteImage(mediaId: string) {
@@ -78,23 +75,21 @@ export default function DogGalleryUploader({
 
   return (
     <div className="space-y-5">
-      {/* Vorschau-Grid — nur für Deckrüden */}
       {!simpleMode && hasGrid && (
         <div>
           <p className="text-xs text-stone-400 mb-2 font-medium">Vorschau der Anordnung:</p>
           <div className="rounded-xl overflow-hidden" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gridTemplateRows: '1fr 1fr', gap: '2px', height: '200px' }}>
-            <GridCell img={grid_tl} label="O.L." />
+            <GCell img={grid_tl} label="O.L." />
             <div style={{ gridColumn: '2', gridRow: '1 / 3' }} className="overflow-hidden bg-stone-100">
               {primary ? <img src={primary.url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-stone-300 text-[10px]">Hauptbild</div>}
             </div>
-            <GridCell img={grid_tr} label="O.R." />
-            <GridCell img={grid_bl} label="U.L." />
-            <GridCell img={grid_br} label="U.R." />
+            <GCell img={grid_tr} label="O.R." />
+            <GCell img={grid_bl} label="U.L." />
+            <GCell img={grid_br} label="U.R." />
           </div>
         </div>
       )}
 
-      {/* Alle Bilder */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {images.map((img) => (
@@ -102,22 +97,28 @@ export default function DogGalleryUploader({
               <div className="relative aspect-square">
                 <img src={img.url} className="w-full h-full object-cover" />
                 <button onClick={() => deleteImage(img.id)}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">
-                  ✕
-                </button>
+                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">✕</button>
+                {/* Titelbild-Indikator */}
+                {simpleMode && img.isPrimary && (
+                  <span className="absolute bottom-1.5 left-1.5 bg-forest text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Titelbild</span>
+                )}
               </div>
-              {/* Position-Auswahl nur für Deckrüden */}
+              {/* Deckrüden: Position-Dropdown */}
               {!simpleMode && (
                 <div className="p-1.5">
-                  <select
-                    value={img.purpose ?? ''}
-                    onChange={(e) => changePurpose(img.id, e.target.value || null)}
-                    className="w-full text-[11px] border border-stone-200 rounded-lg px-2 py-1.5 bg-white text-stone-600 focus:outline-none focus:ring-1 focus:ring-forest/30"
-                  >
-                    {POSITIONS.map((p) => (
-                      <option key={p.value} value={p.value}>{p.label}</option>
-                    ))}
+                  <select value={img.purpose ?? ''} onChange={(e) => changePurpose(img.id, e.target.value || null)}
+                    className="w-full text-[11px] border border-stone-200 rounded-lg px-2 py-1.5 bg-white text-stone-600 focus:outline-none focus:ring-1 focus:ring-forest/30">
+                    {POSITIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
                   </select>
+                </div>
+              )}
+              {/* Hündinnen: Titelbild-Button */}
+              {simpleMode && !img.isPrimary && (
+                <div className="p-1.5">
+                  <button onClick={() => setAsPrimary(img.id)}
+                    className="w-full text-[11px] text-forest font-semibold border border-forest/20 rounded-lg px-2 py-1.5 hover:bg-forest/5 transition-colors">
+                    Als Titelbild setzen
+                  </button>
                 </div>
               )}
             </div>
@@ -125,45 +126,32 @@ export default function DogGalleryUploader({
         </div>
       )}
 
-      {/* Upload-Zone */}
-      <div
-        onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files) }}
-        onDragOver={(e) => e.preventDefault()}
+      <div onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files) }} onDragOver={(e) => e.preventDefault()}
         onClick={() => !uploading && inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${uploading ? 'border-forest/30 bg-cream/80' : 'border-stone-200 hover:border-forest/40 hover:bg-cream/50'}`}
-      >
+        className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${uploading ? 'border-forest/30 bg-cream/80' : 'border-stone-200 hover:border-forest/40 hover:bg-cream/50'}`}>
         <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden"
           onChange={(e) => { handleFiles(e.target.files); if (inputRef.current) inputRef.current.value = '' }} />
-        {uploading ? (
-          <p className="text-sm text-forest">Wird hochgeladen…</p>
-        ) : (
+        {uploading ? <p className="text-sm text-forest">Wird hochgeladen…</p> : (
           <>
             <p className="text-sm text-stone-500 font-medium">Bilder hochladen</p>
-            <p className="text-xs text-stone-400 mt-1">Mehrere Bilder auf einmal möglich · JPG, PNG, WebP</p>
+            <p className="text-xs text-stone-400 mt-1">Mehrere auf einmal möglich · JPG, PNG, WebP</p>
           </>
         )}
       </div>
-
       {error && <p className="text-red-500 text-sm">{error}</p>}
-
       {!simpleMode ? (
-        <p className="text-xs text-stone-400">
-          Weise jedem Bild eine Position zu. Das <strong>Hauptbild</strong> wird groß in der Mitte angezeigt, die vier Nebenbilder darum herum.
-          Bilder ohne Position erscheinen nur beim Durchklicken in der Galerie.
-        </p>
+        <p className="text-xs text-stone-400">Weise jedem Bild eine Position zu. Das <strong>Hauptbild</strong> wird groß in der Mitte angezeigt.</p>
       ) : (
-        <p className="text-xs text-stone-400">Das erste Bild wird als Hauptbild angezeigt, weitere erscheinen als Thumbnails.</p>
+        <p className="text-xs text-stone-400">Wähle ein Titelbild — dieses wird in der Übersicht und als Hauptbild angezeigt.</p>
       )}
     </div>
   )
 }
 
-function GridCell({ img, label }: { img?: DogImage; label: string }) {
+function GCell({ img, label }: { img?: DogImage; label: string }) {
   return (
     <div className="overflow-hidden bg-stone-100">
-      {img ? <img src={img.url} className="w-full h-full object-cover" /> : (
-        <div className="w-full h-full flex items-center justify-center text-stone-300 text-[10px]">{label}</div>
-      )}
+      {img ? <img src={img.url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-stone-300 text-[10px]">{label}</div>}
     </div>
   )
 }

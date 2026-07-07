@@ -60,16 +60,23 @@ export async function PATCH(
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
 
-  const { purpose } = await req.json()
-
-  // Verify ownership
+  const body = await req.json()
   const media = await prisma.media.findUnique({ where: { id: params.id } })
   if (!media) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
 
-  await prisma.media.update({
-    where: { id: params.id },
-    data: { purpose: purpose ?? null },
-  })
+  const updateData: any = {}
+  if ('purpose' in body) updateData.purpose = body.purpose ?? null
+  if ('isPrimary' in body && body.isPrimary === true) {
+    // Alle anderen Bilder desselben Hundes auf isPrimary=false setzen
+    if (media.dogId) {
+      await prisma.media.updateMany({ where: { dogId: media.dogId, id: { not: params.id } }, data: { isPrimary: false } })
+    }
+    if (media.listingId) {
+      await prisma.media.updateMany({ where: { listingId: media.listingId, id: { not: params.id } }, data: { isPrimary: false } })
+    }
+    updateData.isPrimary = true
+  }
 
+  await prisma.media.update({ where: { id: params.id }, data: updateData })
   return NextResponse.json({ ok: true })
 }

@@ -51,7 +51,7 @@ export default async function ZuechterZuchthundePage({ params }: { params: { slu
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="zuchthunde" />
 
         {isOwner && (
-          <div className="max-w-5xl mx-auto px-4">
+          <div className="max-w-5xl mx-auto px-4 mt-4">
             <div className="bg-honey-pale border border-honey/30 rounded-xl px-5 py-3 mb-4 flex items-center justify-between flex-wrap gap-3">
               <p className="text-sm text-stone-700">Deine Zuchthunde verwalten</p>
               <Link href="/dashboard" className="bg-forest text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-forest-light transition-colors">

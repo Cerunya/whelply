@@ -6,6 +6,7 @@ import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import DogGalleryUploader from './DogGalleryUploader'
 import DogBgUploader from './DogBgUploader'
+import { slugify } from '@/lib/slugify'
 import SaveToast from './SaveToast'
 
 type Breed = { id: number; nameDe: string }
@@ -14,6 +15,7 @@ type DogData = {
   name: string
   breedId: number
   sex: string
+  kennelName?: string
   birthDate: string | null
   color: string | null
   pedigreeNumber: string | null
@@ -234,7 +236,7 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
                   className="inline-flex items-center gap-1 text-xs font-semibold bg-white border border-green-200 text-green-700 rounded-lg px-3 py-1.5 hover:bg-green-100 transition-colors">
                   + Weiteren Hund eintragen
                 </Link>
-                <Link href={`/hund/${dog.id}`}
+                <Link href={dog.isStud && dog.sex === 'male' ? `/hund/${dog.id}` : dog.kennelName ? `/zuechter/${slugify(dog.kennelName)}/hund/${dog.id}` : `/hund/${dog.id}`}
                   className="inline-flex items-center gap-1 text-xs font-semibold bg-white border border-green-200 text-green-700 rounded-lg px-3 py-1.5 hover:bg-green-100 transition-colors">
                   Profil ansehen →
                 </Link>

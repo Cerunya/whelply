@@ -62,7 +62,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="zuchthunde" />
 
-        <div className="max-w-5xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4 mt-4">
           {isOwner && (
             <div className="bg-honey-pale border border-honey/30 rounded-xl px-5 py-3 mb-4 flex items-center justify-between flex-wrap gap-3">
               <p className="text-sm text-stone-700">Dies ist die öffentliche Ansicht dieses Zuchthundes.</p>

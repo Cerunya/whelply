@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
 import HundEditForm from '@/components/HundEditForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HundBearbeitenPage({
   params,
 }: {
@@ -43,6 +45,7 @@ export default async function HundBearbeitenPage({
       dog={{
         id: dog.id,
         name: dog.name,
+        kennelName: breeder.kennelName,
         breedId: dog.breedId,
         sex: dog.sex,
         birthDate: dog.birthDate?.toISOString().slice(0, 10) ?? null,
