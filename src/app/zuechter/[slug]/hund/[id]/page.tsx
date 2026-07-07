@@ -17,11 +17,10 @@ const LITTER_STATUS: Record<string, string> = {
   available: 'Abgabebereit', sold_out: 'Vergeben',
 }
 
-// Großeltern-Include (wiederverwendbar)
-const grandparentInclude = {
+const gpInclude = {
   media: { take: 1, select: { url: true } },
-  parentSire: { select: { id: true, name: true } },
-  parentDam: { select: { id: true, name: true } },
+  parentSire: { include: { media: { take: 1, select: { url: true } } } },
+  parentDam: { include: { media: { take: 1, select: { url: true } } } },
 }
 
 export default async function ZuechterHundPage({ params }: { params: { slug: string; id: string } }) {
@@ -36,7 +35,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
     where: { id: params.id },
     include: {
       breed: { select: { nameDe: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { id: true, url: true, purpose: true } },
+      media: { orderBy: { sortOrder: 'asc' }, select: { id: true, url: true, purpose: true, isPrimary: true } },
       littersAsSire: {
         include: { breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
         orderBy: { expectedDate: 'desc' },
@@ -45,20 +44,8 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
         include: { breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
         orderBy: { expectedDate: 'desc' },
       },
-      parentSire: {
-        include: {
-          ...grandparentInclude,
-          parentSire: { include: grandparentInclude },
-          parentDam: { include: grandparentInclude },
-        },
-      },
-      parentDam: {
-        include: {
-          ...grandparentInclude,
-          parentSire: { include: grandparentInclude },
-          parentDam: { include: grandparentInclude },
-        },
-      },
+      parentSire: { include: { ...gpInclude, parentSire: { include: gpInclude }, parentDam: { include: gpInclude } } },
+      parentDam: { include: { ...gpInclude, parentSire: { include: gpInclude }, parentDam: { include: gpInclude } } },
     },
   })
 
@@ -67,7 +54,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
   const tabs = await getBreederTabs(breeder.id)
   const litters = dog.sex === 'male' ? dog.littersAsSire : dog.littersAsDam
   const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
-  const bestImg = photos.find((m) => m.purpose === 'primary')?.url ?? photos[0]?.url ?? null
+  const bestImg = photos.find((m) => m.purpose === 'primary')?.url ?? photos.find((m) => m.isPrimary)?.url ?? photos[0]?.url ?? null
 
   return (
     <>
@@ -75,14 +62,16 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
       <main className="min-h-screen relative">
         <BreederPageHeader breeder={breeder} slug={params.slug} tabs={tabs} active="zuchthunde" />
 
-        {/* Bearbeiten-Button unter der Tab-Leiste */}
-        {isOwner && (
-          <div className="max-w-5xl mx-auto px-4 py-2 flex justify-end">
-            <Link href={`/dashboard/hund/${dog.id}`} className="bg-forest text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-forest-light transition-colors">
-              Hund bearbeiten
-            </Link>
-          </div>
-        )}
+        <div className="max-w-5xl mx-auto px-4">
+          {isOwner && (
+            <div className="bg-honey-pale border border-honey/30 rounded-xl px-5 py-3 mb-4 flex items-center justify-between flex-wrap gap-3">
+              <p className="text-sm text-stone-700">Dies ist die öffentliche Ansicht dieses Zuchthundes.</p>
+              <Link href={`/dashboard/hund/${dog.id}`} className="bg-forest text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-forest-light transition-colors">
+                Bearbeiten
+              </Link>
+            </div>
+          )}
+        </div>
 
         <BreederPageContent bgColor={breeder.themeBgColor} sidebar={
           <BreederContactSidebar
@@ -96,19 +85,13 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
             fullName={breeder.fullName} showFullName={breeder.showFullName}
           />
         }>
-          {/* Fotos mit Lightbox */}
           {photos.length > 0 && (
-            <div className="mb-6">
-              <DogPhotoGrid media={photos} dogName={dog.name} />
-            </div>
+            <div className="mb-6"><DogPhotoGrid media={photos} dogName={dog.name} /></div>
           )}
 
-          {/* Infos */}
           <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide ${
-                dog.sex === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'
-              }`}>
+              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide ${dog.sex === 'female' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'}`}>
                 {dog.sex === 'female' ? 'Zuchthündin' : 'Zuchtrüde'}
               </span>
               <span className="text-xs text-stone-400">{dog.breed.nameDe}</span>
@@ -136,7 +119,6 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
             </div>
           </div>
 
-          {/* Gesundheit */}
           {dog.healthInfo && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
               <h2 className="font-semibold text-stone-800 mb-2">Gesundheitsuntersuchungen</h2>
@@ -144,7 +126,6 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
             </div>
           )}
 
-          {/* Würfe — VOR Stammbaum */}
           {litters.length > 0 && (
             <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
               <h2 className="font-semibold text-stone-800 mb-3">Würfe als {dog.sex === 'female' ? 'Mutter' : 'Vater'}</h2>
@@ -161,41 +142,68 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
                       </p>
                     </div>
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      l.status === 'available' ? 'bg-green-100 text-green-700' :
-                      l.status === 'pregnant' ? 'bg-blue-100 text-blue-700' :
-                      l.status === 'born' ? 'bg-honey/20 text-honey' :
-                      'bg-stone-100 text-stone-600'
-                    }`}>
-                      {LITTER_STATUS[l.status] ?? l.status}
-                    </span>
+                      l.status === 'available' ? 'bg-green-100 text-green-700' : l.status === 'pregnant' ? 'bg-blue-100 text-blue-700' : l.status === 'born' ? 'bg-honey/20 text-honey' : 'bg-stone-100 text-stone-600'
+                    }`}>{LITTER_STATUS[l.status] ?? l.status}</span>
                   </Link>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Stammbaum — 3 Generationen (Eltern, Großeltern, Urgroßeltern) */}
-          {(dog.parentSire || dog.parentDam) && (
-            <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6 overflow-x-auto">
-              <h2 className="font-semibold text-stone-800 mb-4">Stammbaum</h2>
-              <div className="flex flex-col items-center gap-3 min-w-[600px]">
-                {/* Der Hund selbst */}
-                <PedigreeCard name={dog.name} sex={dog.sex} imgUrl={bestImg} highlight />
-                <div className="w-px h-4 bg-stone-300" />
-                {/* Eltern */}
-                <div className="flex gap-8 justify-center">
-                  <ParentBranch parent={dog.parentSire} sex="male" label="Vater" />
-                  <ParentBranch parent={dog.parentDam} sex="female" label="Mutter" />
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Stammbaum — IMMER 3 Generationen, leere Felder für fehlende Ahnen */}
+          <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6 overflow-x-auto">
+            <h2 className="font-semibold text-stone-800 mb-4">Stammbaum</h2>
+            <table className="w-full min-w-[700px] border-collapse">
+              <tbody>
+                {/* Generation 0: Der Hund */}
+                <tr>
+                  <td colSpan={8} className="text-center pb-4">
+                    <div className="inline-block">
+                      <TreeCard name={dog.name} imgUrl={bestImg} sex={dog.sex} highlight />
+                    </div>
+                  </td>
+                </tr>
+                {/* Generation 1: Eltern */}
+                <tr>
+                  <td colSpan={4} className="text-center pb-4 border-r border-stone-200">
+                    <TreeCard name={dog.parentSire?.name} imgUrl={dog.parentSire?.media?.[0]?.url} sex="male" label="Vater" link={dog.parentSire ? `/hund/${dog.parentSire.id}` : undefined} />
+                  </td>
+                  <td colSpan={4} className="text-center pb-4">
+                    <TreeCard name={dog.parentDam?.name} imgUrl={dog.parentDam?.media?.[0]?.url} sex="female" label="Mutter" link={dog.parentDam ? `/hund/${dog.parentDam.id}` : undefined} />
+                  </td>
+                </tr>
+                {/* Generation 2: Großeltern */}
+                <tr>
+                  <td colSpan={2} className="text-center pb-4 border-r border-stone-100">
+                    <TreeCard name={dog.parentSire?.parentSire?.name} imgUrl={dog.parentSire?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentSire?.parentSire ? `/hund/${dog.parentSire.parentSire.id}` : undefined} />
+                  </td>
+                  <td colSpan={2} className="text-center pb-4 border-r border-stone-200">
+                    <TreeCard name={dog.parentSire?.parentDam?.name} imgUrl={dog.parentSire?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentSire?.parentDam ? `/hund/${dog.parentSire.parentDam.id}` : undefined} />
+                  </td>
+                  <td colSpan={2} className="text-center pb-4 border-r border-stone-100">
+                    <TreeCard name={dog.parentDam?.parentSire?.name} imgUrl={dog.parentDam?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentDam?.parentSire ? `/hund/${dog.parentDam.parentSire.id}` : undefined} />
+                  </td>
+                  <td colSpan={2} className="text-center pb-4">
+                    <TreeCard name={dog.parentDam?.parentDam?.name} imgUrl={dog.parentDam?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentDam?.parentDam ? `/hund/${dog.parentDam.parentDam.id}` : undefined} />
+                  </td>
+                </tr>
+                {/* Generation 3: Urgroßeltern */}
+                <tr>
+                  <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                  <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                  <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                  <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                  <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                  <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                  <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                  <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
         </BreederPageContent>
       </main>
-
-      {/* Lightbox muss AUSSERHALB von BreederPageContent sein, damit fixed korrekt funktioniert */}
-
       <BreederFooter
         kennelName={breeder.kennelName} slug={params.slug}
         themeColor={breeder.themeColor} themeAccentColor={breeder.themeAccentColor}
@@ -206,78 +214,30 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
   )
 }
 
-/* ── Stammbaum-Komponenten ────────────────────────── */
+function TreeCard({ name, imgUrl, sex, label, link, highlight, small, tiny }: {
+  name?: string | null; imgUrl?: string | null; sex?: string; label?: string; link?: string; highlight?: boolean; small?: boolean; tiny?: boolean
+}) {
+  const borderColor = highlight ? 'border-forest/40 bg-forest/5' : sex === 'female' ? 'border-pink-200' : 'border-blue-200'
+  const labelColor = sex === 'female' ? 'text-pink-400' : 'text-blue-400'
+  const hover = link ? (sex === 'female' ? 'hover:border-pink-400 hover:shadow' : 'hover:border-blue-400 hover:shadow') : ''
 
-function ParentBranch({ parent, sex, label }: { parent: any; sex: string; label: string }) {
-  if (!parent) {
-    return (
-      <div className="flex flex-col items-center">
-        <PedigreeCard name={null} sex={sex} label={label} />
+  if (tiny) {
+    const inner = (
+      <div className={`rounded-lg border ${name ? borderColor : 'border-dashed border-stone-200'} px-2 py-1.5 text-center mx-0.5 ${hover} transition-all`}>
+        <p className={`text-[8px] ${labelColor}`}>{label}</p>
+        <p className="text-[9px] font-medium text-stone-600 truncate">{name ?? '—'}</p>
       </div>
     )
+    return link && name ? <Link href={link} className="block">{inner}</Link> : inner
   }
 
-  const gps = parent.parentSire
-  const gpd = parent.parentDam
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <PedigreeCard name={parent.name} sex={sex} imgUrl={parent.media?.[0]?.url} link={`/hund/${parent.id}`} label={label} />
-      {(gps || gpd) && (
-        <>
-          <div className="w-px h-3 bg-stone-200" />
-          <div className="flex gap-4">
-            <GrandparentBranch gp={gps} sex="male" label="GV" />
-            <GrandparentBranch gp={gpd} sex="female" label="GM" />
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
-function GrandparentBranch({ gp, sex, label }: { gp: any; sex: string; label: string }) {
-  if (!gp) return <PedigreeCard name={null} sex={sex} label={label} small />
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <PedigreeCard name={gp.name} sex={sex} imgUrl={gp.media?.[0]?.url} link={`/hund/${gp.id}`} label={label} small />
-      {(gp.parentSire || gp.parentDam) && (
-        <>
-          <div className="w-px h-2 bg-stone-100" />
-          <div className="flex gap-2">
-            {gp.parentSire && <MiniCard name={gp.parentSire.name} label="UGV" />}
-            {gp.parentDam && <MiniCard name={gp.parentDam.name} label="UGM" />}
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
-function PedigreeCard({ name, sex, imgUrl, link, label, highlight, small }: {
-  name?: string | null; sex?: string; imgUrl?: string | null; link?: string; label?: string; highlight?: boolean; small?: boolean
-}) {
-  const w = small ? 'w-28' : 'w-40'
-  const border = highlight ? 'border-forest/30 bg-forest/5' : sex === 'female' ? 'border-pink-200' : 'border-blue-200'
-  const hover = link ? (sex === 'female' ? 'hover:border-pink-400 hover:shadow' : 'hover:border-blue-400 hover:shadow') : ''
-  const labelColor = sex === 'female' ? 'text-pink-500' : 'text-blue-500'
-
   const inner = (
-    <div className={`${w} rounded-xl border-2 ${border} ${hover} bg-white p-2.5 text-center transition-all`}>
-      {imgUrl && <img src={imgUrl} alt={name ?? ''} className={`${small ? 'w-9 h-9' : 'w-12 h-12'} rounded-lg object-cover mx-auto mb-1`} />}
+    <div className={`inline-block ${small ? 'w-28' : 'w-36'} rounded-xl border-2 ${name ? borderColor : 'border-dashed border-stone-200'} ${hover} bg-white p-2 text-center transition-all`}>
+      {imgUrl && <img src={imgUrl} alt={name ?? ''} className={`${small ? 'w-8 h-8' : 'w-11 h-11'} rounded-lg object-cover mx-auto mb-1`} />}
+      {label && <p className={`text-[9px] ${labelColor}`}>{label}</p>}
       <p className={`font-bold text-stone-900 truncate ${small ? 'text-[10px]' : 'text-xs'}`}>{name ?? '—'}</p>
-      {label && <p className={`${small ? 'text-[8px]' : 'text-[10px]'} ${labelColor}`}>{label}{link ? ' →' : ''}</p>}
+      {link && name && <p className={`text-[8px] ${labelColor}`}>{'→'}</p>}
     </div>
   )
-  return link ? <Link href={link} className="block">{inner}</Link> : inner
-}
-
-function MiniCard({ name, label }: { name: string; label: string }) {
-  return (
-    <div className="bg-cream rounded-lg border border-cream-deep px-2 py-1 text-center w-20">
-      <p className="text-[8px] text-stone-400">{label}</p>
-      <p className="text-[9px] font-medium text-stone-600 truncate">{name}</p>
-    </div>
-  )
+  return link && name ? <Link href={link} className="inline-block">{inner}</Link> : inner
 }
