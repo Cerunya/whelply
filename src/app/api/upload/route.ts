@@ -197,8 +197,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: media.id, url: media.url })
   }
 
-  // Multi-Bild: bestehende Bilder behalten (ohne dog_bg mitzählen), sortOrder anhängen
-  const existingCount = await prisma.media.count({ where: { dogId: dogId!, purpose: { not: 'dog_bg' } } })
+  // Multi-Bild: bestehende Bilder behalten, sortOrder anhängen
+  // OR-Query nötig weil PostgreSQL bei `!= 'dog_bg'` NULL-Werte ausschließt
+  const existingCount = await prisma.media.count({
+    where: {
+      dogId: dogId!,
+      OR: [{ purpose: null }, { purpose: { not: 'dog_bg' } }],
+    },
+  })
 
   const media = await prisma.media.create({
     data: {
