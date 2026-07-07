@@ -74,20 +74,20 @@ export default async function ZuechterZuchthundePage({ params }: { params: { slu
             </div>
           )}
 
-          {males.length > 0 && (
+          {females.length > 0 && (
             <div className="space-y-4">
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Rüden</h2>
-              {males.map((dog) => (
-                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={dog.isStud ? `/hund/${dog.id}` : `/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Deckrüde" : "Rüde"} badgeColor={dog.isStud ? "bg-blue-100 text-blue-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-blue-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-forest" : "text-stone-500"} />
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Hündinnen</h2>
+              {females.map((dog) => (
+                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={`/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Zuchthündin" : "Hündin"} badgeColor={dog.isStud ? "bg-pink-100 text-pink-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-pink-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-pink-500" : "text-stone-500"} />
               ))}
             </div>
           )}
 
-          {females.length > 0 && (
-            <div className={`space-y-4 ${males.length > 0 ? 'mt-10 pt-8 border-t border-cream-deep' : ''}`}>
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Hündinnen</h2>
-              {females.map((dog) => (
-                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={`/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Zuchthündin" : "Hündin"} badgeColor={dog.isStud ? "bg-pink-100 text-pink-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-pink-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-pink-500" : "text-stone-500"} />
+          {males.length > 0 && (
+            <div className={`space-y-4 ${females.length > 0 ? 'mt-10 pt-8 border-t border-cream-deep' : ''}`}>
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Rüden</h2>
+              {males.map((dog) => (
+                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={dog.isStud ? `/hund/${dog.id}` : `/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Deckrüde" : "Rüde"} badgeColor={dog.isStud ? "bg-blue-100 text-blue-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-blue-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-forest" : "text-stone-500"} />
               ))}
             </div>
           )}
