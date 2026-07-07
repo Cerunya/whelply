@@ -240,11 +240,11 @@ export default async function DashboardPage() {
             </Link>
             <Link
               href="/dashboard/nachrichten"
-              className="relative inline-flex items-center gap-2 border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
+              className="relative border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
               Nachrichten
               {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-sm ring-2 ring-white">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -292,12 +292,12 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Zuchthunde — nur isStud=true */}
-        {breeder.dogs.filter((d) => d.isStud).length > 0 && (
+        {/* Alle Hunde */}
+        {breeder.dogs.length > 0 && (
           <div className="mb-10">
-            <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Meine Zuchthunde</h3>
+            <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Meine Hunde</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {breeder.dogs.filter((d) => d.isStud).map((dog) => (
+              {breeder.dogs.map((dog) => (
                 <Link
                   key={dog.id}
                   href={`/dashboard/hund/${dog.id}`}

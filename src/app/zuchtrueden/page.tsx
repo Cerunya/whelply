@@ -24,7 +24,7 @@ export default async function ZuchtrudenPage({
     include: {
       breed: { select: { nameDe: true, slug: true } },
       breeder: { select: { kennelName: true, displayName: true, city: true, state: true } },
-      media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], take: 6, select: { url: true, purpose: true, isPrimary: true } },
+      media: { orderBy: { sortOrder: 'asc' }, select: { url: true, purpose: true, isPrimary: true } },
     },
     orderBy: [{ isStud: 'desc' }, { createdAt: 'desc' }],
   })
@@ -46,7 +46,7 @@ export default async function ZuchtrudenPage({
         <section className="bg-forest px-4 py-12">
           <div className="max-w-6xl mx-auto">
             <h1 className="font-serif text-3xl font-bold text-white mb-2">
-              Zuchtrüden
+              Deckrüden
             </h1>
             <p className="text-white/70 text-sm">
               Deckrüden unserer Züchter — nur als Deckrüde freigegebene Hunde.
@@ -78,7 +78,7 @@ export default async function ZuchtrudenPage({
                 Noch keine Rüden eingetragen
               </h2>
               <p className="text-stone-400 text-sm max-w-md mx-auto">
-                Unsere Züchter tragen ihre Zuchtrüden gerade ein. Schau bald wieder vorbei.
+                Unsere Züchter tragen ihre Deckrüden gerade ein. Schau bald wieder vorbei.
               </p>
             </div>
           ) : (
@@ -96,7 +96,16 @@ export default async function ZuchtrudenPage({
                   >
                     <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative">
                       {(() => {
-                        const cardImg = dog.media.find((m: any) => m.purpose === 'primary') ?? dog.media.find((m: any) => m.isPrimary && m.purpose !== 'dog_bg') ?? dog.media.find((m: any) => m.purpose !== 'dog_bg') ?? dog.media[0]
+                        // 1. Bild mit purpose='primary' (vom User im Grid gesetzt)
+                        // 2. isPrimary=true das KEIN Hintergrund ist
+                        // 3. Irgendein Bild ohne purpose (=normales Foto)
+                        const imgs = dog.media as { url: string; purpose: string | null; isPrimary: boolean }[]
+                        const cardImg =
+                          imgs.find((m) => m.purpose === 'primary') ??
+                          imgs.find((m) => m.isPrimary === true && m.purpose === null) ??
+                          imgs.find((m) => m.purpose === null) ??
+                          imgs.find((m) => m.purpose !== 'dog_bg') ??
+                          null
                         return cardImg?.url ? (
                           <img src={cardImg.url} alt={dog.name} className="w-full h-full object-cover" />
                         ) : (

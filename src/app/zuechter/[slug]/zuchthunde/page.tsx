@@ -20,7 +20,7 @@ export default async function ZuechterZuchthundePage({ params }: { params: { slu
   const isOwner = session?.user?.id === breeder.userId
 
   const allDogs = await prisma.dog.findMany({
-    where: { breederId: breeder.id, isStud: true },
+    where: { breederId: breeder.id },
     include: {
       breed: { select: { nameDe: true } },
       media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { url: true, purpose: true, isPrimary: true } },
@@ -28,8 +28,8 @@ export default async function ZuechterZuchthundePage({ params }: { params: { slu
     orderBy: { name: 'asc' },
   })
 
-  const studDogs = allDogs.filter((d) => d.sex === 'male')
-  const breedingFemales = allDogs.filter((d) => d.sex === 'female')
+  const males = allDogs.filter((d) => d.sex === 'male')
+  const females = allDogs.filter((d) => d.sex === 'female')
 
   function getCardImage(dog: typeof allDogs[0]) {
     const m = dog.media
@@ -68,29 +68,31 @@ export default async function ZuechterZuchthundePage({ params }: { params: { slu
             fullName={breeder.fullName} showFullName={breeder.showFullName}
           />
         }>
-          {studDogs.length === 0 && breedingFemales.length === 0 && (
+          {males.length === 0 && females.length === 0 && (
             <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
               <p className="text-stone-400 text-sm">Noch keine Zuchthunde vorgestellt.</p>
             </div>
           )}
 
-          {studDogs.length > 0 && (
+          {males.length > 0 && (
             <div className="space-y-4">
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchtrüden</h2>
-              {studDogs.map((dog) => (
-                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={`/hund/${dog.id}`} badge="Deckrüde" badgeColor="bg-blue-100 text-blue-700" hoverColor="hover:border-blue-300" linkColor="text-forest" />
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Rüden</h2>
+              {males.map((dog) => (
+                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={dog.isStud ? `/hund/${dog.id}` : `/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Deckrüde" : "Rüde"} badgeColor={dog.isStud ? "bg-blue-100 text-blue-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-blue-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-forest" : "text-stone-500"} />
               ))}
             </div>
           )}
 
-          {breedingFemales.length > 0 && (
-            <div className={`space-y-4 ${studDogs.length > 0 ? 'mt-10 pt-8 border-t border-cream-deep' : ''}`}>
-              <h2 className="font-serif text-2xl font-bold text-stone-900">Zuchthündinnen</h2>
-              {breedingFemales.map((dog) => (
-                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={`/zuechter/${params.slug}/hund/${dog.id}`} badge="Zuchthündin" badgeColor="bg-pink-100 text-pink-700" hoverColor="hover:border-pink-300" linkColor="text-pink-500" />
+          {females.length > 0 && (
+            <div className={`space-y-4 ${males.length > 0 ? 'mt-10 pt-8 border-t border-cream-deep' : ''}`}>
+              <h2 className="font-serif text-2xl font-bold text-stone-900">Hündinnen</h2>
+              {females.map((dog) => (
+                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={`/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Zuchthündin" : "Hündin"} badgeColor={dog.isStud ? "bg-pink-100 text-pink-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-pink-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-pink-500" : "text-stone-500"} />
               ))}
             </div>
           )}
+
+          
         </BreederPageContent>
       </main>
       <BreederFooter
