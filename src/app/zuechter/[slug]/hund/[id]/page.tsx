@@ -48,11 +48,11 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
       breed: { select: { nameDe: true } },
       media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { id: true, url: true, purpose: true, isPrimary: true } },
       littersAsSire: {
-        include: { breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
+        select: { id: true, name: true, status: true, expectedDate: true, puppyCount: true, breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
         orderBy: { expectedDate: 'desc' },
       },
       littersAsDam: {
-        include: { breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
+        select: { id: true, name: true, status: true, expectedDate: true, puppyCount: true, breed: { select: { nameDe: true } }, listings: { where: { status: 'available' }, select: { id: true } } },
         orderBy: { expectedDate: 'desc' },
       },
       parentSire: { include: parentInclude },
@@ -145,8 +145,9 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
                   <Link key={l.id} href={`/zuechter/${params.slug}/wuerfe`}
                     className="flex items-center justify-between bg-cream rounded-xl px-4 py-3 text-sm hover:bg-cream-dark transition-colors">
                     <div>
-                      <p className="font-medium text-stone-800">{l.breed.nameDe}</p>
+                      <p className="font-medium text-stone-800">{l.name || l.breed.nameDe}</p>
                       <p className="text-xs text-stone-400">
+                        {l.name ? l.breed.nameDe + ' · ' : ''}
                         {l.expectedDate ? new Date(l.expectedDate).toLocaleDateString('de-DE') : ''}
                         {l.puppyCount ? ` · ${l.puppyCount} Welpen` : ''}
                         {l.listings.length > 0 ? ` · ${l.listings.length} verfügbar` : ''}

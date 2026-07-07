@@ -24,7 +24,7 @@ export default async function ZuchtrudenPage({
     include: {
       breed: { select: { nameDe: true, slug: true } },
       breeder: { select: { kennelName: true, displayName: true, city: true, state: true } },
-      media: { orderBy: { sortOrder: 'asc' }, take: 6, select: { url: true, purpose: true, isPrimary: true } },
+      media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], take: 6, select: { url: true, purpose: true, isPrimary: true } },
     },
     orderBy: [{ isStud: 'desc' }, { createdAt: 'desc' }],
   })
@@ -96,7 +96,7 @@ export default async function ZuchtrudenPage({
                   >
                     <div className="bg-cream-dark aspect-[4/3] flex items-center justify-center relative">
                       {(() => {
-                        const cardImg = dog.media.find((m: any) => m.purpose === 'primary') ?? dog.media.find((m: any) => m.purpose !== 'dog_bg') ?? dog.media[0]
+                        const cardImg = dog.media.find((m: any) => m.purpose === 'primary') ?? dog.media.find((m: any) => m.isPrimary && m.purpose !== 'dog_bg') ?? dog.media.find((m: any) => m.purpose !== 'dog_bg') ?? dog.media[0]
                         return cardImg?.url ? (
                           <img src={cardImg.url} alt={dog.name} className="w-full h-full object-cover" />
                         ) : (

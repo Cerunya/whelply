@@ -915,3 +915,39 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 
 #### Header
 - `DashboardHeader.tsx` Höhe `h-16` (war `h-14`, jetzt gleich wie Dashboard-Hauptseite)
+
+---
+
+### ✅ Weitere Änderungen (2026-07-05 Nachtrag) — FERTIG
+
+#### WICHTIGE REGEL: Wurfname
+- Bei Würfen IMMER prominent den Wurfnamen anzeigen (l.name), nicht nur die Rasse
+- Format: Wurfname als Haupttext, Rasse + Datum + Details als Untertext
+- Gilt für ALLE Stellen wo Würfe angezeigt werden: Hund-Detail, Züchterseite, Dashboard
+
+#### Deckrüden-Galerie & Bilder
+- `DogGalleryUploader.tsx`: simpleMode zeigt "Als Titelbild setzen"-Button pro Bild
+- `media-item/[id]` PATCH unterstützt jetzt `isPrimary` — setzt alle anderen Bilder desselben Hundes auf false
+- Bild-Auswahl überall: `purpose='primary'` → `isPrimary=true` (ohne dog_bg) → erstes Nicht-dog_bg-Bild
+- Media-Query überall: `orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }]`
+- Zuchtrueden-Übersicht (`/zuchtrueden`): gleiche Bild-Auswahl-Logik
+- DogPhotoGrid Lightbox: via `createPortal(document.body)`, z-[9999]
+
+#### Zuchthunde-Übersichtsseite (Unsere Hunde)
+- `DogCard`-Komponente: identisches Layout für Rüden und Hündinnen
+- Feste Kartenhöhe `220px`, Bildbreite `w-56`, `overflow-hidden` auf Text
+- Bearbeiten-Banner: gelber Balken wie auf `/hund/[id]`, `mt-4` Abstand zur Navigation
+- Kein Thumbnail unter den Karten
+
+#### Hund-Detailseite (Züchter-Layout)
+- `/zuechter/[slug]/hund/[id]` — für Zuchthündinnen im Züchter-Layout
+- Bearbeiten-Banner identisch zur `/hund/[id]` Seite
+- Profil-ansehen-Link in HundEditForm: Hündinnen → `/zuechter/[slug]/hund/[id]`, Deckrüden → `/hund/[id]`
+- `kennelName` wird an HundEditForm übergeben für korrekte URL-Generierung
+
+#### Stammbaum 3 Generationen
+- Korrekte Query-Verschachtelung: `parentInclude` → `gpInclude` → `ggpSelect`
+- Level 1: Eltern (Bild + klickbar)
+- Level 2: Großeltern (Bild + klickbar)  
+- Level 3: Urgroßeltern (Name)
+- Tabellen-Layout: alle 15 Felder immer sichtbar, fehlende mit "—" und gestricheltem Rand
