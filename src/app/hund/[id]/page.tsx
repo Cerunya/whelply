@@ -89,22 +89,20 @@ export default async function HundDetailPage({
         const headingColor = dog.pageHeadingColor ?? '#1c1917'
         const bgColor = dog.pageBgColor ?? '#1e293b'
         const bgFixed = dog.pageBgFixed !== false
-        const cardStyle = { backgroundColor: cardColor, color: textColor }
         const hStyle = { color: headingColor }
         return (
-          <main className="min-h-screen" style={hasBg ? { backgroundColor: bgColor } : { backgroundColor: '#faf8f3' }}>
+          <main className="min-h-screen relative" style={{ backgroundColor: hasBg ? bgColor : '#faf8f3' }}>
             {hasBg && (
-              <div className={`${bgFixed ? 'fixed' : 'absolute'} inset-0 -z-10`}>
+              <div className={`${bgFixed ? 'fixed' : 'absolute'} inset-0 z-0`}>
                 <img src={dog.media.find((m) => m.purpose === 'dog_bg')!.url} alt="" className="w-full h-full object-cover" />
-                {/* Fixiert: leichtes Overlay. Scrollend: Gradient wie franz. Seite */}
                 {bgFixed ? (
-                  <div className="absolute inset-0" style={{ backgroundColor: bgColor, opacity: 0.7 }} />
+                  <div className="absolute inset-0" style={{ backgroundColor: bgColor, opacity: 0.65 }} />
                 ) : (
-                  <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${bgColor}dd 0%, ${bgColor}99 30%, ${bgColor}cc 70%, ${bgColor}ff 100%)` }} />
+                  <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${bgColor}dd 0%, ${bgColor}88 30%, ${bgColor}bb 70%, ${bgColor}ff 100%)` }} />
                 )}
               </div>
             )}
-        <div className="max-w-4xl mx-auto px-4 py-10">
+        <div className="max-w-4xl mx-auto px-4 py-10 relative z-10">
           {/* Eigentümer-Hinweis */}
           {isOwner && (
             <div className="bg-honey-pale border border-honey/30 rounded-xl px-5 py-3 mb-6 flex items-center justify-between flex-wrap gap-3">
@@ -129,7 +127,8 @@ export default async function HundDetailPage({
             <span className="text-stone-700">{dog.name}</span>
           </p>
 
-          {/* Hintergrundbild für Deckrüden — ganzseitig */}
+          {/* Ein Rahmen um den gesamten Inhalt */}
+          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: cardColor, color: textColor, padding: '2rem' }}>
           {(() => {
             const isStud = dog.isStud && dog.sex === 'male'
             const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
@@ -366,6 +365,7 @@ export default async function HundDetailPage({
               </div>
             </div>
           )}
+          </div>{/* Ende Inhalts-Rahmen */}
         </div>
       </main>
         )
