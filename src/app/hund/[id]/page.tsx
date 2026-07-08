@@ -92,10 +92,10 @@ export default async function HundDetailPage({
         return (
           <main className="min-h-screen relative" style={{ backgroundColor: hasBg ? bgColor : '#faf8f3' }}>
             {hasBg && (
-              <div className={`${bgFixed ? 'fixed' : 'absolute'} inset-0 z-0`}>
+              <div className={`${bgFixed ? 'fixed' : 'absolute'} inset-0 z-0`} style={{ pointerEvents: 'none' }}>
                 <img src={dog.media.find((m) => m.purpose === 'dog_bg')!.url} alt="" className="w-full h-full object-cover" />
-                {/* Overlay nur im unteren Bereich — oben Bild sichtbar, unten Übergang zur Hintergrundfarbe */}
-                <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 0%, transparent 60%, ${bgColor}cc 80%, ${bgColor} 100%)` }} />
+                {/* Gradient: oben transparent, ab 60vh Übergang zur Hintergrundfarbe */}
+                <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent 0px, transparent 60vh, ${bgColor} 100vh)` }} />
               </div>
             )}
         <div className="max-w-4xl mx-auto px-4 py-10 relative z-10">
