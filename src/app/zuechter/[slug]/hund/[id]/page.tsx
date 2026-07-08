@@ -272,3 +272,12 @@ function PedigreeBranch({ parent, label, sex }: { parent: any; label: string; se
     </div>
   )
 }
+
+function MiniCard({ name, label }: { name: string; label: string }) {
+  return (
+    <div className="bg-cream rounded-lg border border-cream-deep px-2 py-1 text-center w-20">
+      <p className="text-[8px] text-stone-400">{label}</p>
+      <p className="text-[9px] font-medium text-stone-600 truncate">{name}</p>
+    </div>
+  )
+}
