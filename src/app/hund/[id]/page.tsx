@@ -128,7 +128,7 @@ export default async function HundDetailPage({
           </p>
 
           {/* Ein Rahmen um den gesamten Inhalt */}
-          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: cardColor, color: textColor, padding: '2rem' }}>
+          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: dog.pageCardColor ?? '#ffffff', color: dog.pageTextColor ?? '#44403c', padding: '2rem' }}>
           {(() => {
             const isStud = dog.isStud && dog.sex === 'male'
             const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
