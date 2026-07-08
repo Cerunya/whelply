@@ -63,6 +63,7 @@ export default async function HundBearbeitenPage({
         pageCardColor: dog.pageCardColor,
         pageTextColor: dog.pageTextColor,
         pageHeadingColor: dog.pageHeadingColor,
+        pageBgColor: dog.pageBgColor,
         pageBgFixed: dog.pageBgFixed ?? true,
       }}
       breeds={breeds}

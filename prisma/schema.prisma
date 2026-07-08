@@ -273,6 +273,7 @@ model Dog {
   pageCardColor    String?  @map("page_card_color")
   pageTextColor    String?  @map("page_text_color")
   pageHeadingColor String?  @map("page_heading_color")
+  pageBgColor      String?  @map("page_bg_color")
   pageBgFixed      Boolean  @default(true) @map("page_bg_fixed")
 
   @@map("dogs")

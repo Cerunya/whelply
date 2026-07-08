@@ -31,6 +31,7 @@ type DogData = {
   pageCardColor: string | null
   pageTextColor: string | null
   pageHeadingColor: string | null
+  pageBgColor: string | null
   pageBgFixed: boolean
 }
 
@@ -136,6 +137,7 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
     pageCardColor: dog.pageCardColor ?? '#ffffff',
     pageTextColor: dog.pageTextColor ?? '#44403c',
     pageHeadingColor: dog.pageHeadingColor ?? '#1c1917',
+    pageBgColor: dog.pageBgColor ?? '#1e293b',
     pageBgFixed: dog.pageBgFixed ?? true,
   })
 
@@ -173,6 +175,7 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
         pageCardColor: form.pageCardColor || null,
         pageTextColor: form.pageTextColor || null,
         pageHeadingColor: form.pageHeadingColor || null,
+        pageBgColor: form.pageBgColor || null,
         pageBgFixed: form.pageBgFixed,
       }),
     })
@@ -380,7 +383,12 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
           {dog.isStud && dog.sex === 'male' && (
             <div className="border-t border-cream-deep pt-5">
               <p className="text-sm font-semibold text-stone-700 mb-3">Deckrüden-Seiten-Design</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div>
+                  <label className="block text-xs text-stone-500 mb-1">Seiten-Hintergrund</label>
+                  <input type="color" name="pageBgColor" value={form.pageBgColor} onChange={handleChange}
+                    className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+                </div>
                 <div>
                   <label className="block text-xs text-stone-500 mb-1">Karten-Hintergrund</label>
                   <input type="color" name="pageCardColor" value={form.pageCardColor} onChange={handleChange}

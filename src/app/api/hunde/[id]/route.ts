@@ -19,6 +19,7 @@ const schema = z.object({
   pageCardColor: z.string().nullable().optional(),
   pageTextColor: z.string().nullable().optional(),
   pageHeadingColor: z.string().nullable().optional(),
+  pageBgColor: z.string().nullable().optional(),
   pageBgFixed: z.boolean().optional(),
 })
 
@@ -67,6 +68,7 @@ export async function PATCH(
       pageCardColor: parsed.data.pageCardColor ?? null,
       pageTextColor: parsed.data.pageTextColor ?? null,
       pageHeadingColor: parsed.data.pageHeadingColor ?? null,
+      pageBgColor: parsed.data.pageBgColor ?? null,
       pageBgFixed: parsed.data.pageBgFixed ?? true,
     },
   })

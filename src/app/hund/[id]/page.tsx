@@ -82,17 +82,26 @@ export default async function HundDetailPage({
     <>
       <Navbar />
       {(() => {
-        const hasBg = dog.isStud && dog.sex === 'male' && dog.media.some((m) => m.purpose === 'dog_bg')
+        const isStud = dog.isStud && dog.sex === 'male'
+        const hasBg = isStud && dog.media.some((m) => m.purpose === 'dog_bg')
         const cardColor = dog.pageCardColor ?? '#ffffff'
         const textColor = dog.pageTextColor ?? '#44403c'
         const headingColor = dog.pageHeadingColor ?? '#1c1917'
+        const bgColor = dog.pageBgColor ?? '#1e293b'
         const bgFixed = dog.pageBgFixed !== false
+        const cardStyle = { backgroundColor: cardColor, color: textColor }
+        const hStyle = { color: headingColor }
         return (
-          <main className={`min-h-screen ${hasBg ? 'bg-transparent' : 'bg-cream'}`}>
+          <main className="min-h-screen" style={hasBg ? { backgroundColor: bgColor } : { backgroundColor: '#faf8f3' }}>
             {hasBg && (
               <div className={`${bgFixed ? 'fixed' : 'absolute'} inset-0 -z-10`}>
                 <img src={dog.media.find((m) => m.purpose === 'dog_bg')!.url} alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-cream/80" />
+                {/* Fixiert: leichtes Overlay. Scrollend: Gradient wie franz. Seite */}
+                {bgFixed ? (
+                  <div className="absolute inset-0" style={{ backgroundColor: bgColor, opacity: 0.7 }} />
+                ) : (
+                  <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${bgColor}dd 0%, ${bgColor}99 30%, ${bgColor}cc 70%, ${bgColor}ff 100%)` }} />
+                )}
               </div>
             )}
         <div className="max-w-4xl mx-auto px-4 py-10">
@@ -112,7 +121,7 @@ export default async function HundDetailPage({
           )}
 
           {/* Breadcrumb */}
-          <p className="text-sm text-stone-400 mb-6">
+          <p className="text-sm mb-6" style={{ color: textColor, opacity: 0.6 }}>
             <Link href="/" className="hover:text-stone-700">Startseite</Link>
             {' / '}
             <Link href="/zuchtrueden" className="hover:text-stone-700">Zuchtrüden</Link>
@@ -166,7 +175,7 @@ export default async function HundDetailPage({
               )}
               <p className="text-sm text-stone-400 mb-4">{breederName}{location && ` · ${location}`}</p>
 
-              <div className="rounded-2xl border border-cream-deep p-5 space-y-3 mb-6" style={{ backgroundColor: cardColor, color: textColor }}>
+              <div className="rounded-2xl border border-cream-deep p-5 space-y-3 mb-6" style={cardStyle}>
                 <div className="flex justify-between text-sm">
                   <span className="text-stone-400">Geschlecht</span>
                   <span className="font-medium text-stone-800">{dog.sex === 'male' ? 'Rüde' : 'Hündin'}</span>
@@ -214,7 +223,7 @@ export default async function HundDetailPage({
           {dog.description && (
             <div className="mt-10">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Über {dog.name}</h2>
-              <div className="bg-white rounded-2xl border border-cream-deep p-6">
+              <div className="rounded-2xl border border-cream-deep p-6" style={cardStyle}>
                 <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
                   {dog.description}
                 </p>
@@ -226,7 +235,7 @@ export default async function HundDetailPage({
           {dog.healthInfo && (
             <div className="mt-10">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Gesundheitstests</h2>
-              <div className="bg-white rounded-2xl border border-cream-deep p-6">
+              <div className="rounded-2xl border border-cream-deep p-6" style={cardStyle}>
                 <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
                   {dog.healthInfo}
                 </p>
@@ -275,7 +284,7 @@ export default async function HundDetailPage({
 
               {/* Dieser Hund */}
               <div className="flex justify-center mb-0">
-                <div className="bg-white rounded-2xl border-2 border-forest/30 p-4 w-44 text-center shadow-sm">
+                <div className="rounded-2xl border-2 border-forest/30 p-4 w-44 text-center shadow-sm" style={cardStyle}>
                   {(() => { const img = dog.media.find((m) => m.purpose === 'primary')?.url ?? dog.media.find((m) => m.isPrimary && m.purpose !== 'dog_bg')?.url ?? dog.media.find((m) => m.purpose !== 'dog_bg')?.url; return img ? (
                     <img src={img} alt={dog.name} className="w-16 h-16 rounded-xl object-cover mx-auto mb-2" />
                   ) : null })()}
