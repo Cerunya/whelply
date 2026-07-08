@@ -383,29 +383,29 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
           {dog.isStud && dog.sex === 'male' && (
             <div className="border-t border-cream-deep pt-5">
               <p className="text-sm font-semibold text-stone-700 mb-3">Deckrüden-Seiten-Design</p>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 <div>
-                  <label className="block text-xs text-stone-500 mb-1">Seiten-Hintergrund</label>
+                  <label className="block text-xs text-stone-500 mb-1">Seite</label>
                   <input type="color" name="pageBgColor" value={form.pageBgColor} onChange={handleChange}
                     className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-1">Karten-Hintergrund</label>
+                  <label className="block text-xs text-stone-500 mb-1">Container</label>
                   <input type="color" name="pageCardColor" value={form.pageCardColor} onChange={handleChange}
                     className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-1">Textfarbe</label>
+                  <label className="block text-xs text-stone-500 mb-1">Text</label>
                   <input type="color" name="pageTextColor" value={form.pageTextColor} onChange={handleChange}
                     className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-1">Überschriften</label>
+                  <label className="block text-xs text-stone-500 mb-1">Titel</label>
                   <input type="color" name="pageHeadingColor" value={form.pageHeadingColor} onChange={handleChange}
                     className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-xs text-stone-500 mb-1">Hintergrundbild</label>
+                  <label className="block text-xs text-stone-500 mb-1">Bild</label>
                   <select name="pageBgFixed" value={form.pageBgFixed ? 'fixed' : 'scroll'} onChange={(e) => setForm({ ...form, pageBgFixed: e.target.value === 'fixed' })}
                     className="w-full h-10 rounded-lg border border-stone-200 px-2 text-sm">
                     <option value="fixed">Fixiert</option>
