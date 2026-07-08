@@ -78,8 +78,11 @@ export default async function HundDetailPage({
     age = Math.floor((Date.now() - dog.birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
   }
 
+  const hasBgImage = dog.isStud && dog.sex === 'male' && dog.media.some((m) => m.purpose === 'dog_bg')
+  const pageBgColor = dog.pageBgColor ?? '#1e293b'
+
   return (
-    <>
+    <div style={{ backgroundColor: hasBgImage ? pageBgColor : '#faf8f3', minHeight: '100vh' }}>
       <Navbar />
       {(() => {
         const isStud = dog.isStud && dog.sex === 'male'
@@ -90,12 +93,12 @@ export default async function HundDetailPage({
         const bgColor = dog.pageBgColor ?? '#1e293b'
         const bgFixed = dog.pageBgFixed !== false
         return (
-          <main className="min-h-screen relative" style={{ backgroundColor: hasBg ? bgColor : '#faf8f3' }}>
+          <main className="min-h-screen relative">
             {hasBg && (
               <div className={`${bgFixed ? 'fixed' : 'absolute'} inset-0 z-0`} style={{ pointerEvents: 'none' }}>
                 <img src={dog.media.find((m) => m.purpose === 'dog_bg')!.url} alt="" className="w-full h-full object-cover" />
                 {/* Gradient: oben transparent, ab 60vh Übergang zur Hintergrundfarbe */}
-                <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent 0px, transparent 60vh, ${bgColor} 100vh)` }} />
+                <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent 0px, transparent 75vh, ${bgColor}90 90vh, ${bgColor} 100vh)` }} />
               </div>
             )}
         <div className="max-w-4xl mx-auto px-4 py-10 relative z-10">
@@ -367,6 +370,6 @@ export default async function HundDetailPage({
         )
       })()}
       <Footer />
-    </>
+    </div>
   )
 }
