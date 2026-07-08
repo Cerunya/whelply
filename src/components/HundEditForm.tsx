@@ -28,6 +28,10 @@ type DogData = {
   healthInfo: string | null
   parentSireId: string | null
   parentDamId: string | null
+  pageCardColor: string | null
+  pageTextColor: string | null
+  pageHeadingColor: string | null
+  pageBgFixed: boolean
 }
 
 type DogOption = { id: string; name: string; sex: string }
@@ -129,6 +133,10 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
     healthInfo: dog.healthInfo ?? '',
     parentSireId: dog.parentSireId ?? '',
     parentDamId: dog.parentDamId ?? '',
+    pageCardColor: dog.pageCardColor ?? '#ffffff',
+    pageTextColor: dog.pageTextColor ?? '#44403c',
+    pageHeadingColor: dog.pageHeadingColor ?? '#1c1917',
+    pageBgFixed: dog.pageBgFixed ?? true,
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -162,6 +170,10 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
         healthInfo: form.healthInfo || null,
         parentSireId: form.parentSireId || null,
         parentDamId: form.parentDamId || null,
+        pageCardColor: form.pageCardColor || null,
+        pageTextColor: form.pageTextColor || null,
+        pageHeadingColor: form.pageHeadingColor || null,
+        pageBgFixed: form.pageBgFixed,
       }),
     })
 
@@ -363,6 +375,38 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
               Freitext — wird unverändert auf dem Profil dieses Hundes angezeigt.
             </p>
           </div>
+
+          {/* Deckrüden-Seiten-Design — nur für Deckrüden */}
+          {dog.isStud && dog.sex === 'male' && (
+            <div className="border-t border-cream-deep pt-5">
+              <p className="text-sm font-semibold text-stone-700 mb-3">Deckrüden-Seiten-Design</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-xs text-stone-500 mb-1">Karten-Hintergrund</label>
+                  <input type="color" name="pageCardColor" value={form.pageCardColor} onChange={handleChange}
+                    className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-xs text-stone-500 mb-1">Textfarbe</label>
+                  <input type="color" name="pageTextColor" value={form.pageTextColor} onChange={handleChange}
+                    className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-xs text-stone-500 mb-1">Überschriften</label>
+                  <input type="color" name="pageHeadingColor" value={form.pageHeadingColor} onChange={handleChange}
+                    className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-xs text-stone-500 mb-1">Hintergrundbild</label>
+                  <select name="pageBgFixed" value={form.pageBgFixed ? 'fixed' : 'scroll'} onChange={(e) => setForm({ ...form, pageBgFixed: e.target.value === 'fixed' })}
+                    className="w-full h-10 rounded-lg border border-stone-200 px-2 text-sm">
+                    <option value="fixed">Fixiert</option>
+                    <option value="scroll">Scrollt mit</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Elterntiere für Stammbaum */}
           {allDogs.length > 0 && (

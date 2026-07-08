@@ -162,56 +162,51 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
             </div>
           )}
 
-          {/* Stammbaum — IMMER 3 Generationen, leere Felder für fehlende Ahnen */}
-          <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6 overflow-x-auto">
+          {/* Stammbaum — 3 Generationen, responsive */}
+          <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
             <h2 className="font-semibold text-stone-800 mb-4">Stammbaum</h2>
-            <table className="w-full min-w-[700px] border-collapse">
-              <tbody>
-                {/* Generation 0: Der Hund */}
-                <tr>
-                  <td colSpan={8} className="text-center pb-4">
-                    <div className="inline-block">
-                      <TreeCard name={dog.name} imgUrl={bestImg} sex={dog.sex} highlight />
-                    </div>
-                  </td>
-                </tr>
-                {/* Generation 1: Eltern */}
-                <tr>
-                  <td colSpan={4} className="text-center pb-4 border-r border-stone-200">
-                    <TreeCard name={dog.parentSire?.name} imgUrl={dog.parentSire?.media?.[0]?.url} sex="male" label="Vater" link={dog.parentSire ? `/hund/${dog.parentSire.id}` : undefined} />
-                  </td>
-                  <td colSpan={4} className="text-center pb-4">
-                    <TreeCard name={dog.parentDam?.name} imgUrl={dog.parentDam?.media?.[0]?.url} sex="female" label="Mutter" link={dog.parentDam ? `/hund/${dog.parentDam.id}` : undefined} />
-                  </td>
-                </tr>
-                {/* Generation 2: Großeltern */}
-                <tr>
-                  <td colSpan={2} className="text-center pb-4 border-r border-stone-100">
-                    <TreeCard name={dog.parentSire?.parentSire?.name} imgUrl={dog.parentSire?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentSire?.parentSire ? `/hund/${dog.parentSire.parentSire.id}` : undefined} />
-                  </td>
-                  <td colSpan={2} className="text-center pb-4 border-r border-stone-200">
-                    <TreeCard name={dog.parentSire?.parentDam?.name} imgUrl={dog.parentSire?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentSire?.parentDam ? `/hund/${dog.parentSire.parentDam.id}` : undefined} />
-                  </td>
-                  <td colSpan={2} className="text-center pb-4 border-r border-stone-100">
-                    <TreeCard name={dog.parentDam?.parentSire?.name} imgUrl={dog.parentDam?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentDam?.parentSire ? `/hund/${dog.parentDam.parentSire.id}` : undefined} />
-                  </td>
-                  <td colSpan={2} className="text-center pb-4">
-                    <TreeCard name={dog.parentDam?.parentDam?.name} imgUrl={dog.parentDam?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentDam?.parentDam ? `/hund/${dog.parentDam.parentDam.id}` : undefined} />
-                  </td>
-                </tr>
-                {/* Generation 3: Urgroßeltern */}
-                <tr>
-                  <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                  <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                  <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                  <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                  <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                  <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                  <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                  <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                </tr>
-              </tbody>
-            </table>
+            {/* Desktop: Tabelle */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[700px] border-collapse">
+                <tbody>
+                  <tr>
+                    <td colSpan={8} className="text-center pb-4">
+                      <div className="inline-block"><TreeCard name={dog.name} imgUrl={bestImg} sex={dog.sex} highlight /></div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={4} className="text-center pb-4 border-r border-stone-200">
+                      <TreeCard name={dog.parentSire?.name} imgUrl={dog.parentSire?.media?.[0]?.url} sex="male" label="Vater" link={dog.parentSire ? `/hund/${dog.parentSire.id}` : undefined} />
+                    </td>
+                    <td colSpan={4} className="text-center pb-4">
+                      <TreeCard name={dog.parentDam?.name} imgUrl={dog.parentDam?.media?.[0]?.url} sex="female" label="Mutter" link={dog.parentDam ? `/hund/${dog.parentDam.id}` : undefined} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={2} className="text-center pb-4"><TreeCard name={dog.parentSire?.parentSire?.name} imgUrl={dog.parentSire?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentSire?.parentSire ? `/hund/${dog.parentSire.parentSire.id}` : undefined} /></td>
+                    <td colSpan={2} className="text-center pb-4 border-r border-stone-200"><TreeCard name={dog.parentSire?.parentDam?.name} imgUrl={dog.parentSire?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentSire?.parentDam ? `/hund/${dog.parentSire.parentDam.id}` : undefined} /></td>
+                    <td colSpan={2} className="text-center pb-4"><TreeCard name={dog.parentDam?.parentSire?.name} imgUrl={dog.parentDam?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentDam?.parentSire ? `/hund/${dog.parentDam.parentSire.id}` : undefined} /></td>
+                    <td colSpan={2} className="text-center pb-4"><TreeCard name={dog.parentDam?.parentDam?.name} imgUrl={dog.parentDam?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentDam?.parentDam ? `/hund/${dog.parentDam.parentDam.id}` : undefined} /></td>
+                  </tr>
+                  <tr>
+                    <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                    <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                    <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                    <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                    <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                    <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                    <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
+                    <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile: vertikal gestapelt */}
+            <div className="md:hidden space-y-6">
+              <div className="flex justify-center"><TreeCard name={dog.name} imgUrl={bestImg} sex={dog.sex} highlight /></div>
+              <PedigreeBranch parent={dog.parentSire} label="Vater" sex="male" />
+              <PedigreeBranch parent={dog.parentDam} label="Mutter" sex="female" />
+            </div>
           </div>
 
         </BreederPageContent>
@@ -252,4 +247,28 @@ function TreeCard({ name, imgUrl, sex, label, link, highlight, small, tiny }: {
     </div>
   )
   return link && name ? <Link href={link} className="inline-block">{inner}</Link> : inner
+}
+
+function PedigreeBranch({ parent, label, sex }: { parent: any; label: string; sex: string }) {
+  const borderColor = sex === 'female' ? 'border-pink-100' : 'border-blue-100'
+  return (
+    <div className={`border-l-4 ${borderColor} pl-4 space-y-3`}>
+      <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide">{label}</p>
+      <TreeCard name={parent?.name} imgUrl={parent?.media?.[0]?.url} sex={sex} link={parent ? `/hund/${parent.id}` : undefined} />
+      {parent && (
+        <div className="ml-4 space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <TreeCard name={parent.parentSire?.name} imgUrl={parent.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={parent.parentSire ? `/hund/${parent.parentSire.id}` : undefined} />
+            <TreeCard name={parent.parentDam?.name} imgUrl={parent.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={parent.parentDam ? `/hund/${parent.parentDam.id}` : undefined} />
+          </div>
+          <div className="flex flex-wrap gap-1 ml-2">
+            {parent.parentSire?.parentSire && <MiniCard name={parent.parentSire.parentSire.name} label="UGV" />}
+            {parent.parentSire?.parentDam && <MiniCard name={parent.parentSire.parentDam.name} label="UGM" />}
+            {parent.parentDam?.parentSire && <MiniCard name={parent.parentDam.parentSire.name} label="UGV" />}
+            {parent.parentDam?.parentDam && <MiniCard name={parent.parentDam.parentDam.name} label="UGM" />}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }

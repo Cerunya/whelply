@@ -83,10 +83,14 @@ export default async function HundDetailPage({
       <Navbar />
       {(() => {
         const hasBg = dog.isStud && dog.sex === 'male' && dog.media.some((m) => m.purpose === 'dog_bg')
+        const cardColor = dog.pageCardColor ?? '#ffffff'
+        const textColor = dog.pageTextColor ?? '#44403c'
+        const headingColor = dog.pageHeadingColor ?? '#1c1917'
+        const bgFixed = dog.pageBgFixed !== false
         return (
           <main className={`min-h-screen ${hasBg ? 'bg-transparent' : 'bg-cream'}`}>
             {hasBg && (
-              <div className="fixed inset-0 -z-10">
+              <div className={`${bgFixed ? 'fixed' : 'absolute'} inset-0 -z-10`}>
                 <img src={dog.media.find((m) => m.purpose === 'dog_bg')!.url} alt="" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-cream/80" />
               </div>
@@ -162,7 +166,7 @@ export default async function HundDetailPage({
               )}
               <p className="text-sm text-stone-400 mb-4">{breederName}{location && ` · ${location}`}</p>
 
-              <div className="bg-white rounded-2xl border border-cream-deep p-5 space-y-3 mb-6">
+              <div className="rounded-2xl border border-cream-deep p-5 space-y-3 mb-6" style={{ backgroundColor: cardColor, color: textColor }}>
                 <div className="flex justify-between text-sm">
                   <span className="text-stone-400">Geschlecht</span>
                   <span className="font-medium text-stone-800">{dog.sex === 'male' ? 'Rüde' : 'Hündin'}</span>

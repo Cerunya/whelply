@@ -16,6 +16,10 @@ const schema = z.object({
   healthInfo: z.string().max(5000).nullable().optional(),
   parentSireId: z.string().nullable().optional(),
   parentDamId: z.string().nullable().optional(),
+  pageCardColor: z.string().nullable().optional(),
+  pageTextColor: z.string().nullable().optional(),
+  pageHeadingColor: z.string().nullable().optional(),
+  pageBgFixed: z.boolean().optional(),
 })
 
 async function getOwnedDog(userId: string, dogId: string) {
@@ -60,6 +64,10 @@ export async function PATCH(
       healthInfo: parsed.data.healthInfo ?? null,
       parentSireId: parsed.data.parentSireId ?? null,
       parentDamId: parsed.data.parentDamId ?? null,
+      pageCardColor: parsed.data.pageCardColor ?? null,
+      pageTextColor: parsed.data.pageTextColor ?? null,
+      pageHeadingColor: parsed.data.pageHeadingColor ?? null,
+      pageBgFixed: parsed.data.pageBgFixed ?? true,
     },
   })
 

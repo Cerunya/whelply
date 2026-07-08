@@ -60,6 +60,10 @@ export default async function HundBearbeitenPage({
         healthInfo: dog.healthInfo,
         parentSireId: dog.parentSireId,
         parentDamId: dog.parentDamId,
+        pageCardColor: dog.pageCardColor,
+        pageTextColor: dog.pageTextColor,
+        pageHeadingColor: dog.pageHeadingColor,
+        pageBgFixed: dog.pageBgFixed ?? true,
       }}
       breeds={breeds}
       allDogs={allDogs}

@@ -269,6 +269,12 @@ model Dog {
   // — bewusst Freitext, da Züchter oft sehr viele Tests dokumentieren
   healthInfo    String?   @map("health_info") @db.Text
 
+  // Deckrüden-Seiten-Styling
+  pageCardColor    String?  @map("page_card_color")
+  pageTextColor    String?  @map("page_text_color")
+  pageHeadingColor String?  @map("page_heading_color")
+  pageBgFixed      Boolean  @default(true) @map("page_bg_fixed")
+
   @@map("dogs")
 }
 
@@ -582,3 +588,11 @@ model Message {
   @@map("messages")
   @@index([conversationId])
 }
+
+// ─────────────────────────────────────────────
+// DECKRÜDEN-SEITE — Styling (nur für isStud=true, sex=male)
+// ─────────────────────────────────────────────
+// pageCardColor: Hintergrundfarbe der Inhaltskarten (default: #ffffff)
+// pageTextColor: Textfarbe (default: #44403c)
+// pageHeadingColor: Überschriften-Farbe (default: #1c1917)
+// pageBgFixed: Hintergrundbild fixiert (true) oder scrollend (false)
