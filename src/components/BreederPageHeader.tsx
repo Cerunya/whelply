@@ -14,6 +14,8 @@ type BreederHeaderData = {
   themeNavColor: string | null
   themeFont: string | null
   themeAlign: string | null
+  themeBgFixed: boolean
+  themeBgOverlay: string | null
   media: { url: string; purpose: string | null }[]
   dogs?: { breed: { nameDe: string } }[]
 }
