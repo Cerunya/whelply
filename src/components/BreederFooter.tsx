@@ -68,7 +68,7 @@ export default function BreederFooter({
 
   return (
     <footer
-      className="mt-0 py-10 px-4"
+      className="mt-0 py-10 px-4 relative z-10"
       style={{ backgroundColor: bgColor }}
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center gap-4">
