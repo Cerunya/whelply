@@ -37,6 +37,8 @@ const schema = z.object({
   themeNavColor: z.string().regex(HEX_COLOR).or(z.literal('')).nullable().optional(),
   themeFont: z.string().max(80).nullable().optional(),
   themeAlign: z.enum(['left', 'center', 'right']).nullable().optional(),
+  themeBgFixed: z.boolean().optional(),
+  themeBgOverlay: z.string().nullable().optional(),
 })
 
 export async function PATCH(req: NextRequest) {

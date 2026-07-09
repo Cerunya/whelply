@@ -32,6 +32,8 @@ export default async function ThemePage() {
         themeNavColor: breeder.themeNavColor,
         themeFont: breeder.themeFont,
         themeAlign: breeder.themeAlign,
+        themeBgFixed: breeder.themeBgFixed ?? true,
+        themeBgOverlay: breeder.themeBgOverlay,
         kennelName: breeder.kennelName,
         headerImageUrl: headerImage?.url ?? null,
         backgroundImageUrl: backgroundImage?.url ?? null,

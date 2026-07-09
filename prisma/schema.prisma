@@ -186,6 +186,8 @@ model BreederProfile {
   themeNavColor     String?           @map("theme_nav_color")    // Farbe der Tab-Navigation
   themeFont         String?           @map("theme_font")         // Google Fonts Familienname, z.B. "Playfair Display"
   themeAlign        String?           @map("theme_align")        // "left" | "center" | "right"
+  themeBgFixed      Boolean           @default(true) @map("theme_bg_fixed")
+  themeBgOverlay    String?           @map("theme_bg_overlay")   // Gradient/Hintergrundfarbe hinter dem Bild
   // Social Media
   socialInstagram   String?           @map("social_instagram")
   socialFacebook    String?           @map("social_facebook")

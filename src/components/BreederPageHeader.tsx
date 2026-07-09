@@ -67,13 +67,20 @@ export default function BreederPageHeader({
       )}
 
       {/* Seitenhintergrund */}
+      {backgroundImage && (
+        <style>{`body { background-color: ${breeder.themeBgOverlay ?? '#1e293b'} !important; }`}</style>
+      )}
       {backgroundImage ? (
         <>
           <div
-            className="fixed inset-0 -z-20"
-            style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
+            className={`${breeder.themeBgFixed !== false ? 'fixed' : 'absolute'} inset-x-0 top-0 -z-20`}
+            style={{ height: '100vh', backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
           />
-          <div className="fixed inset-0 -z-10 bg-cream/45" />
+          {/* Gradient: oben transparent, unten Übergang zur Seitenfarbe */}
+          <div
+            className={`${breeder.themeBgFixed !== false ? 'fixed' : 'absolute'} inset-x-0 top-0 -z-10`}
+            style={{ height: '100vh', background: `linear-gradient(to bottom, transparent 0px, transparent 85vh, ${breeder.themeBgOverlay ?? '#1e293b'}90 95vh, ${breeder.themeBgOverlay ?? '#1e293b'} 100vh)` }}
+          />
         </>
       ) : (
         <div

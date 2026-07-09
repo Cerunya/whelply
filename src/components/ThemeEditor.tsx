@@ -14,6 +14,8 @@ type BreederTheme = {
   themeNavColor: string | null
   themeFont: string | null
   themeAlign: string | null
+  themeBgFixed: boolean
+  themeBgOverlay: string | null
   kennelName: string
   headerImageUrl: string | null
   backgroundImageUrl: string | null
@@ -78,6 +80,8 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
   const [themeNavColor, setThemeNavColor] = useState(breeder.themeNavColor ?? '')
   const [themeFont, setThemeFont] = useState(breeder.themeFont ?? '')
   const [themeAlign, setThemeAlign] = useState(breeder.themeAlign ?? 'left')
+  const [themeBgFixed, setThemeBgFixed] = useState(breeder.themeBgFixed ?? true)
+  const [themeBgOverlay, setThemeBgOverlay] = useState(breeder.themeBgOverlay ?? '#1e293b')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -136,6 +140,8 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
         themeNavColor: themeNavColor || null,
         themeFont: themeFont || null,
         themeAlign: themeAlign || null,
+        themeBgFixed: themeBgFixed,
+        themeBgOverlay: themeBgOverlay || null,
       }),
     })
     const data = await res.json()
@@ -161,7 +167,7 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
     const res = await fetch('/api/profil', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ themeColor: '', themeAccentColor: '', themeBgColor: null, themeNavColor: null, themeFont: null, themeAlign: null }),
+      body: JSON.stringify({ themeColor: '', themeAccentColor: '', themeBgColor: null, themeNavColor: null, themeFont: null, themeAlign: null, themeBgFixed: true, themeBgOverlay: null }),
     })
     if (res.ok) {
       setSuccess(true)
@@ -309,6 +315,30 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
           </div>
 
 
+        </div>
+
+        {/* Hintergrundbild-Optionen */}
+        <div>
+          <label className={labelClass}>Hintergrundbild-Verhalten</label>
+          <p className="text-xs text-stone-400 mb-3">Bestimmt wie das Hintergrundbild und die Seitenfarbe dargestellt werden.</p>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Verhalten</label>
+              <select value={themeBgFixed ? 'fixed' : 'scroll'} onChange={(e) => setThemeBgFixed(e.target.value === 'fixed')}
+                className="w-full h-10 rounded-lg border border-stone-200 px-2 text-sm">
+                <option value="fixed">Fixiert</option>
+                <option value="scroll">Scrollt mit</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Seitenfarbe</label>
+              <input type="color" value={themeBgOverlay} onChange={(e) => setThemeBgOverlay(e.target.value)}
+                className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+            </div>
+            <div className="flex items-end">
+              <p className="text-[10px] text-stone-400">Farbe hinter dem Bild und als Gradient-Übergang</p>
+            </div>
+          </div>
         </div>
 
         {/* Ausrichtung */}
