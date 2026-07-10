@@ -189,12 +189,21 @@ export default function AdminDashboard({
         )}
 
         {tab === 'overview' && (
-          <div className="bg-white rounded-2xl border border-cream-deep p-7">
-            <h2 className="font-serif text-xl font-bold text-stone-900 mb-2">Übersicht</h2>
-            <p className="text-sm text-stone-500">
-              Verwalte Züchter-Konten und Inserate über die Tabs oben. Karteileichen (leere Konten ohne
-              Aktivität) findest du im Tab "Züchter" — sortiert nach Erstellungsdatum.
-            </p>
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl border border-cream-deep p-7">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-2">Übersicht</h2>
+              <p className="text-sm text-stone-500">
+                Verwalte Züchter-Konten und Inserate über die Tabs oben. Karteileichen (leere Konten ohne
+                Aktivität) findest du im Tab "Züchter" — sortiert nach Erstellungsdatum.
+              </p>
+            </div>
+            <Link href="/admin/artikel" className="flex items-center justify-between bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
+              <div>
+                <p className="font-semibold text-stone-900">Artikel & Ratgeber</p>
+                <p className="text-xs text-stone-400 mt-0.5">SEO-Artikel, Rassen-Portraits und News erstellen und verwalten</p>
+              </div>
+              <span className="text-forest text-sm font-semibold">Verwalten →</span>
+            </Link>
           </div>
         )}
 
