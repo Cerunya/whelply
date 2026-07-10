@@ -11,20 +11,7 @@ import Link from 'next/link'
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
 export const dynamic = 'force-dynamic'
 
-function renderMarkdown(md: string): string {
-  return md
-    .replace(/^### (.+)$/gm, '<h3 class="font-serif text-xl font-bold text-stone-900 mt-8 mb-3">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="font-serif text-2xl font-bold text-stone-900 mt-10 mb-4">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="font-serif text-3xl font-bold text-stone-900 mt-10 mb-4">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-xl my-6 w-full" />')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-forest underline hover:text-forest-light">$1</a>')
-    .replace(/^- (.+)$/gm, '<li class="ml-4 text-stone-700">$1</li>')
-    .replace(/(<li.*<\/li>\n?)+/g, '<ul class="list-disc space-y-1 my-4">$&</ul>')
-    .replace(/^(?!<[hluoia])((?!<).+)$/gm, '<p class="text-stone-700 leading-relaxed mb-4">$1</p>')
-    .replace(/<p class="text-stone-700 leading-relaxed mb-4"><\/p>/g, '')
-}
+import { renderMarkdown } from '@/lib/render-markdown'
 
 export default async function RassenDetailPage({
   params,

@@ -10,23 +10,16 @@ type RichEditorProps = {
   className?: string
 }
 
-// Wandelt Bild-Markdown in kurze Platzhalter um fuer die Textarea-Ansicht
-// ![dateiname.png](url) → [📷 dateiname.png]
 function toDisplay(md: string): string {
   return md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt) => `[📷 ${alt || 'Bild'}]`)
 }
 
-// Wandelt Platzhalter zurueck zu Bild-Markdown, mit Hilfe der Image-Map
 function fromDisplay(display: string, images: { alt: string; url: string }[]): string {
   let result = display
-  // Ersetze jeden Platzhalter durch den entsprechenden Bild-Markdown
-  // Wir matchen [📷 name] und schauen welches Bild dazu passt
   let imgIdx = 0
   result = result.replace(/\[📷\s+([^\]]+)\]/g, (_, name) => {
-    // Suche das naechste Bild mit passendem Alt-Text
     const matched = images.find((img) => img.alt === name)
     if (matched) return `![${matched.alt}](${matched.url})`
-    // Fallback: nimm das naechste verfuegbare Bild
     if (imgIdx < images.length) {
       const img = images[imgIdx++]
       return `![${img.alt}](${img.url})`
@@ -55,12 +48,25 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
   const images = extractImages(value)
   const displayValue = toDisplay(value)
 
+  function onDisplayChange(newDisplay: string) {
+    onChange(fromDisplay(newDisplay, images))
+  }
+
+  function insertAtCursor(text: string) {
+    const el = ref.current
+    if (!el) { onChange(value.trimEnd() + '\n' + text + '\n'); return }
+    const s = el.selectionStart
+    const v = el.value
+    const newDisplay = v.slice(0, s) + text + v.slice(s)
+    onDisplayChange(newDisplay)
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + text.length, s + text.length) })
+  }
+
   function insertEmoji(emoji: string) {
     const el = ref.current
     if (el) {
       const s = el.selectionStart
-      const v = el.value
-      const newDisplay = v.slice(0, s) + emoji + v.slice(s)
+      const newDisplay = el.value.slice(0, s) + emoji + el.value.slice(s)
       onDisplayChange(newDisplay)
       requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + emoji.length, s + emoji.length) })
     } else {
@@ -68,46 +74,64 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     }
   }
 
-  // Textarea-Aenderung: Platzhalter zurueck zu Markdown konvertieren
-  function onDisplayChange(newDisplay: string) {
-    onChange(fromDisplay(newDisplay, images))
+  function wrap(marker: string) {
+    const el = ref.current
+    if (!el) return
+    const s = el.selectionStart
+    const e = el.selectionEnd
+    const sel = el.value.slice(s, e) || 'Text'
+    const newDisplay = el.value.slice(0, s) + marker + sel + marker + el.value.slice(e)
+    onDisplayChange(newDisplay)
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + marker.length, s + marker.length + sel.length) })
   }
 
-  function insertAtCursor(text: string) {
+  function prefixLines(prefix: string) {
     const el = ref.current
-    if (!el) {
-      // Fallback: am Ende anhaengen
-      onChange(value.trimEnd() + '\n' + text + '\n')
-      return
-    }
+    if (!el) return
     const s = el.selectionStart
+    const e = el.selectionEnd
     const v = el.value
-    const newDisplay = v.slice(0, s) + text + v.slice(s)
+    const lineStart = v.lastIndexOf('\n', s - 1) + 1
+    const lineEnd = v.indexOf('\n', e)
+    const selectedLines = v.slice(lineStart, lineEnd === -1 ? v.length : lineEnd)
+    const prefixed = selectedLines.split('\n').map((l) => prefix + l).join('\n')
+    const newDisplay = v.slice(0, lineStart) + prefixed + v.slice(lineEnd === -1 ? v.length : lineEnd)
     onDisplayChange(newDisplay)
-    requestAnimationFrame(() => {
-      el.focus()
-      const pos = s + text.length
-      el.setSelectionRange(pos, pos)
-    })
+  }
+
+  function insertLink() {
+    const el = ref.current
+    const selectedText = el ? el.value.slice(el.selectionStart, el.selectionEnd) : ''
+    const text = selectedText || window.prompt('Linktext:') || 'Link'
+    const url = window.prompt('URL:')
+    if (!url) return
+    const md = `[${text}](${url})`
+    if (el && selectedText) {
+      const s = el.selectionStart
+      const newDisplay = el.value.slice(0, s) + md + el.value.slice(el.selectionEnd)
+      onDisplayChange(newDisplay)
+    } else {
+      insertAtCursor(md)
+    }
+  }
+
+  function insertQuote() {
+    insertAtCursor('\n:::tipp\nHier steht ein hilfreicher Tipp oder Hinweis.\n:::\n')
+  }
+
+  function insertTable() {
+    insertAtCursor('\n| Spalte 1 | Spalte 2 | Spalte 3 |\n|----------|----------|----------|\n| Zelle 1  | Zelle 2  | Zelle 3  |\n| Zelle 4  | Zelle 5  | Zelle 6  |\n')
   }
 
   function addImage(alt: string, url: string) {
-    // Erst das neue Bild zum Wert hinzufuegen (damit fromDisplay es kennt)
-    // Dann den Platzhalter an der Cursorposition einfuegen
     const el = ref.current
-    const placeholder = `[📷 ${alt || 'Bild'}]`
-
+    const ph = `[📷 ${alt || 'Bild'}]`
     if (el) {
-      // Wir haben die neue Bildliste: vorhandene + neues Bild
       const newImages = [...images, { alt, url }]
       const s = el.selectionStart
-      const currentDisplay = el.value
-      const newDisplay = currentDisplay.slice(0, s) + placeholder + currentDisplay.slice(s)
+      const newDisplay = el.value.slice(0, s) + ph + el.value.slice(s)
       onChange(fromDisplay(newDisplay, newImages))
-      requestAnimationFrame(() => {
-        el.focus()
-        el.setSelectionRange(s + placeholder.length, s + placeholder.length)
-      })
+      requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + ph.length, s + ph.length) })
     } else {
       onChange(value.trimEnd() + `\n![${alt}](${url})\n`)
     }
@@ -115,26 +139,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
 
   function removeImage(url: string) {
     const esc = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    onChange(
-      value
-        .replace(new RegExp(`\\n?!\\[[^\\]]*\\]\\(${esc}\\)\\n?`, 'g'), '\n')
-        .replace(/\n{3,}/g, '\n\n')
-    )
-  }
-
-  function wrap(marker: string) {
-    const el = ref.current
-    if (!el) return
-    const s = el.selectionStart
-    const e = el.selectionEnd
-    const txt = el.value
-    const sel = txt.slice(s, e) || 'Text'
-    const newDisplay = txt.slice(0, s) + marker + sel + marker + txt.slice(e)
-    onDisplayChange(newDisplay)
-    requestAnimationFrame(() => {
-      el.focus()
-      el.setSelectionRange(s + marker.length, s + marker.length + sel.length)
-    })
+    onChange(value.replace(new RegExp(`\\n?!\\[[^\\]]*\\]\\(${esc}\\)\\n?`, 'g'), '\n').replace(/\n{3,}/g, '\n\n'))
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -150,17 +155,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
       if (data.url) addImage(file.name, data.url)
       else alert('Upload fehlgeschlagen.')
     } catch { alert('Upload fehlgeschlagen.') }
-    finally {
-      setUploading(false)
-      if (fileRef.current) fileRef.current.value = ''
-    }
-  }
-
-  function handleUrlImage() {
-    const url = window.prompt('Bild-URL:')
-    if (!url) return
-    const alt = window.prompt('Beschreibung (optional):') ?? ''
-    addImage(alt, url)
+    finally { setUploading(false); if (fileRef.current) fileRef.current.value = '' }
   }
 
   function handleYoutube() {
@@ -171,18 +166,36 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
   }
 
   const btn = 'w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors text-xs flex-shrink-0'
+  const sep = <div className="w-px h-5 bg-stone-200 mx-0.5" />
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-1 flex-wrap">
+      <div className="flex items-center gap-1 flex-wrap bg-cream/50 rounded-xl p-1.5">
+        {/* Text-Formatierung */}
         <button type="button" onClick={() => wrap('**')} className={btn} title="Fett"><strong>B</strong></button>
         <button type="button" onClick={() => wrap('*')} className={btn + ' italic'} title="Kursiv">I</button>
-        <div className="w-px h-5 bg-stone-200 mx-1" />
-        <button type="button" onClick={handleUrlImage} className={btn} title="Bild-URL">
+        {sep}
+        {/* Überschriften */}
+        <button type="button" onClick={() => insertAtCursor('\n## ')} className={btn} title="Überschrift groß"><span className="font-bold text-[10px]">H2</span></button>
+        <button type="button" onClick={() => insertAtCursor('\n### ')} className={btn} title="Überschrift mittel"><span className="font-bold text-[10px]">H3</span></button>
+        <button type="button" onClick={() => insertAtCursor('\n#### ')} className={btn} title="Überschrift klein"><span className="font-bold text-[9px]">H4</span></button>
+        {sep}
+        {/* Listen */}
+        <button type="button" onClick={() => prefixLines('- ')} className={btn} title="Aufzählung">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <button type="button" onClick={() => prefixLines('1. ')} className={btn} title="Nummerierte Liste">
+          <span className="text-[10px] font-bold">1.</span>
+        </button>
+        <button type="button" onClick={() => prefixLines('   ')} className={btn} title="Einrücken">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+        </button>
+        {sep}
+        {/* Links & Medien */}
+        <button type="button" onClick={insertLink} className={btn} title="Link einfügen">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
         </button>
-        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-          className={btn + (uploading ? ' opacity-50' : '')} title="Bild hochladen">
+        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className={btn + (uploading ? ' opacity-50' : '')} title="Bild hochladen">
           {uploading
             ? <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
             : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
@@ -191,25 +204,28 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         <button type="button" onClick={handleYoutube} className={btn} title="YouTube">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
         </button>
+        {sep}
+        {/* Spezialblöcke */}
+        <button type="button" onClick={insertQuote} className={btn} title="Tipp-Box">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </button>
+        <button type="button" onClick={insertTable} className={btn} title="Tabelle">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M10 3v18M14 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z"/></svg>
+        </button>
+        {sep}
         <div className="relative">
-          <button type="button" onClick={() => setShowEmoji(!showEmoji)} className={btn} title="Emoji einfügen">
-            😊
-          </button>
+          <button type="button" onClick={() => setShowEmoji(!showEmoji)} className={btn} title="Emoji">😊</button>
           {showEmoji && (
             <div className="absolute top-10 left-0 z-50 bg-white border border-stone-200 rounded-xl shadow-lg p-2 grid grid-cols-8 gap-1 w-64">
               {['😀','😂','🥰','😍','🐕','🐾','🐶','🦮','🐩','🐕‍🦺','❤️','🎉','✨','🌟','💪','👏','🙏','✅','🔥','💯','🌿','🍀','🌸','🌺','📸','📅','🏆','🎖️','💉','🩺','📋','🔬'].map((e) => (
-                <button key={e} type="button"
-                  onClick={() => { insertEmoji(e); setShowEmoji(false) }}
-                  className="text-lg hover:bg-cream rounded p-1 transition-colors">
-                  {e}
-                </button>
+                <button key={e} type="button" onClick={() => { insertEmoji(e); setShowEmoji(false) }}
+                  className="text-lg hover:bg-cream rounded p-1 transition-colors">{e}</button>
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Textarea: Bilder erscheinen als kompakte Platzhalter, keine URLs */}
       <textarea
         ref={ref}
         value={displayValue}
@@ -220,7 +236,6 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         style={{ minHeight: `${rows * 1.5}rem` }}
       />
 
-      {/* Bild-Liste mit Vorschau */}
       {images.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {images.map((img, i) => (
