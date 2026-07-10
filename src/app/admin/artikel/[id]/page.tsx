@@ -16,7 +16,8 @@ export default async function AdminArtikelEditPage({ params }: { params: { id: s
   const article = isNew ? null : await prisma.article.findUnique({ where: { id: params.id } })
   if (!isNew && !article) notFound()
 
-  const breeds = await prisma.breed.findMany({ select: { id: true, nameDe: true, slug: true }, orderBy: { nameDe: 'asc' } })
+  const breedsRaw = await prisma.breed.findMany({ select: { id: true, nameDe: true, slug: true }, orderBy: { nameDe: 'asc' } })
+  const breeds = breedsRaw.map((b) => ({ id: String(b.id), nameDe: b.nameDe, slug: b.slug }))
 
   return (
     <>
@@ -33,7 +34,7 @@ export default async function AdminArtikelEditPage({ params }: { params: { id: s
             coverImageUrl: article.coverImageUrl ?? '',
             metaTitle: article.metaTitle ?? '',
             metaDescription: article.metaDescription ?? '',
-            breedId: article.breedId ?? '',
+            breedId: article.breedId ? String(article.breedId) : '',
             authorName: article.authorName ?? '',
             isPublished: article.isPublished,
           } : undefined}
