@@ -11,6 +11,7 @@ export default async function Navbar() {
     { href: '/zuchtrueden', label: 'Deckrüden' },
     { href: '/zuechter', label: 'Züchter' },
     { href: '/rassen', label: 'Rassen' },
+    { href: '/ratgeber', label: 'Ratgeber' },
     { href: '/dienste', label: 'Dienste' },
   ]
 

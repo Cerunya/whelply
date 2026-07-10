@@ -11,6 +11,21 @@ import Link from 'next/link'
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
 export const dynamic = 'force-dynamic'
 
+function renderMarkdown(md: string): string {
+  return md
+    .replace(/^### (.+)$/gm, '<h3 class="font-serif text-xl font-bold text-stone-900 mt-8 mb-3">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="font-serif text-2xl font-bold text-stone-900 mt-10 mb-4">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="font-serif text-3xl font-bold text-stone-900 mt-10 mb-4">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-xl my-6 w-full" />')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-forest underline hover:text-forest-light">$1</a>')
+    .replace(/^- (.+)$/gm, '<li class="ml-4 text-stone-700">$1</li>')
+    .replace(/(<li.*<\/li>\n?)+/g, '<ul class="list-disc space-y-1 my-4">$&</ul>')
+    .replace(/^(?!<[hluoia])((?!<).+)$/gm, '<p class="text-stone-700 leading-relaxed mb-4">$1</p>')
+    .replace(/<p class="text-stone-700 leading-relaxed mb-4"><\/p>/g, '')
+}
+
 export default async function RassenDetailPage({
   params,
 }: {
@@ -21,6 +36,11 @@ export default async function RassenDetailPage({
   })
 
   if (!breed) notFound()
+
+  // Rassen-Artikel (falls vorhanden)
+  const article = await prisma.article.findFirst({
+    where: { breedId: breed.id, category: 'rassen', isPublished: true },
+  })
 
   const listings = await prisma.listing.findMany({
     where: { breedId: breed.id, status: 'available', type: 'puppy' },
@@ -91,8 +111,16 @@ export default async function RassenDetailPage({
                   priceCents={listing.priceCents}
                   isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
                   imageUrl={listing.media[0]?.url}
+                  tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Rassen-Artikel */}
+          {article && (
+            <div className="bg-white rounded-2xl border border-cream-deep p-8 mb-10">
+              <div className="prose-stone" dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }} />
             </div>
           )}
 

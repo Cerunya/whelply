@@ -227,6 +227,7 @@ model Breed {
   litters Litter[]
   listings Listing[]
   alerts  WelpenAlert[]
+  articles Article[]
 
   @@map("breeds")
 }
@@ -599,3 +600,28 @@ model Message {
 // pageTextColor: Textfarbe (default: #44403c)
 // pageHeadingColor: Überschriften-Farbe (default: #1c1917)
 // pageBgFixed: Hintergrundbild fixiert (true) oder scrollend (false)
+
+
+// ─────────────────────────────────────────────
+// ARTIKEL / RATGEBER (SEO-Content)
+// ─────────────────────────────────────────────
+model Article {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  excerpt         String?   @db.Text
+  content         String    @db.Text
+  category        String    @default("ratgeber")  // ratgeber | rassen | news
+  coverImageUrl   String?   @map("cover_image_url")
+  metaTitle       String?   @map("meta_title")
+  metaDescription String?   @map("meta_description") @db.Text
+  breedId         String?   @map("breed_id")
+  breed           Breed?    @relation(fields: [breedId], references: [id])
+  authorName      String?   @map("author_name")
+  isPublished     Boolean   @default(false) @map("is_published")
+  publishedAt     DateTime? @map("published_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("articles")
+}
