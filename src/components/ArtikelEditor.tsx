@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import RichEditor from './RichEditor'
+import { resizeImage } from '@/lib/image-resize'
 
 type Breed = { id: string; nameDe: string; slug: string }
 type Article = {
@@ -21,6 +23,7 @@ type Article = {
 
 export default function ArtikelEditor({ article, breeds }: { article?: Article & { id: string }; breeds: Breed[] }) {
   const router = useRouter()
+  const coverInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState<Article>({
     slug: article?.slug ?? '',
     title: article?.title ?? '',
@@ -35,6 +38,7 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
     isPublished: article?.isPublished ?? false,
   })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -52,6 +56,23 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value, type } = e.target
     setForm({ ...form, [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value })
+  }
+
+  async function handleCoverUpload(files: FileList | null) {
+    if (!files || !files[0]) return
+    setUploading(true)
+    try {
+      const resized = await resizeImage(files[0], 1200, 0.80)
+      const formData = new FormData()
+      formData.append('file', resized)
+      formData.append('purpose', 'article_cover')
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (res.ok) {
+        const data = await res.json()
+        setForm((f) => ({ ...f, coverImageUrl: data.url }))
+      }
+    } catch { setError('Fehler beim Hochladen.') }
+    setUploading(false)
   }
 
   async function handleSubmit() {
@@ -128,19 +149,41 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
         </div>
       </div>
 
+      {/* Titelbild-Upload */}
+      <div>
+        <label className={labelClass}>Titelbild</label>
+        {form.coverImageUrl ? (
+          <div className="relative rounded-xl overflow-hidden bg-cream-dark mb-2" style={{ maxHeight: '200px' }}>
+            <img src={form.coverImageUrl} alt="Titelbild" className="w-full h-full object-cover" />
+            <button onClick={() => setForm({ ...form, coverImageUrl: '' })}
+              className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">✕</button>
+          </div>
+        ) : (
+          <div onClick={() => !uploading && coverInputRef.current?.click()}
+            className="border-2 border-dashed border-stone-200 rounded-xl p-6 text-center cursor-pointer hover:border-forest/40 hover:bg-cream/50 transition-colors">
+            <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+              onChange={(e) => { handleCoverUpload(e.target.files); if (coverInputRef.current) coverInputRef.current.value = '' }} />
+            {uploading ? <p className="text-sm text-forest">Wird hochgeladen…</p> : (
+              <p className="text-sm text-stone-500">Titelbild hochladen (JPG, PNG, WebP)</p>
+            )}
+          </div>
+        )}
+      </div>
+
       <div>
         <label className={labelClass}>Teaser / Auszug</label>
         <textarea name="excerpt" value={form.excerpt} onChange={handleChange} className={inputClass} rows={2} placeholder="Kurze Beschreibung für Vorschaukarten und SEO..." />
       </div>
 
       <div>
-        <label className={labelClass}>Inhalt (Markdown)</label>
-        <textarea name="content" value={form.content} onChange={handleChange} className={`${inputClass} font-mono text-xs`} rows={20} placeholder={'# Überschrift\n\nText hier...'} />
-      </div>
-
-      <div>
-        <label className={labelClass}>Titelbild-URL (optional)</label>
-        <input name="coverImageUrl" value={form.coverImageUrl} onChange={handleChange} className={inputClass} placeholder="https://... oder /api/media/..." />
+        <label className={labelClass}>Inhalt</label>
+        <RichEditor
+          value={form.content}
+          onChange={(val) => setForm({ ...form, content: val })}
+          rows={16}
+          placeholder={'Schreibe deinen Artikel hier...\n\nDu kannst auch Bilder und YouTube-Videos einfügen.'}
+          className={inputClass + ' resize-y'}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

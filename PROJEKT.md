@@ -1178,3 +1178,20 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `breeds.id` ist `Int @id @default(autoincrement())` — NICHT String/cuid
 - Bei Referenzen auf breeds immer `Int` verwenden (nicht String)
 - Im Frontend String↔Int konvertieren: `String(breedId)` für Select-Values, `parseInt(breedId)` für API-Calls
+
+#### ArtikelEditor: Bild-Upload + RichEditor
+- Titelbild: Upload statt URL-Eingabe, nutzt `/api/upload` mit `resizeImage(1200, 0.80)`
+- Inhalt: `RichEditor`-Komponente (wie Über-Uns) statt Markdown-Textarea — Bilder + YouTube einbettbar
+- Vorschau-Link zeigt je nach Kategorie `/rassen/[slug]` oder `/ratgeber/[slug]`
+
+#### FCI-Rassen: Vollständige Liste
+- `prisma/seed-breeds.sql` — ~160 FCI-Rassen auf Deutsch, alle 10 Gruppen
+- Inkl. populäre Designerrassen (Labradoodle, Goldendoodle, Maltipoo etc.)
+- `fci_number` ist NICHT mehr unique (Varietäten teilen sich Nummern: Spitz=97, Dackel=148, Pudel=172)
+- Migration: `20260710010000_breed_fci_not_unique` — entfernt den unique Index
+- Ausführen: `psql -U whelply -d whelply -f prisma/seed-breeds.sql`
+- `ON CONFLICT (slug) DO NOTHING` — überspringt bereits vorhandene Rassen
+
+#### WICHTIG: Breed.fciNumber ist NICHT unique!
+- Varietäten einer Rasse teilen sich die FCI-Nummer
+- Slug ist der einzige unique Identifier neben der Auto-ID

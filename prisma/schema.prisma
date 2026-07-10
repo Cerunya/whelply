@@ -216,7 +216,7 @@ model BreederProfile {
 
 model Breed {
   id         Int    @id @default(autoincrement())
-  fciNumber  Int    @unique @map("fci_number")  // FCI-Rassenummer
+  fciNumber  Int    @map("fci_number")  // FCI-Rassenummer (nicht unique, da Varietäten)
   nameDe     String @map("name_de")             // Offizieller dt. Name
   nameEn     String @map("name_en")
   fciGroup   Int    @map("fci_group")           // FCI-Gruppe 1–10
