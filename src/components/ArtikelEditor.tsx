@@ -65,7 +65,7 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          breedId: form.breedId || null,
+          breedId: form.breedId ? parseInt(form.breedId) : null,
           coverImageUrl: form.coverImageUrl || null,
           metaTitle: form.metaTitle || null,
           metaDescription: form.metaDescription || null,

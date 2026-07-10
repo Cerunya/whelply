@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS "articles" (
   "cover_image_url" TEXT,
   "meta_title" TEXT,
   "meta_description" TEXT,
-  "breed_id" TEXT,
+  "breed_id" INTEGER,
   "author_name" TEXT,
   "is_published" BOOLEAN NOT NULL DEFAULT false,
   "published_at" TIMESTAMP(3),

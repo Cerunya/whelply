@@ -14,7 +14,7 @@ const createSchema = z.object({
   coverImageUrl: z.string().nullable().optional(),
   metaTitle: z.string().nullable().optional(),
   metaDescription: z.string().nullable().optional(),
-  breedId: z.string().nullable().optional(),
+  breedId: z.number().int().nullable().optional(),
   authorName: z.string().nullable().optional(),
   isPublished: z.boolean().default(false),
 })

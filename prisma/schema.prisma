@@ -615,7 +615,7 @@ model Article {
   coverImageUrl   String?   @map("cover_image_url")
   metaTitle       String?   @map("meta_title")
   metaDescription String?   @map("meta_description") @db.Text
-  breedId         String?   @map("breed_id")
+  breedId         Int?      @map("breed_id")
   breed           Breed?    @relation(fields: [breedId], references: [id])
   authorName      String?   @map("author_name")
   isPublished     Boolean   @default(false) @map("is_published")
