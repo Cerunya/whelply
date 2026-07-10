@@ -6,14 +6,14 @@
 export function renderMarkdown(md: string): string {
   let html = md
 
-  // ── Tipp/Info-Boxen: :::tipp ... ::: ──
-  html = html.replace(/:::tipp\n([\s\S]*?):::/g, (_, content) =>
+  // ── Tipp/Info-Boxen: :::tipp ... ::: (mehrzeilig oder einzeilig) ──
+  html = html.replace(/:::tipp\s+([\s\S]*?):::/g, (_, content) =>
     `<div class="bg-forest/5 border-l-4 border-forest rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-forest uppercase tracking-wide mb-1">💡 Tipp</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
   )
-  html = html.replace(/:::info\n([\s\S]*?):::/g, (_, content) =>
+  html = html.replace(/:::info\s+([\s\S]*?):::/g, (_, content) =>
     `<div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">ℹ️ Info</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
   )
-  html = html.replace(/:::warnung\n([\s\S]*?):::/g, (_, content) =>
+  html = html.replace(/:::warnung\s+([\s\S]*?):::/g, (_, content) =>
     `<div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ Achtung</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
   )
 
@@ -23,13 +23,13 @@ export function renderMarkdown(md: string): string {
   )
 
   // ── Tabellen: | col | col | ──
-  html = html.replace(/((?:\|[^\n]+\|\n)+)/g, (table) => {
+  html = html.replace(/((?:^\|[^\n]+\|$\n?)+)/gm, (table) => {
     const rows = table.trim().split('\n').filter((r) => r.trim())
     if (rows.length < 2) return table
     const isHeader = rows[1]?.match(/^\|[\s-:|]+\|$/)
     let out = '<div class="overflow-x-auto my-6"><table class="w-full text-sm border-collapse rounded-xl overflow-hidden">'
     rows.forEach((row, i) => {
-      if (i === 1 && isHeader) return // Skip separator row
+      if (i === 1 && isHeader) return
       const cells = row.split('|').filter((c, ci, arr) => ci > 0 && ci < arr.length - 1)
       const tag = i === 0 && isHeader ? 'th' : 'td'
       const cellClass = i === 0 && isHeader
@@ -73,7 +73,7 @@ export function renderMarkdown(md: string): string {
   })
 
   // ── Horizontale Linie: --- ──
-  html = html.replace(/^---$/gm, '<hr class="border-cream-deep my-8" />')
+  html = html.replace(/^\s*---\s*$/gm, '<hr class="border-cream-deep my-8" />')
 
   // ── Absätze (Zeilen die kein HTML-Tag sind) ──
   html = html.replace(/^(?!<[a-z/])((?!<).+)$/gm, '<p class="text-stone-700 leading-relaxed mb-4">$1</p>')
