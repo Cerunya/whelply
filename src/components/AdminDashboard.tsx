@@ -26,6 +26,18 @@ type Listing = {
   createdAt: string
 }
 
+type Dog = {
+  id: string
+  name: string
+  sex: string
+  isStud: boolean
+  breedName: string
+  kennelName: string
+  listingType: string | null
+  imageUrl: string | null
+  createdAt: string
+}
+
 type Report = {
   id: string
   reason: string
@@ -56,18 +68,20 @@ type Stats = {
 export default function AdminDashboard({
   breeders,
   listings,
+  dogs,
   stats,
   reports,
   allUsers,
 }: {
   breeders: Breeder[]
   listings: Listing[]
+  dogs: Dog[]
   stats: Stats
   reports: Report[]
   allUsers: AdminUser[]
 }) {
   const router = useRouter()
-  const [tab, setTab] = useState<'overview' | 'breeders' | 'listings' | 'reports' | 'users'>('overview')
+  const [tab, setTab] = useState<'overview' | 'breeders' | 'listings' | 'dogs' | 'reports' | 'users'>('overview')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
@@ -102,6 +116,15 @@ export default function AdminDashboard({
     if (!confirm('Nutzer-Konto wirklich löschen?')) return
     setBusyId(id)
     const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+    setBusyId(null)
+    if (res.ok) router.refresh()
+    else alert('Fehler beim Löschen.')
+  }
+
+  async function deleteDog(id: string) {
+    if (!confirm('Hund wirklich löschen? Zugehörige Inserate und Medien werden ebenfalls gelöscht.')) return
+    setBusyId(id)
+    const res = await fetch(`/api/admin/dogs/${id}`, { method: 'DELETE' })
     setBusyId(null)
     if (res.ok) router.refresh()
     else alert('Fehler beim Löschen.')
@@ -172,6 +195,7 @@ export default function AdminDashboard({
           <button onClick={() => setTab('overview')} className={tabClass(tab === 'overview')}>Übersicht</button>
           <button onClick={() => setTab('breeders')} className={tabClass(tab === 'breeders')}>Züchter ({breeders.length})</button>
           <button onClick={() => setTab('listings')} className={tabClass(tab === 'listings')}>Inserate ({listings.length})</button>
+          <button onClick={() => setTab('dogs')} className={tabClass(tab === 'dogs')}>Hunde ({dogs.length})</button>
           <button onClick={() => setTab('reports')} className={tabClass(tab === 'reports')}>
             Meldungen {reports.length > 0 && <span className="ml-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{reports.length}</span>}
           </button>
@@ -315,6 +339,61 @@ export default function AdminDashboard({
             </table>
           </div>
         )}
+
+        {tab === 'dogs' && (
+          <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-cream text-xs text-stone-500 uppercase">
+                <tr>
+                  <th className="text-left px-4 py-3">Hund</th>
+                  <th className="text-left px-4 py-3">Rasse</th>
+                  <th className="text-left px-4 py-3">Züchter</th>
+                  <th className="text-left px-4 py-3">Typ</th>
+                  <th className="text-left px-4 py-3">Erstellt</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cream-deep">
+                {dogs.map((d) => (
+                  <tr key={d.id} className="hover:bg-cream/50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {d.imageUrl && <img src={d.imageUrl} className="w-8 h-8 rounded-lg object-cover" />}
+                        <div>
+                          <p className="font-medium text-stone-900">{d.name}</p>
+                          <p className="text-xs text-stone-400">{d.sex === 'male' ? 'Rüde' : 'Hündin'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-stone-600">{d.breedName}</td>
+                    <td className="px-4 py-3 text-stone-600">{d.kennelName}</td>
+                    <td className="px-4 py-3">
+                      {d.isStud && d.sex === 'male' ? (
+                        <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Deckrüde</span>
+                      ) : d.isStud && d.sex === 'female' ? (
+                        <span className="bg-pink-100 text-pink-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Zuchthündin</span>
+                      ) : d.listingType === 'adult_dog' ? (
+                        <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Erw. Hund</span>
+                      ) : d.listingType === 'puppy' ? (
+                        <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Welpe</span>
+                      ) : (
+                        <span className="bg-stone-100 text-stone-500 text-[10px] font-bold px-2 py-0.5 rounded-full">Zuchthund</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-stone-400 text-xs">{new Date(d.createdAt).toLocaleDateString('de-DE')}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button onClick={() => deleteDog(d.id)} disabled={busyId === d.id}
+                        className="text-red-400 hover:text-red-600 text-xs font-semibold disabled:opacity-50">
+                        {busyId === d.id ? '...' : 'Löschen'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         {tab === 'reports' && (
           <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden">
             <table className="w-full text-sm">

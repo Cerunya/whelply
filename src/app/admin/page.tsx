@@ -10,7 +10,7 @@ export default async function AdminPage() {
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   if (!user || user.role !== 'admin') redirect('/')
 
-  const [breeders, listings, users, stats, reports, nonBreederUsers] = await Promise.all([
+  const [breeders, listings, users, stats, reports, nonBreederUsers, dogs] = await Promise.all([
     prisma.breederProfile.findMany({
       include: {
         user: { select: { email: true, createdAt: true } },
@@ -43,6 +43,16 @@ export default async function AdminPage() {
       where: { role: { not: 'admin' } },
       select: { id: true, email: true, displayName: true, role: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
+    }),
+    prisma.dog.findMany({
+      include: {
+        breed: { select: { nameDe: true } },
+        breeder: { select: { kennelName: true } },
+        listings: { select: { type: true, status: true }, take: 1 },
+        media: { take: 1, select: { url: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
     }),
   ])
 
@@ -84,6 +94,17 @@ export default async function AdminPage() {
         displayName: u.displayName,
         role: u.role,
         createdAt: u.createdAt.toISOString(),
+      }))}
+      dogs={dogs.map((d) => ({
+        id: d.id,
+        name: d.name,
+        sex: d.sex,
+        isStud: d.isStud,
+        breedName: d.breed.nameDe,
+        kennelName: d.breeder?.kennelName ?? '—',
+        listingType: d.listings[0]?.type ?? null,
+        imageUrl: d.media[0]?.url ?? null,
+        createdAt: d.createdAt.toISOString(),
       }))}
       stats={{
         totalUsers: users,

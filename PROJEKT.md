@@ -951,3 +951,230 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 - Level 2: Großeltern (Bild + klickbar)  
 - Level 3: Urgroßeltern (Name)
 - Tabellen-Layout: alle 15 Felder immer sichtbar, fehlende mit "—" und gestricheltem Rand
+
+---
+
+### 📋 AKTUELLE DATEIÜBERSICHT (Stand 2026-07-05)
+
+#### Neue Komponenten (Session 8-9)
+- `DashboardHeader.tsx` — Einheitlicher Header für alle Dashboard-Unterseiten (Whelply | ← Zurück | Titel | Abmelden), h-16, `signOutAction` aus separater Server-Action-Datei
+- `NachrichtButton.tsx` — Modal zum Nachrichtenschreiben, `variant='light'|'dark'`
+- `ConversationView.tsx` — Chat-Ansicht mit Enter-zum-Senden, Auto-Scroll
+- `KontaktForm.tsx` — Kontaktformular mit Honeypot-Spam-Schutz (verstecktes `website_url`-Feld)
+- `DogGalleryUploader.tsx` — Multi-Upload für Hundebilder. Deckrüden: 5er-Grid mit Positions-Dropdown. Hündinnen: simpleMode mit "Als Titelbild setzen"-Button
+- `DogPhotoGrid.tsx` — Client-Component: 5er-Grid oder Einzelbild + Lightbox via `createPortal(document.body)` z-[9999]
+- `DogBgUploader.tsx` — Hintergrundbild-Upload für Deckrüden (purpose='dog_bg')
+- `WelpenAlertButton.tsx` — Alert-Modal mit E-Mail-Eingabe, nur bei aktiver Filterauswahl
+- `BreederStatusToggles.tsx` — isPublished/isActive-Toggles im Dashboard-Header
+
+#### Neue Seiten (Session 8-9)
+- `/dashboard/ueber-uns` — Bio-Editor (RichEditor), Kartenbild bleibt in ProfilForm
+- `/dashboard/nachrichten` — Posteingang (beide Rollen), Ungelesen-Indikator
+- `/dashboard/nachrichten/[id]` — Einzelne Konversation, Date-Serialisierung
+- `/zuechter/[slug]/kontakt` — Kontaktformular im Züchter-Layout
+- `/zuechter/[slug]/hund/[id]` — Hund-Detail im Züchter-Layout (für Zuchthündinnen)
+- `/welpen-alert/abmelden/[token]` — DSGVO-Abmeldeseite
+- `/api/messages` — GET (Liste) / POST (neue Nachricht senden)
+- `/api/messages/[id]` — GET (Conversation + als gelesen markieren) / POST (Antwort)
+- `/api/welpen-alert` — POST (Alert anlegen mit unsubscribeToken + Bestätigungsmail)
+- `/api/cron/welpen-alerts` — GET (täglicher Versand via Resend)
+- `/app/actions/auth.ts` — Server Action `signOutAction()` (aus DashboardHeader importiert)
+
+#### Neue DB-Tabellen (Session 8-9)
+- `conversations` — userId + breederId (unique), Timestamps
+- `messages` — conversationId, senderRole ('user'|'breeder'), content, readAt
+- `welpen_alerts` — email, breedId?, state?, unsubscribeToken (unique), lastSentAt
+
+#### Wichtige Regeln & Patterns
+- **Wurfname**: IMMER prominent anzeigen (`l.name || l.breed.nameDe`), Rasse als Detail darunter
+- **Bild-Auswahl für Hunde**: `purpose='primary'` → `isPrimary=true` (ohne dog_bg) → erstes Nicht-dog_bg-Bild
+- **Media-Ordering**: `orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }]`
+- **Deckrüden-Features** (nur `isStud=true AND sex='male'`): 5er-Grid, Positions-Dropdown, Hintergrundbild (dog_bg), eigene Seite `/hund/[id]`
+- **Zuchthündinnen** (`isStud=true AND sex='female'`): simpleMode, Titelbild-Auswahl, Detailseite im Züchter-Layout `/zuechter/[slug]/hund/[id]`
+- **Nachrichten-Badge**: Query prüft BEIDE Seiten (als breederId UND als userId in Konversationen)
+- **`force-dynamic`**: auf ALLEN Dashboard-Seiten und öffentlichen Datenseiten
+- **Lightbox**: immer via `createPortal(document.body)` rendern, z-[9999]
+- **DashboardHeader**: alle Unterseiten nutzen `DashboardHeader` mit `backHref`/`backLabel`/`action`
+
+#### Middleware alwaysAllowed (vollständig)
+`['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/api/upload', '/api/media', '/api/media-item', '/api/profil', '/api/hunde', '/api/news', '/api/admin', '/api/bookmarks', '/api/reports', '/api/reviews', '/api/upgrade-to-breeder', '/api/user-profile', '/api/welpen-alert', '/api/cron', '/api/messages', '/welpen-alert', '/admin', '/preview', '/_next', '/favicon.ico']`
+
+#### Infrastruktur
+- `resend` npm-Package für E-Mail-Versand
+- `.gitignore`: `node_modules/`, `.next/`, `.env*`
+- Coolify Env-Vars: `RESEND_API_KEY`, `CRON_SECRET`
+- cron-job.org: `GET https://whelply.de/api/cron/welpen-alerts?secret=CRON_SECRET` täglich 08:00
+
+---
+
+### ✅ Weitere Änderungen (2026-07-08) — FERTIG
+
+#### Deckrüden-Seiten-Design (individuell pro Hund)
+- Neue DB-Felder auf `dogs`: `page_card_color`, `page_text_color`, `page_heading_color`, `page_bg_fixed`
+- Migration: `20260705010000_dog_page_style`
+- Im Backend (HundEditForm): Color-Picker für Karten-Hintergrund, Textfarbe, Überschriften; Dropdown für Hintergrundbild fixiert/scrollend — nur bei Deckrüden sichtbar
+- Öffentliche Seite (`/hund/[id]`): Inhaltskarten verwenden die Custom-Farben; Hintergrundbild `fixed` oder `absolute` je nach Einstellung
+
+#### Mobile Stammbaum
+- Desktop: Tabellen-Layout (8 Spalten, alle 15 Positionen)
+- Mobile (`md:hidden`): vertikales Layout mit `PedigreeBranch`-Komponente — Vater-Linie und Mutter-Linie untereinander, jeweils mit Großeltern und Urgroßeltern eingerückt
+- `MiniCard`-Komponente für Urgroßeltern (Name + Label)
+
+#### Unsere Hunde — alle Hunde anzeigen
+- Dashboard: "Meine Hunde" zeigt ALLE Hunde (nicht nur isStud=true)
+- Öffentliche Seite: Query ohne `isStud`-Filter; Sektionen "Hündinnen" (oben) und "Rüden" (unten)
+- Welpen werden über `listings: { none: { type: 'puppy' } }` ausgefiltert
+- isStud steuert nur: Deckrüde-Badge + Link zu `/hund/[id]` vs. normaler Badge + Link zu `/zuechter/[slug]/hund/[id]`
+- Mobile: `flex-col md:flex-row`, Bild oben (h-48), Text darunter; Desktop: feste Höhe `md:h-[220px]`
+
+#### Deckrüden-Übersicht (`/zuchtrueden`)
+- Titel und Navbar: "Zuchtrüden" → "Deckrüden"
+- Mobile: `aspect-square sm:aspect-[4/3]` für bessere Bilddarstellung
+- Bild-Auswahl: kein `take`-Limit mehr; expliziter `purpose === null` Check verhindert dass dog_bg als Kartenbild erscheint
+
+#### Homepage
+- "Hunde zu vergeben" → "Erwachsene Hunde"
+- "Erwachsene Hunde" (Untertitel) → "Hunde jeden Alters"
+- Züchter-Bild: `purpose: 'card'` statt `purpose: 'background'`
+- Filter: nur Züchter MIT Kartenbild werden angezeigt
+
+#### HundEditForm
+- Nach Speichern: `window.scrollTo({ top: 0, behavior: 'smooth' })`
+- "+ Weiteren Hund eintragen" Link entfernt (war nur für Welpen relevant)
+- "Profil ansehen" Link: `flex-col` auf Mobile für bessere Sichtbarkeit
+- Style-Felder (pageCardColor, pageTextColor, pageHeadingColor, pageBgFixed) werden an API gesendet
+
+#### Bildkompression
+- `ImageUploader.tsx`: 1200px statt 1920px, 80% statt 85% Qualität — ca. halbe Dateigröße
+
+#### Cron-Job: Welpen-Aufräumung
+- `GET /api/cron/cleanup?secret=CRON_SECRET` — löscht Dog-Einträge verkaufter Welpen nach 3 Monaten
+- Prüft: `listings.every(type='puppy', status='sold')` + `updatedAt < 90 Tage`
+- Bei cron-job.org als wöchentlichen Job einrichten
+
+#### Upload-API Bug-Fix
+- `purpose: { not: 'dog_bg' }` in PostgreSQL schloss NULL-Werte aus → jeder neue Upload wurde isPrimary=true
+- Fix: `OR: [{ purpose: null }, { purpose: { not: 'dog_bg' } }]`
+
+#### WICHTIGE REGELN (ergänzt)
+- **Prisma/PostgreSQL**: `purpose: { not: 'dog_bg' }` schließt NULL aus! Immer `OR: [{ purpose: null }, { purpose: { not: 'dog_bg' } }]` verwenden
+- **Bild-Auswahl Reihenfolge**: `purpose='primary'` → `isPrimary=true && purpose===null` → `purpose===null` → `purpose!=='dog_bg'`
+- **Media orderBy**: `[{ isPrimary: 'desc' }, { sortOrder: 'asc' }]` — kein `take`-Limit wenn purpose-Suche nötig
+- **Deckrüden-Features**: nur bei `isStud=true AND sex='male'` — Grid, Hintergrund, Farbauswahl, eigene Seite `/hund/[id]`
+
+---
+
+### ✅ Weitere Änderungen (2026-07-09) — FERTIG
+
+#### Deckrüden-Seite: Hintergrund & Styling
+- Äußerer Wrapper-Container (`<div>`) mit `backgroundColor: pageBgColor` umschließt Navbar + main + Footer → kein weißer Bereich mehr am Ende
+- Ein großer Inhalts-Rahmen (`rounded-2xl`, `backgroundColor: pageCardColor`) umschließt Foto-Grid + alle Karten
+- Einzelne Karten bleiben weiß (`#ffffff`), nur der umgebende Container bekommt `pageCardColor`
+- Gradient-Overlay: `transparent 0px → transparent 85vh → bgColor90 95vh → bgColor 100vh` — Bild oben sichtbar, sanfter Übergang unten
+- Hintergrundbild-Container: `height: 100vh` bei fixiert UND scrollend — kein Zooming mehr bei scrollend
+- `pageBgColor` — neue DB-Spalte für Seiten-Hintergrundfarbe (hinter dem Bild + am Ende der Seite)
+- Migration: `20260708010000_dog_page_bg_color`
+- Alle `cardStyle`/`hStyle`-Variablen durch direkte `dog.pageXxxColor`-Zugriffe ersetzt (IIFE-Scope-Problem)
+
+#### Züchterseiten: Hintergrund-Optionen (wie Deckrüden)
+- Neue DB-Felder auf `breeder_profiles`: `theme_bg_fixed` (boolean), `theme_bg_overlay` (text)
+- Migration: `20260708020000_breeder_bg_options`
+- `BreederHeaderData`-Typ: `themeBgFixed` und `themeBgOverlay` hinzugefügt
+- `BreederPageHeader.tsx`: fixiert/scrollend Hintergrundbild, Gradient-Overlay, Body-Background via `<style>`-Tag
+- `ThemeEditor.tsx`: Dropdown "Verhalten" (Fixiert/Scrollt mit) + Color-Picker "Seitenfarbe"
+- `profil` API: `themeBgFixed` und `themeBgOverlay` in Schema + Update
+
+#### Footer-Fix bei fixiertem Hintergrund
+- `Footer.tsx`: `relative z-10` hinzugefügt
+- `BreederFooter.tsx`: `relative z-10` hinzugefügt
+- Problem war: fixierter Hintergrund (z-0) überdeckte die Footer
+
+#### WICHTIGE REGELN (ergänzt)
+- **Footer**: IMMER `relative z-10` auf Footer-Komponenten, damit sie über fixierten Hintergründen sichtbar bleiben
+- **IIFE-Scope**: Keine Variablen innerhalb von IIFEs definieren und außerhalb referenzieren — stattdessen direkt `dog.xyz` / `breeder.xyz` nutzen
+- **Hintergrundbild-Höhe**: Immer `height: 100vh` setzen, nie `inset-0` bei absolute (sonst dehnt sich Bild über gesamte Seitenhöhe)
+- **Wurfname**: IMMER prominent anzeigen (`l.name || l.breed.nameDe`), Rasse als Detail darunter — gilt überall wo Würfe angezeigt werden
+
+---
+
+### 📁 DATEIPFADE — Wohin die Dateien müssen
+
+Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Output entspricht 1:1 der im Projekt.
+
+#### Komponenten → `src/components/`
+- `Navbar.tsx`
+- `Footer.tsx`
+- `BreederFooter.tsx`
+- `BreederPageHeader.tsx`
+- `BreederPageContent.tsx`
+- `BreederContactSidebar.tsx`
+- `BreederNavbar.tsx`
+- `ThemeEditor.tsx`
+- `HundEditForm.tsx`
+- `DogGalleryUploader.tsx`
+- `DogPhotoGrid.tsx`
+- `DogBgUploader.tsx`
+- `ImageUploader.tsx`
+- `NachrichtButton.tsx`
+- `ConversationView.tsx`
+- `KontaktForm.tsx`
+- `WelpenAlertButton.tsx`
+- `DashboardHeader.tsx`
+- `ListingImageGallery.tsx`
+
+#### Seiten → `src/app/...`
+- `src/app/page.tsx` — Homepage
+- `src/app/zuchtrueden/page.tsx` — Deckrüden-Übersicht
+- `src/app/hund/[id]/page.tsx` — Deckrüden-Detailseite (öffentlich)
+- `src/app/zuechter/[slug]/page.tsx` — Züchter-Hauptseite
+- `src/app/zuechter/[slug]/zuchthunde/page.tsx` — Unsere Hunde
+- `src/app/zuechter/[slug]/hund/[id]/page.tsx` — Hund-Detail im Züchter-Layout
+- `src/app/zuechter/[slug]/kontakt/page.tsx` — Kontaktformular
+- `src/app/dashboard/page.tsx` — Züchter-Dashboard
+- `src/app/dashboard/hund/[id]/page.tsx` — Hund bearbeiten
+- `src/app/dashboard/theme/page.tsx` — Theme-Editor
+- `src/app/dashboard/nachrichten/page.tsx` — Posteingang
+- `src/app/dashboard/nachrichten/[id]/page.tsx` — Einzelne Konversation
+
+#### API-Routen → `src/app/api/...`
+- `src/app/api/hunde/[id]/route.ts` — Hund CRUD
+- `src/app/api/media-item/[id]/route.ts` — Media PATCH/DELETE (isPrimary, purpose)
+- `src/app/api/upload/route.ts` — Bild-Upload
+- `src/app/api/profil/route.ts` — Züchter-Profil + Theme
+- `src/app/api/messages/route.ts` — Nachrichten
+- `src/app/api/messages/[id]/route.ts` — Konversation
+- `src/app/api/welpen-alert/route.ts` — Welpen-Alerts
+- `src/app/api/cron/welpen-alerts/route.ts` — Täglicher Alert-Versand
+- `src/app/api/cron/cleanup/route.ts` — Welpen-Aufräumung (3 Monate)
+
+#### Sonstiges
+- `src/app/actions/auth.ts` — Server Action signOutAction
+- `src/lib/mail-alerts.ts` — Welpen-Alert E-Mail-Versand
+- `prisma/schema.prisma` — Datenbankschema
+- `prisma/migrations/` — Migrationen (SQL ausführen + resolve)
+- `.gitignore`
+
+---
+
+### ✅ Weitere Änderungen (2026-07-10) — FERTIG
+
+#### Artikel-System (SEO-Infrastruktur)
+- Neues `Article`-Model: slug, title, excerpt, content (Markdown), category (ratgeber/rassen/news), coverImageUrl, SEO-Felder, breedId (Int, FK auf breeds), isPublished, publishedAt
+- Migration: `20260709010000_articles`
+- API: `GET/POST /api/artikel`, `GET/PATCH/DELETE /api/artikel/[id]` — Admin-only
+- `ArtikelEditor.tsx`: Titel, Auto-Slug, Kategorie, Rassen-Dropdown (Int→String Konvertierung!), Markdown-Textarea, Titelbild-URL, SEO-Felder, Veröffentlichungs-Checkbox
+- Admin: `/admin/artikel` (Liste), `/admin/artikel/neu` und `/admin/artikel/[id]` (Editor) — Link im Admin-Dashboard-Overview
+- Öffentlich: `/ratgeber` (Übersicht nach Kategorien), `/ratgeber/[slug]` (Detail mit Markdown-Rendering, Breadcrumb, SEO-Meta)
+- `/rassen/[slug]` erweitert: zeigt Rassen-Artikel wenn vorhanden
+- Navbar: "Ratgeber"-Link hinzugefügt
+- Middleware: `/api/artikel` zur Whitelist
+
+#### Admin: Hunde-Verwaltung
+- Neuer "Hunde"-Tab im Admin-Dashboard mit Tabelle: Name, Rasse, Züchter, Typ-Badge (Deckrüde/Zuchthündin/Erw. Hund/Welpe/Zuchthund), Erstellungsdatum, Löschen-Button
+- `DELETE /api/admin/dogs/[id]` — löscht Listings + Media + Dog
+- Admin-Page (`/admin/page.tsx`) fetcht jetzt auch Dogs mit Breed, Breeder, Listings, Media
+
+#### WICHTIG: Breed-ID ist Int!
+- `breeds.id` ist `Int @id @default(autoincrement())` — NICHT String/cuid
+- Bei Referenzen auf breeds immer `Int` verwenden (nicht String)
+- Im Frontend String↔Int konvertieren: `String(breedId)` für Select-Values, `parseInt(breedId)` für API-Calls
