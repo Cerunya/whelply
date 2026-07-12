@@ -12,6 +12,7 @@ import { generateBreederMetadata } from '@/lib/breeder-metadata'
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   return generateBreederMetadata(params.slug, '/zuchthunde', 'Zuchthunde')
+}
 
 export const dynamic = 'force-dynamic'
 
