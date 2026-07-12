@@ -27,7 +27,7 @@ export type BreederHeaderData = {
   themeBgOverlay: string | null
   subdomain: string | null
   isPublished: boolean
-  media: { purpose: string | null; storageKey: string }[]
+  media: { url: string; purpose: string | null }[]
   socialInstagram: string | null
   socialFacebook: string | null
   socialTiktok: string | null
@@ -123,7 +123,10 @@ export async function getBreederBySlug(slug: string): Promise<BreederHeaderData 
     themeBgOverlay: breeder.themeBgOverlay,
     subdomain: breeder.subdomain,
 	isPublished: breeder.isPublished ?? true,
-	media: breeder.media,
+	media: breeder.media.map((m) => ({
+      url: `/api/media/${m.storageKey}/view`,
+      purpose: m.purpose,
+    })),
     socialInstagram: breeder.socialInstagram,
     socialFacebook: breeder.socialFacebook,
     socialTiktok: breeder.socialTiktok,
