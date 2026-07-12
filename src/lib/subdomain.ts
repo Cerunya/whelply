@@ -71,3 +71,5 @@ export function getBreederCanonicalUrl(
   // Fallback: /zuechter/slug/path
   return `${base}/zuechter/${slug}${path}`
 }
+
+export const validateSubdomain = isValidSubdomain
