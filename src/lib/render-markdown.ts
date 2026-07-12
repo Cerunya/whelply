@@ -1,14 +1,57 @@
 /**
  * Einfacher Markdown→HTML Renderer für Artikel-Inhalte.
  * Unterstützt: Überschriften (H1-H4), Fett, Kursiv, Links, Bilder, Listen,
- * nummerierte Listen, Tabellen, Tipp-Boxen (:::tipp), YouTube-Embeds, Blockquotes.
+ * nummerierte Listen, Tabellen, Tipp/Info/Warnung-Boxen, Produkt-Karten,
+ * YouTube-Embeds, Blockquotes.
  */
-export function renderMarkdown(md: string): string {
+
+export type ProductData = {
+  asin: string
+  name: string
+  imageUrl: string | null
+  description: string | null
+  affiliateTag: string
+  priceCents: number | null
+  isAvailable: boolean
+}
+
+/** Extrahiert alle ASINs aus dem Markdown-Content */
+export function extractAsins(md: string): string[] {
+  const matches = md.matchAll(/:::produkt\[([A-Z0-9]{10})\]/g)
+  return [...new Set([...matches].map((m) => m[1]))]
+}
+
+export function renderMarkdown(md: string, products?: Map<string, ProductData>): string {
   let html = md
+
+  // ── Produkt-Karten: :::produkt[ASIN] ──
+  html = html.replace(/:::produkt\[([A-Z0-9]{10})\]/g, (_, asin) => {
+    const p = products?.get(asin)
+    if (!p) return `<p class="text-stone-400 text-sm my-4">[Produkt ${asin} nicht gefunden]</p>`
+    if (!p.isAvailable) return ''
+
+    const url = `https://www.amazon.de/dp/${p.asin}?tag=${p.affiliateTag}`
+    const img = p.imageUrl
+      ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-24 h-24 md:w-28 md:h-28 rounded-xl object-contain flex-shrink-0" />`
+      : `<div class="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-cream flex items-center justify-center flex-shrink-0"><svg class="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>`
+    const desc = p.description ? `<p class="text-stone-500 text-sm mt-1">${p.description}</p>` : ''
+
+    return `<div class="my-6 bg-white border border-cream-deep rounded-2xl p-4 flex gap-4 items-center hover:shadow-sm transition-shadow">
+      <a href="${url}" target="_blank" rel="noopener nofollow sponsored">${img}</a>
+      <div class="flex-1 min-w-0">
+        <a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="font-semibold text-stone-900 hover:text-forest transition-colors block">${p.name}</a>
+        ${desc}
+        <a href="${url}" target="_blank" rel="noopener nofollow sponsored"
+           class="inline-block mt-3 bg-honey text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-honey-light transition-colors">
+          Bei Amazon ansehen →
+        </a>
+      </div>
+    </div>`
+  })
 
   // ── Tipp/Info-Boxen: :::tipp ... ::: (mehrzeilig oder einzeilig) ──
   html = html.replace(/:::tipp\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-forest/5 border-l-4 border-forest rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-forest uppercase tracking-wide mb-1">💡 Tipp</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
+    `<div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">💡 Tipp</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
   )
   html = html.replace(/:::info\s+([\s\S]*?):::/g, (_, content) =>
     `<div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">ℹ️ Info</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`

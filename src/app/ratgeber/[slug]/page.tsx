@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-import { renderMarkdown } from '@/lib/render-markdown'
+import { renderMarkdown, extractAsins } from '@/lib/render-markdown'
 
 export default async function RatgeberDetailPage({ params }: { params: { slug: string } }) {
   const article = await prisma.article.findUnique({
@@ -29,6 +29,14 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
     include: { breed: { select: { nameDe: true, slug: true } } },
   })
   if (!article || !article.isPublished) notFound()
+
+  // Produkte für :::produkt[ASIN] Shortcodes laden
+  const asins = extractAsins(article.content)
+  const productsMap = new Map()
+  if (asins.length > 0) {
+    const products = await prisma.product.findMany({ where: { asin: { in: asins } } })
+    products.forEach((p) => productsMap.set(p.asin, p))
+  }
 
   return (
     <>
@@ -61,7 +69,7 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
               {article.publishedAt && <span>· {new Date(article.publishedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
             </div>
 
-            <div dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }} />
+            <div dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content, productsMap) }} />
 
             {article.breed && (
               <div className="mt-10 pt-8 border-t border-cream-deep">

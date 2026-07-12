@@ -1195,3 +1195,28 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 #### WICHTIG: Breed.fciNumber ist NICHT unique!
 - Varietäten einer Rasse teilen sich die FCI-Nummer
 - Slug ist der einzige unique Identifier neben der Auto-ID
+
+#### Affiliate-Produkt-System
+- `Product`-Model: ASIN (unique), Name, Bild (selbst gehostet), Kategorie, Beschreibung, Affiliate-Tag, optionales Preis-Feld (priceCents + priceUpdatedAt)
+- Migration: `20260712020000_products`
+- Admin: `/admin/produkte` — Produkte anlegen, bearbeiten, löschen (mit Bild-Upload)
+- API: `GET/POST /api/produkte`, `PATCH/DELETE /api/produkte/[id]`
+- RichEditor: Warenkorb-Button → ASIN eingeben → `:::produkt[ASIN]` Shortcode
+- Rendering: `renderMarkdown()` akzeptiert optional eine `Map<string, ProductData>` — Artikel-Seiten extrahieren ASINs aus dem Content, laden Produkte aus DB, übergeben sie
+- Produktkarte: Bild links, Name + Beschreibung rechts, "Bei Amazon ansehen →" Button mit Affiliate-Tag
+- Kein Preis angezeigt (optional vorhanden für spätere PA-API Integration)
+- Affiliate-Link: `https://www.amazon.de/dp/{ASIN}?tag={affiliateTag}` mit `rel="noopener nofollow sponsored"`
+- **PA-API Vorbereitung**: priceCents, priceUpdatedAt, isAvailable Felder existieren bereits. Später kann ein Cron-Job (`/api/cron/update-products`) die Amazon PA-API abfragen und Preise + Verfügbarkeit automatisch aktualisieren (erfordert 3 qualifizierte Sales in 180 Tagen für API-Zugang)
+
+#### Passwort-Management
+- **Passwort ändern** (eingeloggt): Altes PW prüfen → neues PW hashen → Bestätigungsmail → Token-Link → PW gespeichert + alle Sessions gelöscht
+- **Passwort vergessen** (nicht eingeloggt): E-Mail eingeben → Reset-Link → neues PW setzen
+- DB: `password_change_requests` + `password_reset_tokens` Tabellen
+- Migration: `20260712010000_password_tokens`
+- Token: bcrypt-gehasht in DB, Klartext nur in E-Mail
+- Rate-Limiting: max 3 offene Anfragen pro User
+- Züchter: Passwort ändern auf `/dashboard/profil` (unter Profilformular)
+- Nutzer: Passwort ändern auf `/dashboard/nutzer`
+- Login: "Passwort vergessen?" Link → `/passwort-vergessen`
+- Route-Schutz: Züchter können `/dashboard/nutzer` nicht aufrufen (redirect → `/dashboard`)
+- Mail: Shared `src/lib/mail.ts` Utility mit Resend API

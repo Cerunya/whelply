@@ -224,6 +224,13 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         <button type="button" onClick={() => insertAtCursor('\n---\n')} className={btn} title="Trennlinie">
           <span className="text-stone-400 text-[10px]">—</span>
         </button>
+        <button type="button" onClick={() => {
+          const asin = window.prompt('Amazon ASIN eingeben (10 Zeichen):')
+          if (asin && /^[A-Z0-9]{10}$/.test(asin.trim())) insertAtCursor(`\n:::produkt[${asin.trim()}]\n`)
+          else if (asin) alert('Ungültige ASIN. Muss 10 Zeichen (A-Z, 0-9) sein.')
+        }} className={btn} title="Amazon-Produkt einfügen">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        </button>
         {sep}
         <div className="relative">
           <button type="button" onClick={() => setShowEmoji(!showEmoji)} className={btn} title="Emoji">😊</button>

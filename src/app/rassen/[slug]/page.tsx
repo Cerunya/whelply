@@ -11,7 +11,7 @@ import Link from 'next/link'
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
 export const dynamic = 'force-dynamic'
 
-import { renderMarkdown } from '@/lib/render-markdown'
+import { renderMarkdown, extractAsins } from '@/lib/render-markdown'
 
 export default async function RassenDetailPage({
   params,
@@ -28,6 +28,16 @@ export default async function RassenDetailPage({
   const article = await prisma.article.findFirst({
     where: { breedId: breed.id, category: 'rassen', isPublished: true },
   })
+
+  // Produkte für :::produkt[ASIN] Shortcodes laden
+  const productsMap = new Map()
+  if (article) {
+    const asins = extractAsins(article.content)
+    if (asins.length > 0) {
+      const products = await prisma.product.findMany({ where: { asin: { in: asins } } })
+      products.forEach((p) => productsMap.set(p.asin, p))
+    }
+  }
 
   const listings = await prisma.listing.findMany({
     where: { breedId: breed.id, status: 'available', type: 'puppy' },
@@ -107,7 +117,7 @@ export default async function RassenDetailPage({
           {/* Rassen-Artikel */}
           {article && (
             <div className="bg-white rounded-2xl border border-cream-deep p-8 mb-10">
-              <div className="prose-stone" dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }} />
+              <div className="prose-stone" dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content, productsMap) }} />
             </div>
           )}
 
