@@ -26,6 +26,7 @@ export type BreederHeaderData = {
   themeBgFixed: boolean
   themeBgOverlay: string | null
   subdomain: string | null
+  isPublished: boolean
   socialInstagram: string | null
   socialFacebook: string | null
   socialTiktok: string | null
@@ -71,6 +72,7 @@ export async function getBreederBySlug(slug: string): Promise<BreederHeaderData 
       themeBgFixed: true,
       themeBgOverlay: true,
       subdomain: true,
+	  isPublished: true,
       socialInstagram: true,
       socialFacebook: true,
       socialTiktok: true,
@@ -119,6 +121,7 @@ export async function getBreederBySlug(slug: string): Promise<BreederHeaderData 
     themeBgFixed: breeder.themeBgFixed ?? false,
     themeBgOverlay: breeder.themeBgOverlay,
     subdomain: breeder.subdomain,
+	isPublished: breeder.isPublished ?? true,
     socialInstagram: breeder.socialInstagram,
     socialFacebook: breeder.socialFacebook,
     socialTiktok: breeder.socialTiktok,
