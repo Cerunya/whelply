@@ -101,8 +101,37 @@ model User {
   reports         Report[]
   bookmarks       Bookmark[]
   conversations   Conversation[]
+  passwordChangeRequests PasswordChangeRequest[]
+  passwordResetTokens    PasswordResetToken[]
 
   @@map("users")
+}
+
+model PasswordChangeRequest {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  newPasswordHash String   @map("new_password_hash")
+  tokenHash       String   @map("token_hash")
+  expiresAt       DateTime @map("expires_at")
+  usedAt          DateTime? @map("used_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_change_requests")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }
 
 // Auth.js Pflicht-Tabellen

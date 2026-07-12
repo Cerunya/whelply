@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import Navbar from '@/components/Navbar'
 import Link from 'next/link'
 import NutzerNameForm from '@/components/NutzerNameForm'
+import PasswortAendernForm from '@/components/PasswortAendernForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +51,12 @@ export default async function NutzerDashboardPage() {
           <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-4">
             <h2 className="font-semibold text-stone-800 text-sm mb-3">Mein Name</h2>
             <NutzerNameForm initialName={user.displayName ?? ''} />
+          </div>
+
+          {/* Passwort ändern */}
+          <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-4">
+            <h2 className="font-semibold text-stone-800 text-sm mb-3">Passwort ändern</h2>
+            <PasswortAendernForm />
           </div>
 
           {/* Links */}
