@@ -106,7 +106,7 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
     setSubdomainStatus('checking')
     if (checkTimer.current) clearTimeout(checkTimer.current)
     checkTimer.current = setTimeout(async () => {
-      const res = await fetch(`/api/subdomain-check?sub=${subdomain}`).catch(() => null)
+      const res = await fetch(`/api/profil/check-subdomain?subdomain=${subdomain}`).catch(() => null)
       if (!res) return
       const data = await res.json().catch(() => ({}))
       setSubdomainStatus(data.available ? 'available' : 'taken')
