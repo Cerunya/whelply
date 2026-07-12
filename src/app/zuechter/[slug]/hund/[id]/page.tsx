@@ -9,6 +9,11 @@ import BreederPageContent from '@/components/BreederPageContent'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 import DogPhotoGrid from '@/components/DogPhotoGrid'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import { generateBreederMetadata } from '@/lib/breeder-metadata'
+
+export async function generateMetadata({ params }: { params: { slug: string; id: string } }) {
+  return generateBreederMetadata(params.slug, `/hund/${params.id}`, 'Zuchthund')
+}
 
 export const dynamic = 'force-dynamic'
 

@@ -8,6 +8,10 @@ import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import { generateBreederMetadata } from '@/lib/breeder-metadata'
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  return generateBreederMetadata(params.slug, '/zuchthunde', 'Zuchthunde')
 
 export const dynamic = 'force-dynamic'
 

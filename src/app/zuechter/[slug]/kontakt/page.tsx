@@ -7,6 +7,10 @@ import BreederContactSidebar from '@/components/BreederContactSidebar'
 import BreederFooter from '@/components/BreederFooter'
 import KontaktForm from '@/components/KontaktForm'
 import { auth } from '@/lib/auth'
+import { generateBreederMetadata } from '@/lib/breeder-metadata'
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  return generateBreederMetadata(params.slug, '/kontakt', 'Kontakt')
 
 export const dynamic = 'force-dynamic'
 

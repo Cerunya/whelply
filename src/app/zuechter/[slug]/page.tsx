@@ -11,6 +11,13 @@ import ReviewSection from '@/components/ReviewSection'
 import NachrichtButton from '@/components/NachrichtButton'
 import { auth } from '@/lib/auth'
 
+
+import { generateBreederMetadata } from '@/lib/breeder-metadata'
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  return generateBreederMetadata(params.slug)
+}
+
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
 export const dynamic = 'force-dynamic'

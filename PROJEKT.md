@@ -1220,3 +1220,21 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - Login: "Passwort vergessen?" Link → `/passwort-vergessen`
 - Route-Schutz: Züchter können `/dashboard/nutzer` nicht aufrufen (redirect → `/dashboard`)
 - Mail: Shared `src/lib/mail.ts` Utility mit Resend API
+
+#### Wildcard-Subdomain Infrastruktur (erledigt)
+- **DNS**: Cloudflare als DNS-Provider (kostenlos), Domain bleibt bei Febas registriert. Nameserver bei Febas auf Cloudflare umgestellt. Alle Records auf "DNS only" (graue Wolke, kein Proxy).
+- **Wildcard A-Record**: `*.whelply.de` → Server-IP bei Cloudflare angelegt
+- **Traefik**: Zwei Certificate-Resolver konfiguriert:
+  - `letsencrypt` (HTTP-01) → für sweethomelab.de, kebabkarte.de, pooppee.de
+  - `letsencrypt-dns` (DNS-01 via Cloudflare) → nur für whelply.de
+  - Cloudflare API Token als `CLOUDFLARE_DNS_API_TOKEN` in docker-compose.yml
+- **Pangolin config.yml**: `prefer_wildcard_cert: true` + `cert_resolver: letsencrypt-dns` für whelply.de
+- **Status**: Wildcard-Zertifikat `*.whelply.de` erfolgreich ausgestellt, HTTPS funktioniert für beliebige Subdomains
+- **Backups**: docker-compose.yml.bak, traefik_config.yml.bak, config.yml.bak existieren
+
+#### TODO: Subdomain-Routing (nächster Schritt)
+- Neues Feld `subdomain` auf `breeder_profiles` (unique, lowercase, validiert)
+- Next.js Middleware: erkennt Subdomains und schreibt um → `bella.whelply.de/` → `/zuechter/bella`
+- Dashboard: Züchter wählt Wunsch-Subdomain
+- SEO: Canonical-Tags auf Subdomain-URLs
+- Bestehende `/zuechter/[slug]`-Routes bleiben als Fallback

@@ -7,6 +7,11 @@ import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
+import { generateBreederMetadata } from '@/lib/breeder-metadata'
+
+export async function generateMetadata({ params }: { params: { slug: string; litterId: string } }) {
+  return generateBreederMetadata(params.slug, `/wuerfe/${params.litterId}`, 'Wurfdetail')
+}
 
 export const dynamic = 'force-dynamic'
 

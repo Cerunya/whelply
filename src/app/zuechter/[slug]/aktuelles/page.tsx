@@ -8,6 +8,11 @@ import BreederPageContent from '@/components/BreederPageContent'
 import { renderRichText } from '@/lib/richtext'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
+import { generateBreederMetadata } from '@/lib/breeder-metadata'
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  return generateBreederMetadata(params.slug, '/aktuelles', 'Neuigkeiten')
+}
 
 export const dynamic = 'force-dynamic'
 

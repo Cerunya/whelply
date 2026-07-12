@@ -8,6 +8,12 @@ import GalleryLightbox from '@/components/GalleryLightbox'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 
+import { generateBreederMetadata } from '@/lib/breeder-metadata'
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  return generateBreederMetadata(params.slug, '/galerie', 'Galerie')
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function GaleriePage({
