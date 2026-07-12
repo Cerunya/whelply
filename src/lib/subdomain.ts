@@ -72,4 +72,12 @@ export function getBreederCanonicalUrl(
   return `${base}/zuechter/${slug}${path}`
 }
 
-export const validateSubdomain = isValidSubdomain
+
+export function validateSubdomain(value: string): string | null {
+  if (!value) return 'Bitte eine Subdomain eingeben.'
+  if (value.length < 3) return 'Mindestens 3 Zeichen.'
+  if (value.length > 30) return 'Maximal 30 Zeichen.'
+  if (!SUBDOMAIN_REGEX.test(value)) return 'Nur Kleinbuchstaben, Ziffern und Bindestriche erlaubt.'
+  if (RESERVED.has(value)) return 'Diese Subdomain ist reserviert.'
+  return null
+}
