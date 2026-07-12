@@ -89,9 +89,6 @@ export default async function DashboardPage() {
                 Admin
               </Link>
             )}
-            <Link href="/dashboard/nutzer" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-              Mein Konto
-            </Link>
             <Link href="/" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
               Zur Website
             </Link>
@@ -111,9 +108,6 @@ export default async function DashboardPage() {
                     Admin
                   </Link>
                 )}
-                <Link href="/dashboard/nutzer" className="font-medium text-stone-700 hover:text-forest transition-colors">
-                  Mein Konto
-                </Link>
                 <Link href="/" className="font-medium text-stone-700 hover:text-forest transition-colors">
                   Zur Website
                 </Link>
