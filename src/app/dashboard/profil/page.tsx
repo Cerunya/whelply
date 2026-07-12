@@ -49,7 +49,7 @@ export default async function ProfilPage() {
           damVisitPossible: breeder.damVisitPossible ?? false,
         }}
       />
-      <div className="max-w-3xl mx-auto px-4 pb-12">
+      <div className="max-w-xl mx-auto px-4 pb-12">
         <div className="bg-white rounded-2xl border border-cream-deep p-6">
           <h2 className="font-serif text-lg font-bold text-stone-900 mb-4">Passwort ändern</h2>
           <PasswortAendernForm />

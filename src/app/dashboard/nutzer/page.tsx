@@ -18,6 +18,9 @@ export default async function NutzerDashboardPage() {
   })
   if (!user) redirect('/login')
 
+  // Züchter/Admins → eigenes Dashboard
+  if (user.role === 'breeder' || user.role === 'admin') redirect('/dashboard')
+
   const bookmarkCount = await prisma.bookmark.count({ where: { userId: session.user.id } })
   const unreadCount = await prisma.message.count({
     where: {
