@@ -17,8 +17,13 @@ export type ProductData = {
 
 /** Extrahiert alle ASINs aus dem Markdown-Content */
 export function extractAsins(md: string): string[] {
-  const matches = md.matchAll(/:::produkt\[([A-Z0-9]{10})\]/g)
-  return [...new Set([...matches].map((m) => m[1]))]
+  const found: string[] = []
+  const re = /:::produkt\[([A-Z0-9]{10})\]/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(md)) !== null) {
+    if (!found.includes(m[1])) found.push(m[1])
+  }
+  return found
 }
 
 export function renderMarkdown(md: string, products?: Map<string, ProductData>): string {
