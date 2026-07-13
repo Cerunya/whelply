@@ -33,6 +33,9 @@ export function extractAsins(md: string): string[] {
 function renderBoxContent(raw: string): string {
   let h = raw.trim()
 
+  // Bullet-Zeichen normalisieren (auch mit ** davor, auch mitten im Text)
+  h = h.replace(/(\*\*)?[•●]\s+/g, '$1- ')
+
   // Überschriften (ohne Farbklassen — erbt vom Box-Container)
   h = h.replace(/^#### (.+)$/gm, '<h4 class="font-serif text-lg font-bold mt-4 mb-1">$1</h4>')
   h = h.replace(/^### (.+)$/gm, '<h3 class="font-serif text-xl font-bold mt-5 mb-2">$1</h3>')
@@ -44,9 +47,6 @@ function renderBoxContent(raw: string): string {
 
   // Links
   h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="underline hover:opacity-80" target="_blank" rel="noopener">$1</a>')
-
-  // Bullet-Zeichen normalisieren
-  h = h.replace(/^[•●] /gm, '- ')
 
   // Listen
   h = h.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
@@ -70,6 +70,9 @@ function renderBoxContent(raw: string): string {
 
 export function renderMarkdown(md: string, products?: Map<string, ProductData>): string {
   let html = md
+
+  // ── Bullet-Zeichen normalisieren (auch mit ** davor, auch mitten im Text) ──
+  html = html.replace(/(\*\*)?[•●]\s+/g, '$1- ')
 
   // ── Produkt-Karten: :::produkt[ASIN] ──
   html = html.replace(/:::produkt\[([A-Z0-9]{10})\]/g, (_, asin) => {
@@ -154,9 +157,6 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
 
   // ── Links ──
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-forest underline hover:text-forest-light" target="_blank" rel="noopener">$1</a>')
-
-  // ── Bullet-Zeichen normalisieren: • → - ──
-  html = html.replace(/^[•●] /gm, '- ')
 
   // ── Nummerierte Listen: 1. item ──
   html = html.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
