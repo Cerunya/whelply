@@ -23,6 +23,12 @@ export function middleware(request: NextRequest) {
   // Auf Subdomains: interne Umschreibung auf /zuechter/[subdomain]/...
   // Ausgenommen: API-Routen, _next, statische Dateien, Dashboard, Admin, Auth
   if (subdomain) {
+	if (pathname.startsWith(`/zuechter/${subdomain}`)) {
+      const shortPath = pathname.replace(`/zuechter/${subdomain}`, '') || '/'
+      const url = request.nextUrl.clone()
+      url.pathname = shortPath
+      return NextResponse.redirect(url)
+    }
     const skipRewrite = [
       '/api/',
       '/_next/',
