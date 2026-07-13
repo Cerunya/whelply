@@ -1,5 +1,3 @@
-import Link from 'next/link'
-
 type BreederFooterProps = {
   kennelName: string
   slug: string
@@ -11,6 +9,8 @@ type BreederFooterProps = {
   socialYoutube: string | null
   website: string | null
 }
+
+const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
 
 // Social Icons als einfache SVG-Komponenten
 function InstagramIcon() {
@@ -72,7 +72,6 @@ export default function BreederFooter({
       style={{ backgroundColor: bgColor }}
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center gap-4">
-        {/* Zwingername */}
         <p
           className="font-serif text-xl font-bold tracking-wide"
           style={{ color: accentColor }}
@@ -80,25 +79,23 @@ export default function BreederFooter({
           {kennelName}
         </p>
 
-        {/* Links */}
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-white/50">
-          <Link href={`/zuechter/${slug}`} className="hover:text-white transition-colors">
+          <a href={`${BASE}/zuechter/${slug}`} className="hover:text-white transition-colors">
             Profil
-          </Link>
+          </a>
           {website && (
             <a href={website} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               Website
             </a>
           )}
-          <Link href="/" className="hover:text-white transition-colors">
+          <a href={BASE} className="hover:text-white transition-colors">
             Whelply
-          </Link>
+          </a>
           <a href="mailto:info@whelply.de" className="hover:text-white transition-colors">
             Kontakt
           </a>
         </div>
 
-        {/* Copyright */}
         <p className="text-xs text-white/30">
           © {new Date().getFullYear()} {kennelName} · Powered by Whelply
         </p>

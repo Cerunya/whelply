@@ -1,15 +1,15 @@
-import Link from 'next/link'
 import { auth } from '@/lib/auth'
+
+const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
 
 export default async function Footer() {
   const session = await auth()
-
   return (
     <footer className="bg-forest text-white/60 mt-20 relative z-10">
       <div className="max-w-6xl mx-auto px-4 py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div className="col-span-2 md:col-span-1">
-            <p className="text-white font-bold text-xl font-serif mb-3">Whelply</p>
+            <a href={BASE} className="text-white font-bold text-xl font-serif mb-3 block">Whelply</a>
             <p className="text-sm leading-relaxed text-white/60">
               Die Plattform für seriöse Rassehunde-Züchter in Deutschland.
               Nur FCI-anerkannte Rassen.
@@ -25,7 +25,7 @@ export default async function Footer() {
                 ['/dienste', 'Dienste'],
               ].map(([href, label]) => (
                 <li key={href}>
-                  <Link href={href} className="text-white/60 hover:text-white transition-colors">{label}</Link>
+                  <a href={`${BASE}${href}`} className="text-white/60 hover:text-white transition-colors">{label}</a>
                 </li>
               ))}
             </ul>
@@ -45,7 +45,7 @@ export default async function Footer() {
                   ]
               ).map(([href, label]) => (
                 <li key={href}>
-                  <Link href={href} className="text-white/60 hover:text-white transition-colors">{label}</Link>
+                  <a href={`${BASE}${href}`} className="text-white/60 hover:text-white transition-colors">{label}</a>
                 </li>
               ))}
             </ul>
@@ -59,7 +59,7 @@ export default async function Footer() {
                 ['/agb', 'AGB'],
               ].map(([href, label]) => (
                 <li key={href}>
-                  <Link href={href} className="text-white/60 hover:text-white transition-colors">{label}</Link>
+                  <a href={`${BASE}${href}`} className="text-white/60 hover:text-white transition-colors">{label}</a>
                 </li>
               ))}
             </ul>
