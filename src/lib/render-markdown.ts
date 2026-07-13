@@ -116,7 +116,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     const rows = table.trim().split('\n').filter((r) => r.trim())
     if (rows.length < 2) return table
     const isHeader = rows[1]?.match(/^\|[\s-:|]+\|$/)
-    let out = '<div class="overflow-x-auto my-6"><table class="w-full text-sm border-collapse rounded-xl overflow-hidden">'
+    let out = '<div class="overflow-x-auto my-10"><table class="w-full text-sm border-collapse rounded-xl overflow-hidden">'
     rows.forEach((row, i) => {
       if (i === 1 && isHeader) return
       const cells = row.split('|').filter((c, ci, arr) => ci > 0 && ci < arr.length - 1)
@@ -154,6 +154,9 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
     return '<ol class="list-decimal list-inside space-y-1 my-4 ml-4 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
   })
+  
+  // ── Bullet-Zeichen normalisieren: • → - ──
+  html = html.replace(/^[•●] /gm, '- ')
 
   // ── Aufzählungslisten: - item ──
   html = html.replace(/((?:^- .+\n?)+)/gm, (block) => {
