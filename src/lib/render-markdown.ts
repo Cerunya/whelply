@@ -45,6 +45,9 @@ function renderBoxContent(raw: string): string {
   // Links
   h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="underline hover:opacity-80" target="_blank" rel="noopener">$1</a>')
 
+  // Bullet-Zeichen normalisieren
+  h = h.replace(/^[•●] /gm, '- ')
+
   // Listen
   h = h.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
@@ -54,6 +57,9 @@ function renderBoxContent(raw: string): string {
     const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
     return '<ul class="list-disc list-inside space-y-1 my-3 ml-4">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
   })
+
+  // Einfache Zeilenumbrüche → <br>
+  h = h.replace(/(?<!>)\n(?!<|\n)/g, '<br>\n')
 
   // Absätze (ohne Farbklasse — erbt vom Parent)
   h = h.replace(/^(?!<[a-z/])((?!<).+)$/gm, '<p class="leading-relaxed mb-2">$1</p>')
@@ -149,14 +155,14 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // ── Links ──
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-forest underline hover:text-forest-light" target="_blank" rel="noopener">$1</a>')
 
+  // ── Bullet-Zeichen normalisieren: • → - ──
+  html = html.replace(/^[•●] /gm, '- ')
+
   // ── Nummerierte Listen: 1. item ──
   html = html.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
     return '<ol class="list-decimal list-inside space-y-1 my-4 ml-4 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
   })
-  
-  // ── Bullet-Zeichen normalisieren: • → - ──
-  html = html.replace(/^[•●] /gm, '- ')
 
   // ── Aufzählungslisten: - item ──
   html = html.replace(/((?:^- .+\n?)+)/gm, (block) => {
@@ -166,6 +172,9 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
 
   // ── Horizontale Linie: --- ──
   html = html.replace(/^\s*---\s*$/gm, '<hr class="border-cream-deep my-8" />')
+
+  // ── Einfache Zeilenumbrüche → <br> (außer vor HTML-Tags und Leerzeilen) ──
+  html = html.replace(/(?<!>)\n(?!<|\n)/g, '<br>\n')
 
   // ── Absätze (Zeilen die kein HTML-Tag sind) ──
   html = html.replace(/^(?!<[a-z/])((?!<).+)$/gm, '<p class="text-stone-700 leading-relaxed mb-4">$1</p>')
