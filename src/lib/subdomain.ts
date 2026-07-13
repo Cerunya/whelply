@@ -7,26 +7,16 @@
  */
 
 const RESERVED = new Set([
-  'www',
-  'api',
-  'admin',
-  'mail',
-  'ftp',
-  'app',
-  'dashboard',
-  'cdn',
-  'static',
-  'media',
-  'blog',
-  'shop',
-  'preview',
-  'staging',
-  'test',
-  'dev',
-  'help',
-  'support',
-  'status',
-  'docs',
+  // Infrastruktur
+  'www', 'api', 'admin', 'mail', 'ftp', 'app', 'dashboard', 'cdn',
+  'static', 'media', 'blog', 'shop', 'preview', 'staging', 'test',
+  'dev', 'help', 'support', 'status', 'docs',
+  // Auth/Account
+  'login', 'register', 'registrieren', 'account', 'billing', 'konto',
+  // Whelply-Seiten
+  'welpen', 'zuechter', 'rassen', 'hunde', 'zuchtrueden', 'deckrueden',
+  'dienste', 'ratgeber', 'kontakt', 'impressum', 'datenschutz', 'agb',
+  'news', 'aktuelles', 'galerie', 'info',
 ])
 
 const SUBDOMAIN_REGEX = /^[a-z0-9]([a-z0-9-]{1,28}[a-z0-9])?$/
