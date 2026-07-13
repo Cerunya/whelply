@@ -46,10 +46,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
       <div class="flex-1 min-w-0">
         <a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="font-semibold text-stone-900 hover:text-forest transition-colors block">${p.name}</a>
         ${desc}
-        <a href="${url}" target="_blank" rel="noopener nofollow sponsored"
-           class="inline-block mt-3 bg-honey text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-honey-light transition-colors">
-          Bei Amazon ansehen →
-        </a>
+        <a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="inline-block mt-3 bg-honey text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-honey-light transition-colors">Bei Amazon ansehen →</a>
       </div>
     </div>`
   })
