@@ -1,8 +1,8 @@
 /**
  * Einfacher Markdown→HTML Renderer für Artikel-Inhalte.
  * Unterstützt: Überschriften (H1-H4), Fett, Kursiv, Links, Bilder, Listen,
- * nummerierte Listen, Tabellen, Tipp/Info/Warnung/Fazit-Boxen, Produkt-Karten,
- * YouTube-Embeds, Blockquotes.
+ * nummerierte Listen, Tabellen, Tipp/Info/Warnung/Fazit/Custom-Farbboxen,
+ * Produkt-Karten, YouTube-Embeds, Blockquotes.
  */
 
 export type ProductData = {
@@ -26,6 +26,42 @@ export function extractAsins(md: string): string[] {
   return found
 }
 
+/**
+ * Verarbeitet Markdown innerhalb von Boxen (Tipp, Info, Fazit, Custom).
+ * Keine hardcoded Textfarben — alles erbt vom Parent-Container.
+ */
+function renderBoxContent(raw: string): string {
+  let h = raw.trim()
+
+  // Überschriften (ohne Farbklassen — erbt vom Box-Container)
+  h = h.replace(/^#### (.+)$/gm, '<h4 class="font-serif text-lg font-bold mt-4 mb-1">$1</h4>')
+  h = h.replace(/^### (.+)$/gm, '<h3 class="font-serif text-xl font-bold mt-5 mb-2">$1</h3>')
+  h = h.replace(/^## (.+)$/gm, '<h2 class="font-serif text-2xl font-bold mt-6 mb-2">$1</h2>')
+
+  // Inline
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  h = h.replace(/\*(.+?)\*/g, '<em>$1</em>')
+
+  // Links
+  h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="underline hover:opacity-80" target="_blank" rel="noopener">$1</a>')
+
+  // Listen
+  h = h.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
+    const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
+    return '<ol class="list-decimal list-inside space-y-1 my-3 ml-4">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
+  })
+  h = h.replace(/((?:^- .+\n?)+)/gm, (block) => {
+    const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
+    return '<ul class="list-disc list-inside space-y-1 my-3 ml-4">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
+  })
+
+  // Absätze (ohne Farbklasse — erbt vom Parent)
+  h = h.replace(/^(?!<[a-z/])((?!<).+)$/gm, '<p class="leading-relaxed mb-2">$1</p>')
+  h = h.replace(/<p class="leading-relaxed mb-2"><\/p>/g, '')
+
+  return h
+}
+
 export function renderMarkdown(md: string, products?: Map<string, ProductData>): string {
   let html = md
 
@@ -41,41 +77,33 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
       : `<div class="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-cream flex items-center justify-center flex-shrink-0"><svg class="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>`
     const desc = p.description ? `<p class="text-stone-500 text-sm mt-1">${p.description}</p>` : ''
 
-    return `<div class="my-6 bg-white border border-cream-deep rounded-2xl p-4 flex gap-4 items-center hover:shadow-sm transition-shadow">
-      <a href="${url}" target="_blank" rel="noopener nofollow sponsored">${img}</a>
-      <div class="flex-1 min-w-0">
-        <a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="font-semibold text-stone-900 hover:text-forest transition-colors block">${p.name}</a>
-        ${desc}
-        <a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="inline-block mt-3 bg-honey text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-honey-light transition-colors">Bei Amazon ansehen →</a>
-      </div>
-    </div>`
+    return `<div class="my-6 bg-white border border-cream-deep rounded-2xl p-4 flex gap-4 items-center hover:shadow-sm transition-shadow"><a href="${url}" target="_blank" rel="noopener nofollow sponsored">${img}</a><div class="flex-1 min-w-0"><a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="font-semibold text-stone-900 hover:text-forest transition-colors block">${p.name}</a>${desc}<a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="inline-block mt-3 bg-honey text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-honey-light transition-colors">Bei Amazon ansehen →</a></div></div>`
   })
 
-  // ── Tipp/Info-Boxen: :::tipp ... ::: (mehrzeilig oder einzeilig) ──
+  // ── Tipp/Info/Warnung/Fazit/Custom-Boxen ──
   html = html.replace(/:::tipp\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">💡 Tipp</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
+    `<div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">💡 Tipp</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
   html = html.replace(/:::info\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">ℹ️ Info</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
+    `<div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">ℹ️ Info</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
   html = html.replace(/:::warnung\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ Achtung</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
+    `<div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ Achtung</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
   html = html.replace(/:::fazit\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-forest rounded-2xl px-6 py-5 my-8 shadow-sm"><p class="text-xs font-bold text-white/60 uppercase tracking-widest mb-2">✍️ Fazit der Redaktion</p><div class="text-white/90 text-sm leading-relaxed">${content.trim()}</div></div>`
+    `<div class="bg-forest rounded-2xl px-6 py-5 my-8 shadow-sm"><p class="text-xs font-bold text-white/60 uppercase tracking-widest mb-2">✍️ Fazit der Redaktion</p><div class="text-white/90 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
 
   // ── Custom Farbbox: :::box[#hex] ... ::: ──
   html = html.replace(/:::box\[([^\]]+)\]\s+([\s\S]*?):::/g, (_, color, content) => {
     const c = color.trim()
-    // Textfarbe automatisch: helle Hintergründe → dunkler Text, dunkle → weißer Text
     const hex = c.replace('#', '')
     const r = parseInt(hex.substring(0, 2), 16) || 0
     const g = parseInt(hex.substring(2, 4), 16) || 0
     const b = parseInt(hex.substring(4, 6), 16) || 0
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
     const textClass = luminance > 0.55 ? 'text-stone-800' : 'text-white/90'
-    return `<div class="rounded-2xl px-6 py-5 my-6 ${textClass}" style="background-color:${c}"><div class="text-sm leading-relaxed">${content.trim()}</div></div>`
+    return `<div class="rounded-2xl px-6 py-5 my-6 ${textClass}" style="background-color:${c}"><div class="text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   })
 
   // ── YouTube-Embeds: @youtube[VIDEO_ID] ──

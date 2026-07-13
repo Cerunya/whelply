@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Datei oder Ziel-ID fehlt' }, { status: 400 })
   }
 
-  if (purpose && !['header', 'background', 'gallery', 'bio', 'card'].includes(purpose)) {
+  if (purpose && !['header', 'background', 'gallery', 'bio', 'card', 'product'].includes(purpose)) {
     return NextResponse.json({ error: 'Ungültiger purpose-Wert' }, { status: 400 })
   }
 
