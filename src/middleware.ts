@@ -34,6 +34,17 @@ export function middleware(request: NextRequest) {
       '/registrieren',
       '/passwort-',
       '/welpen-alert',
+	  '/zuechter/',   
+	  '/welpen/',
+      '/hunde/',
+      '/hund/',
+      '/zuchtrueden/',
+      '/rassen/',
+      '/ratgeber/',
+      '/dienste/',
+      '/impressum',
+      '/datenschutz',
+      '/agb',
     ]
 
     const shouldSkip = skipRewrite.some((prefix) => pathname.startsWith(prefix))
