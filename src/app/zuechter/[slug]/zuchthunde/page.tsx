@@ -9,6 +9,7 @@ import BreederPageContent from '@/components/BreederPageContent'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
 import { generateBreederMetadata } from '@/lib/breeder-metadata'
+const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   return generateBreederMetadata(params.slug, '/zuchthunde', 'Zuchthunde')
@@ -92,7 +93,7 @@ export default async function ZuechterZuchthundePage({ params }: { params: { slu
             <div className={`space-y-4 ${females.length > 0 ? 'mt-10 pt-8 border-t border-cream-deep' : ''}`}>
               <h2 className="font-serif text-2xl font-bold text-stone-900">Rüden</h2>
               {males.map((dog) => (
-                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={dog.isStud ? `/hund/${dog.id}` : `/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Deckrüde" : "Rüde"} badgeColor={dog.isStud ? "bg-blue-100 text-blue-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-blue-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-forest" : "text-stone-500"} />
+                <DogCard key={dog.id} dog={dog} img={getCardImage(dog)} href={dog.isStud ? `${BASE}/hund/${dog.id}` : `/zuechter/${params.slug}/hund/${dog.id}`} badge={dog.isStud ? "Deckrüde" : "Rüde"} badgeColor={dog.isStud ? "bg-blue-100 text-blue-700" : "bg-stone-100 text-stone-600"} hoverColor={dog.isStud ? "hover:border-blue-300" : "hover:border-stone-400"} linkColor={dog.isStud ? "text-forest" : "text-stone-500"} />
               ))}
             </div>
           )}
