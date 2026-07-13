@@ -215,6 +215,16 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         <button type="button" onClick={() => insertAtCursor('\n:::warnung\nHier steht eine Warnung.\n:::\n')} className={btn} title="Warnung-Box">
           <span className="text-amber-500 text-[10px] font-bold">⚠</span>
         </button>
+        <button type="button" onClick={() => insertAtCursor('\n:::fazit\nHier steht das Fazit der Redaktion.\n:::\n')} className={btn} title="Fazit der Redaktion">
+          <span className="text-[10px] font-bold text-forest">✍</span>
+        </button>
+        <button type="button" onClick={() => {
+          const color = window.prompt('Hintergrundfarbe (Hex, z.B. #f0e6d3):')
+          if (color && /^#[0-9a-fA-F]{6}$/.test(color.trim())) insertAtCursor(`\n:::box[${color.trim()}]\nText in farbiger Box.\n:::\n`)
+          else if (color) alert('Bitte gültigen Hex-Wert eingeben (z.B. #f0e6d3).')
+        }} className={btn} title="Farbige Box">
+          <span className="text-[10px] font-bold">🎨</span>
+        </button>
         <button type="button" onClick={insertTable} className={btn} title="Tabelle">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M10 3v18M14 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z"/></svg>
         </button>

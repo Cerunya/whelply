@@ -1,7 +1,7 @@
 /**
  * Einfacher Markdown→HTML Renderer für Artikel-Inhalte.
  * Unterstützt: Überschriften (H1-H4), Fett, Kursiv, Links, Bilder, Listen,
- * nummerierte Listen, Tabellen, Tipp/Info/Warnung-Boxen, Produkt-Karten,
+ * nummerierte Listen, Tabellen, Tipp/Info/Warnung/Fazit-Boxen, Produkt-Karten,
  * YouTube-Embeds, Blockquotes.
  */
 
@@ -64,6 +64,22 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   html = html.replace(/:::warnung\s+([\s\S]*?):::/g, (_, content) =>
     `<div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ Achtung</p><div class="text-stone-700 text-sm leading-relaxed">${content.trim()}</div></div>`
   )
+  html = html.replace(/:::fazit\s+([\s\S]*?):::/g, (_, content) =>
+    `<div class="bg-forest rounded-2xl px-6 py-5 my-8 shadow-sm"><p class="text-xs font-bold text-white/60 uppercase tracking-widest mb-2">✍️ Fazit der Redaktion</p><div class="text-white/90 text-sm leading-relaxed">${content.trim()}</div></div>`
+  )
+
+  // ── Custom Farbbox: :::box[#hex] ... ::: ──
+  html = html.replace(/:::box\[([^\]]+)\]\s+([\s\S]*?):::/g, (_, color, content) => {
+    const c = color.trim()
+    // Textfarbe automatisch: helle Hintergründe → dunkler Text, dunkle → weißer Text
+    const hex = c.replace('#', '')
+    const r = parseInt(hex.substring(0, 2), 16) || 0
+    const g = parseInt(hex.substring(2, 4), 16) || 0
+    const b = parseInt(hex.substring(4, 6), 16) || 0
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    const textClass = luminance > 0.55 ? 'text-stone-800' : 'text-white/90'
+    return `<div class="rounded-2xl px-6 py-5 my-6 ${textClass}" style="background-color:${c}"><div class="text-sm leading-relaxed">${content.trim()}</div></div>`
+  })
 
   // ── YouTube-Embeds: @youtube[VIDEO_ID] ──
   html = html.replace(/@youtube\[([a-zA-Z0-9_-]{11})\]/g,

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { slugify } from '@/lib/slugify'
+import { getBreederCanonicalUrl } from '@/lib/subdomain'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchForm from '@/components/SearchForm'
@@ -60,6 +61,7 @@ export default async function Home() {
       bio: true,
       isPublished: true,
       isActive: true,
+      subdomain: true,
       dogs: { take: 1, select: { breed: { select: { nameDe: true } } } },
       media: { where: { purpose: 'card' }, take: 1, select: { url: true } },
       listings: {
@@ -191,8 +193,10 @@ export default async function Home() {
                 </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {featuredBreeders.map((breeder) => (
-                  <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}
+                {featuredBreeders.map((breeder) => {
+                  const breederUrl = getBreederCanonicalUrl(breeder.subdomain, slugify(breeder.kennelName))
+                  return (
+                  <a key={breeder.id} href={breederUrl}
                     className="group rounded-2xl overflow-hidden border border-white/10 hover:shadow-xl transition-all flex flex-col relative">
                     {/* Runder Badge an der Bild/Text-Grenze */}
                     {breeder.listings.length > 0 && (
@@ -237,8 +241,8 @@ export default async function Home() {
                         <p className="text-xs text-stone-500 mt-2 line-clamp-2">{breeder.bio.replace(/!\[[^\]]*\]\([^)]+\)/g, '').replace(/\*\*|__|\*|_|@youtube\[[^\]]*\]/g, '').trim()}</p>
                       )}
                     </div>
-                  </Link>
-                ))}
+                  </a>
+                )})
               </div>
             </div>
           </section>

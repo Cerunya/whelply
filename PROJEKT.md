@@ -1,6 +1,6 @@
 # Whelply.de — Projektgedächtnis
 <!-- Diese Datei am Anfang jeder neuen Claude-Konversation einfügen -->
-<!-- Letzte Aktualisierung: 2026-06-14 -->
+<!-- Letzte Aktualisierung: 2026-07-13 -->
 
 ## Was wir bauen
 Deutsche Rassehunde-Plattform. Nur FCI-anerkannte Rassen. Kein Tierschutz, keine Mischlinge, keine Designerrassen (Maltipoo etc.). Inspiriert von chiens-de-france.com, aber moderner, mit KI-Features, und mit klarem Fokus auf seriöse VDH-Züchter.
@@ -49,6 +49,7 @@ DATABASE_URL=postgresql://whelply:...@mhpnpg79rlq99qdn62qpgfdx:5432/whelply
 NEXTAUTH_URL=https://whelply.de
 NEXTAUTH_SECRET=...
 NEXT_PUBLIC_APP_URL=https://whelply.de
+NEXT_PUBLIC_BASE_DOMAIN=whelply.de
 PREVIEW_PASSWORD=...
 NIXPACKS_NODE_VERSION=22
 ```
@@ -490,11 +491,6 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
   Header-Bild-Option entfernt (nur noch Hintergrundbild), Reihenfolge:
   Tab-Nav → Hintergrundfarbe → Ausrichtung → Schriftart.
 
-- **GROSS — Subdomain-Routing Phase 2 (später):**
-  - Wildcard-DNS (`*.whelply.de`) + Wildcard-TLS-Zertifikat (DNS-01-Challenge, braucht
-    DNS-Provider-API-Zugriff in Coolify/Traefik — größter Aufwand)
-  - Middleware-Rewrite: `<subdomain>.whelply.de` → `/zuechter/<subdomain>` (oder eigene Route)
-  - Subdomain-Feld + Eindeutigkeitsprüfung existiert bereits (Phase 1)
 - **GROSS — Google Maps auf Züchter-Seite (Punkt 7, später):**
   - Braucht Google Cloud API-Key mit Billing
   - Zeigt ungefähren Standort (Stadt-Ebene wegen Datenschutz, nicht exakte Adresse)
@@ -701,7 +697,7 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 - Keine Mischlinge, kein Tierschutz — FCI-Rassenliste
 - Stripe für Zahlungen, MinIO für Bilder, Resend für E-Mail
 - Vorschaltseite aktiv (PREVIEW_PASSWORD in Coolify)
-- Middleware: alwaysAllowed = ['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/api/upload', '/api/media', '/api/media-item', '/api/profil', '/api/hunde', '/api/news', '/api/admin', '/admin', '/preview', '/_next', '/favicon.ico']
+- Middleware: alwaysAllowed — siehe "Middleware alwaysAllowed (vollständig)" weiter unten für aktuelle Liste
   → Jede neue API-Route (und neue Top-Level-Seiten wie /admin, die eigene Auth-Logik haben) muss hier eingetragen werden!
 
 ---
@@ -997,7 +993,7 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 - **DashboardHeader**: alle Unterseiten nutzen `DashboardHeader` mit `backHref`/`backLabel`/`action`
 
 #### Middleware alwaysAllowed (vollständig)
-`['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/api/upload', '/api/media', '/api/media-item', '/api/profil', '/api/hunde', '/api/news', '/api/admin', '/api/bookmarks', '/api/reports', '/api/reviews', '/api/upgrade-to-breeder', '/api/user-profile', '/api/welpen-alert', '/api/cron', '/api/messages', '/welpen-alert', '/admin', '/preview', '/_next', '/favicon.ico']`
+`['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/api/upload', '/api/media', '/api/media-item', '/api/profil', '/api/hunde', '/api/news', '/api/admin', '/api/bookmarks', '/api/reports', '/api/reviews', '/api/upgrade-to-breeder', '/api/user-profile', '/api/welpen-alert', '/api/cron', '/api/messages', '/api/artikel', '/api/passwort', '/api/produkte', '/api/profil/check-subdomain', '/welpen-alert', '/passwort-', '/admin', '/preview', '/_next', '/favicon.ico']`
 
 #### Infrastruktur
 - `resend` npm-Package für E-Mail-Versand
@@ -1097,6 +1093,74 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 
 ---
 
+### ✅ Subdomain-Routing Phase 2 (2026-07-13) — FERTIG
+
+#### Infrastruktur (Pangolin/Traefik)
+- **Wildcard-Route in Traefik**: `config/traefik/dynamic_config.yml` erweitert mit `whelply-wildcard` Router
+  - Regel: `HostRegexp('^[a-z0-9-]+\.whelply\.de$')` (Traefik v3 Syntax!)
+  - Service: `10-Whelply-service@http` (referenziert Pangolins dynamisch verwalteten Service — Port-Änderungen egal)
+  - `priority: 1` (niedrig, damit Pangolins `whelply.de`-Route Vorrang behält)
+  - `certResolver: letsencrypt-dns` (Wildcard-Zertifikat)
+  - HTTP→HTTPS Redirect via `redirect-to-https` Middleware
+- **Pangolin**: Wildcard-Resources werden im UI nicht unterstützt → direkt in `dynamic_config.yml` gelöst
+- **Coolify Env**: `NEXT_PUBLIC_BASE_DOMAIN=whelply.de` hinzugefügt
+
+#### Next.js Middleware (`src/middleware.ts`)
+- **Subdomain-Erkennung**: Host-Header wird gegen `NEXT_PUBLIC_BASE_DOMAIN` geprüft, `www` ignoriert
+- **URL-Rewrite**: `bella.whelply.de/wuerfe` → intern `/zuechter/bella/wuerfe`
+- **Redirect für saubere URLs**: `bella.whelply.de/zuechter/bella/wuerfe` → redirect zu `bella.whelply.de/wuerfe` (kein Duplicate Content)
+- **skipRewrite-Liste** (Pfade die auf Subdomains NICHT umgeschrieben werden):
+  `/api/`, `/_next/`, `/favicon.ico`, `/dashboard`, `/admin`, `/preview`, `/login`, `/registrieren`,
+  `/passwort-`, `/welpen-alert`, `/zuechter/`, `/welpen/`, `/hunde/`, `/hund/`, `/zuchtrueden/`,
+  `/rassen/`, `/ratgeber/`, `/dienste/`, `/impressum`, `/datenschutz`, `/agb`
+
+#### Subdomain-Validierung (`src/lib/subdomain.ts`)
+- `isValidSubdomain()` — Boolean-Check
+- `validateSubdomain()` — gibt Error-String oder `null` zurück (für API-Routen)
+- `normalizeSubdomain()` — Eingabe bereinigen
+- `getBreederCanonicalUrl()` — kanonische URL (Subdomain bevorzugt, Fallback `/zuechter/slug`)
+- **Reservierte Subdomains**: `www`, `api`, `admin`, `mail`, `ftp`, `app`, `dashboard`, `cdn`, `static`,
+  `media`, `blog`, `shop`, `preview`, `staging`, `test`, `dev`, `help`, `support`, `status`, `docs`,
+  `login`, `register`, `registrieren`, `account`, `billing`, `konto`, `welpen`, `zuechter`, `rassen`,
+  `hunde`, `zuchtrueden`, `deckrueden`, `dienste`, `ratgeber`, `kontakt`, `impressum`, `datenschutz`,
+  `agb`, `news`, `aktuelles`, `galerie`, `info`
+
+#### Breeder-Lookup (`src/lib/breeder.ts`)
+- `getBreederBySlug()` sucht jetzt auch nach `subdomain` (nicht nur `slugify(kennelName)`)
+- `subdomain` im `findMany` select hinzugefügt
+
+#### Canonical-Tags (`src/lib/breeder-metadata.ts`) — NEU
+- `generateBreederMetadata(slug, subPath?, titleSuffix?)` — generiert Metadata mit `alternates.canonical` auf Subdomain-URL
+- Muss in jeder `/zuechter/[slug]/...` Page als `generateMetadata` exportiert werden (9 Seiten):
+  - `/zuechter/[slug]/page.tsx` (subPath: `''`)
+  - `/zuechter/[slug]/zuchthunde/page.tsx` (subPath: `'/zuchthunde'`)
+  - `/zuechter/[slug]/wuerfe/page.tsx` (subPath: `'/wuerfe'`)
+  - `/zuechter/[slug]/wuerfe/[litterId]/page.tsx` (subPath: `` `/wuerfe/${params.litterId}` ``)
+  - `/zuechter/[slug]/hunde/page.tsx` (subPath: `'/hunde'`)
+  - `/zuechter/[slug]/hund/[id]/page.tsx` (subPath: `` `/hund/${params.id}` ``)
+  - `/zuechter/[slug]/aktuelles/page.tsx` (subPath: `'/aktuelles'`)
+  - `/zuechter/[slug]/galerie/page.tsx` (subPath: `'/galerie'`)
+  - `/zuechter/[slug]/kontakt/page.tsx` (subPath: `'/kontakt'`)
+
+#### ThemeEditor Fix
+- Subdomain-Check URL korrigiert: `/api/subdomain-check?sub=` → `/api/profil/check-subdomain?subdomain=`
+- Anzeige: `whelply.de/` → `.whelply.de`
+
+#### Absolute URLs in Navigation
+- `Navbar.tsx`, `BreederNavbar.tsx`, `Footer.tsx`, `BreederFooter.tsx`: alle Links nutzen jetzt
+  `process.env.NEXT_PUBLIC_APP_URL` als Base-URL (absolute `<a>`-Tags statt relative `<Link>`),
+  damit Links auf Subdomains korrekt zur Hauptdomain führen
+
+#### WICHTIGE REGELN (ergänzt)
+- **Subdomain-Routing**: Middleware erkennt `*.whelply.de` und schreibt intern auf `/zuechter/[subdomain]/...` um
+- **Navigation**: Alle Links in Navbar/Footer MÜSSEN absolute URLs mit `NEXT_PUBLIC_APP_URL` verwenden (keine relativen `<Link>`-Tags), damit sie auf Subdomains korrekt zur Hauptdomain führen
+- **Neue öffentliche Top-Level-Routen**: müssen in der `skipRewrite`-Liste der Middleware eingetragen werden
+- **Traefik Wildcard**: liegt in `config/traefik/dynamic_config.yml`, NICHT in Pangolin UI (unterstützt keine Wildcards)
+- **Service-Referenz**: `10-Whelply-service@http` — das `@http` ist zwingend nötig (cross-provider Referenz zwischen File- und HTTP-Provider)
+- **Traefik v3 Syntax**: `HostRegexp('^regex$')` — NICHT die alte v2-Syntax `HostRegexp('{name:regex}')`
+
+---
+
 ### 📁 DATEIPFADE — Wohin die Dateien müssen
 
 Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Output entspricht 1:1 der im Projekt.
@@ -1150,6 +1214,8 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 #### Sonstiges
 - `src/app/actions/auth.ts` — Server Action signOutAction
 - `src/lib/mail-alerts.ts` — Welpen-Alert E-Mail-Versand
+- `src/lib/subdomain.ts` — Subdomain-Validierung, Reserved-Liste, Canonical-URL-Helper
+- `src/lib/breeder-metadata.ts` — generateBreederMetadata für Canonical-Tags auf Züchterseiten
 - `prisma/schema.prisma` — Datenbankschema
 - `prisma/migrations/` — Migrationen (SQL ausführen + resolve)
 - `.gitignore`
@@ -1222,6 +1288,7 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - Mail: Shared `src/lib/mail.ts` Utility mit Resend API
 
 #### Wildcard-Subdomain Infrastruktur (erledigt)
+- **Phase 1** (DNS + SSL) und **Phase 2** (Routing) sind beide abgeschlossen — siehe "Subdomain-Routing Phase 2" weiter oben
 - **DNS**: Cloudflare als DNS-Provider (kostenlos), Domain bleibt bei Febas registriert. Nameserver bei Febas auf Cloudflare umgestellt. Alle Records auf "DNS only" (graue Wolke, kein Proxy).
 - **Wildcard A-Record**: `*.whelply.de` → Server-IP bei Cloudflare angelegt
 - **Traefik**: Zwei Certificate-Resolver konfiguriert:
@@ -1232,9 +1299,5 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - **Status**: Wildcard-Zertifikat `*.whelply.de` erfolgreich ausgestellt, HTTPS funktioniert für beliebige Subdomains
 - **Backups**: docker-compose.yml.bak, traefik_config.yml.bak, config.yml.bak existieren
 
-#### TODO: Subdomain-Routing (nächster Schritt)
-- Neues Feld `subdomain` auf `breeder_profiles` (unique, lowercase, validiert)
-- Next.js Middleware: erkennt Subdomains und schreibt um → `bella.whelply.de/` → `/zuechter/bella`
-- Dashboard: Züchter wählt Wunsch-Subdomain
-- SEO: Canonical-Tags auf Subdomain-URLs
-- Bestehende `/zuechter/[slug]`-Routes bleiben als Fallback
+#### ~~Subdomain-Routing~~ → ✅ FERTIG (2026-07-13)
+- Siehe "Subdomain-Routing Phase 2" weiter oben

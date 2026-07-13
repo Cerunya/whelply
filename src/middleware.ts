@@ -43,7 +43,6 @@ export function middleware(request: NextRequest) {
 	  '/zuechter/',   
 	  '/welpen/',
       '/hunde/',
-      '/hund/',
       '/zuchtrueden/',
       '/rassen/',
       '/ratgeber/',

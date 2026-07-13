@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/slugify'
+import { getBreederCanonicalUrl } from '@/lib/subdomain'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
@@ -193,9 +194,9 @@ export default async function ZuechterVerzeichnisPage({
                 )
 
                 return published ? (
-                  <Link key={breeder.id} href={`/zuechter/${slugify(breeder.kennelName)}`}>
+                  <a key={breeder.id} href={getBreederCanonicalUrl(breeder.subdomain, slugify(breeder.kennelName))}>
                     {cardContent}
-                  </Link>
+                  </a>
                 ) : (
                   <div key={breeder.id}>{cardContent}</div>
                 )
@@ -232,7 +233,7 @@ export default async function ZuechterVerzeichnisPage({
                     </div>
                   )
                   return b.isPublished !== false ? (
-                    <Link key={b.id} href={`/zuechter/${slug}`}>{card}</Link>
+                    <a key={b.id} href={getBreederCanonicalUrl(b.subdomain, slug)}>{card}</a>
                   ) : (
                     <div key={b.id}>{card}</div>
                   )
