@@ -33,8 +33,8 @@ export function extractAsins(md: string): string[] {
 function renderBoxContent(raw: string): string {
   let h = raw.trim()
 
-  // Bullet-Zeichen normalisieren (auch mit ** davor, auch mitten im Text)
-  h = h.replace(/(\*\*)?[•●]\s+/g, '$1- ')
+  // Bullet-Zeichen die mitten im Text stehen → Zeilenumbruch davor
+  h = h.replace(/(?<!^)(?<!\n)(\*?\*?[•●])/gm, '\n$1')
 
   // Überschriften (ohne Farbklassen — erbt vom Box-Container)
   h = h.replace(/^#### (.+)$/gm, '<h4 class="font-serif text-lg font-bold mt-4 mb-1">$1</h4>')
@@ -71,8 +71,8 @@ function renderBoxContent(raw: string): string {
 export function renderMarkdown(md: string, products?: Map<string, ProductData>): string {
   let html = md
 
-  // ── Bullet-Zeichen normalisieren (auch mit ** davor, auch mitten im Text) ──
-  html = html.replace(/(\*\*)?[•●]\s+/g, '$1- ')
+  // ── Bullet-Zeichen die mitten im Text stehen → Zeilenumbruch davor ──
+  html = html.replace(/(?<!^)(?<!\n)(\*?\*?[•●])/gm, '\n$1')
 
   // ── Produkt-Karten: :::produkt[ASIN] ──
   html = html.replace(/:::produkt\[([A-Z0-9]{10})\]/g, (_, asin) => {
