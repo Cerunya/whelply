@@ -33,6 +33,10 @@ export function extractAsins(md: string): string[] {
 function renderBoxContent(raw: string): string {
   let h = raw.trim()
 
+  // Bullet-Zeichen: mitten im Text → eigene Zeile. Doppelte (- •) bereinigen
+  h = h.replace(/(?<!^)(?<!\n)(\*?\*?[•●])/gm, '\n$1')
+  h = h.replace(/^- [•●]\s*/gm, '- ')
+
   // Überschriften (ohne Farbklassen — erbt vom Box-Container)
   h = h.replace(/^#### (.+)$/gm, '<h4 class="font-serif text-lg font-bold mt-4 mb-1">$1</h4>')
   h = h.replace(/^### (.+)$/gm, '<h3 class="font-serif text-xl font-bold mt-5 mb-2">$1</h3>')
@@ -41,9 +45,6 @@ function renderBoxContent(raw: string): string {
   // Inline
   h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   h = h.replace(/\*(.+?)\*/g, '<em>$1</em>')
-
-  // Bullet-Zeichen mitten im Text → <br> davor (NACH bold/italic, damit ** nicht zerhackt wird)
-  h = h.replace(/(?<!^)(?<!\n)([•●])/gm, '<br>$1')
 
   // Links
   h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="underline hover:opacity-80" target="_blank" rel="noopener">$1</a>')
@@ -67,6 +68,10 @@ function renderBoxContent(raw: string): string {
 
 export function renderMarkdown(md: string, products?: Map<string, ProductData>): string {
   let html = md
+
+  // ── Bullet-Zeichen: mitten im Text → eigene Zeile. Doppelte (- •) bereinigen ──
+  html = html.replace(/(?<!^)(?<!\n)(\*?\*?[•●])/gm, '\n$1')
+  html = html.replace(/^- [•●]\s*/gm, '- ')
 
   // ── Produkt-Karten: :::produkt[ASIN] ──
   html = html.replace(/:::produkt\[([A-Z0-9]{10})\]/g, (_, asin) => {
@@ -145,9 +150,6 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // ── Inline-Formatierung ──
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
-
-  // ── Bullet-Zeichen mitten im Text → <br> davor (NACH bold/italic) ──
-  html = html.replace(/(?<!^)(?<!\n)([•●])/gm, '<br>$1')
 
   // ── Bilder ──
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-xl my-6 w-full" />')
