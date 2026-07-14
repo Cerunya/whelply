@@ -152,7 +152,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
 
   // ── Bilder ──
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-xl my-6 w-full" />')
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-xl my-10 w-full" />')
 
   // ── Links ──
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-forest underline hover:text-forest-light" target="_blank" rel="noopener">$1</a>')
@@ -170,7 +170,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   })
 
   // ── Horizontale Linie: --- ──
-  html = html.replace(/^\s*---\s*$/gm, '<hr class="border-cream-deep my-8" />')
+  html = html.replace(/^\s*---\s*$/gm, '<hr class="border-stone-200 my-10" />')
 
   // ── Absätze (Zeilen die kein Block-Level-HTML sind → auch <strong>, <em>, <a> werden gewrappt) ──
   html = html.replace(/^(?!<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|br))(.*\S.*)$/gm, '<p class="text-stone-700 leading-relaxed mb-2">$1</p>')
