@@ -105,7 +105,7 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
                 {article.publishedAt && <span>· {new Date(article.publishedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
               </div>
 
-              <div className="flex flex-col gap-6 [&>hr]:my-4 [&>img]:rounded-xl [&>img]:w-full" dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content, productsMap) }} />
+              <div dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content, productsMap) }} />
 
               {article.breed && (
                 <div className="mt-10 pt-8 border-t border-cream-deep">
@@ -153,14 +153,14 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
                   <h3 className="font-serif text-sm font-bold text-stone-900 uppercase tracking-wide mb-3">Empfehlung</h3>
                   <a href={`https://www.amazon.de/dp/${randomProduct.asin}?tag=${randomProduct.affiliateTag}`}
                     target="_blank" rel="noopener nofollow sponsored"
-                    className="block bg-white rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md hover:border-forest/30 transition-all group">
+                    className="block rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md hover:border-forest/30 transition-all group">
                     {randomProduct.imageUrl && (
-                      <div className="aspect-square overflow-hidden bg-cream p-4">
+                      <div className="aspect-square overflow-hidden bg-white p-4">
                         <img src={randomProduct.imageUrl} alt={randomProduct.name}
                           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                       </div>
                     )}
-                    <div className="p-4">
+                    <div className="p-4 bg-green-50">
                       <p className="font-semibold text-stone-900 text-sm leading-snug mb-2 group-hover:text-forest transition-colors">
                         {randomProduct.name}
                       </p>
