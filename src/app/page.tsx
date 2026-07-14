@@ -281,9 +281,9 @@ export default async function Home() {
         )}
 
         {/* ── Trust-Sektion ── */}
-        <section className="bg-white border-y border-cream-deep py-16 px-4">
+        <section className="bg-forest py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="font-serif text-3xl font-bold text-stone-900 text-center mb-12">
+            <h2 className="font-serif text-3xl font-bold text-white text-center mb-12">
               Warum Whelply?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -304,12 +304,12 @@ export default async function Home() {
                   desc: 'Ein Basis-Account ist dauerhaft gratis. Mehr Sichtbarkeit gibt es ab 1 € für 24 Stunden — kein Monats-Abo, kein Risiko.',
                 },
               ].map((item) => (
-                <div key={item.title} className="bg-cream rounded-2xl p-7 border border-cream-deep">
-                  <div className="w-10 h-10 bg-forest rounded-xl flex items-center justify-center text-honey font-bold text-lg mb-5">
+                <div key={item.title} className="bg-white/10 rounded-2xl p-7 border border-white/10">
+                  <div className="w-10 h-10 bg-honey rounded-xl flex items-center justify-center text-white font-bold text-lg mb-5">
                     {item.icon}
                   </div>
-                  <h3 className="font-serif font-semibold text-stone-900 text-lg mb-2">{item.title}</h3>
-                  <p className="text-stone-500 text-sm leading-relaxed">{item.desc}</p>
+                  <h3 className="font-serif font-semibold text-white text-lg mb-2">{item.title}</h3>
+                  <p className="text-white/70 text-sm leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
