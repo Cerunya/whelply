@@ -58,9 +58,6 @@ function renderBoxContent(raw: string): string {
     return '<ul class="list-disc list-inside space-y-1 my-3 ml-4">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
   })
 
-  // Einfache Zeilenumbrüche → <br>
-  h = h.replace(/(?<!>)\n(?!<|\n)/g, '<br>\n')
-
   // Absätze (ohne Farbklasse — erbt vom Parent, auch inline-HTML wird gewrappt)
   h = h.replace(/^(?!<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|br))(.*\S.*)$/gm, '<p class="leading-relaxed mb-2">$1</p>')
   h = h.replace(/<p class="leading-relaxed mb-2"><\/p>/g, '')
@@ -173,12 +170,9 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // ── Horizontale Linie: --- ──
   html = html.replace(/^\s*---\s*$/gm, '<hr class="border-cream-deep my-8" />')
 
-  // ── Einfache Zeilenumbrüche → <br> (außer vor HTML-Tags und Leerzeilen) ──
-  html = html.replace(/(?<!>)\n(?!<|\n)/g, '<br>\n')
-
   // ── Absätze (Zeilen die kein Block-Level-HTML sind → auch <strong>, <em>, <a> werden gewrappt) ──
-  html = html.replace(/^(?!<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|br))(.*\S.*)$/gm, '<p class="text-stone-700 leading-relaxed mb-4">$1</p>')
-  html = html.replace(/<p class="text-stone-700 leading-relaxed mb-4"><\/p>/g, '')
+  html = html.replace(/^(?!<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|br))(.*\S.*)$/gm, '<p class="text-stone-700 leading-relaxed mb-2">$1</p>')
+  html = html.replace(/<p class="text-stone-700 leading-relaxed mb-2"><\/p>/g, '')
 
   return html
 }
