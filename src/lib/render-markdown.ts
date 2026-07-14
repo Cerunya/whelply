@@ -90,16 +90,16 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
 
   // ── Tipp/Info/Warnung/Fazit/Custom-Boxen ──
   html = html.replace(/:::tipp\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">💡 Tipp</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
+    `<div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl px-5 py-4 my-8"><p class="text-xs font-bold text-green-700 uppercase tracking-wide mb-1">💡 Tipp</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
   html = html.replace(/:::info\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">ℹ️ Info</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
+    `<div class="bg-blue-50 border-l-4 border-blue-400 rounded-r-xl px-5 py-4 my-8"><p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">ℹ️ Info</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
   html = html.replace(/:::warnung\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl px-5 py-4 my-6"><p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ Achtung</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
+    `<div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl px-5 py-4 my-8"><p class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">⚠️ Achtung</p><div class="text-stone-700 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
   html = html.replace(/:::fazit\s+([\s\S]*?):::/g, (_, content) =>
-    `<div class="bg-forest rounded-2xl px-6 py-5 my-8 shadow-sm"><p class="text-xs font-bold text-white/60 uppercase tracking-widest mb-2">✍️ Fazit der Redaktion</p><div class="text-white/90 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
+    `<div class="bg-forest rounded-2xl px-6 py-5 my-10 shadow-sm"><p class="text-xs font-bold text-white/60 uppercase tracking-widest mb-2">✍️ Fazit der Redaktion</p><div class="text-white/90 text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   )
 
   // ── Custom Farbbox: :::box[#hex] ... ::: ──
@@ -111,7 +111,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     const b = parseInt(hex.substring(4, 6), 16) || 0
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
     const textClass = luminance > 0.55 ? 'text-stone-800' : 'text-white/90'
-    return `<div class="rounded-2xl px-6 py-5 my-6 ${textClass}" style="background-color:${c}"><div class="text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
+    return `<div class="rounded-2xl px-6 py-5 my-8 ${textClass}" style="background-color:${c}"><div class="text-sm leading-relaxed">${renderBoxContent(content)}</div></div>`
   })
 
   // ── YouTube-Embeds: @youtube[VIDEO_ID] ──
@@ -124,7 +124,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     const rows = table.trim().split('\n').filter((r) => r.trim())
     if (rows.length < 2) return table
     const isHeader = rows[1]?.match(/^\|[\s-:|]+\|$/)
-    let out = '<div class="overflow-x-auto my-10"><table class="w-full text-sm border-collapse rounded-xl overflow-hidden">'
+    let out = '<div class="overflow-x-auto my-12"><table class="w-full text-sm border-collapse rounded-xl overflow-hidden">'
     rows.forEach((row, i) => {
       if (i === 1 && isHeader) return
       const cells = row.split('|').filter((c, ci, arr) => ci > 0 && ci < arr.length - 1)
