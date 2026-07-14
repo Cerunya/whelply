@@ -147,6 +147,34 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
                 </div>
               )}
 
+              {/* Zufälliges Affiliate-Produkt */}
+              {randomProduct && (
+                <div>
+                  <h3 className="font-serif text-sm font-bold text-stone-900 uppercase tracking-wide mb-3">Empfehlung</h3>
+                  <a href={`https://www.amazon.de/dp/${randomProduct.asin}?tag=${randomProduct.affiliateTag}`}
+                    target="_blank" rel="noopener nofollow sponsored"
+                    className="block bg-white rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md hover:border-forest/30 transition-all group">
+                    {randomProduct.imageUrl && (
+                      <div className="aspect-square overflow-hidden bg-cream p-4">
+                        <img src={randomProduct.imageUrl} alt={randomProduct.name}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <p className="font-semibold text-stone-900 text-sm leading-snug mb-2 group-hover:text-forest transition-colors">
+                        {randomProduct.name}
+                      </p>
+                      {randomProduct.description && (
+                        <p className="text-xs text-stone-500 line-clamp-2 mb-3">{randomProduct.description}</p>
+                      )}
+                      <span className="inline-block bg-honey text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+                        Bei Amazon ansehen →
+                      </span>
+                    </div>
+                  </a>
+                </div>
+              )}
+
               {/* Verwandte Artikel */}
               {relatedArticles.length > 0 && (
                 <div>
@@ -174,34 +202,6 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
                       </Link>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {/* Zufälliges Affiliate-Produkt */}
-              {randomProduct && (
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-stone-900 uppercase tracking-wide mb-3">Empfehlung</h3>
-                  <a href={`https://www.amazon.de/dp/${randomProduct.asin}?tag=${randomProduct.affiliateTag}`}
-                    target="_blank" rel="noopener nofollow sponsored"
-                    className="block bg-white rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md hover:border-forest/30 transition-all group">
-                    {randomProduct.imageUrl && (
-                      <div className="aspect-square overflow-hidden bg-cream p-4">
-                        <img src={randomProduct.imageUrl} alt={randomProduct.name}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <p className="font-semibold text-stone-900 text-sm leading-snug mb-2 group-hover:text-forest transition-colors">
-                        {randomProduct.name}
-                      </p>
-                      {randomProduct.description && (
-                        <p className="text-xs text-stone-500 line-clamp-2 mb-3">{randomProduct.description}</p>
-                      )}
-                      <span className="inline-block bg-honey text-white text-xs font-bold px-3 py-1.5 rounded-lg">
-                        Bei Amazon ansehen →
-                      </span>
-                    </div>
-                  </a>
                 </div>
               )}
             </aside>
