@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { s3, MINIO_BUCKET } from '@/lib/s3'
 import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import sharp from 'sharp'
 
 // Server-seitiger Upload-Proxy:
 // Browser → /api/upload (whelply.de, gültiges Zertifikat)
@@ -40,8 +41,28 @@ export async function POST(req: NextRequest) {
   const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
   if (!breeder) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
 
-  let ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-  const buffer = Buffer.from(await file.arrayBuffer())
+  let ext = 'webp'
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+
+  // ── Bildkompression mit Sharp ──
+  // Breite je nach Verwendungszweck begrenzen, immer WebP für beste Kompression
+  const maxWidth = (purpose === 'header' || purpose === 'background') ? 1920
+    : (purpose === 'card' || purpose === 'product') ? 800
+    : 1200
+
+  let buffer: Buffer
+  try {
+    buffer = await sharp(rawBuffer)
+      .resize({ width: maxWidth, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer()
+  } catch {
+    // Fallback: Original verwenden wenn Sharp fehlschlägt
+    buffer = rawBuffer
+    ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  }
+
+  const contentType = ext === 'webp' ? 'image/webp' : file.type
 
   if (listingId) {
     const listing = await prisma.listing.findUnique({ where: { id: listingId } })
@@ -50,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     const storageKey = `listings/${listingId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
+    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: contentType }))
 
     const existingCount = await prisma.media.count({ where: { listingId } })
     if (existingCount === 0) {
@@ -78,7 +99,7 @@ export async function POST(req: NextRequest) {
     }
 
     const storageKey = `litters/${litterId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
+    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: contentType }))
 
     // Wurf hat nur ein Titelbild — alte Bilder ersetzen
     const oldMedia = await prisma.media.findMany({ where: { litterId } })
@@ -102,7 +123,7 @@ export async function POST(req: NextRequest) {
   if (purpose) {
     // purpose-Zweig (Theme: Header-/Hintergrundbild oder Galerie-Bilder des Züchterprofils)
     const storageKey = `breeders/${breeder.id}/${purpose}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
+    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: contentType }))
 
     if (purpose === 'bio') {
       // Bio-Bild: nur hochladen, keine DB-Eintragung nötig
@@ -154,7 +175,7 @@ export async function POST(req: NextRequest) {
     }
 
     const storageKey = `news/${newsPostId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
+    await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: contentType }))
 
     const oldMedia = await prisma.media.findMany({ where: { newsPostId } })
     for (const old of oldMedia) {
@@ -182,7 +203,7 @@ export async function POST(req: NextRequest) {
   }
 
   const storageKey = `dogs/${dogId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-  await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: file.type }))
+  await s3.send(new PutObjectCommand({ Bucket: MINIO_BUCKET, Key: storageKey, Body: buffer, ContentType: contentType }))
 
   if (dogPurpose === 'dog_bg') {
     // Hintergrundbild — altes ersetzen
