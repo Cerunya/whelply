@@ -159,59 +159,60 @@ export default async function HundDetailPage({
             )
           })()}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Infos */}
-            <div>
-              <p className="text-xs font-semibold text-forest uppercase tracking-wider mb-2">
-                {dog.breed.nameDe}
-              </p>
-              <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
-                {dog.name}
-              </h1>
-              {dog.isStud && (
-                <span className="inline-block bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full mb-2">
-                  {dog.sex === 'male' ? 'Deckrüde verfügbar' : 'Zuchthündin'}
-                </span>
-              )}
-              <p className="text-sm text-stone-400 mb-4">{breederName}{location && ` · ${location}`}</p>
+          {/* Header-Infos */}
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-forest uppercase tracking-wider mb-2">
+              {dog.breed.nameDe}
+            </p>
+            <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
+              {dog.name}
+            </h1>
+            {dog.isStud && (
+              <span className="inline-block bg-honey text-white text-xs font-bold px-2.5 py-1 rounded-full mb-2">
+                {dog.sex === 'male' ? 'Deckrüde verfügbar' : 'Zuchthündin'}
+              </span>
+            )}
+            <p className="text-sm text-stone-400">{breederName}{location && ` · ${location}`}</p>
+          </div>
 
-              <div className="rounded-2xl border border-cream-deep p-5 space-y-3" style={{ backgroundColor: "#ffffff", color: dog.pageTextColor ?? "#44403c" }}>
-                <div className="flex justify-between text-sm">
-                  <span className="text-stone-400">Geschlecht</span>
-                  <span className="font-medium text-stone-800">{dog.sex === 'male' ? 'Rüde' : 'Hündin'}</span>
-                </div>
-                {dog.birthDate && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Geboren am</span>
-                    <span className="font-medium text-stone-800">
-                      {dog.birthDate.toLocaleDateString('de-DE')}{age !== null && ` (${age} Jahre)`}
-                    </span>
-                  </div>
-                )}
-                {dog.color && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Farbe</span>
-                    <span className="font-medium text-stone-800">{dog.color}</span>
-                  </div>
-                )}
-                {dog.titles && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Titel</span>
-                    <span className="font-medium text-stone-800">{dog.titles}</span>
-                  </div>
-                )}
-                {dog.pedigreeNumber && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Ahnentafel-Nr.</span>
-                    <span className="font-medium text-stone-800">{dog.pedigreeNumber}</span>
-                  </div>
-                )}
+          {/* Eckdaten + Züchter nebeneinander */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div className="rounded-2xl border border-cream-deep p-5 space-y-3" style={{ backgroundColor: "#ffffff", color: dog.pageTextColor ?? "#44403c" }}>
+              <div className="flex justify-between text-sm">
+                <span className="text-stone-400">Geschlecht</span>
+                <span className="font-medium text-stone-800">{dog.sex === 'male' ? 'Rüde' : 'Hündin'}</span>
               </div>
+              {dog.birthDate && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-stone-400">Geboren am</span>
+                  <span className="font-medium text-stone-800">
+                    {dog.birthDate.toLocaleDateString('de-DE')}{age !== null && ` (${age} Jahre)`}
+                  </span>
+                </div>
+              )}
+              {dog.color && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-stone-400">Farbe</span>
+                  <span className="font-medium text-stone-800">{dog.color}</span>
+                </div>
+              )}
+              {dog.titles && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-stone-400">Titel</span>
+                  <span className="font-medium text-stone-800">{dog.titles}</span>
+                </div>
+              )}
+              {dog.pedigreeNumber && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-stone-400">Ahnentafel-Nr.</span>
+                  <span className="font-medium text-stone-800">{dog.pedigreeNumber}</span>
+                </div>
+              )}
             </div>
 
             {/* Züchter-Kontakt */}
             {dog.breeder.isPublished !== false && (
-              <div className="rounded-2xl border border-cream-deep p-5 bg-white flex flex-col justify-between">
+              <div className="rounded-2xl border border-cream-deep p-5 bg-white">
                 <p className="text-xs font-bold text-stone-400 uppercase tracking-wide mb-3">Züchter</p>
                 <p className="font-serif font-bold text-stone-900 text-lg">{breederName}</p>
                 {location && (
