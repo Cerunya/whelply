@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/slugify'
+import { getBreederCanonicalUrl } from '@/lib/subdomain'
 import { auth } from '@/lib/auth'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
@@ -28,7 +29,7 @@ export default async function HundDetailPage({
     where: { id: params.id },
     include: {
       breed: { select: { nameDe: true, slug: true } },
-      breeder: { select: { kennelName: true, displayName: true, city: true, state: true, isPublished: true } },
+      breeder: { select: { kennelName: true, displayName: true, city: true, state: true, isPublished: true, subdomain: true, phone: true, showPhone: true, website: true, socialInstagram: true, socialFacebook: true } },
       media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { id: true, url: true, isPrimary: true, sortOrder: true, purpose: true } },
       parentSire: {
         include: {
@@ -71,6 +72,7 @@ export default async function HundDetailPage({
 
   const breederName = dog.breeder.displayName || dog.breeder.kennelName
   const location = [dog.breeder.city, dog.breeder.state].filter(Boolean).join(', ')
+  const breederUrl = getBreederCanonicalUrl(dog.breeder.subdomain, slugify(dog.breeder.kennelName))
   const litters = [...dog.littersAsDam, ...dog.littersAsSire]
 
   let age: number | null = null
@@ -173,7 +175,7 @@ export default async function HundDetailPage({
               )}
               <p className="text-sm text-stone-400 mb-4">{breederName}{location && ` · ${location}`}</p>
 
-              <div className="rounded-2xl border border-cream-deep p-5 space-y-3 mb-6" style={{ backgroundColor: "#ffffff", color: dog.pageTextColor ?? "#44403c" }}>
+              <div className="rounded-2xl border border-cream-deep p-5 space-y-3" style={{ backgroundColor: "#ffffff", color: dog.pageTextColor ?? "#44403c" }}>
                 <div className="flex justify-between text-sm">
                   <span className="text-stone-400">Geschlecht</span>
                   <span className="font-medium text-stone-800">{dog.sex === 'male' ? 'Rüde' : 'Hündin'}</span>
@@ -205,16 +207,41 @@ export default async function HundDetailPage({
                   </div>
                 )}
               </div>
-
-              {dog.breeder.isPublished !== false && (
-                <Link
-                  href={`/zuechter/${slugify(dog.breeder.kennelName)}`}
-                  className="block text-center border-2 border-forest text-forest font-semibold py-3 rounded-xl hover:bg-forest/5 transition-colors"
-                >
-                  Züchter-Profil ansehen
-                </Link>
-              )}
             </div>
+
+            {/* Züchter-Kontakt */}
+            {dog.breeder.isPublished !== false && (
+              <div className="rounded-2xl border border-cream-deep p-5 bg-white self-start">
+                <p className="text-xs font-bold text-stone-400 uppercase tracking-wide mb-3">Züchter</p>
+                <p className="font-serif font-bold text-stone-900 text-lg">{breederName}</p>
+                {location && (
+                  <p className="text-sm text-stone-500 mt-1 flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    {location}
+                  </p>
+                )}
+                {dog.breeder.showPhone && dog.breeder.phone && (
+                  <a href={`tel:${dog.breeder.phone}`} className="flex items-center gap-2 mt-3 text-sm text-forest font-medium hover:underline">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    {dog.breeder.phone}
+                  </a>
+                )}
+                {dog.breeder.website && (
+                  <a href={dog.breeder.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mt-2 text-sm text-forest font-medium hover:underline">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" /></svg>
+                    Website
+                  </a>
+                )}
+                <div className="flex flex-col gap-2 mt-4">
+                  <a href={breederUrl} className="block text-center border-2 border-forest text-forest font-semibold py-2.5 rounded-xl hover:bg-forest/5 transition-colors text-sm">
+                    Züchter-Profil ansehen
+                  </a>
+                  <a href={getBreederCanonicalUrl(dog.breeder.subdomain, slugify(dog.breeder.kennelName), '/kontakt')} className="block text-center bg-forest text-white font-semibold py-2.5 rounded-xl hover:bg-forest-light transition-colors text-sm">
+                    Kontakt aufnehmen
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Vorstellung */}
@@ -259,7 +286,7 @@ export default async function HundDetailPage({
                     </div>
                     {litter.listings.length > 0 ? (
                       <Link
-                        href={`/zuechter/${slugify(dog.breeder.kennelName)}/wuerfe/${litter.id}`}
+                        href={getBreederCanonicalUrl(dog.breeder.subdomain, slugify(dog.breeder.kennelName), `/wuerfe/${litter.id}`)}
                         className="text-sm text-forest font-semibold hover:underline"
                       >
                         Welpen ansehen →
