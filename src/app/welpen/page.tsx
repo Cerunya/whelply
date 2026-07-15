@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { getBreederCanonicalUrl } from '@/lib/subdomain'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ListingCard from '@/components/ListingCard'
@@ -65,7 +66,7 @@ export default async function WelpenPage({
     },
     include: {
       breed: { select: { nameDe: true } },
-      breeder: { select: { kennelName: true, city: true, state: true } },
+      breeder: { select: { kennelName: true, city: true, state: true, subdomain: true } },
       dam: { include: { media: { where: { isPrimary: true }, take: 1, select: { url: true } } } },
       sire: { include: { media: { where: { isPrimary: true }, take: 1, select: { url: true } } } },
       media: { take: 2, select: { url: true } },
@@ -246,7 +247,7 @@ export default async function WelpenPage({
                         </div>
                       )}
                     </div>
-                    <Link href={`/zuechter/${litter.breeder.kennelName.toLowerCase().replace(/\s+/g, '-')}/wuerfe/${litter.id}`}
+                    <Link href={getBreederCanonicalUrl(litter.breeder.subdomain, litter.breeder.kennelName.toLowerCase().replace(/\s+/g, '-'), `/wuerfe/${litter.id}`)}
                       className="block mt-3 text-center text-xs font-semibold text-forest border border-forest/30 py-1.5 rounded-lg hover:bg-forest/5 transition-colors">
                       Zum Wurf →
                     </Link>
