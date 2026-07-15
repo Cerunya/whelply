@@ -211,7 +211,7 @@ export default async function HundDetailPage({
 
             {/* Züchter-Kontakt */}
             {dog.breeder.isPublished !== false && (
-              <div className="rounded-2xl border border-cream-deep p-5 bg-white self-start">
+              <div className="rounded-2xl border border-cream-deep p-5 bg-white flex flex-col justify-between">
                 <p className="text-xs font-bold text-stone-400 uppercase tracking-wide mb-3">Züchter</p>
                 <p className="font-serif font-bold text-stone-900 text-lg">{breederName}</p>
                 {location && (
