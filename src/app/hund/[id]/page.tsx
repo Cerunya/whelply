@@ -121,15 +121,6 @@ export default async function HundDetailPage({
             </div>
           )}
 
-          {/* Breadcrumb */}
-          <p className="text-sm mb-6" style={{ color: textColor, opacity: 0.6 }}>
-            <Link href="/" className="hover:text-stone-700">Startseite</Link>
-            {' / '}
-            <Link href="/zuchtrueden" className="hover:text-stone-700">Zuchtrüden</Link>
-            {' / '}
-            <span className="text-stone-700">{dog.name}</span>
-          </p>
-
           {/* Ein Rahmen um den gesamten Inhalt */}
           <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: dog.pageCardColor ?? '#ffffff', color: dog.pageTextColor ?? '#44403c', padding: '2rem' }}>
           {(() => {

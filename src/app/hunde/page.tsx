@@ -87,12 +87,6 @@ export default async function HundePage({
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-10">
-          <p className="text-sm text-stone-400 mb-2">
-            <Link href="/" className="hover:text-stone-700">Startseite</Link>
-            {' / '}
-            <span className="text-stone-700">Hunde</span>
-            {selectedBreed && <> / <span className="text-stone-700">{selectedBreed.nameDe}</span></>}
-          </p>
 
           {listings.length === 0 ? (
             <div className="text-center py-24 bg-white rounded-2xl border border-cream-deep">

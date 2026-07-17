@@ -1,6 +1,6 @@
 # Whelply.de — Projektgedächtnis
 <!-- Diese Datei am Anfang jeder neuen Claude-Konversation einfügen -->
-<!-- Letzte Aktualisierung: 2026-07-13 -->
+<!-- Letzte Aktualisierung: 2026-07-17 -->
 
 ## Was wir bauen
 Deutsche Rassehunde-Plattform. Nur FCI-anerkannte Rassen. Kein Tierschutz, keine Mischlinge, keine Designerrassen (Maltipoo etc.). Inspiriert von chiens-de-france.com, aber moderner, mit KI-Features, und mit klarem Fokus auf seriöse VDH-Züchter.
@@ -55,6 +55,14 @@ NIXPACKS_NODE_VERSION=22
 ```
 
 ## Workflow-Hinweise für Claude (wichtig!)
+- **GitHub-Repo-Zugriff**: Das Repo ist öffentlich unter `https://github.com/Cerunya/whelply`.
+  Claude kann Dateien direkt lesen via:
+  ```bash
+  curl -s "https://raw.githubusercontent.com/Cerunya/whelply/main/[pfad]"
+  ```
+  Beispiel: `curl -s "https://raw.githubusercontent.com/Cerunya/whelply/main/src/app/page.tsx"`
+  So muss der User keine Dateien mehr manuell hochladen. IMMER zuerst die aktuelle Version
+  aus dem Repo lesen, bevor Änderungen gemacht werden.
 - **Datei-Workflow**: Claude erstellt/ändert Dateien unter `/mnt/user-data/outputs/whelply/[pfad]`
   (spiegelt die Repo-Struktur), präsentiert sie via present_files. User kopiert sie per
   GitHub Desktop ins lokale Repo, committet, pusht. Coolify deployt automatisch.
@@ -1161,6 +1169,71 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 
 ---
 
+### ✅ Artikel-Rendering, Bildkompression & Ratgeber-Sidebar (2026-07-14)
+
+
+#### Render-Markdown Fixes (`src/lib/render-markdown.ts`)
+- **`renderBoxContent()`**: Neue Hilfsfunktion — verarbeitet Markdown innerhalb von Boxen (Überschriften, Bold, Listen, Links) ohne hardcoded Textfarben, erbt vom Parent-Container
+- **Neue Box-Typen**: `:::fazit ... :::` (Forest-Green wie Footer), `:::box[#hexfarbe] ... :::` (freie Farbwahl, Textfarbe automatisch hell/dunkel je nach Hintergrund-Luminanz)
+- **Bullet-Zeichen (`•`)**: Mid-Text-Bullets werden auf eigene Zeile geschoben (`\n` davor), bleiben als `•` erhalten (kein Ersetzen zu `-`). `- •` Duplikate werden bereinigt.
+- **Absatz-Regex**: Überspringt nur Block-Level-Tags (`div`, `h1-6`, `p`, `ul`, `ol`, `table`, etc.), NICHT Inline-Tags (`<strong>`, `<em>`, `<a>`) → konsistente Textfarbe/-größe überall
+- **Produkt-Karten**: HTML komplett auf eine Zeile (verhindert Zerhacken durch Absatz-Regex)
+- **Abstände**: Paragraphen `mb-2`, Boxen `my-8`, Fazit `my-10`, Tabellen `my-12`
+- **`<br>`-Regex entfernt**: Verursachte doppelte Abstände in Kombination mit `<p>`-Wrapping
+
+#### Bildkompression via Sharp (`src/app/api/upload/route.ts`)
+- **Sharp** als Dependency installiert (`npm install sharp`)
+- Alle Uploads werden automatisch zu **WebP** konvertiert (Qualität 80%)
+- **Maximale Breite** je nach Zweck: Header/Hintergrund 1920px, Karten/Produkte 800px, alles andere 1200px
+- Bilder kleiner als Max werden nicht vergrößert
+- Fallback auf Original wenn Sharp fehlschlägt
+- **`purpose: 'product'`** als erlaubter Upload-Typ hinzugefügt (war vorher blockiert → Produktbilder konnten nicht gespeichert werden)
+
+#### Ratgeber-Sidebar (`src/app/ratgeber/[slug]/page.tsx`)
+- **Breiteres Layout**: `max-w-3xl` → `max-w-6xl`, Grid mit Artikel (flexibel) + Sidebar (320px)
+- **Sidebar** (sticky): Neuester Artikel (mit Bild), 3 verwandte Artikel (gleiche Kategorie/Rasse, automatisch), zufälliges Affiliate-Produkt
+- **Mobil**: Sidebar rutscht unter den Artikel (1-spaltig)
+- Manuelle Artikelauswahl für Sidebar ist noch nicht implementiert (braucht DB-Feld `relatedSlugs`)
+
+#### Subdomain-Link-Integration
+- **Frontpage** (`src/app/page.tsx`): Züchter-Links nutzen `getBreederCanonicalUrl()` → Subdomain-URL wenn vorhanden
+- **Züchterverzeichnis** (`src/app/zuechter/page.tsx`): Beide Züchter-Sektionen (Karten + "Zuletzt eingetragene") nutzen Subdomain-URLs
+- **Zuchthunde** (`src/app/zuechter/[slug]/zuchthunde/page.tsx`): Deckrüden → absolute URL zu `whelply.de/hund/id` (Marktplatz), normale Zuchthunde → relativ (Züchter-Theme)
+
+#### Middleware-Fix
+- **`/hund/`** aus `skipRewrite` entfernt — existiert nur als Züchter-Unterseite, braucht Rewrite auf Subdomains
+
+#### RichEditor (`src/components/RichEditor.tsx`)
+- Neuer Toolbar-Button: **Fazit der Redaktion** (✍ Icon) → `:::fazit ... :::`
+- Neuer Toolbar-Button: **Farbige Box** (🎨 Icon) → `:::box[#hex] ... :::` mit Hex-Eingabe-Prompt
+
+#### WICHTIGE REGELN (ergänzt)
+- **`breeder.ts` NICHT neu schreiben**: Die originale `getBreederBySlug()` nutzt `include` (gibt alle Felder zurück). Nur einzelne Felder ergänzen wenn nötig, nie den ganzen Type/Select umbauen.
+- **`render-markdown.ts` Template-Strings**: Alle HTML-Templates auf EINE Zeile — mehrzeilige Tags werden vom Absatz-Regex zerhackt
+- **Sharp**: Bilder werden nur beim Upload komprimiert. Bestehende Bilder in MinIO bleiben unverändert — müssen neu hochgeladen werden für Kompression.
+
+---
+
+### ✅ Subdomain-Links, UI-Fixes & Breadcrumb-Entfernung (2026-07-17)
+
+#### Subdomain-Links auf weiteren Seiten
+- **Welpen-Detailseite** (`src/app/welpen/[id]/page.tsx`): "Züchter-Profil ansehen" nutzt `getBreederCanonicalUrl()`
+- **Welpen-Übersicht** (`src/app/welpen/page.tsx`): "Zum Wurf →" in erwarteten Würfen nutzt Subdomain-URL, `subdomain` im Breeder-Select
+- **Deckrüden-Detailseite** (`src/app/hund/[id]/page.tsx`): Komplett neues Layout:
+  - Header-Infos (Rasse, Name, Badge) über dem Grid
+  - Eckdaten-Box links + Züchter-Kontaktkarte rechts (gleiche Höhe, `items-start`)
+  - Züchter-Karte im Forest-Green-Style (wie Welpen-Detailseite): Anrufen (nur mit Telefon), Züchter-Profil (nur wenn published), Nachricht schreiben
+  - Wurf-Links nutzen Subdomain-URL
+
+#### Breadcrumbs entfernt
+- Breadcrumbs ("Startseite / ...") von **allen** Seiten entfernt:
+  `hund/[id]`, `welpen/page`, `welpen/[id]`, `ratgeber/[slug]`, `hunde/page`
+
+#### Frontpage
+- "Warum Whelply?" Sektion: `bg-white` → `bg-forest` mit weißem Text und `bg-white/10` Karten
+
+---
+
 ### 📁 DATEIPFADE — Wohin die Dateien müssen
 
 Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Output entspricht 1:1 der im Projekt.
@@ -1189,11 +1262,16 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 #### Seiten → `src/app/...`
 - `src/app/page.tsx` — Homepage
 - `src/app/zuchtrueden/page.tsx` — Deckrüden-Übersicht
-- `src/app/hund/[id]/page.tsx` — Deckrüden-Detailseite (öffentlich)
+- `src/app/zuechter/page.tsx` — Züchterverzeichnis
+- `src/app/hund/[id]/page.tsx` — Deckrüden-Detailseite (öffentlich, mit Züchter-Kontaktkarte)
+- `src/app/hunde/page.tsx` — Erwachsene Hunde Übersicht
+- `src/app/welpen/page.tsx` — Welpen-Übersicht
+- `src/app/welpen/[id]/page.tsx` — Welpen-Detailseite
 - `src/app/zuechter/[slug]/page.tsx` — Züchter-Hauptseite
 - `src/app/zuechter/[slug]/zuchthunde/page.tsx` — Unsere Hunde
 - `src/app/zuechter/[slug]/hund/[id]/page.tsx` — Hund-Detail im Züchter-Layout
 - `src/app/zuechter/[slug]/kontakt/page.tsx` — Kontaktformular
+- `src/app/ratgeber/[slug]/page.tsx` — Ratgeber-Artikel mit Sidebar
 - `src/app/dashboard/page.tsx` — Züchter-Dashboard
 - `src/app/dashboard/hund/[id]/page.tsx` — Hund bearbeiten
 - `src/app/dashboard/theme/page.tsx` — Theme-Editor
@@ -1203,7 +1281,7 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 #### API-Routen → `src/app/api/...`
 - `src/app/api/hunde/[id]/route.ts` — Hund CRUD
 - `src/app/api/media-item/[id]/route.ts` — Media PATCH/DELETE (isPrimary, purpose)
-- `src/app/api/upload/route.ts` — Bild-Upload
+- `src/app/api/upload/route.ts` — Bild-Upload mit Sharp-Kompression (WebP, Resize)
 - `src/app/api/profil/route.ts` — Züchter-Profil + Theme
 - `src/app/api/messages/route.ts` — Nachrichten
 - `src/app/api/messages/[id]/route.ts` — Konversation
@@ -1216,6 +1294,7 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/lib/mail-alerts.ts` — Welpen-Alert E-Mail-Versand
 - `src/lib/subdomain.ts` — Subdomain-Validierung, Reserved-Liste, Canonical-URL-Helper
 - `src/lib/breeder-metadata.ts` — generateBreederMetadata für Canonical-Tags auf Züchterseiten
+- `src/lib/render-markdown.ts` — Markdown→HTML mit Boxen (tipp/info/warnung/fazit/box), Produkt-Karten, renderBoxContent()
 - `prisma/schema.prisma` — Datenbankschema
 - `prisma/migrations/` — Migrationen (SQL ausführen + resolve)
 - `.gitignore`
@@ -1299,5 +1378,5 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - **Status**: Wildcard-Zertifikat `*.whelply.de` erfolgreich ausgestellt, HTTPS funktioniert für beliebige Subdomains
 - **Backups**: docker-compose.yml.bak, traefik_config.yml.bak, config.yml.bak existieren
 
-#### ~~Subdomain-Routing~~ → ✅ FERTIG (2026-07-13)
+#### ~~TODO: Subdomain-Routing~~ → ✅ FERTIG (2026-07-13)
 - Siehe "Subdomain-Routing Phase 2" weiter oben

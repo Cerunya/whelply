@@ -77,13 +77,6 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
       <Navbar />
       <main className="min-h-screen bg-cream">
         <div className="max-w-6xl mx-auto px-4 py-12">
-          <p className="text-sm text-stone-400 mb-6">
-            <Link href="/" className="hover:text-stone-700">Startseite</Link>
-            {' › '}
-            <Link href="/ratgeber" className="hover:text-stone-700">Ratgeber</Link>
-            {' › '}
-            <span className="text-stone-600">{article.title}</span>
-          </p>
 
           {article.coverImageUrl && (
             <div className="rounded-2xl overflow-hidden mb-8 aspect-[2/1]">
@@ -105,7 +98,8 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
                 {article.publishedAt && <span>· {new Date(article.publishedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
               </div>
 
-              <div className="flex flex-col gap-3 [&>hr]:my-4 [&>img]:rounded-xl [&>img]:w-full" dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content, productsMap) }} />
+              <div className="flex flex-col gap-6 [&>hr]:my-4 [&>img]:rounded-xl [&>img]:w-full"
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content, productsMap) }} />
 
               {article.breed && (
                 <div className="mt-10 pt-8 border-t border-cream-deep">

@@ -130,15 +130,6 @@ export default async function WelpenDetailPage({
             </div>
           )}
 
-          {/* Breadcrumb */}
-          <p className="text-sm text-stone-400 mb-6">
-            <Link href="/" className="hover:text-stone-700">Startseite</Link>
-            {' / '}
-            <Link href="/welpen" className="hover:text-stone-700">Welpen</Link>
-            {' / '}
-            <span className="text-stone-700">{listing.breed.nameDe}</span>
-          </p>
-
           {/* === HERO: Galerie + Kopfzeile === */}
           <div className="mb-8">
             {/* Titel-Zeile */}

@@ -109,21 +109,15 @@ export default async function WelpenPage({
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-10">
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-            <p className="text-sm text-stone-400">
-              <Link href="/" className="hover:text-stone-700">Startseite</Link>
-              {' / '}
-              <span className="text-stone-700">Welpen</span>
-              {selectedBreed && <> / <span className="text-stone-700">{selectedBreed.nameDe}</span></>}
-            </p>
-            {(selectedBreed || searchParams.region) && (
+          {(selectedBreed || searchParams.region) && (
+            <div className="flex items-center justify-end mb-6">
               <WelpenAlertButton
                 breedName={selectedBreed?.nameDe}
                 breedId={selectedBreed?.id}
                 state={searchParams.region}
               />
-            )}
-          </div>
+            </div>
+          )}
 
           {listings.length === 0 ? (
             <div className="text-center py-24 bg-stone-50 rounded-2xl border border-stone-200">
