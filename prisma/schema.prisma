@@ -196,6 +196,10 @@ model BreederProfile {
   // Mitgliedsnummer im Rassezuchtverein — optional, für Badge
   mitgliedsnummer   String?           @map("mitgliedsnummer")
   verificationLevel VerificationLevel @default(none) @map("verification_level")
+  verificationDocKey       String?   @map("verification_doc_key")
+  verificationRequestedAt  DateTime? @map("verification_requested_at")
+  verifiedAt               DateTime? @map("verified_at")
+  verificationRejectReason String?   @map("verification_reject_reason")
   bio               String?           @db.Text
   website           String?
   // Kontaktdaten — standardmäßig NICHT öffentlich, Züchter kann dies in den Privatsphäre-Einstellungen ändern
