@@ -8,12 +8,18 @@ const registerSchema = z.object({
   password: z.string().min(8, 'Passwort muss mindestens 8 Zeichen haben'),
   role: z.enum(['buyer', 'breeder', 'service']).default('buyer'),
   kennelName: z.string().min(2).max(80).optional(),
+  verband: z.string().min(1).max(20).optional(),
 }).refine((data) => {
   if (data.role === 'breeder' && (!data.kennelName || data.kennelName.trim().length < 2)) {
     return false
   }
   return true
-}, { message: 'Zwingername muss mindestens 2 Zeichen haben', path: ['kennelName'] })
+}, { message: 'Zwingername muss mindestens 2 Zeichen haben', path: ['kennelName'] }).refine((data) => {
+  if (data.role === 'breeder' && !data.verband) {
+    return false
+  }
+  return true
+}, { message: 'Bitte wähle einen Verband aus', path: ['verband'] })
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,6 +27,9 @@ export async function POST(req: NextRequest) {
     // Leeren kennelName-String als undefined behandeln
     if (body.kennelName === '' || body.kennelName === null) {
       delete body.kennelName
+    }
+    if (body.verband === '' || body.verband === null) {
+      delete body.verband
     }
     const parsed = registerSchema.safeParse(body)
 
@@ -31,7 +40,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { email, password, role, kennelName } = parsed.data
+    const { email, password, role, kennelName, verband } = parsed.data
 
     // Züchter braucht Zwingernamen
     if (role === 'breeder' && !kennelName) {
@@ -73,6 +82,7 @@ export async function POST(req: NextRequest) {
           data: {
             userId: newUser.id,
             kennelName,
+            verband: verband || null,
             verificationLevel: 'email_verified',
           },
         })

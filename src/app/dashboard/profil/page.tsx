@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import ProfilForm from '@/components/ProfilForm'
 import PasswortAendernForm from '@/components/PasswortAendernForm'
+import VerifizierungSection from '@/components/VerifizierungSection'
 
 export default async function ProfilPage() {
   const session = await auth()
@@ -20,6 +21,15 @@ export default async function ProfilPage() {
 
   return (
     <>
+      {/* Verifizierung */}
+      <div className="max-w-xl mx-auto px-4 pt-8 pb-4">
+        <VerifizierungSection
+          verificationLevel={breeder.verificationLevel}
+          verifiedAt={breeder.verifiedAt?.toISOString() ?? null}
+          rejectReason={breeder.verificationRejectReason ?? null}
+        />
+      </div>
+
       <ProfilForm
         breeder={{
           kennelName: breeder.kennelName,

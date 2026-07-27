@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
+import { VERBAENDE } from '@/lib/verbaende'
 
 type Role = 'buyer' | 'breeder' | 'service'
 
@@ -16,11 +17,11 @@ const ROLES: { value: Role; label: string; desc: string; icon: string }[] = [
 export default function RegisterPage() {
   const router = useRouter()
   const [role, setRole] = useState<Role>('buyer')
-  const [form, setForm] = useState({ email: '', password: '', kennelName: '' })
+  const [form, setForm] = useState({ email: '', password: '', kennelName: '', verband: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
@@ -37,6 +38,7 @@ export default function RegisterPage() {
         password: form.password,
         role,
         ...(role === 'breeder' && form.kennelName ? { kennelName: form.kennelName } : {}),
+        ...(role === 'breeder' && form.verband ? { verband: form.verband } : {}),
       }),
     })
 
@@ -56,6 +58,8 @@ export default function RegisterPage() {
 
     router.push('/dashboard')
   }
+
+  const inputClass = 'w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest'
 
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-12">
@@ -88,22 +92,44 @@ export default function RegisterPage() {
             ))}
           </div>
 
-          {/* Zwingername nur für Züchter */}
+          {/* Züchter-Felder */}
           {role === 'breeder' && (
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Zwingername <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                name="kennelName"
-                value={form.kennelName}
-                onChange={handleChange}
-                required
-                placeholder="Mein Zwingername"
-                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                  Zwingername <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="kennelName"
+                  value={form.kennelName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Mein Zwingername"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                  Verband <span className="text-red-400">*</span>
+                </label>
+                <select
+                  name="verband"
+                  value={form.verband}
+                  onChange={handleChange}
+                  required
+                  className={inputClass}
+                >
+                  <option value="">— Verband auswählen —</option>
+                  {VERBAENDE.map((v) => (
+                    <option key={v.value} value={v.value}>{v.label}</option>
+                  ))}
+                </select>
+                <a href="mailto:info@whelply.de?subject=Verband%20vorschlagen&body=Hallo%2C%0A%0Aich%20möchte%20folgenden%20Verband%20vorschlagen%3A%0A%0AName%3A%20%0AWebsite%3A%20%0A%0ADanke!" className="text-xs text-forest hover:underline mt-1.5 inline-block">
+                  Dein Verband fehlt? Vorschlagen →
+                </a>
+              </div>
+            </>
           )}
 
           <div>
@@ -115,7 +141,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
               placeholder="deine@email.de"
-              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+              className={inputClass}
             />
           </div>
 
@@ -129,7 +155,7 @@ export default function RegisterPage() {
               required
               minLength={8}
               placeholder="Mindestens 8 Zeichen"
-              className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+              className={inputClass}
             />
           </div>
 
