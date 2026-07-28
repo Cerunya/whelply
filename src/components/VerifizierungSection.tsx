@@ -157,7 +157,28 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
               )}
             </div>
           ) : idPending ? (
-            <p className="text-sm text-amber-600 ml-10">Deine ID wird geprüft. Bitte warte einen Moment und lade die Seite dann neu.</p>
+            <div className="ml-10">
+              <p className="text-sm text-amber-600 mb-2">Deine ID wird geprüft.</p>
+              <button onClick={async () => {
+                setError('')
+                setDiditLoading(true)
+                try {
+                  const res = await fetch('/api/verifizierung/didit', { method: 'PATCH' })
+                  const data = await res.json()
+                  if (data.status === 'approved') {
+                    setDiditStatus('approved')
+                  } else if (data.status === 'declined') {
+                    setDiditStatus('declined')
+                  } else {
+                    setError('Prüfung läuft noch. Versuche es in ein paar Minuten erneut.')
+                  }
+                } catch { setError('Fehler beim Abrufen.') }
+                setDiditLoading(false)
+              }} disabled={diditLoading}
+                className="text-xs font-bold text-amber-700 border border-amber-300 px-4 py-2 rounded-lg hover:bg-amber-100 disabled:opacity-40">
+                {diditLoading ? 'Wird geprüft...' : 'Status aktualisieren'}
+              </button>
+            </div>
           ) : diditAvailable ? (
             <div className="ml-10">
               <p className="text-xs text-stone-500 mb-3">

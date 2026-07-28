@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { createDiditSession } from '@/lib/didit'
+import { createDiditSession, getDiditSession } from '@/lib/didit'
 
 const MONTHLY_LIMIT = 500
 
@@ -61,5 +61,50 @@ export async function POST() {
   } catch (e: any) {
     console.error('Didit error:', e.message)
     return NextResponse.json({ error: 'ID-Prüfung konnte nicht gestartet werden.' }, { status: 500 })
+  }
+}
+
+// PATCH: Status bei Didit direkt abfragen (Fallback wenn Webhook nicht ankommt)
+export async function PATCH() {
+  const session = await auth()
+  if (!session?.user) return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
+
+  const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
+  if (!breeder) return NextResponse.json({ error: 'Kein Züchterprofil' }, { status: 404 })
+
+  if (!breeder.diditSessionId) {
+    return NextResponse.json({ error: 'Keine laufende ID-Prüfung' }, { status: 400 })
+  }
+
+  if (breeder.diditStatus === 'approved') {
+    return NextResponse.json({ status: 'approved' })
+  }
+
+  try {
+    const decision = await getDiditSession(breeder.diditSessionId)
+    if (!decision) {
+      return NextResponse.json({ status: 'pending' })
+    }
+
+    const rawStatus = (decision.status || decision.verification_status || '').toLowerCase()
+
+    if (rawStatus === 'approved' || rawStatus === 'success' || rawStatus === 'verified') {
+      await prisma.breederProfile.update({
+        where: { id: breeder.id },
+        data: { diditStatus: 'approved' },
+      })
+      return NextResponse.json({ status: 'approved' })
+    } else if (rawStatus === 'declined' || rawStatus === 'rejected') {
+      await prisma.breederProfile.update({
+        where: { id: breeder.id },
+        data: { diditStatus: 'declined' },
+      })
+      return NextResponse.json({ status: 'declined' })
+    }
+
+    return NextResponse.json({ status: 'pending' })
+  } catch (e: any) {
+    console.error('Didit status check error:', e.message)
+    return NextResponse.json({ error: 'Status konnte nicht abgefragt werden.' }, { status: 500 })
   }
 }
