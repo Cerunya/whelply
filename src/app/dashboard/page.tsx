@@ -150,13 +150,22 @@ export default async function DashboardPage() {
             { label: 'Entwürfe', value: draftListings.length },
             { label: 'Profilaufrufe', value: totalViews },
             { label: 'Inserate gesamt', value: breeder._count.listings },
-            { label: 'Verifizierung', value: breeder.verificationLevel === 'none' ? '—' : '✓' },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-2xl border border-cream-deep p-5">
               <p className="text-2xl font-bold text-stone-900 font-serif">{s.value}</p>
               <p className="text-xs text-stone-400 mt-1">{s.label}</p>
             </div>
           ))}
+          <Link href="/dashboard/profil" className="bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
+            <div className="flex gap-3 mb-2">
+              <span className={`text-lg ${breeder.diditStatus === 'approved' ? 'text-green-500' : 'text-stone-300'}`}>🪪</span>
+              <span className={`text-lg ${breeder.verificationLevel === 'doc_verified' ? 'text-green-500' : 'text-stone-300'}`}>📄</span>
+            </div>
+            <p className="text-xs text-stone-400">
+              {breeder.verificationLevel === 'doc_verified' ? 'Verifiziert' :
+               breeder.verificationLevel === 'kennel_verified' ? 'In Prüfung' : 'Verifizierung'}
+            </p>
+          </Link>
         </div>
 
         {/* Aktionen */}
@@ -214,7 +223,7 @@ export default async function DashboardPage() {
               href="/dashboard/profil"
               className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
             >
-              Profil bearbeiten
+              Profil
             </Link>
             <Link
               href="/dashboard/ueber-uns"

@@ -132,7 +132,7 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Profil</h2>
         <p className="text-stone-400 text-sm mb-8">
           Zwingername: <span className="font-medium text-stone-600">{breeder.kennelName}</span>
-          {' '}(nicht änderbar — bei der FCI registriert)
+          {' '}(nicht änderbar{breeder.verband ? ` — ${breeder.verband}-registriert` : ''})
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">

@@ -69,7 +69,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
   if (verificationLevel === 'doc_verified') {
     return (
       <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-lg">✓</div>
           <div>
             <p className="font-semibold text-green-800">Verifizierter Züchter</p>
@@ -77,6 +77,12 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
               {verifiedAt ? `Verifiziert am ${new Date(verifiedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'Dein Profil ist verifiziert.'}
             </p>
           </div>
+        </div>
+        <div className="flex gap-4 ml-13 text-xs">
+          <span className={diditStatus === 'approved' ? 'text-green-700' : 'text-green-600/50'}>
+            {diditStatus === 'approved' ? '🪪 ID bestätigt' : '🪪 ID ausstehend'}
+          </span>
+          <span className="text-green-700">📄 Züchterstatus bestätigt</span>
         </div>
         {diditStatus !== 'approved' && diditAvailable && (
           <div className="mt-4 pt-4 border-t border-green-200">
