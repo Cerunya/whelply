@@ -113,8 +113,6 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
         )}
       </div>
     )
-      </div>
-    )
   }
 
   // ── Zwei-Schritt-Verifizierung ──
