@@ -235,6 +235,13 @@ export default function AdminDashboard({
               </div>
               <span className="text-forest text-sm font-semibold">Verwalten →</span>
             </Link>
+            <Link href="/admin/verifizierung" className="flex items-center justify-between bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
+              <div>
+                <p className="font-semibold text-stone-900">Züchter-Verifizierung</p>
+                <p className="text-xs text-stone-400 mt-0.5">Eingereichte Dokumente prüfen und Züchter verifizieren</p>
+              </div>
+              <span className="text-forest text-sm font-semibold">Prüfen →</span>
+            </Link>
           </div>
         )}
 

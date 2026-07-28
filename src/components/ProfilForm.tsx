@@ -7,6 +7,7 @@ import SaveToast from './SaveToast'
 import RichEditor from './RichEditor'
 import DashboardHeader from './DashboardHeader'
 import BreederImageUploader from './BreederImageUploader'
+import VerifizierungSection from './VerifizierungSection'
 import { VERBAENDE } from '@/lib/verbaende'
 
 const BUNDESLAENDER = [
@@ -44,7 +45,7 @@ type BreederData = {
   damVisitPossible: boolean
 }
 
-export default function ProfilForm({ breeder }: { breeder: BreederData }) {
+export default function ProfilForm({ breeder, verification }: { breeder: BreederData; verification?: { level: string; verifiedAt: string | null; rejectReason: string | null } }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -115,6 +116,16 @@ export default function ProfilForm({ breeder }: { breeder: BreederData }) {
   return (
     <div className="min-h-screen bg-cream font-sans">
       <DashboardHeader title="Profil bearbeiten" />
+
+      {verification && (
+        <div className="max-w-xl mx-auto px-4 mb-6">
+          <VerifizierungSection
+            verificationLevel={verification.level}
+            verifiedAt={verification.verifiedAt}
+            rejectReason={verification.rejectReason}
+          />
+        </div>
+      )}
 
       <main className="max-w-xl mx-auto px-4 py-12">
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Profil bearbeiten</h2>
