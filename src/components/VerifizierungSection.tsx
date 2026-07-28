@@ -78,6 +78,15 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
             </p>
           </div>
         </div>
+        {diditStatus !== 'approved' && diditAvailable && (
+          <div className="mt-4 pt-4 border-t border-green-200">
+            <p className="text-xs text-green-700 mb-2">Möchtest du zusätzlich deine Identität per Ausweischeck bestätigen?</p>
+            <button onClick={startDiditCheck} disabled={diditLoading}
+              className="text-xs font-bold text-green-700 border border-green-300 px-4 py-2 rounded-lg hover:bg-green-100 disabled:opacity-40">
+              {diditLoading ? 'Wird gestartet...' : 'ID-Prüfung nachholen'}
+            </button>
+          </div>
+        )}
       </div>
     )
   }
@@ -93,6 +102,17 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
             <p className="text-sm text-amber-600">Dein Dokument wird von unserem Team geprüft. Das dauert in der Regel 1–2 Werktage.</p>
           </div>
         </div>
+        {diditStatus !== 'approved' && diditAvailable && (
+          <div className="mt-4 pt-4 border-t border-amber-200">
+            <p className="text-xs text-amber-700 mb-2">Du kannst in der Zwischenzeit deine Identität per Ausweischeck bestätigen.</p>
+            <button onClick={startDiditCheck} disabled={diditLoading}
+              className="text-xs font-bold text-amber-700 border border-amber-300 px-4 py-2 rounded-lg hover:bg-amber-100 disabled:opacity-40">
+              {diditLoading ? 'Wird gestartet...' : 'ID-Prüfung nachholen'}
+            </button>
+          </div>
+        )}
+      </div>
+    )
       </div>
     )
   }
