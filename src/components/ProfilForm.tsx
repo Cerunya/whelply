@@ -115,10 +115,10 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
 
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <DashboardHeader title="Profil bearbeiten" />
+      <DashboardHeader title="Profil" />
 
       {verification && (
-        <div className="max-w-xl mx-auto px-4 mb-6">
+        <div className="max-w-xl mx-auto px-4 mt-4 mb-4">
           <VerifizierungSection
             verificationLevel={verification.level}
             verifiedAt={verification.verifiedAt}
@@ -129,7 +129,7 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
       )}
 
       <main className="max-w-xl mx-auto px-4 py-12">
-        <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Profil bearbeiten</h2>
+        <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Profil</h2>
         <p className="text-stone-400 text-sm mb-8">
           Zwingername: <span className="font-medium text-stone-600">{breeder.kennelName}</span>
           {' '}(nicht änderbar — bei der FCI registriert)
