@@ -200,6 +200,9 @@ model BreederProfile {
   verificationRequestedAt  DateTime? @map("verification_requested_at")
   verifiedAt               DateTime? @map("verified_at")
   verificationRejectReason String?   @map("verification_reject_reason")
+  diditSessionId    String?   @map("didit_session_id")
+  diditStatus       String?   @map("didit_status")
+  diditCheckedAt    DateTime? @map("didit_checked_at")
   bio               String?           @db.Text
   website           String?
   // Kontaktdaten — standardmäßig NICHT öffentlich, Züchter kann dies in den Privatsphäre-Einstellungen ändern
