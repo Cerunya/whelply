@@ -1,6 +1,6 @@
 # Whelply.de — Projektgedächtnis
 <!-- Diese Datei am Anfang jeder neuen Claude-Konversation einfügen -->
-<!-- Letzte Aktualisierung: 2026-07-17 -->
+<!-- Letzte Aktualisierung: 2026-07-28 -->
 
 ## Was wir bauen
 Deutsche Rassehunde-Plattform. Nur FCI-anerkannte Rassen. Kein Tierschutz, keine Mischlinge, keine Designerrassen (Maltipoo etc.). Inspiriert von chiens-de-france.com, aber moderner, mit KI-Features, und mit klarem Fokus auf seriöse VDH-Züchter.
@@ -1234,6 +1234,53 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 
 ---
 
+### ✅ Züchter-Verifizierung & Verbände-System (2026-07-28)
+
+#### Verbände-Dropdown
+- **`src/lib/verbaende.ts`**: Shared Liste mit 28 seriösen Zuchtverbänden (FCI, VDH + 11 deutsche Vereine, ÖKV, SKG, AKC, KC, CKC, UKC, ASCA, ISDS, JRTCA, WUSV, IFR, ABCA, NAVHDA, USRC, USCA)
+- **ProfilForm**: Dropdown statt Freitext, "Dein Verband fehlt? Vorschlagen →" mailto-Link, kein Freitext-Fallback (Qualitätskontrolle)
+- **Registrierung**: Verband ist Pflichtfeld bei Rolle "Züchter" (`src/app/(auth)/register/page.tsx` + API)
+- Zwingername-Anzeige zeigt tatsächlichen Verband (z.B. "VDH-registriert" statt hardcoded "FCI")
+
+#### Didit Identity Verification
+- **`src/lib/didit.ts`**: API-Helper (Session erstellen, Status abfragen, Webhook-Signatur verifizieren)
+- **`src/app/api/verifizierung/didit/route.ts`**: GET (Monatslimit prüfen), POST (Session erstellen), PATCH (Status direkt bei Didit abfragen als Webhook-Fallback)
+- **`src/app/api/verifizierung/didit-webhook/route.ts`**: Webhook-Handler für Didit-Events
+- **Monatslimit**: 500 kostenlose Checks/Monat, Counter zählt über `diditCheckedAt`, ab Limit wird nur Dokument-Upload angeboten
+- **ID nachholen**: Züchter die den ID-Check übersprungen haben können ihn später nachholen (bei "In Prüfung" und "Verifiziert")
+- **Coolify Env-Vars**: `DIDIT_API_KEY`, `DIDIT_WEBHOOK_SECRET`, `DIDIT_WORKFLOW_ID`
+
+#### Dokumenten-Upload + Admin-Review (DSGVO-konform)
+- **`src/app/api/verifizierung/route.ts`**: Upload + Status (Einwilligung erforderlich, max 10MB, JPG/PNG/WebP/PDF)
+- **`src/app/api/admin/verifizierung/[id]/route.ts`**: Admin Approve/Reject — Dokument wird sofort aus MinIO gelöscht (DSGVO)
+- **`src/app/admin/verifizierung/page.tsx`**: Admin-Seite mit Dokumentvorschau, Züchter-Info, Verifizieren/Ablehnen
+- **`src/components/VerifizierungAdmin.tsx`**: Client-Komponente für Admin-Review mit Ablehnungsgrund
+- **`src/components/AdminDashboard.tsx`**: Link "Züchter-Verifizierung → Prüfen" auf Admin-Übersicht
+
+#### Verifizierungs-UI im Dashboard
+- **`src/components/VerifizierungSection.tsx`**: Zwei-Schritt-Flow (1. Didit ID-Check, 2. Dokument-Upload), Status-Anzeigen (verifiziert/in Prüfung/abgelehnt), "Status aktualisieren"-Button als Webhook-Fallback
+- **Dashboard Stat-Box**: 🪪 + 📄 Icons (grün/grau), klickbar → Profil, zeigt "Verifiziert"/"In Prüfung"/"Verifizierung"
+- **Getrennte Anzeige**: "🪪 ID bestätigt" und "📄 Züchterstatus bestätigt" unter dem Badge
+- **"Profil bearbeiten" → "Profil"** überall (DashboardHeader, Überschrift, Dashboard-Button)
+
+#### DB-Felder (Migration manuell)
+```sql
+psql -U whelply -d whelply -c "ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS verification_doc_key TEXT; ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS verification_requested_at TIMESTAMPTZ; ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ; ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS verification_reject_reason TEXT; ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS didit_session_id TEXT; ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS didit_status TEXT; ALTER TABLE breeder_profiles ADD COLUMN IF NOT EXISTS didit_checked_at TIMESTAMPTZ;"
+```
+
+Prisma Schema ergänzen in `model BreederProfile`:
+```prisma
+verificationDocKey       String?   @map("verification_doc_key")
+verificationRequestedAt  DateTime? @map("verification_requested_at")
+verifiedAt               DateTime? @map("verified_at")
+verificationRejectReason String?   @map("verification_reject_reason")
+diditSessionId           String?   @map("didit_session_id")
+diditStatus              String?   @map("didit_status")
+diditCheckedAt           DateTime? @map("didit_checked_at")
+```
+
+---
+
 ### 📁 DATEIPFADE — Wohin die Dateien müssen
 
 Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Output entspricht 1:1 der im Projekt.
@@ -1258,6 +1305,9 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `WelpenAlertButton.tsx`
 - `DashboardHeader.tsx`
 - `ListingImageGallery.tsx`
+- `VerifizierungSection.tsx`
+- `VerifizierungAdmin.tsx`
+- `AdminDashboard.tsx`
 
 #### Seiten → `src/app/...`
 - `src/app/page.tsx` — Homepage
@@ -1267,6 +1317,10 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/app/hunde/page.tsx` — Erwachsene Hunde Übersicht
 - `src/app/welpen/page.tsx` — Welpen-Übersicht
 - `src/app/welpen/[id]/page.tsx` — Welpen-Detailseite
+- `src/app/(auth)/register/page.tsx` — Registrierung (mit Verband-Pflichtfeld)
+- `src/app/admin/verifizierung/page.tsx` — Admin: Verifizierungen prüfen
+- `src/app/dashboard/page.tsx` — Züchter-Dashboard
+- `src/app/dashboard/profil/page.tsx` — Züchter-Profil mit Verifizierung
 - `src/app/zuechter/[slug]/page.tsx` — Züchter-Hauptseite
 - `src/app/zuechter/[slug]/zuchthunde/page.tsx` — Unsere Hunde
 - `src/app/zuechter/[slug]/hund/[id]/page.tsx` — Hund-Detail im Züchter-Layout
@@ -1288,6 +1342,10 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/app/api/welpen-alert/route.ts` — Welpen-Alerts
 - `src/app/api/cron/welpen-alerts/route.ts` — Täglicher Alert-Versand
 - `src/app/api/cron/cleanup/route.ts` — Welpen-Aufräumung (3 Monate)
+- `src/app/api/verifizierung/route.ts` — Dokument-Upload + Status
+- `src/app/api/verifizierung/didit/route.ts` — Didit Session + Status-Check
+- `src/app/api/verifizierung/didit-webhook/route.ts` — Didit Webhook-Handler
+- `src/app/api/admin/verifizierung/[id]/route.ts` — Admin: Approve/Reject
 
 #### Sonstiges
 - `src/app/actions/auth.ts` — Server Action signOutAction
@@ -1295,6 +1353,8 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/lib/subdomain.ts` — Subdomain-Validierung, Reserved-Liste, Canonical-URL-Helper
 - `src/lib/breeder-metadata.ts` — generateBreederMetadata für Canonical-Tags auf Züchterseiten
 - `src/lib/render-markdown.ts` — Markdown→HTML mit Boxen (tipp/info/warnung/fazit/box), Produkt-Karten, renderBoxContent()
+- `src/lib/verbaende.ts` — Shared VERBAENDE-Liste (28 Vereine)
+- `src/lib/didit.ts` — Didit Identity Verification API-Helper
 - `prisma/schema.prisma` — Datenbankschema
 - `prisma/migrations/` — Migrationen (SQL ausführen + resolve)
 - `.gitignore`
