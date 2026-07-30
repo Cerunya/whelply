@@ -261,8 +261,8 @@ export default async function WelpenDetailPage({
             <div className="bg-forest rounded-2xl p-5 text-white flex flex-col justify-between">
               <div>
                 <p className="font-serif font-bold text-lg mb-0.5">{listing.breeder.kennelName}</p>
-                {listing.breeder.verificationLevel !== 'none' && (
-                  <p className="text-white/70 text-xs mb-4">Verifizierter Züchter</p>
+                {(listing.breeder.verificationLevel !== 'none' || listing.breeder.diditStatus === 'approved') && (
+                  <div className="flex flex-wrap gap-1.5 mb-4">{listing.breeder.diditStatus === 'approved' && (<span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">ID geprüft</span>)}{listing.breeder.verificationLevel === 'doc_verified' && (<span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">Zucht verifiziert</span>)}</div>
                 )}
               </div>
               <div className="space-y-2">

@@ -82,7 +82,7 @@ export default async function ZuechterVerzeichnisPage({
               Züchter-Verzeichnis
             </h1>
             <p className="text-white/70 text-sm">
-              Alle registrierten Rassehunde-Züchter auf Whelply — verifiziert über FCI-Zwingernamen.
+              Alle registrierten Rassehunde-Züchter auf Whelply — verifiziert über anerkannte Zuchtverbände.
             </p>
           </div>
         </section>
@@ -136,9 +136,12 @@ export default async function ZuechterVerzeichnisPage({
                             <p className="text-xs text-stone-400 mt-0.5">{breeder.fullName}</p>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {breeder.verificationLevel !== 'none' && (
-                            <span className="text-xs text-honey font-semibold whitespace-nowrap">✓ Verifiziert</span>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
+                          {breeder.diditStatus === 'approved' && (
+                            <span className="text-xs text-green-700 font-semibold whitespace-nowrap bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">ID ✓</span>
+                          )}
+                          {breeder.verificationLevel === 'doc_verified' && (
+                            <span className="text-xs text-green-700 font-semibold whitespace-nowrap bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">Zucht ✓</span>
                           )}
                         </div>
                       </div>

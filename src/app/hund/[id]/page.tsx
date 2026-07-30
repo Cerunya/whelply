@@ -30,7 +30,7 @@ export default async function HundDetailPage({
     where: { id: params.id },
     include: {
       breed: { select: { nameDe: true, slug: true } },
-      breeder: { select: { id: true, kennelName: true, displayName: true, city: true, state: true, isPublished: true, subdomain: true, phone: true, showPhone: true, website: true, socialInstagram: true, socialFacebook: true, verificationLevel: true } },
+      breeder: { select: { id: true, kennelName: true, displayName: true, city: true, state: true, isPublished: true, subdomain: true, phone: true, showPhone: true, website: true, socialInstagram: true, socialFacebook: true, verificationLevel: true, diditStatus: true } },
       media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { id: true, url: true, isPrimary: true, sortOrder: true, purpose: true } },
       parentSire: {
         include: {
@@ -207,8 +207,15 @@ export default async function HundDetailPage({
             <div className="bg-forest rounded-2xl p-5 text-white flex flex-col justify-between">
               <div>
                 <p className="font-serif font-bold text-lg mb-0.5">{breederName}</p>
-                {dog.breeder.verificationLevel !== 'none' && (
-                  <p className="text-white/70 text-xs mb-4">Verifizierter Züchter</p>
+                {(dog.breeder.verificationLevel !== 'none' || dog.breeder.diditStatus === 'approved') && (
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {dog.breeder.diditStatus === 'approved' && (
+                      <span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">ID geprüft</span>
+                    )}
+                    {dog.breeder.verificationLevel === 'doc_verified' && (
+                      <span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">Zucht verifiziert</span>
+                    )}
+                  </div>
                 )}
               </div>
               <div className="space-y-2">
