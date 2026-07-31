@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import BreedSearch from './BreedSearch'
 
 const BUNDESLAENDER = [
   'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
@@ -30,16 +31,13 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
 
   return (
     <div className="flex flex-wrap gap-3 items-center">
-      <select
+      <BreedSearch
+        breeds={breeds}
         value={currentRasse}
-        onChange={(e) => update('rasse', e.target.value)}
-        className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
-      >
-        <option value="">Alle Rassen</option>
-        {breeds.map((b) => (
-          <option key={b.id} value={b.slug}>{b.nameDe}</option>
-        ))}
-      </select>
+        onChange={(slug) => update('rasse', slug)}
+        placeholder="Rasse suchen..."
+        className="w-56"
+      />
 
       <select
         value={currentRegion}

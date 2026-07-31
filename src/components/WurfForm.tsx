@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
+import BreedSearch from './BreedSearch'
 
 type Breed = { id: number; nameDe: string }
 type DogOption = { id: string; name: string; sex: string; breedId: number }
@@ -94,12 +95,14 @@ export default function WurfForm({
 
           <div>
             <label className={labelClass}>Rasse <span className="text-red-400">*</span></label>
-            <select name="breedId" required value={form.breedId} onChange={handleChange} className={inputClass}>
-              <option value="">Rasse auswählen</option>
-              {breeds.map((b) => (
-                <option key={b.id} value={b.id}>{b.nameDe}</option>
-              ))}
-            </select>
+            <select name="breedId" required value={form.breedId} onChange={handleChange} className={inputClass + ' hidden'} />
+            <BreedSearch
+              breeds={breeds}
+              value={form.breedId}
+              onChange={(v) => setForm({ ...form, breedId: v })}
+              valueKey="id"
+              placeholder="Rasse suchen..."
+            />
           </div>
 
           <div>

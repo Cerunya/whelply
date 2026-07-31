@@ -8,6 +8,7 @@ import DogGalleryUploader from './DogGalleryUploader'
 import DogBgUploader from './DogBgUploader'
 import { slugify } from '@/lib/slugify'
 import SaveToast from './SaveToast'
+import BreedSearch from './BreedSearch'
 
 type Breed = { id: number; nameDe: string }
 type DogData = {
@@ -278,11 +279,14 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
 
           <div>
             <label className={labelClass}>Rasse <span className="text-red-400">*</span></label>
-            <select name="breedId" required value={form.breedId} onChange={handleChange} className={inputClass}>
-              {breeds.map((b) => (
-                <option key={b.id} value={b.id}>{b.nameDe}</option>
-              ))}
-            </select>
+            <select name="breedId" required value={form.breedId} onChange={handleChange} className={inputClass + ' hidden'} />
+            <BreedSearch
+              breeds={breeds}
+              value={form.breedId}
+              onChange={(v) => setForm({ ...form, breedId: v })}
+              valueKey="id"
+              placeholder="Rasse suchen..."
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

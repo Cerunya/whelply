@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import BreedSearch from './BreedSearch'
 
 const BUNDESLAENDER = [
   'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
@@ -33,12 +34,13 @@ export default function SearchForm({ breeds }: { breeds: Breed[] }) {
 
   return (
     <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 w-full">
-      <select value={breed} onChange={(e) => setBreed(e.target.value)} className={selectClass}>
-        <option value="">Alle Rassen</option>
-        {breeds.map((b) => (
-          <option key={b.id} value={b.slug}>{b.nameDe}</option>
-        ))}
-      </select>
+      <BreedSearch
+        breeds={breeds}
+        value={breed}
+        onChange={setBreed}
+        placeholder="Rasse suchen..."
+        className="flex-1"
+      />
 
       <select value={region} onChange={(e) => setRegion(e.target.value)} className={selectClass}>
         <option value="">Alle Bundesländer</option>

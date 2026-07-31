@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import RichEditor from './RichEditor'
+import BreedSearch from './BreedSearch'
 import { resizeImage } from '@/lib/image-resize'
 
 type Breed = { id: string; nameDe: string; slug: string }
@@ -138,10 +139,13 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
         </div>
         <div>
           <label className={labelClass}>Rasse (optional)</label>
-          <select name="breedId" value={form.breedId} onChange={handleChange} className={inputClass}>
-            <option value="">— Keine —</option>
-            {breeds.map((b) => <option key={b.id} value={b.id}>{b.nameDe}</option>)}
-          </select>
+          <BreedSearch
+            breeds={breeds}
+            value={form.breedId}
+            onChange={(v) => setForm({ ...form, breedId: v })}
+            valueKey="id"
+            placeholder="Rasse suchen..."
+          />
         </div>
         <div>
           <label className={labelClass}>Autor</label>
