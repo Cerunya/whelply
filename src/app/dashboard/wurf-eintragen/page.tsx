@@ -14,7 +14,7 @@ export default async function WurfEintragenPage() {
 
   const breeds = await prisma.breed.findMany({
     orderBy: { nameDe: 'asc' },
-    select: { id: true, nameDe: true },
+    select: { id: true, nameDe: true, slug: true },
   })
 
   const dogs = await prisma.dog.findMany({

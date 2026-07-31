@@ -63,6 +63,12 @@ NIXPACKS_NODE_VERSION=22
   Beispiel: `curl -s "https://raw.githubusercontent.com/Cerunya/whelply/main/src/app/page.tsx"`
   So muss der User keine Dateien mehr manuell hochladen. IMMER zuerst die aktuelle Version
   aus dem Repo lesen, bevor Änderungen gemacht werden.
+- **PFLICHT vor jeder Dateiänderung**:
+  1. Datei via `curl` aus GitHub lesen
+  2. HTTP-Status prüfen (`curl -s -o /dev/null -w "%{http_code}"`) — bei 404 die Datei NICHT erstellen
+  3. Inhalt prüfen — beginnt die Antwort mit `404:` oder `Not Found`, ist es KEINE gültige Datei
+  4. Erst nach erfolgreicher Prüfung Änderungen vornehmen
+  NIEMALS blind `curl`-Output als Datei speichern ohne Status zu prüfen!
 - **Datei-Workflow**: Claude erstellt/ändert Dateien unter `/mnt/user-data/outputs/whelply/[pfad]`
   (spiegelt die Repo-Struktur), präsentiert sie via present_files. User kopiert sie per
   GitHub Desktop ins lokale Repo, committet, pusht. Coolify deployt automatisch.
