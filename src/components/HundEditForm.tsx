@@ -10,7 +10,7 @@ import { slugify } from '@/lib/slugify'
 import SaveToast from './SaveToast'
 import BreedSearch from './BreedSearch'
 
-type Breed = { id: number; nameDe: string }
+type Breed = { id: number; nameDe: string; slug: string }
 type DogData = {
   id: string
   name: string

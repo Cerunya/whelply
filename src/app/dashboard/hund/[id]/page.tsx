@@ -29,7 +29,7 @@ export default async function HundBearbeitenPage({
 
   const breeds = await prisma.breed.findMany({
     orderBy: { nameDe: 'asc' },
-    select: { id: true, nameDe: true },
+    select: { id: true, nameDe: true, slug: true },
   })
 
   // Alle Hunde aller Züchter für Elterntier-Auswahl (Stammbaum kann züchterübergreifend sein)

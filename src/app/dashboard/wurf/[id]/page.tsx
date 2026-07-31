@@ -38,7 +38,7 @@ export default async function WurfDetailPage({
 
   const breeds = await prisma.breed.findMany({
     orderBy: { nameDe: 'asc' },
-    select: { id: true, nameDe: true },
+    select: { id: true, nameDe: true, slug: true },
   })
 
   // Eigene Hunde für Mutter/Vater-Auswahl (gefiltert nach Rasse des Wurfs)

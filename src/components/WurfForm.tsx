@@ -6,7 +6,7 @@ import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import BreedSearch from './BreedSearch'
 
-type Breed = { id: number; nameDe: string }
+type Breed = { id: number; nameDe: string; slug: string }
 type DogOption = { id: string; name: string; sex: string; breedId: number }
 
 export default function WurfForm({
