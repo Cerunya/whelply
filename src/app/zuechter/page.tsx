@@ -138,10 +138,10 @@ export default async function ZuechterVerzeichnisPage({
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
                           {breeder.diditStatus === 'approved' && (
-                            <span className="text-xs text-green-700 font-semibold whitespace-nowrap bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">ID ✓</span>
+                            <a href="/badges#id-geprueft" className="text-xs text-green-700 font-semibold whitespace-nowrap bg-green-50 border border-green-200 px-2 py-0.5 rounded-full hover:border-green-400 transition-colors">ID ✓</a>
                           )}
                           {breeder.verificationLevel === 'doc_verified' && (
-                            <span className="text-xs text-green-700 font-semibold whitespace-nowrap bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">Zucht ✓</span>
+                            <a href="/badges#zucht-verifiziert" className="text-xs text-green-700 font-semibold whitespace-nowrap bg-green-50 border border-green-200 px-2 py-0.5 rounded-full hover:border-green-400 transition-colors">Zucht ✓</a>
                           )}
                         </div>
                       </div>

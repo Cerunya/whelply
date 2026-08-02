@@ -246,10 +246,10 @@ export default async function WelpenDetailPage({
               <h2 className="font-semibold text-stone-800 text-sm mb-3">Gesundheit & Dokumente</h2>
               {(listing.hasPedigree || listing.isVaccinated || listing.isDewormed || listing.isChipped || listing.isInsured) ? (
                 <div className="flex flex-wrap gap-2">
-                  {listing.hasPedigree && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Ahnentafel</span>}
-                  {listing.isVaccinated && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Geimpft</span>}
-                  {listing.isDewormed && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Entwurmt</span>}
-                  {listing.isChipped && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Gechipt</span>}
+                  {listing.hasPedigree && <a href="/badges#ahnentafel" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Ahnentafel</a>}
+                  {listing.isVaccinated && <a href="/badges#geimpft" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Geimpft</a>}
+                  {listing.isDewormed && <a href="/badges#entwurmt" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Entwurmt</a>}
+                  {listing.isChipped && <a href="/badges#gechipt" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Gechipt</a>}
                   {listing.isInsured && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Versichert</span>}
                 </div>
               ) : (
@@ -262,7 +262,7 @@ export default async function WelpenDetailPage({
               <div>
                 <p className="font-serif font-bold text-lg mb-0.5">{listing.breeder.kennelName}</p>
                 {(listing.breeder.verificationLevel !== 'none' || listing.breeder.diditStatus === 'approved') && (
-                  <div className="flex flex-wrap gap-1.5 mb-4">{listing.breeder.diditStatus === 'approved' && (<span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">ID geprüft</span>)}{listing.breeder.verificationLevel === 'doc_verified' && (<span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">Zucht verifiziert</span>)}</div>
+                  <div className="flex flex-wrap gap-1.5 mb-4">{listing.breeder.diditStatus === 'approved' && (<a href="/badges#id-geprueft" className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full hover:bg-white/30 transition-colors">ID geprüft</a>)}{listing.breeder.verificationLevel === 'doc_verified' && (<a href="/badges#zucht-verifiziert" className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full hover:bg-white/30 transition-colors">Zucht verifiziert</a>)}</div>
                 )}
               </div>
               <div className="space-y-2">

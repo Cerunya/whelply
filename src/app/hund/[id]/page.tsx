@@ -210,10 +210,10 @@ export default async function HundDetailPage({
                 {(dog.breeder.verificationLevel !== 'none' || dog.breeder.diditStatus === 'approved') && (
                   <div className="flex flex-wrap gap-1.5 mb-4">
                     {dog.breeder.diditStatus === 'approved' && (
-                      <span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">ID geprüft</span>
+                      <a href="/badges#id-geprueft" className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full hover:bg-white/30 transition-colors">ID geprüft</a>
                     )}
                     {dog.breeder.verificationLevel === 'doc_verified' && (
-                      <span className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full">Zucht verifiziert</span>
+                      <a href="/badges#zucht-verifiziert" className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full hover:bg-white/30 transition-colors">Zucht verifiziert</a>
                     )}
                   </div>
                 )}

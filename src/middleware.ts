@@ -50,6 +50,7 @@ export function middleware(request: NextRequest) {
       '/impressum',
       '/datenschutz',
       '/agb',
+      '/badges',
     ]
 
     const shouldSkip = skipRewrite.some((prefix) => pathname.startsWith(prefix))
