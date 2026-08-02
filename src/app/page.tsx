@@ -90,7 +90,7 @@ export default async function Home() {
       <main className="bg-cream">
 
         {/* ── Hero ── */}
-        <section className="bg-forest px-4 py-20 md:py-28 relative overflow-hidden">
+        <section className="bg-forest px-4 py-20 md:py-28 relative overflow-visible">
           {/* Subtile Textur-Punkte */}
           <div className="absolute inset-0 opacity-5"
             style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}

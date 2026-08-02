@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth'
+import CookieSettingsButton from './CookieSettingsButton'
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
 
@@ -62,6 +63,9 @@ export default async function Footer() {
                   <a href={`${BASE}${href}`} className="text-white/60 hover:text-white transition-colors">{label}</a>
                 </li>
               ))}
+              <li>
+                <CookieSettingsButton />
+              </li>
             </ul>
           </div>
         </div>
