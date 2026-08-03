@@ -159,14 +159,14 @@ export default async function DashboardPage() {
           <Link href="/dashboard/profil" className="bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${breeder.diditStatus === 'approved' ? 'bg-green-500' : 'bg-red-400'}`} />
-                <span className={`text-xs ${breeder.diditStatus === 'approved' ? 'text-green-700' : 'text-red-500'}`}>
+                <span className="text-lg">🪪</span>
+                <span className={`text-xs ${breeder.diditStatus === 'approved' ? 'text-green-700' : 'text-stone-400'}`}>
                   {breeder.diditStatus === 'approved' ? 'ID geprüft' : 'ID offen'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${breeder.verificationLevel === 'doc_verified' ? 'bg-green-500' : breeder.verificationLevel === 'kennel_verified' ? 'bg-amber-400' : 'bg-red-400'}`} />
-                <span className={`text-xs ${breeder.verificationLevel === 'doc_verified' ? 'text-green-700' : breeder.verificationLevel === 'kennel_verified' ? 'text-amber-600' : 'text-red-500'}`}>
+                <span className="text-lg">📄</span>
+                <span className={`text-xs ${breeder.verificationLevel === 'doc_verified' ? 'text-green-700' : breeder.verificationLevel === 'kennel_verified' ? 'text-amber-600' : 'text-stone-400'}`}>
                   {breeder.verificationLevel === 'doc_verified' ? 'Zucht verifiziert' : breeder.verificationLevel === 'kennel_verified' ? 'In Prüfung' : 'Zucht offen'}
                 </span>
               </div>

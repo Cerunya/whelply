@@ -242,6 +242,13 @@ export default function AdminDashboard({
               </div>
               <span className="text-forest text-sm font-semibold">Prüfen →</span>
             </Link>
+            <Link href="/admin/mediathek" className="flex items-center justify-between bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
+              <div>
+                <p className="font-semibold text-stone-900">Mediathek</p>
+                <p className="text-xs text-stone-400 mt-0.5">Bilder und PDFs für Ratgeber-Artikel hochladen und verwalten</p>
+              </div>
+              <span className="text-forest text-sm font-semibold">Verwalten →</span>
+            </Link>
           </div>
         )}
 
