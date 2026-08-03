@@ -151,8 +151,11 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
 
-  // ── Bilder ──
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-xl my-10 w-full" />')
+  // ── Bilder mit optionaler Bildunterschrift: ![alt](url "Unterschrift") ──
+  html = html.replace(/!\[([^\]]*)\]\(([^\s)]+)\s+"([^"]+)"\)/g,
+    '<figure class="my-10"><img src="$2" alt="$1" class="rounded-xl w-full" /><figcaption class="text-center text-xs text-stone-400 mt-2 italic">$3</figcaption></figure>')
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+    '<img src="$2" alt="$1" class="rounded-xl my-10 w-full" />')
 
   // ── Links ──
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-forest underline hover:text-forest-light" target="_blank" rel="noopener">$1</a>')
