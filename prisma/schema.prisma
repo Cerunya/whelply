@@ -654,6 +654,8 @@ model Article {
   breedId         Int?      @map("breed_id")
   breed           Breed?    @relation(fields: [breedId], references: [id])
   authorName      String?   @map("author_name")
+  sidebarProductId String?  @map("sidebar_product_id")
+  sidebarProduct   Product? @relation(fields: [sidebarProductId], references: [id])
   isPublished     Boolean   @default(false) @map("is_published")
   publishedAt     DateTime? @map("published_at")
   createdAt       DateTime  @default(now()) @map("created_at")

@@ -63,14 +63,20 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
     select: { slug: true, title: true, coverImageUrl: true, publishedAt: true },
   })
 
-  // Zufälliges Affiliate-Produkt
-  const productCount = await prisma.product.count({ where: { isAvailable: true } })
-  const randomProduct = productCount > 0
-    ? await prisma.product.findFirst({
-        where: { isAvailable: true },
-        skip: Math.floor(Math.random() * productCount),
-      })
-    : null
+  // Sidebar-Produkt: gewähltes oder zufälliges
+  let sidebarProduct = null
+  if ((article as any).sidebarProductId) {
+    sidebarProduct = await prisma.product.findFirst({ where: { id: (article as any).sidebarProductId, isAvailable: true } })
+  }
+  if (!sidebarProduct) {
+    const productCount = await prisma.product.count({ where: { isAvailable: true } })
+    sidebarProduct = productCount > 0
+      ? await prisma.product.findFirst({
+          where: { isAvailable: true },
+          skip: Math.floor(Math.random() * productCount),
+        })
+      : null
+  }
 
   return (
     <>
@@ -142,24 +148,24 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
               )}
 
               {/* Zufälliges Affiliate-Produkt */}
-              {randomProduct && (
+              {sidebarProduct && (
                 <div>
                   <h3 className="font-serif text-sm font-bold text-stone-900 uppercase tracking-wide mb-3">Empfehlung</h3>
-                  <a href={`https://www.amazon.de/dp/${randomProduct.asin}?tag=${randomProduct.affiliateTag}`}
+                  <a href={`https://www.amazon.de/dp/${sidebarProduct.asin}?tag=${sidebarProduct.affiliateTag}`}
                     target="_blank" rel="noopener nofollow sponsored"
                     className="block rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md hover:border-forest/30 transition-all group">
-                    {randomProduct.imageUrl && (
+                    {sidebarProduct.imageUrl && (
                       <div className="aspect-square overflow-hidden bg-white p-4">
-                        <img src={randomProduct.imageUrl} alt={randomProduct.name}
+                        <img src={sidebarProduct.imageUrl} alt={sidebarProduct.name}
                           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                       </div>
                     )}
                     <div className="p-4 bg-green-50">
                       <p className="font-semibold text-stone-900 text-sm leading-snug mb-2 group-hover:text-forest transition-colors">
-                        {randomProduct.name}
+                        {sidebarProduct.name}
                       </p>
-                      {randomProduct.description && (
-                        <p className="text-xs text-stone-500 line-clamp-2 mb-3">{randomProduct.description}</p>
+                      {sidebarProduct.description && (
+                        <p className="text-xs text-stone-500 line-clamp-2 mb-3">{sidebarProduct.description}</p>
                       )}
                       <span className="inline-block bg-honey text-white text-xs font-bold px-3 py-1.5 rounded-lg">
                         Bei Amazon ansehen →

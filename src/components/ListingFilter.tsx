@@ -1,14 +1,16 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import BreedSearch from './BreedSearch'
 
 type FilterOption = { value: string; label: string }
+type Filter = { key: string; placeholder: string; options: FilterOption[] }
 
 export default function ListingFilter({
   filters,
   basePath,
 }: {
-  filters: { key: string; placeholder: string; options: FilterOption[] }[]
+  filters: Filter[]
   basePath: string
 }) {
   const router = useRouter()
@@ -26,19 +28,36 @@ export default function ListingFilter({
 
   return (
     <div className="flex flex-wrap gap-3 items-center">
-      {filters.map((f) => (
-        <select
-          key={f.key}
-          value={searchParams.get(f.key) ?? ''}
-          onChange={(e) => update(f.key, e.target.value)}
-          className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
-        >
-          <option value="">{f.placeholder}</option>
-          {f.options.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      ))}
+      {filters.map((f) => {
+        // Rasse-Filter → durchsuchbar
+        if (f.key === 'rasse') {
+          const breeds = f.options.map((o) => ({ id: o.value, nameDe: o.label, slug: o.value }))
+          return (
+            <BreedSearch
+              key={f.key}
+              breeds={breeds}
+              value={searchParams.get(f.key) ?? ''}
+              onChange={(slug) => update(f.key, slug)}
+              placeholder={f.placeholder}
+              className="w-56"
+            />
+          )
+        }
+        // Alle anderen Filter → normales Dropdown
+        return (
+          <select
+            key={f.key}
+            value={searchParams.get(f.key) ?? ''}
+            onChange={(e) => update(f.key, e.target.value)}
+            className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
+          >
+            <option value="">{f.placeholder}</option>
+            {f.options.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        )
+      })}
       {hasAnyFilter && (
         <button
           onClick={() => router.push(basePath)}

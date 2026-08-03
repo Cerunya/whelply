@@ -19,6 +19,8 @@ export default async function AdminArtikelEditPage({ params }: { params: { id: s
   const breedsRaw = await prisma.breed.findMany({ select: { id: true, nameDe: true, slug: true }, orderBy: { nameDe: 'asc' } })
   const breeds = breedsRaw.map((b) => ({ id: String(b.id), nameDe: b.nameDe, slug: b.slug }))
 
+  const productsRaw = await prisma.product.findMany({ where: { isAvailable: true }, select: { id: true, name: true, asin: true }, orderBy: { name: 'asc' } })
+
   return (
     <>
       <DashboardHeader title={isNew ? 'Neuer Artikel' : 'Artikel bearbeiten'} backHref="/admin/artikel" backLabel="Artikel" />
@@ -37,8 +39,10 @@ export default async function AdminArtikelEditPage({ params }: { params: { id: s
             breedId: article.breedId ? String(article.breedId) : '',
             authorName: article.authorName ?? '',
             isPublished: article.isPublished,
+            sidebarProductId: (article as any).sidebarProductId ?? '',
           } : undefined}
           breeds={breeds}
+          products={productsRaw}
         />
       </div>
     </>

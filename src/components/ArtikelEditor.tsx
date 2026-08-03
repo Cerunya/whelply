@@ -7,6 +7,7 @@ import BreedSearch from './BreedSearch'
 import { resizeImage } from '@/lib/image-resize'
 
 type Breed = { id: string; nameDe: string; slug: string }
+type Product = { id: string; name: string; asin: string }
 type Article = {
   id?: string
   slug: string
@@ -20,9 +21,10 @@ type Article = {
   breedId: string
   authorName: string
   isPublished: boolean
+  sidebarProductId: string
 }
 
-export default function ArtikelEditor({ article, breeds }: { article?: Article & { id: string }; breeds: Breed[] }) {
+export default function ArtikelEditor({ article, breeds, products = [] }: { article?: Article & { id: string }; breeds: Breed[]; products?: Product[] }) {
   const router = useRouter()
   const coverInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState<Article>({
@@ -37,6 +39,7 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
     breedId: article?.breedId ?? '',
     authorName: article?.authorName ?? 'Whelply Redaktion',
     isPublished: article?.isPublished ?? false,
+    sidebarProductId: article?.sidebarProductId ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -89,6 +92,7 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
           ...form,
           breedId: form.breedId ? parseInt(form.breedId) : null,
           coverImageUrl: form.coverImageUrl || null,
+          sidebarProductId: form.sidebarProductId || null,
           metaTitle: form.metaTitle || null,
           metaDescription: form.metaDescription || null,
           excerpt: form.excerpt || null,
@@ -152,6 +156,20 @@ export default function ArtikelEditor({ article, breeds }: { article?: Article &
           <input name="authorName" value={form.authorName} onChange={handleChange} className={inputClass} />
         </div>
       </div>
+
+      {/* Sidebar-Produkt */}
+      {products.length > 0 && (
+        <div>
+          <label className={labelClass}>Sidebar-Produkt (Amazon-Empfehlung)</label>
+          <select name="sidebarProductId" value={form.sidebarProductId} onChange={handleChange} className={inputClass}>
+            <option value="">Zufälliges Produkt</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>{p.name} ({p.asin})</option>
+            ))}
+          </select>
+          <p className="text-xs text-stone-400 mt-1">Wird in der Seitenleiste neben dem Artikel angezeigt. Leer = zufällig.</p>
+        </div>
+      )}
 
       {/* Titelbild-Upload */}
       <div>

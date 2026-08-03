@@ -79,7 +79,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
           </div>
         </div>
         <div className="flex gap-4 ml-13 text-xs">
-          <span className={diditStatus === 'approved' ? 'text-green-700' : 'text-green-600/50'}>
+          <span className={diditStatus === 'approved' ? 'text-green-700' : 'text-red-400'}>
             {diditStatus === 'approved' ? '🪪 ID bestätigt' : '🪪 ID ausstehend'}
           </span>
           <span className="text-green-700">📄 Züchterstatus bestätigt</span>
