@@ -677,6 +677,7 @@ model Product {
   isAvailable    Boolean   @default(true) @map("is_available") // Verfügbarkeit (PA-API später)
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
+  sidebarArticles  Article[]
 
   @@map("products")
 }
