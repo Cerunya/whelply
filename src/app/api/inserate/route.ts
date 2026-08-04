@@ -49,6 +49,8 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const breed = await prisma.breed.findUnique({ where: { id: parsed.data.breedId }, select: { nameDe: true } })
+
   const listing = await prisma.listing.create({
     data: {
       breederId: breeder.id,
@@ -63,5 +65,16 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  return NextResponse.json({ id: listing.id }, { status: 201 })
+  // SEO-Slug generieren
+  const { generateListingSlug } = await import('@/lib/listing-slug')
+  const slug = generateListingSlug({
+    breedName: breed?.nameDe ?? 'hund',
+    type: listing.type,
+    sex: listing.sex,
+    title: listing.title,
+    id: listing.id,
+  })
+  await prisma.listing.update({ where: { id: listing.id }, data: { slug } })
+
+  return NextResponse.json({ id: listing.id, slug }, { status: 201 })
 }

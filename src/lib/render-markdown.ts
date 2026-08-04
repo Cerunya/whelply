@@ -153,7 +153,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
 
   // ── Bilder mit optionaler Bildunterschrift: ![alt](url "Unterschrift") ──
   html = html.replace(/!\[([^\]]*)\]\(([^\s)]+)\s+"([^"]+)"\)/g,
-    '<figure class="my-10"><img src="$2" alt="$1" class="rounded-xl w-full" /><figcaption class="text-center text-xs text-stone-400 mt-2 italic">$3</figcaption></figure>')
+    '<figure class="mt-10 mb-4"><img src="$2" alt="$1" class="rounded-xl w-full" /><figcaption class="text-center text-xs text-stone-400 mt-2 italic">$3</figcaption></figure>')
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
     '<img src="$2" alt="$1" class="rounded-xl my-10 w-full" />')
 

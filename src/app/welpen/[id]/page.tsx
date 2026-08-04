@@ -20,8 +20,10 @@ export default async function WelpenDetailPage({
 }: {
   params: { id: string }
 }) {
-  const listing = await prisma.listing.findUnique({
-    where: { id: params.id },
+  // Slug oder ID akzeptieren
+  const isCuid = /^c[a-z0-9]{20,}$/.test(params.id)
+  const listing = await prisma.listing.findFirst({
+    where: isCuid ? { id: params.id } : { slug: params.id },
     include: {
       breed: true,
       breeder: true,

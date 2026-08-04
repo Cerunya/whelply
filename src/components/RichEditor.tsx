@@ -167,8 +167,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     try {
       const fd = new FormData()
       fd.append('file', file)
-      fd.append('purpose', 'bio')
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const res = await fetch('/api/admin/mediathek', { method: 'POST', body: fd })
       const data = await res.json()
       if (data.url) addImage(file.name, data.url)
       else alert('Upload fehlgeschlagen.')
