@@ -323,6 +323,18 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
             <div key={i} className="flex items-center gap-2 bg-cream border border-cream-deep rounded-lg px-2.5 py-1.5 text-xs text-stone-700">
               <img src={img.url} alt={img.alt} className="w-8 h-8 rounded object-cover flex-shrink-0" />
               <span className="truncate max-w-[120px]">{img.alt || 'Bild'}</span>
+              <button type="button" onClick={() => {
+                const caption = window.prompt('Bildunterschrift:', img.caption || '')
+                if (caption === null) return
+                const esc = img.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+                const re = new RegExp(`!\\[([^\\]]*)\\]\\(${esc}(?:\\s+"[^"]*")?\\)`)
+                const newMd = caption
+                  ? value.replace(re, `![$1](${img.url} "${caption}")`)
+                  : value.replace(re, `![$1](${img.url})`)
+                onChange(newMd)
+              }} className="text-stone-400 hover:text-forest flex-shrink-0" title="Bildunterschrift bearbeiten">
+                ✎
+              </button>
               {img.caption && <span className="text-stone-400 truncate max-w-[80px]">„{img.caption}"</span>}
               <button type="button" onClick={() => removeImage(img.url)}
                 className="text-stone-400 hover:text-red-500 ml-1 flex-shrink-0" title="Bild entfernen">×</button>
