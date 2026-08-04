@@ -34,20 +34,20 @@ export default async function WelpenDetailPage({
           dam: {
             include: {
               media: { take: 1, select: { url: true } },
-              parentSire: { select: { id: true, name: true } },
-              parentDam: { select: { id: true, name: true } },
+              parentSire: { select: { id: true, name: true, slug: true } },
+              parentDam: { select: { id: true, name: true, slug: true } },
             },
           },
           sire: {
             include: {
               media: { take: 1, select: { url: true } },
-              parentSire: { select: { id: true, name: true } },
-              parentDam: { select: { id: true, name: true } },
+              parentSire: { select: { id: true, name: true, slug: true } },
+              parentDam: { select: { id: true, name: true, slug: true } },
             },
           },
           listings: {
             include: {
-              dog: { select: { id: true, name: true, sex: true } },
+              dog: { select: { id: true, name: true, sex: true, slug: true } },
               media: { where: { isPrimary: true }, take: 1, select: { url: true } },
             },
           },
@@ -337,7 +337,7 @@ export default async function WelpenDetailPage({
                 <div className="flex flex-col items-center">
                   <div className="w-0.5 h-8 bg-stone-300 mb-0" />
                   {listing.litter?.dam ? (
-                    <Link href={`/hund/${listing.litter.dam.id}`}
+                    <Link href={`/hund/${listing.litter.dam.slug || listing.litter.dam.id}`}
                       className="bg-white rounded-2xl border-2 border-pink-200 p-4 w-full max-w-xs hover:border-pink-400 hover:shadow transition-all block">
                       {listing.litter.dam.media[0]?.url && (
                         <img src={listing.litter.dam.media[0].url} alt={listing.litter.dam.name}
@@ -355,7 +355,7 @@ export default async function WelpenDetailPage({
                 <div className="flex flex-col items-center">
                   <div className="w-0.5 h-8 bg-stone-300 mb-0" />
                   {listing.litter?.sire ? (
-                    <Link href={`/hund/${listing.litter.sire.id}`}
+                    <Link href={`/hund/${listing.litter.sire.slug || listing.litter.sire.id}`}
                       className="bg-white rounded-2xl border-2 border-blue-200 p-4 w-full max-w-xs hover:border-blue-400 hover:shadow transition-all block">
                       {listing.litter.sire.media[0]?.url && (
                         <img src={listing.litter.sire.media[0].url} alt={listing.litter.sire.name}
@@ -397,7 +397,7 @@ export default async function WelpenDetailPage({
                       <div key={label} className="flex flex-col items-center">
                         <div className="w-0.5 h-6 bg-stone-200 mb-0" />
                         {dog ? (
-                          <Link href={`/hund/${dog.id}`}
+                          <Link href={`/hund/${dog.slug || dog.id}`}
                             className={`bg-white rounded-xl border-2 w-full p-3 block text-center hover:shadow transition-all ${color === 'pink' ? 'border-pink-100 hover:border-pink-200' : 'border-blue-100 hover:border-blue-200'}`}>
                             <p className={`text-xs font-semibold mb-1 ${color === 'pink' ? 'text-pink-400' : 'text-blue-400'}`}>{label}</p>
                             <p className="text-xs font-semibold text-stone-800 line-clamp-2">{dog.name}</p>
@@ -444,7 +444,7 @@ export default async function WelpenDetailPage({
                     ? 'border-pink-300 bg-pink-50'
                     : 'border-cream-deep bg-white'
                   return (
-                    <Link key={sibling.id} href={`/welpen/${sibling.id}`}
+                    <Link key={sibling.id} href={`/welpen/${sibling.slug || sibling.id}`}
                       className={`flex-shrink-0 w-40 sm:w-auto rounded-xl border-2 overflow-hidden hover:shadow-md transition-all ${borderClass}`}>
                       <div className="bg-cream-dark aspect-square flex items-center justify-center">
                         {sibling.media[0]?.url ? (

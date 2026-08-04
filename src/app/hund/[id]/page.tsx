@@ -37,15 +37,15 @@ export default async function HundDetailPage({
       parentSire: {
         include: {
           media: { take: 1, select: { url: true } },
-          parentSire: { select: { id: true, name: true } },
-          parentDam: { select: { id: true, name: true } },
+          parentSire: { select: { id: true, name: true, slug: true } },
+          parentDam: { select: { id: true, name: true, slug: true } },
         },
       },
       parentDam: {
         include: {
           media: { take: 1, select: { url: true } },
-          parentSire: { select: { id: true, name: true } },
-          parentDam: { select: { id: true, name: true } },
+          parentSire: { select: { id: true, name: true, slug: true } },
+          parentDam: { select: { id: true, name: true, slug: true } },
         },
       },
       littersAsDam: {
@@ -331,7 +331,7 @@ export default async function HundDetailPage({
                 <div className="flex flex-col items-center">
                   <div className="w-0.5 h-6 bg-stone-300" />
                   {dog.parentDam ? (
-                    <Link href={`/hund/${dog.parentDam.id}`}
+                    <Link href={`/hund/${dog.parentDam.slug || dog.parentDam.id}`}
                       className="bg-white rounded-2xl border-2 border-pink-200 p-4 w-full max-w-xs hover:border-pink-400 hover:shadow transition-all block">
                       {dog.parentDam.media[0]?.url && (
                         <img src={dog.parentDam.media[0].url} alt={dog.parentDam.name} className="w-14 h-14 rounded-xl object-cover mx-auto mb-2" />
@@ -346,7 +346,7 @@ export default async function HundDetailPage({
                 <div className="flex flex-col items-center">
                   <div className="w-0.5 h-6 bg-stone-300" />
                   {dog.parentSire ? (
-                    <Link href={`/hund/${dog.parentSire.id}`}
+                    <Link href={`/hund/${dog.parentSire.slug || dog.parentSire.id}`}
                       className="bg-white rounded-2xl border-2 border-blue-200 p-4 w-full max-w-xs hover:border-blue-400 hover:shadow transition-all block">
                       {dog.parentSire.media[0]?.url && (
                         <img src={dog.parentSire.media[0].url} alt={dog.parentSire.name} className="w-14 h-14 rounded-xl object-cover mx-auto mb-2" />
@@ -379,7 +379,7 @@ export default async function HundDetailPage({
                   <div key={role} className="flex flex-col items-center">
                     <div className="w-0.5 h-5 bg-stone-200" />
                     {gp ? (
-                      <Link href={`/hund/${gp.id}`}
+                      <Link href={`/hund/${gp.slug || gp.id}`}
                         className={`bg-white rounded-xl border-2 w-full p-3 block text-center hover:shadow transition-all ${color === 'pink' ? 'border-pink-100 hover:border-pink-200' : 'border-blue-100 hover:border-blue-200'}`}>
                         <p className={`text-xs font-semibold mb-1 ${color === 'pink' ? 'text-pink-400' : 'text-blue-400'}`}>{role}</p>
                         <p className="text-xs font-semibold text-stone-800 line-clamp-2">{gp.name}</p>
