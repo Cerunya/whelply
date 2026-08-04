@@ -68,11 +68,9 @@ export async function POST(req: NextRequest) {
   // SEO-Slug generieren
   const { generateListingSlug } = await import('@/lib/listing-slug')
   const slug = generateListingSlug({
-    breedName: breed?.nameDe ?? 'hund',
-    type: listing.type,
-    sex: listing.sex,
     title: listing.title,
-    id: listing.id,
+    breedName: breed?.nameDe ?? 'hund',
+    listingNumber: listing.listingNumber,
   })
   await prisma.listing.update({ where: { id: listing.id }, data: { slug } })
 

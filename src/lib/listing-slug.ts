@@ -1,7 +1,7 @@
 /**
  * Generiert SEO-freundliche Slugs für Inserate.
- * Format: {rasse}-{typ}-{geschlecht}-{titel/name}-{kurzid}
- * Beispiel: australian-shepherd-welpe-ruede-nugget-a8f3b2
+ * Format: {titel}-an{nummer}
+ * Beispiel: kruemel-an42, schwarzer-mini-aussie-an1234
  */
 
 function slugify(text: string): string {
@@ -10,37 +10,14 @@ function slugify(text: string): string {
     .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
-    .slice(0, 80)
+    .slice(0, 60)
 }
 
 export function generateListingSlug(params: {
-  breedName: string
-  type: string
-  sex?: string | null
   title?: string | null
-  id: string
+  breedName: string
+  listingNumber: number
 }): string {
-  const parts: string[] = []
-
-  // Rasse
-  parts.push(slugify(params.breedName))
-
-  // Typ
-  if (params.type === 'puppy') parts.push('welpe')
-  else if (params.type === 'adult') parts.push('hund')
-  else if (params.type === 'stud') parts.push('deckruede')
-
-  // Geschlecht
-  if (params.sex === 'male') parts.push('ruede')
-  else if (params.sex === 'female') parts.push('huendin')
-
-  // Titel/Name (falls vorhanden)
-  if (params.title) {
-    parts.push(slugify(params.title).slice(0, 30))
-  }
-
-  // Kurze ID (letzte 8 Zeichen der cuid)
-  parts.push(params.id.slice(-8))
-
-  return parts.join('-')
+  const name = slugify(params.title || params.breedName)
+  return `${name}-an${params.listingNumber}`
 }

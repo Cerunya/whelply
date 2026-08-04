@@ -400,6 +400,7 @@ model Listing {
   bookmarks Bookmark[]
   
   slug           String?       @unique
+  listingNumber  Int     @default(autoincrement()) @map("listing_number")
 
   @@map("listings")
 }
