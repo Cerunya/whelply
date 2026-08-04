@@ -398,6 +398,8 @@ model Listing {
   media     Media[]    @relation("ListingMedia")
   reports   Report[]
   bookmarks Bookmark[]
+  
+  slug           String?       @unique
 
   @@map("listings")
 }
