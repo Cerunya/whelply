@@ -314,6 +314,9 @@ model Dog {
   pageHeadingColor String?  @map("page_heading_color")
   pageBgColor      String?  @map("page_bg_color")
   pageBgFixed      Boolean  @default(true) @map("page_bg_fixed")
+  
+  slug           String?  @unique
+  dogNumber      Int      @default(autoincrement()) @map("dog_number")
 
   @@map("dogs")
 }

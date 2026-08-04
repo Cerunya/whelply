@@ -26,8 +26,10 @@ export default async function HundDetailPage({
 }: {
   params: { id: string }
 }) {
-  const dog = await prisma.dog.findUnique({
-    where: { id: params.id },
+  // Slug oder ID akzeptieren
+  const isCuid = /^c[a-z0-9]{20,}$/.test(params.id)
+  const dog = await prisma.dog.findFirst({
+    where: isCuid ? { id: params.id } : { slug: params.id },
     include: {
       breed: { select: { nameDe: true, slug: true } },
       breeder: { select: { id: true, kennelName: true, displayName: true, city: true, state: true, isPublished: true, subdomain: true, phone: true, showPhone: true, website: true, socialInstagram: true, socialFacebook: true, verificationLevel: true, diditStatus: true } },
