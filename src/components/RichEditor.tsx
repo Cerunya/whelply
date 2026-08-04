@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 
 type RichEditorProps = {
   value: string
@@ -10,33 +10,36 @@ type RichEditorProps = {
   className?: string
 }
 
-function toDisplay(md: string): string {
-  return md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt) => `[📷 ${alt || 'Bild'}]`)
-}
+type ImageInfo = { alt: string; url: string; caption?: string }
 
-function fromDisplay(display: string, images: { alt: string; url: string }[]): string {
-  let result = display
-  let imgIdx = 0
-  result = result.replace(/\[📷\s+([^\]]+)\]/g, (_, name) => {
-    const matched = images.find((img) => img.alt === name)
-    if (matched) return `![${matched.alt}](${matched.url})`
-    if (imgIdx < images.length) {
-      const img = images[imgIdx++]
-      return `![${img.alt}](${img.url})`
-    }
-    return ''
-  })
-  return result
-}
-
-function extractImages(md: string) {
-  const imgs: { alt: string; url: string }[] = []
-  const re = /!\[([^\]]*)\]\(([^)]+)\)/g
+// Bilder extrahieren (mit optionaler Bildunterschrift)
+function extractImages(md: string): ImageInfo[] {
+  const imgs: ImageInfo[] = []
+  const re = /!\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)/g
   let m: RegExpExecArray | null
   while ((m = re.exec(md)) !== null) {
-    imgs.push({ alt: m[1], url: m[2] })
+    imgs.push({ alt: m[1], url: m[2], caption: m[3] || undefined })
   }
   return imgs
+}
+
+// Markdown → Display (mit eindeutigen #Index-Platzhaltern)
+function toDisplay(md: string): string {
+  let idx = 0
+  return md.replace(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)/g, (_, alt) => {
+    return `[📷#${idx++} ${alt || 'Bild'}]`
+  })
+}
+
+// Display → Markdown (Index-basiert, keine Verwechslung möglich)
+function fromDisplay(display: string, images: ImageInfo[]): string {
+  return display.replace(/\[📷#(\d+)\s+([^\]]*)\]/g, (_, idxStr, alt) => {
+    const idx = parseInt(idxStr)
+    const img = images[idx]
+    if (!img) return ''
+    const captionPart = img.caption ? ` "${img.caption}"` : ''
+    return `![${alt}](${img.url}${captionPart})`
+  })
 }
 
 export default function RichEditor({ value, onChange, placeholder, rows = 6, className = '' }: RichEditorProps) {
@@ -44,12 +47,25 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [showEmoji, setShowEmoji] = useState(false)
+  const cursorRef = useRef<number | null>(null)
 
   const images = extractImages(value)
   const displayValue = toDisplay(value)
 
-  function onDisplayChange(newDisplay: string) {
+  // Cursor-Position nach React-Render wiederherstellen
+  const restoreCursor = useCallback((pos: number) => {
+    requestAnimationFrame(() => {
+      const el = ref.current
+      if (el) {
+        el.focus()
+        el.setSelectionRange(pos, pos)
+      }
+    })
+  }, [])
+
+  function onDisplayChange(newDisplay: string, newCursorPos?: number) {
     onChange(fromDisplay(newDisplay, images))
+    if (newCursorPos !== undefined) restoreCursor(newCursorPos)
   }
 
   function insertAtCursor(text: string) {
@@ -58,20 +74,18 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const s = el.selectionStart
     const v = el.value
     const newDisplay = v.slice(0, s) + text + v.slice(s)
-    onDisplayChange(newDisplay)
-    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + text.length, s + text.length) })
+    const newPos = s + text.length
+    onChange(fromDisplay(newDisplay, images))
+    restoreCursor(newPos)
   }
 
   function insertEmoji(emoji: string) {
     const el = ref.current
-    if (el) {
-      const s = el.selectionStart
-      const newDisplay = el.value.slice(0, s) + emoji + el.value.slice(s)
-      onDisplayChange(newDisplay)
-      requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + emoji.length, s + emoji.length) })
-    } else {
-      onDisplayChange(displayValue + emoji)
-    }
+    if (!el) { onDisplayChange(displayValue + emoji); return }
+    const s = el.selectionStart
+    const newDisplay = el.value.slice(0, s) + emoji + el.value.slice(s)
+    onChange(fromDisplay(newDisplay, images))
+    restoreCursor(s + emoji.length)
   }
 
   function wrap(marker: string) {
@@ -81,8 +95,8 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const e = el.selectionEnd
     const sel = el.value.slice(s, e) || 'Text'
     const newDisplay = el.value.slice(0, s) + marker + sel + marker + el.value.slice(e)
-    onDisplayChange(newDisplay)
-    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + marker.length, s + marker.length + sel.length) })
+    onChange(fromDisplay(newDisplay, images))
+    restoreCursor(s + marker.length + sel.length + marker.length)
   }
 
   function prefixLines(prefix: string) {
@@ -96,7 +110,8 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const selectedLines = v.slice(lineStart, lineEnd === -1 ? v.length : lineEnd)
     const prefixed = selectedLines.split('\n').map((l) => prefix + l).join('\n')
     const newDisplay = v.slice(0, lineStart) + prefixed + v.slice(lineEnd === -1 ? v.length : lineEnd)
-    onDisplayChange(newDisplay)
+    onChange(fromDisplay(newDisplay, images))
+    restoreCursor(s + prefix.length)
   }
 
   function insertLink() {
@@ -109,7 +124,8 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     if (el && selectedText) {
       const s = el.selectionStart
       const newDisplay = el.value.slice(0, s) + md + el.value.slice(el.selectionEnd)
-      onDisplayChange(newDisplay)
+      onChange(fromDisplay(newDisplay, images))
+      restoreCursor(s + md.length)
     } else {
       insertAtCursor(md)
     }
@@ -125,13 +141,14 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
 
   function addImage(alt: string, url: string) {
     const el = ref.current
-    const ph = `[📷 ${alt || 'Bild'}]`
+    const newIdx = images.length
+    const ph = `[📷#${newIdx} ${alt || 'Bild'}]`
+    const newImages = [...images, { alt, url }]
     if (el) {
-      const newImages = [...images, { alt, url }]
       const s = el.selectionStart
       const newDisplay = el.value.slice(0, s) + ph + el.value.slice(s)
       onChange(fromDisplay(newDisplay, newImages))
-      requestAnimationFrame(() => { el.focus(); el.setSelectionRange(s + ph.length, s + ph.length) })
+      restoreCursor(s + ph.length)
     } else {
       onChange(value.trimEnd() + `\n![${alt}](${url})\n`)
     }
@@ -139,7 +156,8 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
 
   function removeImage(url: string) {
     const esc = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    onChange(value.replace(new RegExp(`\\n?!\\[[^\\]]*\\]\\(${esc}\\)\\n?`, 'g'), '\n').replace(/\n{3,}/g, '\n\n'))
+    const cleaned = value.replace(new RegExp(`\\n?!\\[[^\\]]*\\]\\(${esc}(?:\\s+"[^"]*")?\\)\\n?`, 'g'), '\n').replace(/\n{3,}/g, '\n\n')
+    onChange(cleaned)
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -163,6 +181,32 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     if (!input) return
     const m = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
     insertAtCursor(`\n@youtube[${m ? m[1] : input.trim()}]\n`)
+  }
+
+  function handleInsertFromUrl() {
+    const url = window.prompt('Bild-URL einfügen (aus Mediathek kopiert):')
+    if (!url) return
+    const caption = window.prompt('Bildunterschrift (optional):') || ''
+    const alt = url.split('/').pop()?.split('.')[0] || 'Bild'
+    if (caption) {
+      // Direkt als Markdown mit Caption einfügen (umgeht display-Konvertierung)
+      const el = ref.current
+      const md = `![${alt}](${url} "${caption}")`
+      if (el) {
+        const s = el.selectionStart
+        const currentMd = value
+        const displayBefore = el.value.slice(0, s)
+        // Position im Markdown finden über fromDisplay
+        const mdBefore = fromDisplay(displayBefore, images)
+        const newMd = currentMd.slice(0, mdBefore.length) + '\n' + md + '\n' + currentMd.slice(mdBefore.length)
+        onChange(newMd)
+        restoreCursor(s + `[📷#${images.length} ${alt}]`.length + 1)
+      } else {
+        onChange(value.trimEnd() + '\n' + md + '\n')
+      }
+    } else {
+      addImage(alt, url)
+    }
   }
 
   const btn = 'w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors text-xs flex-shrink-0'
@@ -201,6 +245,9 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
             : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+        <button type="button" onClick={handleInsertFromUrl} className={btn} title="Bild aus Mediathek / URL einfügen">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </button>
         <button type="button" onClick={handleYoutube} className={btn} title="YouTube">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
         </button>
@@ -258,7 +305,12 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
       <textarea
         ref={ref}
         value={displayValue}
-        onChange={(e) => onDisplayChange(e.target.value)}
+        onChange={(e) => {
+          const el = ref.current
+          const pos = el?.selectionStart ?? 0
+          onChange(fromDisplay(e.target.value, images))
+          restoreCursor(pos)
+        }}
         rows={rows}
         placeholder={placeholder}
         className={className + ' resize-y'}
@@ -271,6 +323,7 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
             <div key={i} className="flex items-center gap-2 bg-cream border border-cream-deep rounded-lg px-2.5 py-1.5 text-xs text-stone-700">
               <img src={img.url} alt={img.alt} className="w-8 h-8 rounded object-cover flex-shrink-0" />
               <span className="truncate max-w-[120px]">{img.alt || 'Bild'}</span>
+              {img.caption && <span className="text-stone-400 truncate max-w-[80px]">„{img.caption}"</span>}
               <button type="button" onClick={() => removeImage(img.url)}
                 className="text-stone-400 hover:text-red-500 ml-1 flex-shrink-0" title="Bild entfernen">×</button>
             </div>
