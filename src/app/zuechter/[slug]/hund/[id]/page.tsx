@@ -47,8 +47,10 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
   const session = await auth()
   const isOwner = session?.user?.id === breeder.userId
 
-  const dog = await prisma.dog.findUnique({
-    where: { id: params.id },
+  // Slug oder ID akzeptieren
+  const isCuid = /^c[a-z0-9]{20,}$/.test(params.id)
+  const dog = await prisma.dog.findFirst({
+    where: isCuid ? { id: params.id } : { slug: params.id },
     include: {
       breed: { select: { nameDe: true } },
       media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { id: true, url: true, purpose: true, isPrimary: true } },
