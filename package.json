@@ -28,7 +28,7 @@
     "next-auth": "^5.0.0-beta.25",
     "react": "^18",
     "react-dom": "^18",
-    "react-leaflet": "^4.2.1",
+    "react-leaflet": "^3.2.5",
     "resend": "^6.16.0",
     "sharp": "^0.35.3",
     "tailwind-merge": "^2.5.2",
