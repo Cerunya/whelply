@@ -242,6 +242,9 @@ model BreederProfile {
   reviews      Review[]
   bookmarks    Bookmark[]    @relation("BookmarkedBreeder")
   conversations Conversation[]
+  
+  latitude       Float?
+  longitude      Float?
 
   @@map("breeder_profiles")
 }

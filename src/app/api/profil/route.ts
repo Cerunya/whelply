@@ -88,5 +88,23 @@ export async function PATCH(req: NextRequest) {
     data,
   })
 
+  // Koordinaten aktualisieren wenn Adresse geändert wurde
+  if (data.zip || data.city || data.state || data.street) {
+    const breeder = await prisma.breederProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { zip: true, city: true, state: true, street: true },
+    })
+    if (breeder) {
+      const { geocodeAddress } = await import('@/lib/geocode')
+      const coords = await geocodeAddress(breeder)
+      if (coords) {
+        await prisma.breederProfile.update({
+          where: { userId: session.user.id },
+          data: { latitude: coords.lat, longitude: coords.lng },
+        })
+      }
+    }
+  }
+
   return NextResponse.json({ ok: true })
 }

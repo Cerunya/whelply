@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import BreedSearch from './BreedSearch'
+import LocationSearch from './LocationSearch'
 
 const BUNDESLAENDER = [
   'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
@@ -17,6 +18,7 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
   const searchParams = useSearchParams()
   const currentRasse = searchParams.get('rasse') ?? ''
   const currentRegion = searchParams.get('region') ?? ''
+  const currentOrt = searchParams.get('ort') ?? ''
 
   function update(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -39,6 +41,13 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
         className="w-56"
       />
 
+      <LocationSearch
+        value={currentOrt}
+        onChange={(val) => update('ort', val)}
+        placeholder="PLZ oder Ort..."
+        className="w-44"
+      />
+
       <select
         value={currentRegion}
         onChange={(e) => update('region', e.target.value)}
@@ -50,7 +59,7 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
         ))}
       </select>
 
-      {(currentRasse || currentRegion) && (
+      {(currentRasse || currentRegion || currentOrt) && (
         <button
           onClick={() => router.push(basePath)}
           className="text-sm text-stone-500 hover:text-stone-900 transition-colors"

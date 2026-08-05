@@ -10,6 +10,9 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+const LocationMap = dynamic(() => import('@/components/LocationMap'), { ssr: false })
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -301,6 +304,20 @@ export default async function WelpenDetailPage({
             <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-8">
               <h2 className="font-semibold text-stone-800 text-sm mb-3">Beschreibung</h2>
               <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">{listing.description}</p>
+            </div>
+          )}
+
+          {/* Standort-Karte */}
+          {listing.breeder.latitude && listing.breeder.longitude && (
+            <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-8">
+              <h2 className="font-semibold text-stone-800 text-sm mb-3">Ungefährer Standort</h2>
+              <LocationMap
+                lat={listing.breeder.latitude}
+                lng={listing.breeder.longitude}
+                label={[listing.breeder.city, listing.breeder.state].filter(Boolean).join(', ')}
+                className="h-64"
+              />
+              <p className="text-xs text-stone-400 mt-2">Der Kreis zeigt den ungefähren Standort des Züchters.</p>
             </div>
           )}
 

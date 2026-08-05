@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 export default async function WelpenPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string }
+  searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string; ort?: string }
 }) {
   const page = Number(searchParams.seite ?? 1)
   const perPage = 36
@@ -33,6 +33,7 @@ export default async function WelpenPage({
     breeder: {
       isActive: true,
       ...(searchParams.region ? { state: searchParams.region } : {}),
+      ...(searchParams.ort ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
     },
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
     ...(searchParams.geschlecht === 'male' ? { sex: 'male' as const } : {}),
@@ -77,7 +78,7 @@ export default async function WelpenPage({
 
   function buildUrl(params: Record<string, string | undefined>) {
     const p = new URLSearchParams()
-    const merged = { rasse: searchParams.rasse, region: searchParams.region, geschlecht: searchParams.geschlecht, ...params }
+    const merged = { rasse: searchParams.rasse, region: searchParams.region, geschlecht: searchParams.geschlecht, ort: searchParams.ort, ...params }
     Object.entries(merged).forEach(([k, v]) => { if (v) p.set(k, v) })
     return `/welpen?${p.toString()}`
   }
