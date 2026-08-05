@@ -52,11 +52,11 @@ function renderBoxContent(raw: string): string {
   // Listen
   h = h.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
-    return '<ol class="list-decimal list-inside space-y-1 my-3 ml-4">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
+    return '<ol class="list-decimal list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
   })
   h = h.replace(/((?:^- .+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
-    return '<ul class="list-disc list-inside space-y-1 my-3 ml-4">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
+    return '<ul class="list-disc list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
   })
 
   // Absätze (ohne Farbklasse — erbt vom Parent, auch inline-HTML wird gewrappt)
@@ -153,7 +153,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
 
   // ── Bilder mit optionaler Bildunterschrift: ![alt](url "Unterschrift") ──
   html = html.replace(/!\[([^\]]*)\]\(([^\s)]+)\s+"([^"]+)"\)/g,
-    '<figure class="mt-10 mb-4"><img src="$2" alt="$1" class="rounded-xl w-full" /><figcaption class="text-center text-xs text-stone-400 mt-2 italic">$3</figcaption></figure>')
+    '<figure class="mt-6"><img src="$2" alt="$1" class="rounded-xl w-full" /><figcaption class="text-center text-xs text-stone-400 mt-2 italic">$3</figcaption></figure>')
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
     '<img src="$2" alt="$1" class="rounded-xl my-10 w-full" />')
 
@@ -163,13 +163,13 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // ── Nummerierte Listen: 1. item ──
   html = html.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
-    return '<ol class="list-decimal list-inside space-y-1 my-4 ml-4 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
+    return '<ol class="list-decimal list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
   })
 
   // ── Aufzählungslisten: - item ──
   html = html.replace(/((?:^- .+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
-    return '<ul class="list-disc list-inside space-y-1 my-4 ml-4 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
+    return '<ul class="list-disc list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
   })
 
   // ── Horizontale Linie: --- ──

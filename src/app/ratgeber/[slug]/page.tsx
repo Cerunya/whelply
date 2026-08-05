@@ -64,15 +64,18 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
   })
 
   // Sidebar-Produkt: gewähltes oder zufälliges
+  // Sidebar-Produkt: gewähltes oder zufälliges (aber nicht eins das im Artikel eingebunden ist)
+  const articleAsins = extractAsins(article.content)
   let sidebarProduct = null
   if ((article as any).sidebarProductId) {
     sidebarProduct = await prisma.product.findFirst({ where: { id: (article as any).sidebarProductId, isAvailable: true } })
   }
   if (!sidebarProduct) {
-    const productCount = await prisma.product.count({ where: { isAvailable: true } })
+    const excludeFilter = articleAsins.length > 0 ? { asin: { notIn: articleAsins } } : {}
+    const productCount = await prisma.product.count({ where: { isAvailable: true, ...excludeFilter } })
     sidebarProduct = productCount > 0
       ? await prisma.product.findFirst({
-          where: { isAvailable: true },
+          where: { isAvailable: true, ...excludeFilter },
           skip: Math.floor(Math.random() * productCount),
         })
       : null
