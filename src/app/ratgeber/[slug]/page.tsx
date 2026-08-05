@@ -107,7 +107,7 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
                 {article.publishedAt && <span>· {new Date(article.publishedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
               </div>
 
-              <div className="flex flex-col gap-6 [&>hr]:my-4 [&>img]:rounded-xl [&>img]:w-full"
+              <div className="flex flex-col gap-3 [&>*]:!mb-0 [&>*]:!mt-0 [&>hr]:!my-4 [&>h2]:!mt-6 [&>h3]:!mt-4 [&>figure]:!mt-4 [&>img]:rounded-xl [&>img]:w-full [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:pl-1"
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content, productsMap) }} />
 
               {article.breed && (
