@@ -32,8 +32,8 @@ export default async function LitterDetailPage({
     where: { id: params.litterId },
     include: {
       breed: { select: { nameDe: true } },
-      dam: { select: { id: true, name: true, titles: true, media: { take: 1, select: { url: true } } } },
-      sire: { select: { id: true, name: true, titles: true, media: { take: 1, select: { url: true } } } },
+      dam: { select: { id: true, name: true, slug: true, titles: true, media: { take: 1, select: { url: true } } } },
+      sire: { select: { id: true, name: true, slug: true, titles: true, media: { take: 1, select: { url: true } } } },
       media: { take: 1, select: { url: true } },
       listings: {
         where: { type: 'puppy' },
@@ -170,7 +170,7 @@ export default async function LitterDetailPage({
                    return (
                      <a
                        key={listing.id}
-                       href={`/welpen/${listing.id}`}
+                       href={`/welpen/${listing.slug || listing.id}`}
                        className={`flex flex-col sm:flex-row rounded-2xl border overflow-hidden hover:shadow-md transition-all sm:h-52 ${borderClass}`}
                      >
                        {/* Bild — wie Zuchthunde-Karte */}
@@ -237,7 +237,7 @@ export default async function LitterDetailPage({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {litter.dam && (
                   <Link
-                    href={`/hund/${litter.dam.id}`}
+                    href={`/hund/${litter.dam.slug || litter.dam.id}`}
                     className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all flex items-center gap-4"
                   >
                     {litter.dam.media[0]?.url && (
@@ -259,7 +259,7 @@ export default async function LitterDetailPage({
                 {(litter.sire || litter.sireExternal) && (
                   litter.sire ? (
                     <Link
-                      href={`/hund/${litter.sire.id}`}
+                      href={`/hund/${litter.sire.slug || litter.sire.id}`}
                       className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all flex items-center gap-4"
                     >
                       {litter.sire.media[0]?.url && (
