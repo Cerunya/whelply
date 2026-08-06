@@ -12,15 +12,31 @@ export const dynamic = 'force-dynamic'
 export default async function ZuchtrudenPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; ort?: string }
+  searchParams: { rasse?: string; ort?: string; radius?: string }
 }) {
+  // Umkreissuche
+  let radiusFilter: any = {}
+  const radiusKm = Number(searchParams.radius) || 0
+  if (searchParams.ort && radiusKm > 0) {
+    const { geocodeAddress } = await import('@/lib/geocode')
+    const coords = await geocodeAddress({ zip: searchParams.ort, city: searchParams.ort })
+    if (coords) {
+      const delta = radiusKm / 111
+      radiusFilter = {
+        latitude: { gte: coords.lat - delta, lte: coords.lat + delta },
+        longitude: { gte: coords.lng - delta, lte: coords.lng + delta },
+      }
+    }
+  }
+
   const dogs = await prisma.dog.findMany({
     where: {
       sex: 'male',
       isStud: true,
       breeder: {
         isActive: true,
-        ...(searchParams.ort ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+        ...(searchParams.ort && !radiusKm ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+        ...radiusFilter,
       },
       ...(searchParams.rasse ? { breed: { slug: searchParams.rasse } } : {}),
     },

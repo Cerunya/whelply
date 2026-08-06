@@ -25,7 +25,7 @@ export default function ListingFilter({
     router.push(`${basePath}?${params.toString()}`)
   }
 
-  const hasAnyFilter = filters.some((f) => searchParams.get(f.key)) || !!searchParams.get('ort')
+  const hasAnyFilter = filters.some((f) => searchParams.get(f.key)) || !!searchParams.get('ort') || !!searchParams.get('radius')
 
   return (
     <div className="flex flex-wrap gap-3 items-center">
@@ -60,8 +60,10 @@ export default function ListingFilter({
       <LocationSearch
         value={searchParams.get('ort') ?? ''}
         onChange={(val) => update('ort', val)}
+        radius={searchParams.get('radius') ?? ''}
+        onRadiusChange={(val) => update('radius', val)}
         placeholder="PLZ oder Ort..."
-        className="w-44"
+        className="w-56"
       />
       {hasAnyFilter && (
         <button

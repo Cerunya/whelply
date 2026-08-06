@@ -19,6 +19,7 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
   const currentRasse = searchParams.get('rasse') ?? ''
   const currentRegion = searchParams.get('region') ?? ''
   const currentOrt = searchParams.get('ort') ?? ''
+  const currentRadius = searchParams.get('radius') ?? ''
 
   function update(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -44,8 +45,10 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
       <LocationSearch
         value={currentOrt}
         onChange={(val) => update('ort', val)}
+        radius={currentRadius}
+        onRadiusChange={(val) => update('radius', val)}
         placeholder="PLZ oder Ort..."
-        className="w-44"
+        className="w-56"
       />
 
       <select
@@ -59,7 +62,7 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
         ))}
       </select>
 
-      {(currentRasse || currentRegion || currentOrt) && (
+      {(currentRasse || currentRegion || currentOrt || currentRadius) && (
         <button
           onClick={() => router.push(basePath)}
           className="text-sm text-stone-500 hover:text-stone-900 transition-colors"

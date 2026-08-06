@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
+import { auth } from '@/lib/auth'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -28,7 +29,16 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
     where: { slug: params.slug },
     include: { breed: { select: { nameDe: true, slug: true } } },
   })
-  if (!article || !article.isPublished) notFound()
+  if (!article) notFound()
+
+  // Admins dürfen unveröffentlichte Artikel als Vorschau sehen
+  const session = await auth()
+  const isAdmin = session?.user?.id
+    ? (await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } }))?.role === 'admin'
+    : false
+  const isPreview = !article.isPublished
+
+  if (isPreview && !isAdmin) notFound()
 
   // Produkte für :::produkt[ASIN] Shortcodes laden
   const asins = extractAsins(article.content)
@@ -86,6 +96,12 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
       <Navbar />
       <main className="min-h-screen bg-cream">
         <div className="max-w-6xl mx-auto px-4 py-12">
+
+          {isPreview && (
+            <div className="bg-amber-400 text-amber-900 text-center text-sm font-bold py-2 rounded-xl mb-4">
+              ⚠ VORSCHAU — Dieser Artikel ist noch nicht veröffentlicht
+            </div>
+          )}
 
           {article.coverImageUrl && (
             <div className="rounded-2xl overflow-hidden mb-8 aspect-[2/1]">

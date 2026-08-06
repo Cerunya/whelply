@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 export default async function WelpenPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string; ort?: string }
+  searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string; ort?: string; radius?: string }
 }) {
   const page = Number(searchParams.seite ?? 1)
   const perPage = 36
@@ -27,13 +27,30 @@ export default async function WelpenPage({
 
   const selectedBreed = breeds.find((b) => b.slug === searchParams.rasse)
 
+  // Umkreissuche: Ort geocoden und Bounding-Box berechnen
+  let radiusFilter: any = {}
+  let searchCoords: { lat: number; lng: number } | null = null
+  const radiusKm = Number(searchParams.radius) || 0
+  if (searchParams.ort && radiusKm > 0) {
+    const { geocodeAddress } = await import('@/lib/geocode')
+    searchCoords = await geocodeAddress({ zip: searchParams.ort, city: searchParams.ort })
+    if (searchCoords) {
+      const delta = radiusKm / 111 // ~1° ≈ 111km
+      radiusFilter = {
+        latitude: { gte: searchCoords.lat - delta, lte: searchCoords.lat + delta },
+        longitude: { gte: searchCoords.lng - delta, lte: searchCoords.lng + delta },
+      }
+    }
+  }
+
   const where = {
     status: { in: ['available', 'reserved', 'sold'] as ('available' | 'reserved' | 'sold')[] },
     type: 'puppy' as const,
     breeder: {
       isActive: true,
       ...(searchParams.region ? { state: searchParams.region } : {}),
-      ...(searchParams.ort ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+      ...(searchParams.ort && !radiusKm ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+      ...radiusFilter,
     },
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
     ...(searchParams.geschlecht === 'male' ? { sex: 'male' as const } : {}),
@@ -78,7 +95,7 @@ export default async function WelpenPage({
 
   function buildUrl(params: Record<string, string | undefined>) {
     const p = new URLSearchParams()
-    const merged = { rasse: searchParams.rasse, region: searchParams.region, geschlecht: searchParams.geschlecht, ort: searchParams.ort, ...params }
+    const merged = { rasse: searchParams.rasse, region: searchParams.region, geschlecht: searchParams.geschlecht, ort: searchParams.ort, radius: searchParams.radius, ...params }
     Object.entries(merged).forEach(([k, v]) => { if (v) p.set(k, v) })
     return `/welpen?${p.toString()}`
   }
