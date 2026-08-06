@@ -12,13 +12,16 @@ export const dynamic = 'force-dynamic'
 export default async function ZuchtrudenPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string }
+  searchParams: { rasse?: string; ort?: string }
 }) {
   const dogs = await prisma.dog.findMany({
     where: {
       sex: 'male',
       isStud: true,
-      breeder: { isActive: true },
+      breeder: {
+        isActive: true,
+        ...(searchParams.ort ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+      },
       ...(searchParams.rasse ? { breed: { slug: searchParams.rasse } } : {}),
     },
     include: {

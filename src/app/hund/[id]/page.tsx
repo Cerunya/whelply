@@ -6,6 +6,9 @@ import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import nextDynamic from 'next/dynamic'
+
+const LocationMap = nextDynamic(() => import('@/components/LocationMap'), { ssr: false })
 import DogPhotoGrid from '@/components/DogPhotoGrid'
 import NachrichtButton from '@/components/NachrichtButton'
 
@@ -32,7 +35,7 @@ export default async function HundDetailPage({
     where: isCuid ? { id: params.id } : { slug: params.id },
     include: {
       breed: { select: { nameDe: true, slug: true } },
-      breeder: { select: { id: true, kennelName: true, displayName: true, city: true, state: true, isPublished: true, subdomain: true, phone: true, showPhone: true, website: true, socialInstagram: true, socialFacebook: true, verificationLevel: true, diditStatus: true } },
+      breeder: { select: { id: true, kennelName: true, displayName: true, city: true, state: true, isPublished: true, subdomain: true, phone: true, showPhone: true, website: true, socialInstagram: true, socialFacebook: true, verificationLevel: true, diditStatus: true, latitude: true, longitude: true } },
       media: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }], select: { id: true, url: true, isPrimary: true, sortOrder: true, purpose: true } },
       parentSire: {
         include: {
@@ -269,6 +272,22 @@ export default async function HundDetailPage({
                   {dog.healthInfo}
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Standort-Karte */}
+          {dog.breeder.latitude && dog.breeder.longitude && (
+            <div className="mt-10">
+              <h2 className="font-serif text-xl font-bold text-stone-900 mb-4">Standort</h2>
+              <div className="rounded-2xl border border-cream-deep overflow-hidden">
+                <LocationMap
+                  lat={dog.breeder.latitude}
+                  lng={dog.breeder.longitude}
+                  label={[dog.breeder.city, dog.breeder.state].filter(Boolean).join(', ')}
+                  className="h-64"
+                />
+              </div>
+              <p className="text-xs text-stone-400 mt-2">Ungefährer Standort des Züchters.</p>
             </div>
           )}
 

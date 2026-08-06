@@ -51,6 +51,7 @@ export function middleware(request: NextRequest) {
       '/datenschutz',
       '/agb',
       '/badges',
+      '/inserate/',
     ]
 
     const shouldSkip = skipRewrite.some((prefix) => pathname.startsWith(prefix))

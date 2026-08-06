@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import BreedSearch from './BreedSearch'
+import LocationSearch from './LocationSearch'
 
 type FilterOption = { value: string; label: string }
 type Filter = { key: string; placeholder: string; options: FilterOption[] }
@@ -24,12 +25,11 @@ export default function ListingFilter({
     router.push(`${basePath}?${params.toString()}`)
   }
 
-  const hasAnyFilter = filters.some((f) => searchParams.get(f.key))
+  const hasAnyFilter = filters.some((f) => searchParams.get(f.key)) || !!searchParams.get('ort')
 
   return (
     <div className="flex flex-wrap gap-3 items-center">
       {filters.map((f) => {
-        // Rasse-Filter → durchsuchbar
         if (f.key === 'rasse') {
           const breeds = f.options.map((o) => ({ id: o.value, nameDe: o.label, slug: o.value }))
           return (
@@ -43,7 +43,6 @@ export default function ListingFilter({
             />
           )
         }
-        // Alle anderen Filter → normales Dropdown
         return (
           <select
             key={f.key}
@@ -58,6 +57,12 @@ export default function ListingFilter({
           </select>
         )
       })}
+      <LocationSearch
+        value={searchParams.get('ort') ?? ''}
+        onChange={(val) => update('ort', val)}
+        placeholder="PLZ oder Ort..."
+        className="w-44"
+      />
       {hasAnyFilter && (
         <button
           onClick={() => router.push(basePath)}

@@ -105,6 +105,8 @@ export default async function HundePage({
                     key={listing.id}
                     id={listing.id}
                     slug={listing.slug}
+                    listingType={listing.type}
+                    slug={listing.slug}
                     breedName={listing.breed.nameDe}
                     kennelName={listing.breeder.kennelName}
                     puppyName={listing.title}

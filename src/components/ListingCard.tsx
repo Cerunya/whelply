@@ -3,6 +3,7 @@ import Link from 'next/link'
 type ListingCardProps = {
   id: string
   slug?: string | null
+  listingType?: string
   breedName: string
   kennelName: string
   puppyName?: string | null
@@ -15,12 +16,13 @@ type ListingCardProps = {
 }
 
 export default function ListingCard({
-  id, slug, breedName, kennelName, puppyName, city, state, priceCents, isBoosted, imageUrl, tint,
+  id, slug, listingType, breedName, kennelName, puppyName, city, state, priceCents, isBoosted, imageUrl, tint,
 }: ListingCardProps) {
   const price = priceCents
     ? `${(priceCents / 100).toLocaleString('de-DE')} €`
     : 'Auf Anfrage'
   const location = [city, state].filter(Boolean).join(', ')
+  const basePath = listingType === 'puppy' || !listingType ? '/welpen' : '/inserate'
 
   let cardClasses = 'rounded-2xl border overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 '
   if (tint === 'sold') {
@@ -36,7 +38,7 @@ export default function ListingCard({
   }
 
   return (
-    <Link href={`/welpen/${slug || id}`} className="group block h-full">
+    <Link href={`${basePath}/${slug || id}`} className="group block h-full">
       <div className={cardClasses + ' flex flex-col h-full'}>
         {/* Bild oder Platzhalter */}
         <div className="bg-cream-dark aspect-[3/2] flex items-center justify-center relative overflow-hidden">
