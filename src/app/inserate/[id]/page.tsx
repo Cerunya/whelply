@@ -13,9 +13,6 @@ import Link from 'next/link'
 import nextDynamic from 'next/dynamic'
 
 const LocationMap = nextDynamic(() => import('@/components/LocationMap'), { ssr: false })
-import nextDynamic from 'next/dynamic'
-
-const LocationMap = nextDynamic(() => import('@/components/LocationMap'), { ssr: false })
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
