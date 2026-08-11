@@ -60,9 +60,17 @@ function renderBoxContent(raw: string): string {
     return '<ul class="list-disc list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
   })
 
-  // Absätze (ohne Farbklasse — erbt vom Parent, auch inline-HTML wird gewrappt)
-  h = h.replace(/^(?!<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|br))(.*\S.*)$/gm, '<p class="leading-relaxed mb-2">$1</p>')
-  h = h.replace(/<p class="leading-relaxed mb-2"><\/p>/g, '')
+  // Absätze mit Zeilenumbruch-Unterstützung
+  const blocks = h.split(/\n{2,}/)
+  h = blocks.map((block) => {
+    const trimmed = block.trim()
+    if (!trimmed) return ''
+    if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(trimmed)) return trimmed
+    const lines = trimmed.split('\n').map((l) => l.trim()).filter(Boolean)
+    const joined = lines.join('<br>')
+    if (!joined) return ''
+    return `<p class="leading-relaxed">${joined}</p>`
+  }).filter(Boolean).join('\n')
 
   return h
 }
@@ -177,9 +185,27 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // ── Horizontale Linie: --- ──
   html = html.replace(/^\s*---\s*$/gm, '<hr class="border-stone-200 my-10" />')
 
-  // ── Absätze (Zeilen die kein Block-Level-HTML sind → auch <strong>, <em>, <a> werden gewrappt) ──
-  html = html.replace(/^(?!<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|br))(.*\S.*)$/gm, '<p class="text-stone-700 leading-relaxed mb-2">$1</p>')
-  html = html.replace(/<p class="text-stone-700 leading-relaxed mb-2"><\/p>/g, '')
+  // ── Absätze mit Zeilenumbruch-Unterstützung ──
+  // 1 Enter (\n) → <br> innerhalb desselben Absatzes
+  // 2 Enter (\n\n) → neuer Absatz (<p>)
+  const blocks = html.split(/\n{2,}/)
+  html = blocks.map((block) => {
+    const trimmed = block.trim()
+    if (!trimmed) return ''
+    // Block-Level HTML nicht wrappen
+    if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(trimmed)) return trimmed
+    // Einzelne Zeilen innerhalb des Blocks mit <br> verbinden
+    const lines = trimmed.split('\n')
+    const joined = lines.map((line) => {
+      const l = line.trim()
+      if (!l) return ''
+      if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(l)) return l
+      return l
+    }).filter(Boolean).join('<br>')
+    if (!joined) return ''
+    // Wenn der Block schon HTML ist (z.B. nur ein <strong>-Tag), in <p> wrappen
+    return `<p class="text-stone-700 leading-relaxed">${joined}</p>`
+  }).filter(Boolean).join('\n')
 
   return html
 }

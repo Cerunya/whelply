@@ -11,60 +11,86 @@ export const metadata: Metadata = {
   description: 'Tipps und Ratgeber rund um Hundezucht, Welpenkauf und Hundehaltung. Rassen-Portraits, Gesundheit, Ernährung und mehr.',
 }
 
+const CATEGORIES = [
+  { key: '', label: 'Alle' },
+  { key: 'ratgeber', label: 'Ratgeber & Tipps' },
+  { key: 'rassen', label: 'Rassen-Portraits' },
+  { key: 'news', label: 'Neuigkeiten' },
+]
+
 const CATEGORY_LABEL: Record<string, string> = { ratgeber: 'Ratgeber', rassen: 'Rassen-Portrait', news: 'News' }
 
-export default async function RatgeberPage() {
+export default async function RatgeberPage({
+  searchParams,
+}: {
+  searchParams: { kategorie?: string }
+}) {
+  const activeCategory = searchParams.kategorie || ''
+
   const articles = await prisma.article.findMany({
-    where: { isPublished: true },
+    where: {
+      isPublished: true,
+      ...(activeCategory ? { category: activeCategory } : {}),
+    },
     include: { breed: { select: { nameDe: true, slug: true } } },
     orderBy: { publishedAt: 'desc' },
   })
 
-  const ratgeber = articles.filter((a) => a.category === 'ratgeber')
-  const rassen = articles.filter((a) => a.category === 'rassen')
-  const news = articles.filter((a) => a.category === 'news')
+  // Zähler pro Kategorie (für Badges)
+  const counts = await prisma.article.groupBy({
+    by: ['category'],
+    where: { isPublished: true },
+    _count: true,
+  })
+  const countMap: Record<string, number> = {}
+  counts.forEach((c) => { countMap[c.category] = c._count })
+  const totalCount = Object.values(countMap).reduce((a, b) => a + b, 0)
 
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-cream">
         <div className="max-w-5xl mx-auto px-4 py-12">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-2">Wissen & Tipps</p>
             <h1 className="font-serif text-4xl font-bold text-stone-900">Ratgeber</h1>
             <p className="text-stone-500 mt-3 max-w-xl mx-auto">Alles rund um Hundezucht, Welpenkauf und das Leben mit Hund — von Experten für Hundeliebhaber.</p>
           </div>
 
-          {rassen.length > 0 && (
-            <section className="mb-14">
-              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Rassen-Portraits</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {rassen.map((a) => <ArticleCard key={a.id} article={a} href={`/rassen/${a.slug}`} />)}
-              </div>
-            </section>
-          )}
+          {/* Kategorie-Tabs */}
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {CATEGORIES.map((cat) => {
+              const isActive = cat.key === activeCategory
+              const count = cat.key ? (countMap[cat.key] || 0) : totalCount
+              return (
+                <Link
+                  key={cat.key}
+                  href={cat.key ? `/ratgeber?kategorie=${cat.key}` : '/ratgeber'}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-forest text-white'
+                      : 'bg-white border border-cream-deep text-stone-600 hover:border-forest/30'
+                  }`}
+                >
+                  {cat.label}
+                  <span className={`ml-1.5 text-xs ${isActive ? 'text-white/70' : 'text-stone-400'}`}>
+                    {count}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
 
-          {ratgeber.length > 0 && (
-            <section className="mb-14">
-              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Ratgeber & Tipps</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {ratgeber.map((a) => <ArticleCard key={a.id} article={a} href={`/ratgeber/${a.slug}`} />)}
-              </div>
-            </section>
-          )}
-
-          {news.length > 0 && (
-            <section className="mb-14">
-              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Neuigkeiten</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {news.map((a) => <ArticleCard key={a.id} article={a} href={`/ratgeber/${a.slug}`} />)}
-              </div>
-            </section>
-          )}
-
-          {articles.length === 0 && (
+          {/* Artikel-Grid */}
+          {articles.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {articles.map((a) => (
+                <ArticleCard key={a.id} article={a} href={a.category === 'rassen' ? `/rassen/${a.slug}` : `/ratgeber/${a.slug}`} />
+              ))}
+            </div>
+          ) : (
             <div className="text-center py-20">
-              <p className="text-stone-400">Noch keine Artikel veröffentlicht. Schau bald wieder vorbei!</p>
+              <p className="text-stone-400">Keine Artikel in dieser Kategorie.</p>
             </div>
           )}
         </div>
