@@ -36,6 +36,9 @@ function renderBoxContent(raw: string): string {
   // Zeilenenden normalisieren
   h = h.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
 
+  // Leerzeilen normalisieren (Zeilen die nur Whitespace enthalten → echte Leerzeilen)
+  h = h.replace(/^\s+$/gm, '')
+
   // * Listen → - Listen
   h = h.replace(/^\* /gm, '- ')
 
