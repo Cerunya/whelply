@@ -3,6 +3,12 @@
  * Unterstützt: Überschriften (H1-H4), Fett, Kursiv, Links, Bilder, Listen,
  * nummerierte Listen, Tabellen, Tipp/Info/Warnung/Fazit/Custom-Farbboxen,
  * Produkt-Karten, YouTube-Embeds, Blockquotes.
+ *
+ * Leerzeilen-Logik:
+ * - 1 Enter (\n)         → <br> innerhalb des Absatzes
+ * - 2 Enter (1 Leerzeile) → neuer Absatz (normaler Abstand via mb-*)
+ * - 3+ Enter (2+ Leerzeilen) → jede zusätzliche Leerzeile = extra Spacer-Abstand,
+ *   funktioniert auch zwischen Boxen bzw. Box ↔ Text
  */
 
 export type ProductData = {
@@ -70,9 +76,15 @@ function renderBoxContent(raw: string): string {
   })
 
   // Absätze mit Zeilenumbruch-Unterstützung
-  const blocks = h.split(/\n{2,}/)
-  h = blocks.map((block) => {
-    const trimmed = block.trim()
+  // Trenner mitbeachten: jede Leerzeile ÜBER der ersten erzeugt einen Spacer
+  const parts = h.split(/(\n{2,})/)
+  h = parts.map((part, idx) => {
+    if (idx % 2 === 1) {
+      // Trenner: n Zeilenumbrüche = n-1 Leerzeilen; erste = normaler Absatzabstand
+      const extra = Math.max(0, part.length - 2)
+      return Array.from({ length: extra }, () => '<div class="h-4" aria-hidden="true"></div>').join('\n')
+    }
+    const trimmed = part.trim()
     if (!trimmed) return ''
     if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(trimmed)) return trimmed
     const lines = trimmed.split('\n').map((l) => l.trim()).filter(Boolean)
@@ -202,14 +214,24 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
 
   // ── Absätze mit Zeilenumbruch-Unterstützung ──
   // 1 Enter (\n) → <br> innerhalb desselben Absatzes
-  // 2+ Enter (\n\n+) → neuer Absatz (<p>)
+  // 2 Enter (1 Leerzeile) → neuer Absatz (<p>)
+  // 3+ Enter (2+ Leerzeilen) → jede zusätzliche Leerzeile erzeugt einen Spacer
+  //   (sichtbarer Extra-Abstand, auch zwischen Boxen bzw. Box ↔ Text)
 
   // Leerzeilen normalisieren (Zeilen die nur Whitespace enthalten → echte Leerzeilen)
   html = html.replace(/^\s+$/gm, '')
 
-  const blocks = html.split(/\n{2,}/)
-  html = blocks.map((block) => {
-    const trimmed = block.trim()
+  // Split MIT Trenner-Capture, damit die Anzahl der Leerzeilen erhalten bleibt
+  const parts = html.split(/(\n{2,})/)
+  html = parts.map((part, idx) => {
+    if (idx % 2 === 1) {
+      // Trenner zwischen Blöcken: n Zeilenumbrüche = n-1 Leerzeilen.
+      // Die erste Leerzeile ist der normale Abstand (via my-*/mb-*-Klassen),
+      // jede weitere wird ein sichtbarer Spacer.
+      const extra = Math.max(0, part.length - 2)
+      return Array.from({ length: extra }, () => '<div class="h-6" aria-hidden="true"></div>').join('\n')
+    }
+    const trimmed = part.trim()
     if (!trimmed) return ''
     // Block-Level HTML nicht wrappen
     if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(trimmed)) return trimmed
