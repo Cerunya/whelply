@@ -9,6 +9,12 @@
  * - 2 Enter (1 Leerzeile) → neuer Absatz (normaler Abstand via mb-*)
  * - 3+ Enter (2+ Leerzeilen) → jede zusätzliche Leerzeile = extra Spacer-Abstand,
  *   funktioniert auch zwischen Boxen bzw. Box ↔ Text
+ *
+ * Abstands-Logik rund um Listen:
+ * - Text direkt VOR einer Liste bekommt nur minimalen Abstand (mb-1) —
+ *   er gehört optisch zur Liste
+ * - Der eigentliche Abstand kommt NACH der Liste (ul/ol haben mb-*)
+ * - Muster: Text → eng → Liste → Abstand → nächster Block
  */
 
 export type ProductData = {
@@ -29,15 +35,16 @@ const BLOCK_RE = /^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|im
  * - Block-Level-HTML (Listen, Überschriften, …) bleibt eigenständig
  * - zusammenhängende Textzeilen werden mit <br> zu einem <p> verbunden
  * - gilt auch für Text VOR, ZWISCHEN und NACH Block-Elementen im selben Block
+ * - Text direkt VOR einer Liste bekommt pClassBeforeList (enger Abstand)
  */
-function wrapParagraphBlocks(blockText: string, pClass: string): string {
+function wrapParagraphBlocks(blockText: string, pClass: string, pClassBeforeList: string): string {
   const trimmed = blockText.trim()
   if (!trimmed) return ''
   const out: string[] = []
   let textBuf: string[] = []
-  const flush = () => {
+  const flush = (beforeList = false) => {
     if (textBuf.length > 0) {
-      out.push(`<p class="${pClass}">${textBuf.join('<br>')}</p>`)
+      out.push(`<p class="${beforeList ? pClassBeforeList : pClass}">${textBuf.join('<br>')}</p>`)
       textBuf = []
     }
   }
@@ -45,7 +52,7 @@ function wrapParagraphBlocks(blockText: string, pClass: string): string {
     const l = line.trim()
     if (!l) continue
     if (BLOCK_RE.test(l)) {
-      flush()
+      flush(/^<(?:ul|ol)/i.test(l))
       out.push(l)
     } else {
       textBuf.push(l)
@@ -104,11 +111,11 @@ function renderBoxContent(raw: string): string {
   // trailing \n am Ersatz: verhindert, dass Folgetext am Block-Element klebt
   h = h.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
-    return '<ol class="list-decimal list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>\n'
+    return '<ol class="list-decimal list-outside pl-6 space-y-1 mb-3">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>\n'
   })
   h = h.replace(/((?:^- .+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
-    return '<ul class="list-disc list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>\n'
+    return '<ul class="list-disc list-outside pl-6 space-y-1 mb-3">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>\n'
   })
 
   // Absätze mit Zeilenumbruch-Unterstützung
@@ -120,7 +127,7 @@ function renderBoxContent(raw: string): string {
       const extra = Math.max(0, part.length - 2)
       return Array.from({ length: extra }, () => '<div class="h-4" aria-hidden="true"></div>').join('\n')
     }
-    return wrapParagraphBlocks(part, 'leading-relaxed mb-3')
+    return wrapParagraphBlocks(part, 'leading-relaxed mb-3', 'leading-relaxed mb-1')
   }).filter(Boolean).join('\n')
 
   return h
@@ -231,13 +238,13 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // trailing \n am Ersatz: verhindert, dass Folgetext am Block-Element klebt
   html = html.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
-    return '<ol class="list-decimal list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>\n'
+    return '<ol class="list-decimal list-outside pl-6 space-y-1 mb-4 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>\n'
   })
 
   // ── Aufzählungslisten: - item ──
   html = html.replace(/((?:^- .+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
-    return '<ul class="list-disc list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>\n'
+    return '<ul class="list-disc list-outside pl-6 space-y-1 mb-4 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>\n'
   })
 
   // ── Horizontale Linie: --- ──
@@ -263,7 +270,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
       const extra = Math.max(0, part.length - 2)
       return Array.from({ length: extra }, () => '<div class="h-6" aria-hidden="true"></div>').join('\n')
     }
-    return wrapParagraphBlocks(part, 'text-stone-700 leading-relaxed mb-4')
+    return wrapParagraphBlocks(part, 'text-stone-700 leading-relaxed mb-4', 'text-stone-700 leading-relaxed mb-1')
   }).filter(Boolean).join('\n')
 
   return html
