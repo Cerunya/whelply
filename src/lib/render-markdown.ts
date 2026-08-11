@@ -33,6 +33,12 @@ export function extractAsins(md: string): string[] {
 function renderBoxContent(raw: string): string {
   let h = raw.trim()
 
+  // Zeilenenden normalisieren
+  h = h.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+  // * Listen → - Listen
+  h = h.replace(/^\* /gm, '- ')
+
   // Bullet-Zeichen: mitten im Text → eigene Zeile, am Zeilenanfang → Listensyntax
   h = h.replace(/(?<!^)(?<!\n)(\*?\*?[•●])/gm, '\n$1')
   h = h.replace(/^[•●]\s*/gm, '- ')
@@ -77,6 +83,12 @@ function renderBoxContent(raw: string): string {
 
 export function renderMarkdown(md: string, products?: Map<string, ProductData>): string {
   let html = md
+
+  // ── Zeilenenden normalisieren (Windows \r\n → \n) ──
+  html = html.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+  // ── Markdown-Listen mit * normalisieren: * item → - item ──
+  html = html.replace(/^\* /gm, '- ')
 
   // ── Bullet-Zeichen: mitten im Text → eigene Zeile, am Zeilenanfang → Listensyntax ──
   html = html.replace(/(?<!^)(?<!\n)(\*?\*?[•●])/gm, '\n$1')
@@ -187,7 +199,11 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
 
   // ── Absätze mit Zeilenumbruch-Unterstützung ──
   // 1 Enter (\n) → <br> innerhalb desselben Absatzes
-  // 2 Enter (\n\n) → neuer Absatz (<p>)
+  // 2+ Enter (\n\n+) → neuer Absatz (<p>)
+
+  // Leerzeilen normalisieren (Zeilen die nur Whitespace enthalten → echte Leerzeilen)
+  html = html.replace(/^\s+$/gm, '')
+
   const blocks = html.split(/\n{2,}/)
   html = blocks.map((block) => {
     const trimmed = block.trim()
@@ -196,15 +212,30 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(trimmed)) return trimmed
     // Einzelne Zeilen innerhalb des Blocks mit <br> verbinden
     const lines = trimmed.split('\n')
-    const joined = lines.map((line) => {
+    const processed: string[] = []
+    for (const line of lines) {
       const l = line.trim()
-      if (!l) return ''
-      if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(l)) return l
-      return l
-    }).filter(Boolean).join('<br>')
-    if (!joined) return ''
-    // Wenn der Block schon HTML ist (z.B. nur ein <strong>-Tag), in <p> wrappen
-    return `<p class="text-stone-700 leading-relaxed">${joined}</p>`
+      if (!l) continue
+      // Block-Level HTML als eigenes Element belassen
+      if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(l)) {
+        // Vorherige Text-Zeilen als <p> abschließen
+        if (processed.length > 0) {
+          const textLines = processed.splice(0, processed.length)
+          processed.push(`<p class="text-stone-700 leading-relaxed">${textLines.join('<br>')}</p>`)
+        }
+        processed.push(l)
+      } else {
+        processed.push(l)
+      }
+    }
+    // Verbleibende Text-Zeilen wrappen
+    if (processed.length > 0 && !processed[processed.length - 1].startsWith('<')) {
+      const allText = processed.every((p) => !p.startsWith('<'))
+      if (allText) {
+        return `<p class="text-stone-700 leading-relaxed">${processed.join('<br>')}</p>`
+      }
+    }
+    return processed.join('\n')
   }).filter(Boolean).join('\n')
 
   return html
