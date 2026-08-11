@@ -21,6 +21,40 @@ export type ProductData = {
   isAvailable: boolean
 }
 
+// Block-Level-HTML erkennen (darf nicht in <p> gewrappt werden)
+const BLOCK_RE = /^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i
+
+/**
+ * Wrappt einen Text-Block in <p>-Absätze:
+ * - Block-Level-HTML (Listen, Überschriften, …) bleibt eigenständig
+ * - zusammenhängende Textzeilen werden mit <br> zu einem <p> verbunden
+ * - gilt auch für Text VOR, ZWISCHEN und NACH Block-Elementen im selben Block
+ */
+function wrapParagraphBlocks(blockText: string, pClass: string): string {
+  const trimmed = blockText.trim()
+  if (!trimmed) return ''
+  const out: string[] = []
+  let textBuf: string[] = []
+  const flush = () => {
+    if (textBuf.length > 0) {
+      out.push(`<p class="${pClass}">${textBuf.join('<br>')}</p>`)
+      textBuf = []
+    }
+  }
+  for (const line of trimmed.split('\n')) {
+    const l = line.trim()
+    if (!l) continue
+    if (BLOCK_RE.test(l)) {
+      flush()
+      out.push(l)
+    } else {
+      textBuf.push(l)
+    }
+  }
+  flush()
+  return out.join('\n')
+}
+
 /** Extrahiert alle ASINs aus dem Markdown-Content */
 export function extractAsins(md: string): string[] {
   const found: string[] = []
@@ -67,13 +101,14 @@ function renderBoxContent(raw: string): string {
   h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="underline hover:opacity-80" target="_blank" rel="noopener">$1</a>')
 
   // Listen
+  // trailing \n am Ersatz: verhindert, dass Folgetext am Block-Element klebt
   h = h.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
-    return '<ol class="list-decimal list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
+    return '<ol class="list-decimal list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>\n'
   })
   h = h.replace(/((?:^- .+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
-    return '<ul class="list-disc list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
+    return '<ul class="list-disc list-outside pl-6 space-y-1">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>\n'
   })
 
   // Absätze mit Zeilenumbruch-Unterstützung
@@ -85,13 +120,7 @@ function renderBoxContent(raw: string): string {
       const extra = Math.max(0, part.length - 2)
       return Array.from({ length: extra }, () => '<div class="h-4" aria-hidden="true"></div>').join('\n')
     }
-    const trimmed = part.trim()
-    if (!trimmed) return ''
-    if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(trimmed)) return trimmed
-    const lines = trimmed.split('\n').map((l) => l.trim()).filter(Boolean)
-    const joined = lines.join('<br>')
-    if (!joined) return ''
-    return `<p class="leading-relaxed mb-3">${joined}</p>`
+    return wrapParagraphBlocks(part, 'leading-relaxed mb-3')
   }).filter(Boolean).join('\n')
 
   return h
@@ -173,7 +202,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
       out += '<tr>' + cells.map((c) => `<${tag} class="${cellClass}">${c.trim()}</${tag}>`).join('') + '</tr>'
     })
     out += '</table></div>'
-    return out
+    return out + '\n' // trailing \n: verhindert, dass Folgetext am Block-Element klebt
   })
 
   // ── Blockquotes: > text ──
@@ -199,15 +228,16 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-forest underline hover:text-forest-light" target="_blank" rel="noopener">$1</a>')
 
   // ── Nummerierte Listen: 1. item ──
+  // trailing \n am Ersatz: verhindert, dass Folgetext am Block-Element klebt
   html = html.replace(/((?:^\d+\.\s.+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^\d+\.\s/, ''))
-    return '<ol class="list-decimal list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>'
+    return '<ol class="list-decimal list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ol>\n'
   })
 
   // ── Aufzählungslisten: - item ──
   html = html.replace(/((?:^- .+\n?)+)/gm, (block) => {
     const items = block.trim().split('\n').map((l) => l.replace(/^- /, ''))
-    return '<ul class="list-disc list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>'
+    return '<ul class="list-disc list-outside pl-6 space-y-1 text-stone-700">' + items.map((i) => `<li>${i}</li>`).join('') + '</ul>\n'
   })
 
   // ── Horizontale Linie: --- ──
@@ -233,36 +263,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
       const extra = Math.max(0, part.length - 2)
       return Array.from({ length: extra }, () => '<div class="h-6" aria-hidden="true"></div>').join('\n')
     }
-    const trimmed = part.trim()
-    if (!trimmed) return ''
-    // Block-Level HTML nicht wrappen
-    if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(trimmed)) return trimmed
-    // Einzelne Zeilen innerhalb des Blocks mit <br> verbinden
-    const lines = trimmed.split('\n')
-    const processed: string[] = []
-    for (const line of lines) {
-      const l = line.trim()
-      if (!l) continue
-      // Block-Level HTML als eigenes Element belassen
-      if (/^<(?:div|h[1-6]|p[ >]|ul|ol|li|table|tr|td|th|blockquote|hr|img|iframe|figure|br)/i.test(l)) {
-        // Vorherige Text-Zeilen als <p> abschließen
-        if (processed.length > 0) {
-          const textLines = processed.splice(0, processed.length)
-          processed.push(`<p class="text-stone-700 leading-relaxed mb-4">${textLines.join('<br>')}</p>`)
-        }
-        processed.push(l)
-      } else {
-        processed.push(l)
-      }
-    }
-    // Verbleibende Text-Zeilen wrappen
-    if (processed.length > 0 && !processed[processed.length - 1].startsWith('<')) {
-      const allText = processed.every((p) => !p.startsWith('<'))
-      if (allText) {
-        return `<p class="text-stone-700 leading-relaxed mb-4">${processed.join('<br>')}</p>`
-      }
-    }
-    return processed.join('\n')
+    return wrapParagraphBlocks(part, 'text-stone-700 leading-relaxed mb-4')
   }).filter(Boolean).join('\n')
 
   return html
