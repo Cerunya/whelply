@@ -42,8 +42,9 @@ function renderBoxContent(raw: string): string {
   // Zeilenenden normalisieren
   h = h.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
 
-  // Leerzeilen normalisieren (Zeilen die nur Whitespace enthalten → echte Leerzeilen)
-  h = h.replace(/^\s+$/gm, '')
+  // Leerzeilen normalisieren (Zeilen die nur Spaces/Tabs enthalten → echte Leerzeilen)
+  // WICHTIG: nur [ \t], NICHT \s — \s würde Zeilenumbrüche mitfressen
+  h = h.replace(/^[ \t]+$/gm, '')
 
   // * Listen → - Listen
   h = h.replace(/^\* /gm, '- ')
@@ -218,8 +219,9 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // 3+ Enter (2+ Leerzeilen) → jede zusätzliche Leerzeile erzeugt einen Spacer
   //   (sichtbarer Extra-Abstand, auch zwischen Boxen bzw. Box ↔ Text)
 
-  // Leerzeilen normalisieren (Zeilen die nur Whitespace enthalten → echte Leerzeilen)
-  html = html.replace(/^\s+$/gm, '')
+  // Leerzeilen normalisieren (Zeilen die nur Spaces/Tabs enthalten → echte Leerzeilen)
+  // WICHTIG: nur [ \t], NICHT \s — \s würde Zeilenumbrüche mitfressen
+  html = html.replace(/^[ \t]+$/gm, '')
 
   // Split MIT Trenner-Capture, damit die Anzahl der Leerzeilen erhalten bleibt
   const parts = html.split(/(\n{2,})/)
