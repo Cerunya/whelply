@@ -75,7 +75,7 @@ function renderBoxContent(raw: string): string {
     const lines = trimmed.split('\n').map((l) => l.trim()).filter(Boolean)
     const joined = lines.join('<br>')
     if (!joined) return ''
-    return `<p class="leading-relaxed">${joined}</p>`
+    return `<p class="leading-relaxed mb-3">${joined}</p>`
   }).filter(Boolean).join('\n')
 
   return h
@@ -221,7 +221,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
         // Vorherige Text-Zeilen als <p> abschließen
         if (processed.length > 0) {
           const textLines = processed.splice(0, processed.length)
-          processed.push(`<p class="text-stone-700 leading-relaxed">${textLines.join('<br>')}</p>`)
+          processed.push(`<p class="text-stone-700 leading-relaxed mb-4">${textLines.join('<br>')}</p>`)
         }
         processed.push(l)
       } else {
@@ -232,7 +232,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     if (processed.length > 0 && !processed[processed.length - 1].startsWith('<')) {
       const allText = processed.every((p) => !p.startsWith('<'))
       if (allText) {
-        return `<p class="text-stone-700 leading-relaxed">${processed.join('<br>')}</p>`
+        return `<p class="text-stone-700 leading-relaxed mb-4">${processed.join('<br>')}</p>`
       }
     }
     return processed.join('\n')
