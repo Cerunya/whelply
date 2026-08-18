@@ -22,7 +22,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-import { renderMarkdown, extractAsins } from '@/lib/render-markdown'
+import { renderMarkdown, extractAsins, extractFonts } from '@/lib/render-markdown'
+import FontLoader from '@/components/FontLoader'
 
 export default async function RatgeberDetailPage({ params }: { params: { slug: string } }) {
   const article = await prisma.article.findUnique({
@@ -47,6 +48,9 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
     const products = await prisma.product.findMany({ where: { asin: { in: asins } } })
     products.forEach((p) => productsMap.set(p.asin, p))
   }
+
+  // Im Artikel verwendete Schriftarten (:::schrift[...]) für Google-Fonts-Nachladen
+  const usedFonts = extractFonts(article.content)
 
   // ── Sidebar-Daten ──
 
@@ -93,6 +97,7 @@ export default async function RatgeberDetailPage({ params }: { params: { slug: s
 
   return (
     <>
+      <FontLoader fonts={usedFonts} />
       <Navbar />
       <main className="min-h-screen bg-cream">
         <div className="max-w-6xl mx-auto px-4 py-12">

@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
+import { AVAILABLE_FONTS, googleFontsUrl } from '@/lib/fonts'
 
 type RichEditorProps = {
   value: string
@@ -47,7 +48,19 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [showEmoji, setShowEmoji] = useState(false)
+  const [showFonts, setShowFonts] = useState(false)
   const cursorRef = useRef<number | null>(null)
+
+  // Google Fonts einmalig laden, damit die Dropdown-Vorschau die echte Schrift zeigt
+  useEffect(() => {
+    const href = googleFontsUrl(AVAILABLE_FONTS.map((f) => f.name))
+    if (!href || document.querySelector('link[data-whelply-fonts-preview]')) return
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = href
+    link.setAttribute('data-whelply-fonts-preview', '1')
+    document.head.appendChild(link)
+  }, [])
 
   const images = extractImages(value)
   const displayValue = toDisplay(value)
@@ -97,6 +110,21 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
     const newDisplay = el.value.slice(0, s) + marker + sel + marker + el.value.slice(e)
     onChange(fromDisplay(newDisplay, images))
     restoreCursor(s + marker.length + sel.length + marker.length)
+  }
+
+  function applyFont(fontName: string) {
+    setShowFonts(false)
+    const el = ref.current
+    const sel = el ? el.value.slice(el.selectionStart, el.selectionEnd) : ''
+    const block = `\n:::schrift[${fontName}]\n${sel || 'Text in anderer Schriftart'}\n:::\n`
+    if (el) {
+      const s = el.selectionStart
+      const newDisplay = el.value.slice(0, s) + block + el.value.slice(el.selectionEnd)
+      onChange(fromDisplay(newDisplay, images))
+      restoreCursor(s + block.length)
+    } else {
+      onChange(value.trimEnd() + block)
+    }
   }
 
   function prefixLines(prefix: string) {
@@ -217,6 +245,22 @@ export default function RichEditor({ value, onChange, placeholder, rows = 6, cla
         {/* Text-Formatierung */}
         <button type="button" onClick={() => wrap('**')} className={btn} title="Fett"><strong>B</strong></button>
         <button type="button" onClick={() => wrap('*')} className={btn + ' italic'} title="Kursiv">I</button>
+        <div className="relative">
+          <button type="button" onClick={() => setShowFonts(!showFonts)} className={btn} title="Schriftart">
+            <span className="font-bold text-[11px]">Aa</span>
+          </button>
+          {showFonts && (
+            <div className="absolute top-10 left-0 z-50 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-60 max-h-72 overflow-y-auto">
+              {AVAILABLE_FONTS.map((f) => (
+                <button key={f.name} type="button" onClick={() => applyFont(f.name)}
+                  className="w-full text-left px-3 py-1.5 text-sm text-stone-700 hover:bg-cream transition-colors"
+                  style={{ fontFamily: `'${f.name}', ${f.fallback}` }}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         {sep}
         {/* Überschriften */}
         <button type="button" onClick={() => insertAtCursor('\n## ')} className={btn} title="Überschrift groß"><span className="font-bold text-[10px]">H2</span></button>
