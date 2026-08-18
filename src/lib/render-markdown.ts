@@ -2,7 +2,7 @@
  * Einfacher Markdown→HTML Renderer für Artikel-Inhalte.
  * Unterstützt: Überschriften (H1-H4), Fett, Kursiv, Links, Bilder, Listen,
  * nummerierte Listen, Tabellen, Tipp/Info/Warnung/Fazit/Custom-Farbboxen,
- * Produkt-Karten, YouTube-Embeds, Blockquotes.
+ * Produkt-Karten, YouTube-Embeds, Blockquotes, Schriftart-Blöcke (:::schrift[...]).
  *
  * Leerzeilen-Logik:
  * - 1 Enter (\n)         → <br> innerhalb des Absatzes
@@ -16,6 +16,8 @@
  * - Der eigentliche Abstand kommt NACH der Liste (ul/ol haben mb-*)
  * - Muster: Text → eng → Liste → Abstand → nächster Block
  */
+
+import { getFont } from './fonts'
 
 export type ProductData = {
   asin: string
@@ -73,6 +75,18 @@ export function extractAsins(md: string): string[] {
   return found
 }
 
+/** Extrahiert alle verwendeten :::schrift[...]-Fonts (für Google-Fonts-Nachladen) */
+export function extractFonts(md: string): string[] {
+  const found: string[] = []
+  const re = /:::schrift\[([^\]]+)\]/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(md)) !== null) {
+    const font = getFont(m[1].trim())
+    if (font && !found.includes(font.name)) found.push(font.name)
+  }
+  return found
+}
+
 /**
  * Verarbeitet Markdown innerhalb von Boxen (Tipp, Info, Fazit, Custom).
  * Keine hardcoded Textfarben — alles erbt vom Parent-Container.
@@ -86,6 +100,13 @@ function renderBoxContent(raw: string): string {
   // Leerzeilen normalisieren (Zeilen die nur Spaces/Tabs enthalten → echte Leerzeilen)
   // WICHTIG: nur [ \t], NICHT \s — \s würde Zeilenumbrüche mitfressen
   h = h.replace(/^[ \t]+$/gm, '')
+
+  // Schriftart-Blöcke: :::schrift[Font Name] ... :::
+  h = h.replace(/:::schrift\[([^\]]+)\]\s*([\s\S]*?):::/g, (_, fontName, content) => {
+    const font = getFont(fontName.trim())
+    if (!font) return content
+    return `<div style="font-family:'${font.name}', ${font.fallback}">${renderBoxContent(content)}</div>`
+  })
 
   // * Listen → - Listen
   h = h.replace(/^\* /gm, '- ')
@@ -160,6 +181,15 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     const desc = p.description ? `<p class="text-stone-500 text-sm mt-1">${p.description}</p>` : ''
 
     return `<div class="my-6 bg-white border border-cream-deep rounded-2xl p-4 flex gap-4 items-center hover:shadow-sm transition-shadow"><a href="${url}" target="_blank" rel="noopener nofollow sponsored">${img}</a><div class="flex-1 min-w-0"><a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="font-semibold text-stone-900 hover:text-forest transition-colors block">${p.name}</a>${desc}<a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="inline-block mt-3 bg-honey text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-honey-light transition-colors">Bei Amazon ansehen →</a></div></div>`
+  })
+
+  // ── Schriftart-Blöcke: :::schrift[Font Name] ... ::: ──
+  // WICHTIG: muss VOR den Box-Regeln laufen, damit :::schrift auch
+  // innerhalb von tipp/info/warnung/fazit/box funktioniert
+  html = html.replace(/:::schrift\[([^\]]+)\]\s*([\s\S]*?):::/g, (_, fontName, content) => {
+    const font = getFont(fontName.trim())
+    if (!font) return content
+    return `<div class="my-4" style="font-family:'${font.name}', ${font.fallback}">${renderBoxContent(content)}</div>`
   })
 
   // ── Tipp/Info/Warnung/Fazit/Custom-Boxen ──

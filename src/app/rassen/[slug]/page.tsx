@@ -11,7 +11,8 @@ import Link from 'next/link'
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
 export const dynamic = 'force-dynamic'
 
-import { renderMarkdown, extractAsins } from '@/lib/render-markdown'
+import { renderMarkdown, extractAsins, extractFonts } from '@/lib/render-markdown'
+import FontLoader from '@/components/FontLoader'
 
 export default async function RassenDetailPage({
   params,
@@ -39,6 +40,9 @@ export default async function RassenDetailPage({
     }
   }
 
+  // Im Rassen-Artikel verwendete Schriftarten (:::schrift[...]) für Google-Fonts-Nachladen
+  const usedFonts = article ? extractFonts(article.content) : []
+
   const listings = await prisma.listing.findMany({
     where: { breedId: breed.id, status: 'available', type: 'puppy' },
     include: {
@@ -63,6 +67,7 @@ export default async function RassenDetailPage({
 
   return (
     <>
+      <FontLoader fonts={usedFonts} />
       <Navbar />
       <main className="min-h-screen bg-cream">
         <section className="bg-forest px-4 py-12">
