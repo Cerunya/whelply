@@ -90,8 +90,11 @@ export function extractFonts(md: string): string[] {
 /**
  * Verarbeitet Markdown innerhalb von Boxen (Tipp, Info, Fazit, Custom).
  * Keine hardcoded Textfarben — alles erbt vom Parent-Container.
+ * inSchrift: true, wenn der Inhalt bereits in einem :::schrift-Block steht —
+ *   Überschriften bekommen dann KEIN font-serif, damit die gewählte
+ *   Schriftart nicht von der Klasse am h*-Element überschrieben wird.
  */
-function renderBoxContent(raw: string): string {
+function renderBoxContent(raw: string, inSchrift = false): string {
   let h = raw.trim()
 
   // Zeilenenden normalisieren
@@ -101,11 +104,17 @@ function renderBoxContent(raw: string): string {
   // WICHTIG: nur [ \t], NICHT \s — \s würde Zeilenumbrüche mitfressen
   h = h.replace(/^[ \t]+$/gm, '')
 
+  // Formatmarker, die einen Schrift-Block umschließen, nach INNEN ziehen:
+  // **:::schrift[X]t:::** → :::schrift[X]**t**::: (sonst <div> in <strong> → Browser zerbricht es)
+  h = h.replace(/(\*\*|__)\s*(:::schrift\[[^\]]+\])\s*([\s\S]*?):::\s*\1/g, '$2\n$1$3$1\n:::')
+  // Überschriften-Zeile mit Schrift-Block: ## :::schrift[X]t::: → :::schrift[X]\n## t\n:::
+  h = h.replace(/^(#{1,4})\s*(:::schrift\[[^\]]+\])\s*(.*?):::\s*$/gm, '$2\n$1 $3\n:::')
+
   // Schriftart-Blöcke: :::schrift[Font Name] ... :::
   h = h.replace(/:::schrift\[([^\]]+)\]\s*([\s\S]*?):::/g, (_, fontName, content) => {
     const font = getFont(fontName.trim())
     if (!font) return content
-    return `<div style="font-family:'${font.name}', ${font.fallback}">${renderBoxContent(content)}</div>`
+    return `<div style="font-family:'${font.name}', ${font.fallback}">${renderBoxContent(content, true)}</div>`
   })
 
   // * Listen → - Listen
@@ -117,9 +126,11 @@ function renderBoxContent(raw: string): string {
   h = h.replace(/^- [•●]\s*/gm, '- ')
 
   // Überschriften (ohne Farbklassen — erbt vom Box-Container)
-  h = h.replace(/^#### (.+)$/gm, '<h4 class="font-serif text-lg font-bold mt-4 mb-1">$1</h4>')
-  h = h.replace(/^### (.+)$/gm, '<h3 class="font-serif text-xl font-bold mt-5 mb-2">$1</h3>')
-  h = h.replace(/^## (.+)$/gm, '<h2 class="font-serif text-2xl font-bold mt-6 mb-2">$1</h2>')
+  // inSchrift: kein font-serif, sonst überschreibt die Klasse die :::schrift-Schriftart
+  const serif = inSchrift ? '' : 'font-serif '
+  h = h.replace(/^#### (.+)$/gm, `<h4 class="${serif}text-lg font-bold mt-4 mb-1">$1</h4>`)
+  h = h.replace(/^### (.+)$/gm, `<h3 class="${serif}text-xl font-bold mt-5 mb-2">$1</h3>`)
+  h = h.replace(/^## (.+)$/gm, `<h2 class="${serif}text-2xl font-bold mt-6 mb-2">$1</h2>`)
 
   // Inline
   h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -186,10 +197,16 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // ── Schriftart-Blöcke: :::schrift[Font Name] ... ::: ──
   // WICHTIG: muss VOR den Box-Regeln laufen, damit :::schrift auch
   // innerhalb von tipp/info/warnung/fazit/box funktioniert
+  // Formatmarker, die einen Schrift-Block umschließen, nach INNEN ziehen:
+  // **:::schrift[X]t:::** → :::schrift[X]**t**::: (sonst <div> in <strong> → Browser zerbricht es)
+  html = html.replace(/(\*\*|__)\s*(:::schrift\[[^\]]+\])\s*([\s\S]*?):::\s*\1/g, '$2\n$1$3$1\n:::')
+  // Überschriften-Zeile mit Schrift-Block: ## :::schrift[X]t::: → :::schrift[X]\n## t\n:::
+  html = html.replace(/^(#{1,4})\s*(:::schrift\[[^\]]+\])\s*(.*?):::\s*$/gm, '$2\n$1 $3\n:::')
+
   html = html.replace(/:::schrift\[([^\]]+)\]\s*([\s\S]*?):::/g, (_, fontName, content) => {
     const font = getFont(fontName.trim())
     if (!font) return content
-    return `<div class="my-4" style="font-family:'${font.name}', ${font.fallback}">${renderBoxContent(content)}</div>`
+    return `<div class="my-4" style="font-family:'${font.name}', ${font.fallback}">${renderBoxContent(content, true)}</div>`
   })
 
   // ── Tipp/Info/Warnung/Fazit/Custom-Boxen ──
