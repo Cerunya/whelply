@@ -104,9 +104,12 @@ function renderBoxContent(raw: string, inSchrift = false): string {
   // WICHTIG: nur [ \t], NICHT \s — \s würde Zeilenumbrüche mitfressen
   h = h.replace(/^[ \t]+$/gm, '')
 
-  // Formatmarker, die einen Schrift-Block umschließen, nach INNEN ziehen:
+  // Formatmarker, die einen Schrift-Block DIREKT umschließen, nach INNEN ziehen:
   // **:::schrift[X]t:::** → :::schrift[X]**t**::: (sonst <div> in <strong> → Browser zerbricht es)
-  h = h.replace(/(\*\*|__)\s*(:::schrift\[[^\]]+\])\s*([\s\S]*?):::\s*\1/g, '$2\n$1$3$1\n:::')
+  // WICHTIG: strikte Adjazenz — KEIN \s* dazwischen! Ein \s* würde Zeilenumbrüche erlauben
+  // und so einen fetten Text, der zufällig VOR einem Schrift-Block steht, mit diesem
+  // verknüpfen (frisst sich dann lazy über mehrere Blöcke → zerstört das ganze Dokument)
+  h = h.replace(/(\*\*|__)(:::schrift\[[^\]]+\])\s*([\s\S]*?)\s*:::\1/g, '$2\n$1$3$1\n:::')
   // Überschriften-Zeile mit Schrift-Block: ## :::schrift[X]t::: → :::schrift[X]\n## t\n:::
   h = h.replace(/^(#{1,4})\s*(:::schrift\[[^\]]+\])\s*(.*?):::\s*$/gm, '$2\n$1 $3\n:::')
 
@@ -188,7 +191,7 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
     const url = `https://www.amazon.de/dp/${p.asin}?tag=${p.affiliateTag}`
     const img = p.imageUrl
       ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-24 h-24 md:w-28 md:h-28 rounded-xl object-contain flex-shrink-0" />`
-      : `<div class="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-cream flex items-center justify-center flex-shrink-0"><svg class="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>`
+      : `<div class="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-cream flex items-center justify-center flex-shrink-0"><svg class="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7v10l8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>`
     const desc = p.description ? `<p class="text-stone-500 text-sm mt-1">${p.description}</p>` : ''
 
     return `<div class="my-6 bg-white border border-cream-deep rounded-2xl p-4 flex gap-4 items-center hover:shadow-sm transition-shadow"><a href="${url}" target="_blank" rel="noopener nofollow sponsored">${img}</a><div class="flex-1 min-w-0"><a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="font-semibold text-stone-900 hover:text-forest transition-colors block">${p.name}</a>${desc}<a href="${url}" target="_blank" rel="noopener nofollow sponsored" class="inline-block mt-3 bg-honey text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-honey-light transition-colors">Bei Amazon ansehen →</a></div></div>`
@@ -197,9 +200,10 @@ export function renderMarkdown(md: string, products?: Map<string, ProductData>):
   // ── Schriftart-Blöcke: :::schrift[Font Name] ... ::: ──
   // WICHTIG: muss VOR den Box-Regeln laufen, damit :::schrift auch
   // innerhalb von tipp/info/warnung/fazit/box funktioniert
-  // Formatmarker, die einen Schrift-Block umschließen, nach INNEN ziehen:
+  // Formatmarker, die einen Schrift-Block DIREKT umschließen, nach INNEN ziehen:
   // **:::schrift[X]t:::** → :::schrift[X]**t**::: (sonst <div> in <strong> → Browser zerbricht es)
-  html = html.replace(/(\*\*|__)\s*(:::schrift\[[^\]]+\])\s*([\s\S]*?):::\s*\1/g, '$2\n$1$3$1\n:::')
+  // WICHTIG: strikte Adjazenz — KEIN \s* dazwischen! (s. Kommentar in renderBoxContent)
+  html = html.replace(/(\*\*|__)(:::schrift\[[^\]]+\])\s*([\s\S]*?)\s*:::\1/g, '$2\n$1$3$1\n:::')
   // Überschriften-Zeile mit Schrift-Block: ## :::schrift[X]t::: → :::schrift[X]\n## t\n:::
   html = html.replace(/^(#{1,4})\s*(:::schrift\[[^\]]+\])\s*(.*?):::\s*$/gm, '$2\n$1 $3\n:::')
 
