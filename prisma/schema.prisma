@@ -690,3 +690,14 @@ model Product {
 
   @@map("products")
 }
+
+model ArticleCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("article_categories")
+}
