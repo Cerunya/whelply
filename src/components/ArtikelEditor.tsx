@@ -8,6 +8,7 @@ import { resizeImage } from '@/lib/image-resize'
 
 type Breed = { id: string; nameDe: string; slug: string }
 type Product = { id: string; name: string; asin: string }
+type Category = { id: string; slug: string; name: string }
 type Article = {
   id?: string
   slug: string
@@ -24,7 +25,7 @@ type Article = {
   sidebarProductId: string
 }
 
-export default function ArtikelEditor({ article, breeds, products = [] }: { article?: Article & { id: string }; breeds: Breed[]; products?: Product[] }) {
+export default function ArtikelEditor({ article, breeds, products = [], categories = [] }: { article?: Article & { id: string }; breeds: Breed[]; products?: Product[]; categories?: Category[] }) {
   const router = useRouter()
   const coverInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState<Article>({
@@ -136,9 +137,15 @@ export default function ArtikelEditor({ article, breeds, products = [] }: { arti
         <div>
           <label className={labelClass}>Kategorie</label>
           <select name="category" value={form.category} onChange={handleChange} className={inputClass}>
-            <option value="ratgeber">Ratgeber</option>
-            <option value="rassen">Rassen-Portrait</option>
-            <option value="news">News</option>
+            {categories.length > 0 ? categories.map((c) => (
+              <option key={c.slug} value={c.slug}>{c.name}</option>
+            )) : (
+              <>
+                <option value="ratgeber">Ratgeber</option>
+                <option value="rassen">Rassen-Portrait</option>
+                <option value="news">News</option>
+              </>
+            )}
           </select>
         </div>
         <div>

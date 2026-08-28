@@ -249,6 +249,13 @@ export default function AdminDashboard({
               </div>
               <span className="text-forest text-sm font-semibold">Verwalten →</span>
             </Link>
+            <Link href="/admin/kategorien" className="flex items-center justify-between bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
+              <div>
+                <p className="font-semibold text-stone-900">Artikel-Kategorien</p>
+                <p className="text-xs text-stone-400 mt-0.5">Kategorien für Ratgeber-Artikel anlegen und verwalten</p>
+              </div>
+              <span className="text-forest text-sm font-semibold">Verwalten →</span>
+            </Link>
           </div>
         )}
 

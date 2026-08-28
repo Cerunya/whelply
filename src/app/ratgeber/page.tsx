@@ -11,21 +11,30 @@ export const metadata: Metadata = {
   description: 'Tipps und Ratgeber rund um Hundezucht, Welpenkauf und Hundehaltung. Rassen-Portraits, Gesundheit, Ernährung und mehr.',
 }
 
-const CATEGORIES = [
-  { key: '', label: 'Alle' },
-  { key: 'ratgeber', label: 'Ratgeber & Tipps' },
-  { key: 'rassen', label: 'Rassen-Portraits' },
-  { key: 'news', label: 'Neuigkeiten' },
-]
-
-const CATEGORY_LABEL: Record<string, string> = { ratgeber: 'Ratgeber', rassen: 'Rassen-Portrait', news: 'News' }
-
 export default async function RatgeberPage({
   searchParams,
 }: {
   searchParams: { kategorie?: string }
 }) {
   const activeCategory = searchParams.kategorie || ''
+
+  // Kategorien dynamisch aus DB laden (Fallback auf hardcoded)
+  let categories: { slug: string; name: string }[] = []
+  try {
+    categories = await prisma.articleCategory.findMany({
+      select: { slug: true, name: true },
+      orderBy: { sortOrder: 'asc' },
+    })
+  } catch {
+    categories = [
+      { slug: 'ratgeber', name: 'Ratgeber & Tipps' },
+      { slug: 'rassen', name: 'Rassen-Portraits' },
+      { slug: 'news', name: 'Neuigkeiten' },
+    ]
+  }
+
+  const categoryLabelMap: Record<string, string> = {}
+  categories.forEach((c) => { categoryLabelMap[c.slug] = c.name })
 
   const articles = await prisma.article.findMany({
     where: {
@@ -36,7 +45,7 @@ export default async function RatgeberPage({
     orderBy: { publishedAt: 'desc' },
   })
 
-  // Zähler pro Kategorie (für Badges)
+  // Zähler pro Kategorie
   const counts = await prisma.article.groupBy({
     by: ['category'],
     where: { isPublished: true },
@@ -59,23 +68,26 @@ export default async function RatgeberPage({
 
           {/* Kategorie-Tabs */}
           <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {CATEGORIES.map((cat) => {
-              const isActive = cat.key === activeCategory
-              const count = cat.key ? (countMap[cat.key] || 0) : totalCount
+            <Link
+              href="/ratgeber"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                !activeCategory ? 'bg-forest text-white' : 'bg-white border border-cream-deep text-stone-600 hover:border-forest/30'
+              }`}
+            >
+              Alle <span className={`ml-1.5 text-xs ${!activeCategory ? 'text-white/70' : 'text-stone-400'}`}>{totalCount}</span>
+            </Link>
+            {categories.map((cat) => {
+              const isActive = cat.slug === activeCategory
+              const count = countMap[cat.slug] || 0
               return (
                 <Link
-                  key={cat.key}
-                  href={cat.key ? `/ratgeber?kategorie=${cat.key}` : '/ratgeber'}
+                  key={cat.slug}
+                  href={`/ratgeber?kategorie=${cat.slug}`}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-forest text-white'
-                      : 'bg-white border border-cream-deep text-stone-600 hover:border-forest/30'
+                    isActive ? 'bg-forest text-white' : 'bg-white border border-cream-deep text-stone-600 hover:border-forest/30'
                   }`}
                 >
-                  {cat.label}
-                  <span className={`ml-1.5 text-xs ${isActive ? 'text-white/70' : 'text-stone-400'}`}>
-                    {count}
-                  </span>
+                  {cat.name} <span className={`ml-1.5 text-xs ${isActive ? 'text-white/70' : 'text-stone-400'}`}>{count}</span>
                 </Link>
               )
             })}
@@ -85,7 +97,23 @@ export default async function RatgeberPage({
           {articles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {articles.map((a) => (
-                <ArticleCard key={a.id} article={a} href={a.category === 'rassen' ? `/rassen/${a.slug}` : `/ratgeber/${a.slug}`} />
+                <Link key={a.id} href={a.category === 'rassen' ? `/rassen/${a.slug}` : `/ratgeber/${a.slug}`}
+                  className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md hover:border-forest/20 transition-all group">
+                  {a.coverImageUrl && (
+                    <div className="aspect-[16/9] overflow-hidden bg-cream-dark">
+                      <img src={a.coverImageUrl} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <p className="text-[10px] font-bold text-forest uppercase tracking-wide mb-1">
+                      {categoryLabelMap[a.category] ?? a.category}
+                      {a.breed && ` · ${a.breed.nameDe}`}
+                    </p>
+                    <h3 className="font-serif text-lg font-bold text-stone-900 mb-2 group-hover:text-forest transition-colors">{a.title}</h3>
+                    {a.excerpt && <p className="text-sm text-stone-500 line-clamp-2">{a.excerpt}</p>}
+                    {a.publishedAt && <p className="text-xs text-stone-400 mt-3">{new Date(a.publishedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
+                  </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -97,26 +125,5 @@ export default async function RatgeberPage({
       </main>
       <Footer />
     </>
-  )
-}
-
-function ArticleCard({ article, href }: { article: any; href: string }) {
-  return (
-    <Link href={href} className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md hover:border-forest/20 transition-all group">
-      {article.coverImageUrl && (
-        <div className="aspect-[16/9] overflow-hidden bg-cream-dark">
-          <img src={article.coverImageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-        </div>
-      )}
-      <div className="p-5">
-        <p className="text-[10px] font-bold text-forest uppercase tracking-wide mb-1">
-          {CATEGORY_LABEL[article.category] ?? article.category}
-          {article.breed && ` · ${article.breed.nameDe}`}
-        </p>
-        <h3 className="font-serif text-lg font-bold text-stone-900 mb-2 group-hover:text-forest transition-colors">{article.title}</h3>
-        {article.excerpt && <p className="text-sm text-stone-500 line-clamp-2">{article.excerpt}</p>}
-        {article.publishedAt && <p className="text-xs text-stone-400 mt-3">{new Date(article.publishedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
-      </div>
-    </Link>
   )
 }
