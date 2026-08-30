@@ -9,6 +9,8 @@ const registerSchema = z.object({
   role: z.enum(['buyer', 'breeder', 'service']).default('buyer'),
   kennelName: z.string().min(2).max(80).optional(),
   verband: z.string().min(1).max(20).optional(),
+  serviceName: z.string().min(2).max(120).optional(),
+  serviceCategory: z.enum(['vet', 'groomer', 'pension', 'trainer', 'other']).optional(),
 }).refine((data) => {
   if (data.role === 'breeder' && (!data.kennelName || data.kennelName.trim().length < 2)) {
     return false
@@ -19,7 +21,17 @@ const registerSchema = z.object({
     return false
   }
   return true
-}, { message: 'Bitte wähle einen Verband aus', path: ['verband'] })
+}, { message: 'Bitte wähle einen Verband aus', path: ['verband'] }).refine((data) => {
+  if (data.role === 'service' && (!data.serviceName || data.serviceName.trim().length < 2)) {
+    return false
+  }
+  return true
+}, { message: 'Firmenname muss mindestens 2 Zeichen haben', path: ['serviceName'] }).refine((data) => {
+  if (data.role === 'service' && !data.serviceCategory) {
+    return false
+  }
+  return true
+}, { message: 'Bitte wähle eine Kategorie aus', path: ['serviceCategory'] })
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,7 +52,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { email, password, role, kennelName, verband } = parsed.data
+    const { email, password, role, kennelName, verband, serviceName, serviceCategory } = parsed.data
 
     // Züchter braucht Zwingernamen
     if (role === 'breeder' && !kennelName) {
@@ -88,6 +100,16 @@ export async function POST(req: NextRequest) {
         })
         await tx.subscription.create({
           data: { breederId: breeder.id, plan: 'free' },
+        })
+      }
+
+      if (role === 'service' && serviceName && serviceCategory) {
+        await tx.serviceProvider.create({
+          data: {
+            userId: newUser.id,
+            name: serviceName,
+            category: serviceCategory as any,
+          },
         })
       }
 

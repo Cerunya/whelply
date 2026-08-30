@@ -17,7 +17,7 @@ const ROLES: { value: Role; label: string; desc: string; icon: string }[] = [
 export default function RegisterPage() {
   const router = useRouter()
   const [role, setRole] = useState<Role>('buyer')
-  const [form, setForm] = useState({ email: '', password: '', kennelName: '', verband: '' })
+  const [form, setForm] = useState({ email: '', password: '', kennelName: '', verband: '', serviceName: '', serviceCategory: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -39,6 +39,8 @@ export default function RegisterPage() {
         role,
         ...(role === 'breeder' && form.kennelName ? { kennelName: form.kennelName } : {}),
         ...(role === 'breeder' && form.verband ? { verband: form.verband } : {}),
+        ...(role === 'service' && form.serviceName ? { serviceName: form.serviceName } : {}),
+        ...(role === 'service' && form.serviceCategory ? { serviceCategory: form.serviceCategory } : {}),
       }),
     })
 
@@ -128,6 +130,45 @@ export default function RegisterPage() {
                 <a href="mailto:info@whelply.de?subject=Verband%20vorschlagen&body=Hallo%2C%0A%0Aich%20möchte%20folgenden%20Verband%20vorschlagen%3A%0A%0AName%3A%20%0AWebsite%3A%20%0A%0ADanke!" className="text-xs text-forest hover:underline mt-1.5 inline-block">
                   Dein Verband fehlt? Vorschlagen →
                 </a>
+              </div>
+            </>
+          )}
+
+          {/* Dienstleister-Felder */}
+          {role === 'service' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                  Firmen-/Praxisname <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="serviceName"
+                  value={form.serviceName}
+                  onChange={handleChange}
+                  required
+                  placeholder="z.B. Hundesalon Bella"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                  Kategorie <span className="text-red-400">*</span>
+                </label>
+                <select
+                  name="serviceCategory"
+                  value={form.serviceCategory}
+                  onChange={handleChange}
+                  required
+                  className={inputClass}
+                >
+                  <option value="">— Kategorie auswählen —</option>
+                  <option value="vet">Tierarzt / Tierklinik</option>
+                  <option value="groomer">Hundefriseur / Groomer</option>
+                  <option value="pension">Tierpension / Hundesitter</option>
+                  <option value="trainer">Hundetrainer / Hundeschule</option>
+                  <option value="other">Sonstige Dienstleistung</option>
+                </select>
               </div>
             </>
           )}
