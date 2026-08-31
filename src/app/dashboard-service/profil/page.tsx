@@ -43,6 +43,7 @@ export default async function ServiceProfilPage() {
             pageHeadingColor: (provider as any).pageHeadingColor ?? '#1c1917',
             pageBgColor: (provider as any).pageBgColor ?? '#1e3a2f',
             pageBgFixed: (provider as any).pageBgFixed !== false,
+            pageContactColor: (provider as any).pageContactColor ?? '#2d5016',
             bgUrl: provider.media.find((m) => m.purpose === 'bg')?.url ?? null,
           }} images={provider.media.filter((m) => m.purpose !== 'bg')} />
         </div>

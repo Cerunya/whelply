@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import nextDynamic from 'next/dynamic'
 import { Metadata } from 'next'
+import ServiceGallery from '@/components/ServiceGallery'
 
 const LocationMap = nextDynamic(() => import('@/components/LocationMap'), { ssr: false })
 
@@ -60,6 +61,7 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
   const textColor = p.pageTextColor ?? '#44403c'
   const headingColor = p.pageHeadingColor ?? '#1c1917'
   const bgFixed = p.pageBgFixed !== false
+  const contactColor = p.pageContactColor ?? '#2d5016'
 
   const bgImage = provider.media.find((m) => m.purpose === 'bg')?.url
   const galleryImages = provider.media.filter((m) => m.purpose !== 'bg')
@@ -96,14 +98,10 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
               </div>
             </div>
 
-            {/* Galerie-Bilder */}
+            {/* Galerie-Bilder mit Lightbox */}
             {galleryImages.length > 0 && (
-              <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-                {galleryImages.map((img, i) => (
-                  <div key={i} className="rounded-xl overflow-hidden aspect-square">
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
-                  </div>
-                ))}
+              <div className="mb-8">
+                <ServiceGallery images={galleryImages.map((img) => img.url)} name={provider.name} />
               </div>
             )}
 
@@ -166,7 +164,7 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
 
               {/* Rechte Spalte — Kontakt */}
               <div>
-                <div className="bg-forest rounded-2xl p-6 text-white">
+                <div className="rounded-2xl p-6 text-white" style={{ backgroundColor: contactColor }}>
                   <h3 className="font-serif text-lg font-bold mb-4">Kontakt</h3>
                   <div className="space-y-4 text-sm">
                     {provider.street && (

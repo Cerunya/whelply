@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   }
 
   const rawBuffer = Buffer.from(await file.arrayBuffer())
-  const maxWidth = purpose === 'logo' ? 400 : 1200
+  const maxWidth = purpose === 'logo' ? 400 : purpose === 'bg' ? 2400 : 1200
 
   let buffer: Buffer
   try {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   const url = `/api/media/${storageKey}/view`
 
-  // Logo: altes überschreiben
+  // Logo: speichern + URL in Profil
   if (purpose === 'logo') {
     await prisma.serviceProvider.update({
       where: { id: provider.id },
@@ -58,7 +58,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url })
   }
 
-  // Galerie: Media-Eintrag erstellen
+  // Hintergrundbild: altes löschen, neues speichern
+  if (purpose === 'bg') {
+    // Altes Hintergrundbild entfernen
+    await prisma.media.deleteMany({ where: { serviceId: provider.id, purpose: 'bg' } })
+    const media = await prisma.media.create({
+      data: {
+        storageKey,
+        url,
+        purpose: 'bg',
+        serviceId: provider.id,
+        isPrimary: false,
+        sortOrder: 0,
+      },
+    })
+    return NextResponse.json({ id: media.id, url: media.url })
+  }
+
+  // Galerie
   const media = await prisma.media.create({
     data: {
       storageKey,

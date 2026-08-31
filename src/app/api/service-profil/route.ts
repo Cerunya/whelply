@@ -31,6 +31,7 @@ export async function PATCH(req: NextRequest) {
       pageHeadingColor: body.pageHeadingColor || null,
       pageBgColor: body.pageBgColor || null,
       pageBgFixed: typeof body.pageBgFixed === 'boolean' ? body.pageBgFixed : true,
+      pageContactColor: body.pageContactColor || null,
     },
   })
 

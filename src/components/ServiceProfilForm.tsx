@@ -46,7 +46,7 @@ type Props = {
     phone: string; website: string; openingHours: string; paymentMethods: string
     logoUrl: string
     pageCardColor: string; pageTextColor: string; pageHeadingColor: string
-    pageBgColor: string; pageBgFixed: boolean
+    pageBgColor: string; pageBgFixed: boolean; pageContactColor: string
     bgUrl: string | null
   }
   images?: { id: string; url: string }[]
@@ -69,6 +69,7 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
     pageHeadingColor: provider.pageHeadingColor,
     pageBgColor: provider.pageBgColor,
     pageBgFixed: provider.pageBgFixed,
+    pageContactColor: provider.pageContactColor,
   })
   const [bgUrl, setBgUrl] = useState(provider.bgUrl)
   const [bgUploading, setBgUploading] = useState(false)
@@ -319,7 +320,7 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
         {/* Farbschema */}
         <div>
           <p className="text-sm font-semibold text-stone-700 mb-2">Farbschema</p>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
             <div>
               <label className="block text-xs text-stone-500 mb-1">Seite</label>
               <input type="color" name="pageBgColor" value={form.pageBgColor} onChange={handleChange}
@@ -338,6 +339,11 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
             <div>
               <label className="block text-xs text-stone-500 mb-1">Titel</label>
               <input type="color" name="pageHeadingColor" value={form.pageHeadingColor} onChange={handleChange}
+                className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Kontakt</label>
+              <input type="color" name="pageContactColor" value={form.pageContactColor} onChange={handleChange}
                 className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
             </div>
             <div>

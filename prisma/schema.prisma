@@ -472,7 +472,8 @@ model ServiceProvider {
   pageHeadingColor String?  @map("page_heading_color")
   pageBgColor      String?  @map("page_bg_color")
   pageBgFixed      Boolean  @default(true) @map("page_bg_fixed")
-
+  pageContactColor String?  @map("page_contact_color")
+  
   user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   media Media[] @relation("ServiceMedia")
 
