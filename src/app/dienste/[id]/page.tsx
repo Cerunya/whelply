@@ -35,11 +35,39 @@ function parseHours(json: string | null): Record<string, DayHours> | null {
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const p = await prisma.serviceProvider.findUnique({ where: { id: params.id }, select: { name: true, category: true, city: true } })
-  if (!p) return { title: 'Nicht gefunden' }
+  const provider = await prisma.serviceProvider.findUnique({
+    where: { id: params.id },
+    include: { media: { select: { url: true, purpose: true }, take: 5 } },
+  })
+  if (!provider) return { title: 'Nicht gefunden' }
+  const p = provider as any
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
+  const pageUrl = `${baseUrl}/dienste/${params.id}`
+  const logoForOg = (provider as any)?.logoUrl ? `${baseUrl}${(provider as any).logoUrl}` : null
+  const firstImage = provider.media.find((m) => m.purpose !== 'bg')?.url
+  const ogImage = logoForOg || (firstImage ? `${baseUrl}${firstImage}` : `${baseUrl}/og-default.png`)
+  const ogTitle = `${p.name} — ${CATEGORY_LABELS[p.category]}`
+  const ogDesc = p.description
+    ? (p.description as string).slice(0, 160)
+    : `${CATEGORY_LABELS[p.category]}${p.city ? ` in ${p.city}` : ''} — Dienstleister auf Whelply`
+
   return {
     title: `${p.name} — ${CATEGORY_LABELS[p.category]}${p.city ? ` in ${p.city}` : ''} | Whelply`,
-    description: `${p.name} — ${CATEGORY_LABELS[p.category]}${p.city ? ` in ${p.city}` : ''}. Dienstleister für deinen Hund auf Whelply.`,
+    description: ogDesc,
+    openGraph: {
+      title: ogTitle,
+      description: ogDesc,
+      url: pageUrl,
+      siteName: 'Whelply',
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: ogTitle,
+      description: ogDesc,
+      images: ogImage ? [ogImage] : [],
+    },
   }
 }
 
@@ -141,13 +169,13 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
                           </div>
                         )
                       })}
+                      {holidayHours && (
+                        <div className="flex items-center text-sm mt-2">
+                          <span className="w-28 font-medium" style={{ color: headingColor }}>Feiertage</span>
+                          <span>{holidayHours}</span>
+                        </div>
+                      )}
                     </div>
-                    {holidayHours && (
-                      <div className="mt-3 pt-3 border-t text-sm" style={{ borderColor: textColor + '15' }}>
-                        <span className="font-medium" style={{ color: headingColor }}>Feiertage: </span>
-                        <span>{holidayHours}</span>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -231,16 +259,19 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
             <div className="mt-8 flex items-center justify-center gap-3">
               <span className="text-sm" style={{ color: textColor + '80' }}>Teilen:</span>
               <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://whelply.de/dienste/${provider.id}`)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold transition-opacity hover:opacity-80" style={{ backgroundColor: '#1877f2' }}>f</a>
-              <a href={`https://wa.me/?text=${encodeURIComponent(`${provider.name} auf Whelply: https://whelply.de/dienste/${provider.id}`)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm transition-opacity hover:opacity-80" style={{ backgroundColor: '#25d366' }}>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                target="_blank" rel="noopener noreferrer" title="Auf Facebook teilen"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold transition-opacity hover:opacity-80" style={{ backgroundColor: '#1877f2' }}>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
               </a>
-              <a href={`mailto:?subject=${encodeURIComponent(provider.name)}&body=${encodeURIComponent(`Schau mal: https://whelply.de/dienste/${provider.id}`)}`}
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm transition-opacity hover:opacity-80" style={{ backgroundColor: headingColor }}>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${provider.name} — ${CATEGORY_LABELS[provider.category]} auf Whelply`)}&url=${encodeURIComponent(`https://whelply.de/dienste/${provider.id}`)}`}
+                target="_blank" rel="noopener noreferrer" title="Auf X/Twitter teilen"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-opacity hover:opacity-80" style={{ backgroundColor: '#000000' }}>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a href={`https://wa.me/?text=${encodeURIComponent(`${provider.name} auf Whelply: https://whelply.de/dienste/${provider.id}`)}`}
+                target="_blank" rel="noopener noreferrer" title="Über WhatsApp teilen"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-opacity hover:opacity-80" style={{ backgroundColor: '#25d366' }}>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
               </a>
             </div>
           </div>

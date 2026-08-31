@@ -49,7 +49,7 @@ export default function OpenStatus({ hours, contactColor }: { hours: Record<stri
         color: open ? contactColor : '#dc2626',
       }}
     >
-      {open ? '● Aktuell geöffnet' : '● Aktuell geschlossen'}
+      {open ? 'Aktuell geöffnet' : 'Aktuell geschlossen'}
     </div>
   )
 }
