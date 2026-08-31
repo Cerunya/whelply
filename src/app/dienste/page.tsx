@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
@@ -85,14 +86,15 @@ export default async function DienstePage({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {providers.map((provider) => (
-                <div
+                <Link
                   key={provider.id}
-                  className={`bg-white rounded-2xl border p-6 ${
-                    provider.isPremium ? 'border-honey ring-1 ring-honey/30' : 'border-cream-deep'
+                  href={`/dienste/${provider.id}`}
+                  className={`bg-white rounded-2xl border p-6 hover:shadow-md transition-all group ${
+                    provider.isPremium ? 'border-honey ring-1 ring-honey/30' : 'border-cream-deep hover:border-forest/20'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-serif text-lg font-bold text-stone-900">{provider.name}</h3>
+                    <h3 className="font-serif text-lg font-bold text-stone-900 group-hover:text-forest transition-colors">{provider.name}</h3>
                     {provider.isPremium && (
                       <span className="text-xs text-honey font-semibold whitespace-nowrap ml-2">★ Premium</span>
                     )}
@@ -101,24 +103,14 @@ export default async function DienstePage({
                     {CATEGORY_LABELS[provider.category]}
                   </p>
                   {provider.description && (
-                    <p className="text-sm text-stone-500 mb-3">{provider.description}</p>
+                    <p className="text-sm text-stone-500 mb-3 line-clamp-2">{provider.description}</p>
                   )}
                   {(provider.city || provider.state) && (
-                    <p className="text-sm text-stone-400 mb-1">
+                    <p className="text-sm text-stone-400">
                       {[provider.city, provider.state].filter(Boolean).join(', ')}
                     </p>
                   )}
-                  {provider.website && (
-                    <a
-                      href={provider.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-forest font-semibold hover:underline"
-                    >
-                      Webseite besuchen →
-                    </a>
-                  )}
-                </div>
+                </Link>
               ))}
             </div>
           )}
