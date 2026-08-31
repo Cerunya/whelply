@@ -47,7 +47,7 @@ type Props = {
     logoUrl: string
     pageCardColor: string; pageTextColor: string; pageHeadingColor: string
     pageBgColor: string; pageBgFixed: boolean; pageContactColor: string
-    bgUrl: string | null
+    bgUrl: string | null; holidayHours: string; pricingInfo: string
   }
   images?: { id: string; url: string }[]
 }
@@ -74,6 +74,8 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
   const [bgUrl, setBgUrl] = useState(provider.bgUrl)
   const [bgUploading, setBgUploading] = useState(false)
   const [hours, setHours] = useState<OpeningHours>(parseHours(provider.openingHours))
+  const [holidayHours, setHolidayHours] = useState(provider.holidayHours)
+  const [pricingInfo, setPricingInfo] = useState(provider.pricingInfo)
   const [payments, setPayments] = useState<string[]>(provider.paymentMethods ? provider.paymentMethods.split(',').map((s) => s.trim()).filter(Boolean) : [])
   const [logoUrl, setLogoUrl] = useState(provider.logoUrl)
   const [images, setImages] = useState(initialImages)
@@ -121,6 +123,8 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
           ...form,
           openingHours: JSON.stringify(hours),
           paymentMethods: payments.join(', '),
+          holidayHours,
+          pricingInfo,
         }),
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Fehler')
@@ -260,6 +264,16 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
             </div>
           ))}
         </div>
+        <div className="mt-4">
+          <p className="text-sm font-semibold text-stone-700 mb-1.5">Feiertage / Sonstiges</p>
+          <textarea
+            value={holidayHours}
+            onChange={(e) => { setHolidayHours(e.target.value); setSuccess(false) }}
+            rows={2}
+            className={inputClass}
+            placeholder="z.B. An Feiertagen geschlossen, Termine nach Vereinbarung"
+          />
+        </div>
       </div>
 
       {/* Zahlungsarten */}
@@ -278,6 +292,19 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Preise */}
+      <div className="bg-white rounded-2xl border border-cream-deep p-6">
+        <h2 className="font-serif text-lg font-bold text-stone-900 mb-3">Preise</h2>
+        <textarea
+          value={pricingInfo}
+          onChange={(e) => { setPricingInfo(e.target.value); setSuccess(false) }}
+          rows={4}
+          className={inputClass}
+          placeholder={"Fellpflege ab 35 €\nBaden & Föhnen ab 25 €\nKrallenpflege 10 €\n\nPreise variieren je nach Größe und Felltyp."}
+        />
+        <p className="text-xs text-stone-400 mt-1">Freie Eingabe — wird so angezeigt wie eingegeben.</p>
       </div>
 
       {/* Seitendesign */}

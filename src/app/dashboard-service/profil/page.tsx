@@ -45,6 +45,8 @@ export default async function ServiceProfilPage() {
             pageBgFixed: (provider as any).pageBgFixed !== false,
             pageContactColor: (provider as any).pageContactColor ?? '#2d5016',
             bgUrl: provider.media.find((m) => m.purpose === 'bg')?.url ?? null,
+            holidayHours: (provider as any).holidayHours ?? '',
+            pricingInfo: (provider as any).pricingInfo ?? '',
           }} images={provider.media.filter((m) => m.purpose !== 'bg')} />
         </div>
       </main>

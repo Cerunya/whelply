@@ -5,6 +5,7 @@ import Footer from '@/components/Footer'
 import nextDynamic from 'next/dynamic'
 import { Metadata } from 'next'
 import ServiceGallery from '@/components/ServiceGallery'
+import OpenStatus from '@/components/OpenStatus'
 
 const LocationMap = nextDynamic(() => import('@/components/LocationMap'), { ssr: false })
 
@@ -62,6 +63,8 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
   const headingColor = p.pageHeadingColor ?? '#1c1917'
   const bgFixed = p.pageBgFixed !== false
   const contactColor = p.pageContactColor ?? '#2d5016'
+  const holidayHours = p.holidayHours as string | null
+  const pricingInfo = p.pricingInfo as string | null
 
   const bgImage = provider.media.find((m) => m.purpose === 'bg')?.url
   const galleryImages = provider.media.filter((m) => m.purpose !== 'bg')
@@ -139,6 +142,22 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
                         )
                       })}
                     </div>
+                    {holidayHours && (
+                      <div className="mt-3 pt-3 border-t text-sm" style={{ borderColor: textColor + '15' }}>
+                        <span className="font-medium" style={{ color: headingColor }}>Feiertage: </span>
+                        <span>{holidayHours}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Preise */}
+                {pricingInfo && (
+                  <div>
+                    <h2 className="font-serif text-lg font-bold mb-3" style={{ color: headingColor }}>Preise</h2>
+                    <div className="rounded-xl p-4 text-sm leading-relaxed whitespace-pre-line" style={{ backgroundColor: textColor + '08' }}>
+                      {pricingInfo}
+                    </div>
                   </div>
                 )}
 
@@ -162,8 +181,13 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
                 )}
               </div>
 
-              {/* Rechte Spalte — Kontakt */}
-              <div>
+              {/* Rechte Spalte — Status + Kontakt */}
+              <div className="space-y-4">
+                {/* Offen/Geschlossen */}
+                {hours && (
+                  <OpenStatus hours={hours} contactColor={contactColor} />
+                )}
+
                 <div className="rounded-2xl p-6 text-white" style={{ backgroundColor: contactColor }}>
                   <h3 className="font-serif text-lg font-bold mb-4">Kontakt</h3>
                   <div className="space-y-4 text-sm">
@@ -203,6 +227,22 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
                 )}
               </div>
             )}
+            {/* Social Sharing */}
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <span className="text-sm" style={{ color: textColor + '80' }}>Teilen:</span>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://whelply.de/dienste/${provider.id}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold transition-opacity hover:opacity-80" style={{ backgroundColor: '#1877f2' }}>f</a>
+              <a href={`https://wa.me/?text=${encodeURIComponent(`${provider.name} auf Whelply: https://whelply.de/dienste/${provider.id}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm transition-opacity hover:opacity-80" style={{ backgroundColor: '#25d366' }}>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+              </a>
+              <a href={`mailto:?subject=${encodeURIComponent(provider.name)}&body=${encodeURIComponent(`Schau mal: https://whelply.de/dienste/${provider.id}`)}`}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm transition-opacity hover:opacity-80" style={{ backgroundColor: headingColor }}>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </a>
+            </div>
           </div>
 
           <div className="mt-8 text-center">
