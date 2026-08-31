@@ -19,7 +19,12 @@ const CATEGORIES = [
 ]
 
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
-const PAYMENT_OPTIONS = ['Bargeld', 'EC-Karte', 'Kreditkarte', 'PayPal', 'Überweisung', 'Rechnung', 'Auf Anfrage']
+const PAYMENT_OPTIONS = [
+  { id: 'bargeld', label: 'Bargeld', icon: '💵' },
+  { id: 'ec', label: 'EC-Karte', icon: '💳' },
+  { id: 'kreditkarte', label: 'Kreditkarte', icon: '💳' },
+  { id: 'paypal', label: 'PayPal', icon: '🅿️' },
+]
 
 type DayHours = { open: boolean; from1: string; to1: string; from2: string; to2: string }
 type OpeningHours = Record<string, DayHours>
@@ -79,8 +84,8 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
     setSuccess(false)
   }
 
-  function togglePayment(method: string) {
-    setPayments((prev) => prev.includes(method) ? prev.filter((p) => p !== method) : [...prev, method])
+  function togglePayment(id: string) {
+    setPayments((prev) => prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id])
     setSuccess(false)
   }
 
@@ -251,13 +256,14 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
         <h2 className="font-serif text-lg font-bold text-stone-900 mb-4">Zahlungsarten</h2>
         <div className="flex flex-wrap gap-2">
           {PAYMENT_OPTIONS.map((method) => (
-            <button key={method} type="button" onClick={() => togglePayment(method)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                payments.includes(method)
+            <button key={method.id} type="button" onClick={() => togglePayment(method.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                payments.includes(method.id)
                   ? 'bg-forest text-white border-forest'
                   : 'bg-white text-stone-600 border-stone-200 hover:border-forest/30'
               }`}>
-              {method}
+              <span>{method.icon}</span>
+              {method.label}
             </button>
           ))}
         </div>
