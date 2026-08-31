@@ -21,12 +21,12 @@ const CATEGORIES = [
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
 const PAYMENT_OPTIONS = ['Bargeld', 'EC-Karte', 'Kreditkarte', 'PayPal', 'Überweisung', 'Rechnung', 'Auf Anfrage']
 
-type DayHours = { open: boolean; from: string; to: string }
+type DayHours = { open: boolean; from1: string; to1: string; from2: string; to2: string }
 type OpeningHours = Record<string, DayHours>
 
 function defaultHours(): OpeningHours {
   const h: OpeningHours = {}
-  DAYS.forEach((d) => { h[d] = { open: d !== 'Sonntag', from: '09:00', to: '18:00' } })
+  DAYS.forEach((d) => { h[d] = { open: d !== 'Sonntag', from1: '09:00', to1: '12:00', from2: '14:00', to2: '18:00' } })
   return h
 }
 
@@ -213,7 +213,7 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
         <h2 className="font-serif text-lg font-bold text-stone-900 mb-4">Öffnungszeiten</h2>
         <div className="space-y-2">
           {DAYS.map((day) => (
-            <div key={day} className="flex items-center gap-3">
+            <div key={day} className="flex items-center gap-3 flex-wrap">
               <label className="flex items-center gap-2 w-28 flex-shrink-0 cursor-pointer">
                 <input type="checkbox" checked={hours[day]?.open ?? false}
                   onChange={(e) => updateDay(day, 'open', e.target.checked)}
@@ -221,13 +221,21 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
                 <span className={`text-sm ${hours[day]?.open ? 'text-stone-800 font-medium' : 'text-stone-400'}`}>{day}</span>
               </label>
               {hours[day]?.open ? (
-                <div className="flex items-center gap-1.5 text-sm">
-                  <input type="time" value={hours[day].from}
-                    onChange={(e) => updateDay(day, 'from', e.target.value)}
+                <div className="flex items-center gap-1 text-sm flex-wrap">
+                  <input type="time" value={hours[day].from1}
+                    onChange={(e) => updateDay(day, 'from1', e.target.value)}
                     className="border border-stone-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30" />
                   <span className="text-stone-400">–</span>
-                  <input type="time" value={hours[day].to}
-                    onChange={(e) => updateDay(day, 'to', e.target.value)}
+                  <input type="time" value={hours[day].to1}
+                    onChange={(e) => updateDay(day, 'to1', e.target.value)}
+                    className="border border-stone-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30" />
+                  <span className="text-stone-300 mx-1">|</span>
+                  <input type="time" value={hours[day].from2}
+                    onChange={(e) => updateDay(day, 'from2', e.target.value)}
+                    className="border border-stone-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30" />
+                  <span className="text-stone-400">–</span>
+                  <input type="time" value={hours[day].to2}
+                    onChange={(e) => updateDay(day, 'to2', e.target.value)}
                     className="border border-stone-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30" />
                 </div>
               ) : (

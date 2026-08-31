@@ -19,7 +19,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
 
-type DayHours = { open: boolean; from: string; to: string }
+type DayHours = { open: boolean; from1: string; to1: string; from2: string; to2: string }
 
 function parseHours(json: string | null): Record<string, DayHours> | null {
   if (!json) return null
@@ -101,7 +101,15 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
                         <div key={day} className="flex items-center text-sm">
                           <span className={`w-28 font-medium ${d?.open ? 'text-stone-800' : 'text-stone-400'}`}>{day}</span>
                           {d?.open ? (
-                            <span className="text-stone-600">{d.from} – {d.to} Uhr</span>
+                            <span className="text-stone-600">
+                              {d.from1} – {d.to1} Uhr
+                              {d.from2 && d.to2 && d.from2 !== d.to2 && (
+                                <span className="text-stone-400"> | </span>
+                              )}
+                              {d.from2 && d.to2 && d.from2 !== d.to2 && (
+                                <>{d.from2} – {d.to2} Uhr</>
+                              )}
+                            </span>
                           ) : (
                             <span className="text-stone-400">Geschlossen</span>
                           )}
