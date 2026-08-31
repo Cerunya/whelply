@@ -16,6 +16,9 @@ export default async function DashboardPage() {
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } })
   if (!user) redirect('/login')
 
+  // Dienstleister → eigenes Dashboard
+  if (user.role === 'service') redirect('/dashboard-service')
+
   // Nicht-Züchter → eigene Seite
   if (user.role !== 'breeder' && user.role !== 'admin') redirect('/dashboard/nutzer')
 

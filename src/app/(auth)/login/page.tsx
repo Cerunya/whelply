@@ -28,18 +28,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError('E-Mail oder Passwort falsch.')
     } else {
-      // Rolle abfragen für korrekte Weiterleitung
-      try {
-        const res = await fetch('/api/auth/session')
-        const session = await res.json()
-        if (session?.user?.role === 'service') {
-          router.push('/dashboard-service')
-        } else {
-          router.push('/dashboard')
-        }
-      } catch {
-        router.push('/dashboard')
-      }
+      router.push('/dashboard')
     }
   }
 
