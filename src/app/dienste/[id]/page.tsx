@@ -17,12 +17,21 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: 'Sonstige Dienstleistung',
 }
 
+const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+
+type DayHours = { open: boolean; from: string; to: string }
+
+function parseHours(json: string | null): Record<string, DayHours> | null {
+  if (!json) return null
+  try { return JSON.parse(json) } catch { return null }
+}
+
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const provider = await prisma.serviceProvider.findUnique({ where: { id: params.id }, select: { name: true, category: true, city: true } })
-  if (!provider) return { title: 'Nicht gefunden' }
+  const p = await prisma.serviceProvider.findUnique({ where: { id: params.id }, select: { name: true, category: true, city: true } })
+  if (!p) return { title: 'Nicht gefunden' }
   return {
-    title: `${provider.name} — ${CATEGORY_LABELS[provider.category]}${provider.city ? ` in ${provider.city}` : ''} | Whelply`,
-    description: `${provider.name} — ${CATEGORY_LABELS[provider.category]}${provider.city ? ` in ${provider.city}` : ''}. Finde Dienstleister für deinen Hund auf Whelply.`,
+    title: `${p.name} — ${CATEGORY_LABELS[p.category]}${p.city ? ` in ${p.city}` : ''} | Whelply`,
+    description: `${p.name} — ${CATEGORY_LABELS[p.category]}${p.city ? ` in ${p.city}` : ''}. Finde Dienstleister für deinen Hund auf Whelply.`,
   }
 }
 
@@ -34,24 +43,33 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
 
   if (!provider) notFound()
 
+  const hours = parseHours((provider as any).openingHours)
+  const payments = ((provider as any).paymentMethods as string)?.split(',').map((s: string) => s.trim()).filter(Boolean) ?? []
+  const logoUrl = (provider as any).logoUrl as string | null
+
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-cream">
         <div className="max-w-4xl mx-auto px-4 py-12">
-          {/* Header */}
-          <div className="mb-8">
-            <span className="text-xs font-semibold text-forest uppercase tracking-wider bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
-              {CATEGORY_LABELS[provider.category]}
-            </span>
-            {provider.isPremium && <span className="text-xs text-honey font-semibold ml-2">★ Premium</span>}
-            <h1 className="font-serif text-3xl font-bold text-stone-900 mt-3">{provider.name}</h1>
-            {provider.city && (
-              <p className="text-stone-500 mt-1">{[provider.city, provider.state].filter(Boolean).join(', ')}</p>
+          {/* Header mit Logo */}
+          <div className="flex items-start gap-5 mb-8">
+            {logoUrl && (
+              <img src={logoUrl} alt={provider.name} className="w-20 h-20 rounded-2xl object-contain border border-cream-deep flex-shrink-0" />
             )}
+            <div>
+              <span className="text-xs font-semibold text-forest uppercase tracking-wider bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                {CATEGORY_LABELS[provider.category]}
+              </span>
+              {provider.isPremium && <span className="text-xs text-honey font-semibold ml-2">★ Premium</span>}
+              <h1 className="font-serif text-3xl font-bold text-stone-900 mt-2">{provider.name}</h1>
+              {provider.city && (
+                <p className="text-stone-500 mt-1">{[provider.city, provider.state].filter(Boolean).join(', ')}</p>
+              )}
+            </div>
           </div>
 
-          {/* Bilder-Galerie */}
+          {/* Bilder */}
           {provider.media.length > 0 && (
             <div className="mb-8 grid grid-cols-2 md:grid-cols-3 gap-3">
               {provider.media.map((img, i) => (
@@ -63,7 +81,7 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Linke Spalte — Beschreibung + Karte */}
+            {/* Linke Spalte */}
             <div className="md:col-span-2 space-y-6">
               {provider.description && (
                 <div className="bg-white rounded-2xl border border-cream-deep p-6">
@@ -72,11 +90,37 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
                 </div>
               )}
 
-              {/* Öffnungszeiten */}
-              {provider.openingHours && (
+              {/* Öffnungszeiten — strukturiert */}
+              {hours && (
                 <div className="bg-white rounded-2xl border border-cream-deep p-6">
-                  <h2 className="font-serif text-lg font-bold text-stone-900 mb-3">Öffnungszeiten</h2>
-                  <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">{provider.openingHours}</p>
+                  <h2 className="font-serif text-lg font-bold text-stone-900 mb-4">Öffnungszeiten</h2>
+                  <div className="space-y-1.5">
+                    {DAYS.map((day) => {
+                      const d = hours[day]
+                      return (
+                        <div key={day} className="flex items-center text-sm">
+                          <span className={`w-28 font-medium ${d?.open ? 'text-stone-800' : 'text-stone-400'}`}>{day}</span>
+                          {d?.open ? (
+                            <span className="text-stone-600">{d.from} – {d.to} Uhr</span>
+                          ) : (
+                            <span className="text-stone-400">Geschlossen</span>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Zahlungsarten */}
+              {payments.length > 0 && (
+                <div className="bg-white rounded-2xl border border-cream-deep p-6">
+                  <h2 className="font-serif text-lg font-bold text-stone-900 mb-3">Zahlungsarten</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {payments.map((p) => (
+                      <span key={p} className="text-xs font-medium bg-cream border border-cream-deep text-stone-600 px-3 py-1.5 rounded-full">{p}</span>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -84,12 +128,7 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
               {provider.lat && provider.lng && (
                 <div className="bg-white rounded-2xl border border-cream-deep p-6">
                   <h2 className="font-serif text-lg font-bold text-stone-900 mb-3">Standort</h2>
-                  <LocationMap
-                    lat={provider.lat}
-                    lng={provider.lng}
-                    label={provider.name}
-                    className="h-72"
-                  />
+                  <LocationMap lat={provider.lat} lng={provider.lng} label={provider.name} className="h-72" />
                   {provider.street && (
                     <p className="text-sm text-stone-500 mt-3">{provider.street}, {provider.zip} {provider.city}</p>
                   )}
@@ -118,21 +157,14 @@ export default async function DienstDetailPage({ params }: { params: { id: strin
                   {provider.website && (
                     <div>
                       <p className="text-white/60 text-xs mb-0.5">Website</p>
-                      <a href={provider.website} target="_blank" rel="noopener noreferrer" className="hover:text-honey transition-colors break-all">
-                        {provider.website.replace(/^https?:\/\//, '')}
+                      <a href={provider.website} target="_blank" rel="noopener noreferrer"
+                        className="inline-block bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors mt-1">
+                        Website besuchen →
                       </a>
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Öffnungszeiten kompakt (wenn Sidebar Platz hat) */}
-              {provider.openingHours && (
-                <div className="bg-white rounded-2xl border border-cream-deep p-5">
-                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Öffnungszeiten</p>
-                  <p className="text-sm text-stone-600 whitespace-pre-line leading-relaxed">{provider.openingHours}</p>
-                </div>
-              )}
             </div>
           </div>
 

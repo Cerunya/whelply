@@ -35,7 +35,9 @@ export default async function ServiceProfilPage() {
             state: provider.state ?? '',
             phone: provider.phone ?? '',
             website: provider.website ?? '',
-            openingHours: provider.openingHours ?? '',
+            openingHours: (provider as any).openingHours ?? '',
+            paymentMethods: (provider as any).paymentMethods ?? '',
+            logoUrl: (provider as any).logoUrl ?? '',
           }} images={provider.media} />
         </div>
       </main>

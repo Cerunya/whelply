@@ -465,6 +465,8 @@ model ServiceProvider {
   isPremium   Boolean         @default(false) @map("is_premium")
   createdAt   DateTime        @default(now()) @map("created_at")
   openingHours String?  @map("opening_hours") @db.Text
+  paymentMethods String?  @map("payment_methods")
+  logoUrl        String?  @map("logo_url")
 
   user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   media Media[] @relation("ServiceMedia")

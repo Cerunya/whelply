@@ -93,11 +93,18 @@ export default async function DienstePage({
                     provider.isPremium ? 'border-honey ring-1 ring-honey/30' : 'border-cream-deep hover:border-forest/20'
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-serif text-lg font-bold text-stone-900 group-hover:text-forest transition-colors">{provider.name}</h3>
+                  <div className="flex items-start gap-3 mb-2">
+                    {(provider as any).logoUrl && (
+                      <img src={(provider as any).logoUrl} alt="" className="w-12 h-12 rounded-xl object-contain border border-cream-deep flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <h3 className="font-serif text-lg font-bold text-stone-900 group-hover:text-forest transition-colors">{provider.name}</h3>
                     {provider.isPremium && (
                       <span className="text-xs text-honey font-semibold whitespace-nowrap ml-2">★ Premium</span>
                     )}
+                      </div>
+                    </div>
                   </div>
                   <p className="text-xs text-forest font-semibold uppercase tracking-wide mb-3">
                     {CATEGORY_LABELS[provider.category]}
