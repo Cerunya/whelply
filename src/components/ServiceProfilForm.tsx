@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 const BUNDESLAENDER = [
@@ -29,15 +29,20 @@ type Props = {
     state: string
     phone: string
     website: string
+    openingHours: string
   }
+  images?: { id: string; url: string }[]
 }
 
-export default function ServiceProfilForm({ provider }: Props) {
+export default function ServiceProfilForm({ provider, images: initialImages = [] }: Props) {
   const router = useRouter()
   const [form, setForm] = useState(provider)
+  const [images, setImages] = useState(initialImages)
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -126,6 +131,60 @@ export default function ServiceProfilForm({ provider }: Props) {
             <input name="website" value={form.website} onChange={handleChange} type="url" placeholder="https://..." className={inputClass} />
           </div>
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-cream-deep p-6 space-y-4">
+        <h2 className="font-serif text-lg font-bold text-stone-900">Öffnungszeiten</h2>
+        <textarea
+          name="openingHours"
+          value={form.openingHours}
+          onChange={handleChange}
+          rows={4}
+          className={inputClass}
+          placeholder={"Mo–Fr: 9:00–18:00 Uhr\nSa: 10:00–14:00 Uhr\nSo: geschlossen"}
+        />
+        <p className="text-xs text-stone-400">Eine Zeile pro Tag oder Zeitraum.</p>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-cream-deep p-6 space-y-4">
+        <h2 className="font-serif text-lg font-bold text-stone-900">Bilder</h2>
+        <p className="text-xs text-stone-400">Zeige deine Räumlichkeiten, dein Team oder deine Arbeit. Max. 6 Bilder.</p>
+
+        <div className="grid grid-cols-3 gap-3">
+          {images.map((img) => (
+            <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden bg-cream group">
+              <img src={img.url} alt="" className="w-full h-full object-cover" />
+              <button type="button" onClick={async () => {
+                await fetch(`/api/media-item/${img.id}`, { method: 'DELETE' })
+                setImages((prev) => prev.filter((i) => i.id !== img.id))
+              }}
+                className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+            </div>
+          ))}
+          {images.length < 6 && (
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+              className="aspect-square rounded-xl border-2 border-dashed border-stone-200 flex items-center justify-center text-stone-400 hover:border-forest/40 hover:text-forest transition-colors">
+              {uploading ? '...' : '+'}
+            </button>
+          )}
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+          const file = e.target.files?.[0]
+          if (!file) return
+          setUploading(true)
+          try {
+            const fd = new FormData()
+            fd.append('file', file)
+            fd.append('purpose', 'gallery')
+            const res = await fetch('/api/upload', { method: 'POST', body: fd })
+            const data = await res.json()
+            if (data.url) {
+              setImages((prev) => [...prev, { id: data.id || Date.now().toString(), url: data.url }])
+            }
+          } catch {}
+          setUploading(false)
+          if (fileRef.current) fileRef.current.value = ''
+        }} />
       </div>
 
       <button type="submit" disabled={saving}

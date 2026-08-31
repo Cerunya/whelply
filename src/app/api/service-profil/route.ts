@@ -24,6 +24,7 @@ export async function PATCH(req: NextRequest) {
       state: body.state?.slice(0, 50) || null,
       phone: body.phone?.slice(0, 20) || null,
       website: body.website?.slice(0, 200) || null,
+      openingHours: body.openingHours || null,
     },
   })
 

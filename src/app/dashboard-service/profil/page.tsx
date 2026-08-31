@@ -12,6 +12,7 @@ export default async function ServiceProfilPage() {
 
   const provider = await prisma.serviceProvider.findUnique({
     where: { userId: session.user.id },
+    include: { media: { select: { id: true, url: true }, orderBy: { sortOrder: 'asc' } } },
   })
   if (!provider) redirect('/')
 
@@ -34,7 +35,8 @@ export default async function ServiceProfilPage() {
             state: provider.state ?? '',
             phone: provider.phone ?? '',
             website: provider.website ?? '',
-          }} />
+            openingHours: provider.openingHours ?? '',
+          }} images={provider.media} />
         </div>
       </main>
     </>
