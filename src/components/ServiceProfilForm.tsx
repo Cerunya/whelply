@@ -45,6 +45,9 @@ type Props = {
     street: string; zip: string; city: string; state: string
     phone: string; website: string; openingHours: string; paymentMethods: string
     logoUrl: string
+    pageCardColor: string; pageTextColor: string; pageHeadingColor: string
+    pageBgColor: string; pageBgFixed: boolean
+    bgUrl: string | null
   }
   images?: { id: string; url: string }[]
 }
@@ -61,7 +64,14 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
     state: provider.state,
     phone: provider.phone,
     website: provider.website,
+    pageCardColor: provider.pageCardColor,
+    pageTextColor: provider.pageTextColor,
+    pageHeadingColor: provider.pageHeadingColor,
+    pageBgColor: provider.pageBgColor,
+    pageBgFixed: provider.pageBgFixed,
   })
+  const [bgUrl, setBgUrl] = useState(provider.bgUrl)
+  const [bgUploading, setBgUploading] = useState(false)
   const [hours, setHours] = useState<OpeningHours>(parseHours(provider.openingHours))
   const [payments, setPayments] = useState<string[]>(provider.paymentMethods ? provider.paymentMethods.split(',').map((s) => s.trim()).filter(Boolean) : [])
   const [logoUrl, setLogoUrl] = useState(provider.logoUrl)
@@ -266,6 +276,79 @@ export default function ServiceProfilForm({ provider, images: initialImages = []
               {method.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Seitendesign */}
+      <div className="bg-white rounded-2xl border border-cream-deep p-6 space-y-5">
+        <h2 className="font-serif text-lg font-bold text-stone-900">Seitendesign</h2>
+
+        {/* Hintergrundbild */}
+        <div>
+          <p className="text-sm font-semibold text-stone-700 mb-2">Hintergrundbild</p>
+          <p className="text-xs text-stone-400 mb-3">Wird als großer Hintergrund auf deiner öffentlichen Seite angezeigt. Querformat empfohlen, min. 1920px breit.</p>
+          {bgUrl ? (
+            <div className="relative rounded-xl overflow-hidden" style={{ height: '160px' }}>
+              <img src={bgUrl} alt="Hintergrund" className="w-full h-full object-cover" />
+              <button type="button" onClick={() => setBgUrl(null)}
+                className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">✕</button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => {
+              const input = document.createElement('input')
+              input.type = 'file'
+              input.accept = 'image/*'
+              input.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0]
+                if (!file) return
+                setBgUploading(true)
+                try {
+                  const data = await uploadImage(file, 'bg')
+                  if (data.url) setBgUrl(data.url)
+                } catch {}
+                setBgUploading(false)
+              }
+              input.click()
+            }} disabled={bgUploading}
+              className="w-full h-32 rounded-xl border-2 border-dashed border-stone-200 flex items-center justify-center text-stone-400 hover:border-forest/40 hover:text-forest transition-colors">
+              {bgUploading ? 'Wird hochgeladen...' : '+ Hintergrundbild hochladen'}
+            </button>
+          )}
+        </div>
+
+        {/* Farbschema */}
+        <div>
+          <p className="text-sm font-semibold text-stone-700 mb-2">Farbschema</p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Seite</label>
+              <input type="color" name="pageBgColor" value={form.pageBgColor} onChange={handleChange}
+                className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Container</label>
+              <input type="color" name="pageCardColor" value={form.pageCardColor} onChange={handleChange}
+                className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Text</label>
+              <input type="color" name="pageTextColor" value={form.pageTextColor} onChange={handleChange}
+                className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Titel</label>
+              <input type="color" name="pageHeadingColor" value={form.pageHeadingColor} onChange={handleChange}
+                className="w-full h-10 rounded-lg border border-stone-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-xs text-stone-500 mb-1">Bild</label>
+              <select name="pageBgFixed" value={form.pageBgFixed ? 'fixed' : 'scroll'} onChange={(e) => setForm({ ...form, pageBgFixed: e.target.value === 'fixed' })}
+                className="w-full h-10 rounded-lg border border-stone-200 px-2 text-sm">
+                <option value="fixed">Fixiert</option>
+                <option value="scroll">Scrollt mit</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 

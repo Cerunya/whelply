@@ -12,7 +12,7 @@ export default async function ServiceProfilPage() {
 
   const provider = await prisma.serviceProvider.findUnique({
     where: { userId: session.user.id },
-    include: { media: { select: { id: true, url: true }, orderBy: { sortOrder: 'asc' } } },
+    include: { media: { select: { id: true, url: true, purpose: true }, orderBy: { sortOrder: 'asc' } } },
   })
   if (!provider) redirect('/')
 
@@ -38,7 +38,13 @@ export default async function ServiceProfilPage() {
             openingHours: (provider as any).openingHours ?? '',
             paymentMethods: (provider as any).paymentMethods ?? '',
             logoUrl: (provider as any).logoUrl ?? '',
-          }} images={provider.media} />
+            pageCardColor: (provider as any).pageCardColor ?? '#ffffff',
+            pageTextColor: (provider as any).pageTextColor ?? '#44403c',
+            pageHeadingColor: (provider as any).pageHeadingColor ?? '#1c1917',
+            pageBgColor: (provider as any).pageBgColor ?? '#1e3a2f',
+            pageBgFixed: (provider as any).pageBgFixed !== false,
+            bgUrl: provider.media.find((m) => m.purpose === 'bg')?.url ?? null,
+          }} images={provider.media.filter((m) => m.purpose !== 'bg')} />
         </div>
       </main>
     </>

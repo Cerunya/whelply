@@ -26,6 +26,11 @@ export async function PATCH(req: NextRequest) {
       website: body.website?.slice(0, 200) || null,
       openingHours: body.openingHours || null,
       paymentMethods: body.paymentMethods || null,
+      pageCardColor: body.pageCardColor || null,
+      pageTextColor: body.pageTextColor || null,
+      pageHeadingColor: body.pageHeadingColor || null,
+      pageBgColor: body.pageBgColor || null,
+      pageBgFixed: typeof body.pageBgFixed === 'boolean' ? body.pageBgFixed : true,
     },
   })
 
