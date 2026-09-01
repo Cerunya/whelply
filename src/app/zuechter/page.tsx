@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import ListingFilter from '@/components/ListingFilter'
+import WelpenFilter from '@/components/WelpenFilter'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -14,12 +14,17 @@ export const dynamic = 'force-dynamic'
 export default async function ZuechterVerzeichnisPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; bundesland?: string }
+  searchParams: { rasse?: string; region?: string; ort?: string; radius?: string }
 }) {
+  const allBreeds = await prisma.breed.findMany({
+    select: { id: true, nameDe: true, slug: true },
+    orderBy: { nameDe: 'asc' },
+  })
+
   const breeders = await prisma.breederProfile.findMany({
     include: {
       dogs: {
-        include: { breed: { select: { nameDe: true } } },
+        include: { breed: { select: { nameDe: true, slug: true } } },
         take: 1,
       },
       media: {
@@ -34,7 +39,7 @@ export default async function ZuechterVerzeichnisPage({
       },
       listings: {
         where: { status: 'available', type: 'puppy' },
-        select: { id: true, breed: { select: { nameDe: true } } },
+        select: { id: true, breed: { select: { nameDe: true, slug: true } } },
       },
       litters: {
         where: { status: { in: ['planned', 'pregnant'] } },
@@ -51,25 +56,25 @@ export default async function ZuechterVerzeichnisPage({
     .filter((b) => b.isActive !== false && new Date(b.createdAt) > thirtyDaysAgo)
     .slice(0, 10)
 
-  // Eindeutige Rassen über alle Inserate sammeln (für Filter)
-  const allBreeds = new Set<string>()
-  breeders.forEach((b) => b.listings.forEach((l) => allBreeds.add(l.breed.nameDe)))
-  const breedOptions = Array.from(allBreeds).sort()
-
-  const states = Array.from(
-    new Set(breeders.map((b) => b.state).filter(Boolean))
-  ).sort() as string[]
-
   // Filtern
-  // Inaktive Züchter komplett ausblenden
   let filtered = breeders.filter((b) => b.isActive !== false)
   if (searchParams.rasse) {
-    filtered = filtered.filter((b) =>
-      b.listings.some((l) => l.breed.nameDe === searchParams.rasse)
-    )
+    const selectedBreed = allBreeds.find((b) => b.slug === searchParams.rasse)
+    if (selectedBreed) {
+      filtered = filtered.filter((b) =>
+        b.dogs.some((d) => d.breed.slug === searchParams.rasse) ||
+        b.listings.some((l) => l.breed.slug === searchParams.rasse)
+      )
+    }
   }
-  if (searchParams.bundesland) {
-    filtered = filtered.filter((b) => b.state === searchParams.bundesland)
+  if (searchParams.region) {
+    filtered = filtered.filter((b) => b.state === searchParams.region)
+  }
+  if (searchParams.ort) {
+    const ort = searchParams.ort.toLowerCase()
+    filtered = filtered.filter((b) =>
+      (b.zip && b.zip.startsWith(ort)) || (b.city && b.city.toLowerCase().includes(ort))
+    )
   }
 
   return (
@@ -90,13 +95,7 @@ export default async function ZuechterVerzeichnisPage({
         <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
             <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
-              <ListingFilter
-                basePath="/zuechter"
-                filters={[
-                  { key: 'rasse', placeholder: 'Alle Rassen', options: breedOptions.map((b) => ({ value: b, label: b })) },
-                  { key: 'bundesland', placeholder: 'Alle Bundesländer', options: states.map((s) => ({ value: s, label: s })) },
-                ]}
-              />
+              <WelpenFilter breeds={allBreeds} basePath="/zuechter" />
             </Suspense>
             <p className="text-xs text-stone-400 flex-shrink-0">{filtered.length} Züchter</p>
           </div>

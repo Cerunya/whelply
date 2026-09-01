@@ -3,7 +3,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import ListingFilter from '@/components/ListingFilter'
+import WelpenFilter from '@/components/WelpenFilter'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export default async function ZuchtrudenPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; ort?: string; radius?: string }
+  searchParams: { rasse?: string; ort?: string; radius?: string; region?: string }
 }) {
   // Umkreissuche
   let radiusFilter: any = {}
@@ -35,6 +35,7 @@ export default async function ZuchtrudenPage({
       isStud: true,
       breeder: {
         isActive: true,
+        ...(searchParams.region ? { state: searchParams.region } : {}),
         ...(searchParams.ort && !radiusKm ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
         ...radiusFilter,
       },
@@ -48,9 +49,9 @@ export default async function ZuchtrudenPage({
     orderBy: [{ isStud: 'desc' }, { createdAt: 'desc' }],
   })
 
-  const breedOptions = Array.from(
+  const breeds = Array.from(
     new Map(dogs.map((d) => [d.breed.slug, d.breed.nameDe])).entries()
-  ).sort((a, b) => a[1].localeCompare(b[1]))
+  ).map(([slug, nameDe]) => ({ id: slug, nameDe, slug })).sort((a, b) => a.nameDe.localeCompare(b.nameDe))
 
   function calcAge(birthDate: Date | null) {
     if (!birthDate) return null
@@ -76,12 +77,7 @@ export default async function ZuchtrudenPage({
         <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
             <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
-              <ListingFilter
-                basePath="/zuchtrueden"
-                filters={[
-                  { key: 'rasse', placeholder: 'Alle Rassen', options: breedOptions.map(([slug, name]) => ({ value: slug, label: name })) },
-                ]}
-              />
+              <WelpenFilter breeds={breeds} basePath="/zuchtrueden" />
             </Suspense>
             <p className="text-xs text-stone-400 flex-shrink-0">{dogs.length} {dogs.length === 1 ? 'Deckrüde' : 'Deckrüden'}</p>
           </div>

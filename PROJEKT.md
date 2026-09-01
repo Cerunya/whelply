@@ -1,6 +1,6 @@
 # Whelply.de — Projektgedächtnis
 <!-- Diese Datei am Anfang jeder neuen Claude-Konversation einfügen -->
-<!-- Letzte Aktualisierung: 2026-07-28 -->
+<!-- Letzte Aktualisierung: 2026-08-08 -->
 
 ## Was wir bauen
 Deutsche Rassehunde-Plattform. Nur FCI-anerkannte Rassen. Kein Tierschutz, keine Mischlinge, keine Designerrassen (Maltipoo etc.). Inspiriert von chiens-de-france.com, aber moderner, mit KI-Features, und mit klarem Fokus auf seriöse VDH-Züchter.
@@ -1287,6 +1287,140 @@ diditCheckedAt           DateTime? @map("didit_checked_at")
 
 ---
 
+### ✅ SEO-Slugs, Mediathek, Standortkarte & Pflichtseiten (2026-08-05)
+
+#### SEO-freundliche URLs für Inserate
+- **`src/lib/listing-slug.ts`**: Slug-Generator — Format: `{titel}-an{nummer}` (z.B. `kruemel-an42`)
+- **`listings`-Tabelle**: Neue Felder `slug` (unique) + `listing_number` (auto-increment)
+- **Inserate-API**: Generiert Slug automatisch bei Erstellung
+- **Welpen-Detailseite**: Akzeptiert Slug oder ID (Regex `^c[a-z0-9]{20,}$` unterscheidet)
+- **ListingCard**: Nutzt `slug || id` in allen Links
+- **Alle Seiten**: Frontpage, Welpen, Hunde — übergeben `slug` an ListingCard
+
+#### SEO-freundliche URLs für Zuchthunde
+- **`dogs`-Tabelle**: Neue Felder `slug` (unique) + `dog_number` (auto-increment)
+- **Format**: `{name}-zr{nummer}` (z.B. `fussel-zr1`)
+- **Hund-Detailseite** (`/hund/[id]`): Akzeptiert Slug oder ID
+- **Züchter-Hundseite** (`/zuechter/[slug]/hund/[id]`): Akzeptiert Slug oder ID
+- **Alle Links aktualisiert**: Zuchtrueden-Übersicht, Zuchthunde-Seite, Wurfseite (Eltern + Welpen), Stammbaum (Eltern + Großeltern, Desktop + Mobil), Welpen-Detailseite (Eltern + Geschwister)
+- **Dashboard-Links bleiben als ID** (intern)
+
+#### Mediathek (Admin-only)
+- **`/admin/mediathek`**: Bilder und PDFs für Ratgeber hochladen, verwalten, URLs kopieren
+- **`/api/admin/mediathek`**: Upload (Sharp-Kompression), Liste, Löschen
+- **`MediathekClient.tsx`**: Grid-Ansicht, Drag&Drop, "URL kopieren", "Markdown kopieren", Löschen
+- **RichEditor**: Upload nutzt Mediathek-API → Bilder erscheinen automatisch in der Mediathek
+- **Bild aus URL einfügen**: Neuer Toolbar-Button, fragt nach URL + optionaler Bildunterschrift
+- **Bildunterschriften**: `![alt](url "Unterschrift")` → `<figure>` mit `<figcaption>`
+- **Caption bearbeiten**: ✎-Button auf Bild-Thumbnails im Editor
+
+#### Sidebar-Produkt pro Artikel
+- **`articles`-Tabelle**: Neues Feld `sidebar_product_id`
+- **ArtikelEditor**: Dropdown zur Produktauswahl, Fallback auf zufällig
+- **Sidebar**: Im Artikel eingebundene Produkte (`:::produkt[ASIN]`) werden von zufälliger Auswahl ausgeschlossen
+
+#### Standortkarte & PLZ/Ort-Suche
+- **`src/lib/geocode.ts`**: Nominatim-Geocoding (kostenlos, kein API-Key)
+- **`src/components/LocationMap.tsx`**: Leaflet + OpenStreetMap Karte mit 2km-Kreis (Datenschutz)
+- **`src/components/LocationSearch.tsx`**: PLZ/Ort-Suchfeld mit Debounce
+- **`breeder_profiles`-Tabelle**: Neue Felder `latitude`, `longitude`
+- **Profil-API**: Auto-Geocoding bei Adressänderung
+- **Welpen-Detailseite**: Karte mit ungefährem Züchter-Standort
+- **WelpenFilter**: PLZ/Ort-Suchfeld hinzugefügt (sucht nach PLZ-Prefix oder Stadtname)
+- **Leaflet**: Nur `leaflet` Paket, KEIN `react-leaflet` (Kompatibilitätsprobleme mit React 18)
+- **Dynamic Import**: `nextDynamic` statt `dynamic` (Namenskollision mit `export const dynamic`)
+
+#### Pflichtseiten
+- **`/impressum`**: §5 DDG, Manuel Lorenz, Klosterstr. 21, 94072 Bad Füssing
+- **`/datenschutz`**: DSGVO-konform — Server-Logs, Registrierung, Didit, Dokumentenprüfung, Amazon Affiliate, Cookies, Self-Hosting, Betroffenenrechte
+- **`/agb`**: Geltungsbereich, Züchter-/Welpensucher-Pflichten, Verifizierung, Haftung, Kündigung
+- **Cookie-Banner**: `CookieBanner.tsx` (dark, fixiert unten, "Alle akzeptieren" / "Nur notwendige"), Cookie 1 Jahr gültig
+- **`CookieSettingsButton.tsx`**: Client-Wrapper für Footer (Server Component kompatibel)
+- **Footer**: "Cookie-Einstellungen" Link, öffnet Banner erneut
+
+#### Badges-Seite
+- **`/badges`**: Erklärt alle 6 Badges (ID geprüft, Zucht verifiziert, Ahnentafel, Geimpft, Entwurmt, Gechipt)
+- **`robots: noindex`** — nur via Klick auf Badges erreichbar
+- **Alle Badges klickbar**: `<span>` → `<a href="/badges#id">` mit Hover-Effekt
+- **`/badges` in skipRewrite** (Middleware)
+
+#### Artikel-Rendering Fixes
+- **Aufzählungslisten**: `list-inside` → `list-outside` mit `pl-6` (korrekte Einrückung)
+- **Bullet `•`**: Werden jetzt zu `- ` konvertiert → echte `<ul><li>` mit CSS-Bullets
+- **Artikel-Container**: `gap-6` → `gap-3` mit `[&>*]:!mb-0 [&>*]:!mt-0` + spezifische Overrides für h2/h3/figure/hr/ol/ul
+- **Figure-Margin**: `mt-6` ohne Bottom-Margin (Gap reicht)
+
+#### UI-Fixes
+- **Dashboard Verifizierung**: 🪪 + 📄 Icons mit Text, grau für offen, grün für verifiziert
+- **Profil "ID ausstehend"**: Rot statt blass-grün
+- **"Profil bearbeiten" → "Profil"**: Überall umbenannt
+- **Frontpage**: `overflow-hidden` → `overflow-visible` (Breed-Search Dropdown Fix)
+- **BreedSearch überall**: ListingFilter erkennt `key === 'rasse'` automatisch → durchsuchbar auf Deckrüden + Züchter
+
+---
+
+### ✅ Dynamische Kategorien (2026-08-06)
+
+- **`article_categories`-Tabelle**: Dynamische Kategorien für Ratgeber-Artikel (slug, name, sortOrder)
+- **Admin-Seite `/admin/kategorien`**: Kategorien anlegen/löschen, Auto-Slug-Generierung
+- **`KategorienManager.tsx`**: Client-Komponente für CRUD
+- **`/api/admin/kategorien`**: GET/POST/DELETE
+- **ArtikelEditor**: Kategorie-Dropdown lädt dynamisch aus DB (Fallback auf hardcoded)
+- **Ratgeber-Übersicht**: Tabs dynamisch aus `article_categories`, mit Artikel-Zähler
+- **7 Standard-Kategorien**: Ratgeber, Rassen, News, Gesundheit, Ernährung, Erziehung, Pflege
+
+---
+
+### ✅ Dienstleister-System (2026-08-08)
+
+#### Registrierung & Login
+- **Registrierung**: Dienstleister-Felder (Firmenname + Kategorie Pflicht) bei Rolle `service`
+- **API**: Erstellt `ServiceProvider` Profil in gleicher Transaktion wie User
+- **Login-Redirect**: `/dashboard` prüft Rolle → `service` wird auf `/dashboard-service` redirected
+
+#### Dienstleister-Dashboard
+- **`/dashboard-service`**: Übersicht mit Profil-Status, Links zu Profil + öffentlicher Seite
+- **`/dashboard-service/profil`**: Vollständige Profil-Bearbeitung
+
+#### Profil-Bearbeitung (`ServiceProfilForm.tsx`)
+- **Allgemein**: Name, Kategorie (5 Optionen), Beschreibung
+- **Adresse & Kontakt**: Straße, PLZ, Ort, Bundesland, Telefon, Website
+- **Logo-Upload**: Über `/api/service-upload` (400px, WebP), wird auf Übersicht + Detail angezeigt
+- **Öffnungszeiten**: Strukturiert pro Tag (Checkbox + 2 Zeitslots: Vormittag/Nachmittag für Mittagspause), Feiertage-Freitextfeld
+- **Zahlungsarten**: 4 Toggle-Buttons (💵 Bargeld, 💳 EC-Karte, 💳 Kreditkarte, 🅿️ PayPal)
+- **Preise**: Freitextfeld
+- **Galerie-Bilder**: Max. 6 Bilder über `/api/service-upload`, Grid mit Löschen
+- **Seitendesign**: Hintergrundbild-Upload (2400px), 6 Color-Picker (Seite, Container, Text, Titel, Kontakt, Bild fixiert/scrollend)
+
+#### Upload-Route (`/api/service-upload`)
+- **Eigene Route** für Dienstleister (alte `/api/upload` ist Züchter-only)
+- Unterscheidet `purpose`: `logo` (400px), `bg` (2400px, ersetzt altes), `gallery` (1200px)
+- Sharp WebP-Kompression
+
+#### Öffentliche Detailseite (`/dienste/[id]`)
+- **Anpassbares Design** wie Deckrüden: Hintergrundbild + Farbschema (Seite, Container, Text, Titel, Kontakt)
+- **Logo** im Header neben Name + Kategorie-Badge
+- **Galerie** mit Lightbox (`ServiceGallery.tsx`): Klick → Fullscreen-Overlay, Vor/Zurück, Zähler
+- **Öffnungszeiten**: Strukturierte Tabelle mit 2 Zeitslots + Feiertage in gleicher Box
+- **Offen/Geschlossen** (`OpenStatus.tsx`): Über Kontaktbox, prüft aktuelle Uhrzeit gegen Öffnungszeiten (beide Zeitslots), aktualisiert jede Minute
+- **Preise**: Eigener Block mit beigem Hintergrund
+- **Zahlungsarten**: Pill-Cards mit Icons
+- **Kontakt-Sidebar**: Anpassbare Farbe, Adresse, Telefon, Website-Button
+- **Standort-Karte**: Leaflet mit Geocoding
+- **Social Sharing**: Facebook, X/Twitter, WhatsApp — mit OG Meta-Tags (og:title, og:description, og:image, twitter:card)
+
+#### Übersichtsseite (`/dienste`)
+- Karten klickbar → Link zu Detailseite
+- Logo neben Name in Karten
+- Kategorie-Filter-Tabs
+
+#### DB-Felder (Migration manuell)
+```sql
+psql -U whelply -d whelply -c "ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS opening_hours TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS payment_methods TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS logo_url TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS page_card_color TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS page_text_color TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS page_heading_color TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS page_bg_color TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS page_bg_fixed BOOLEAN DEFAULT true; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS page_contact_color TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS holiday_hours TEXT; ALTER TABLE service_providers ADD COLUMN IF NOT EXISTS pricing_info TEXT;"
+```
+
+---
+
 ### 📁 DATEIPFADE — Wohin die Dateien müssen
 
 Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Output entspricht 1:1 der im Projekt.
@@ -1301,6 +1435,8 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `BreederNavbar.tsx`
 - `ThemeEditor.tsx`
 - `HundEditForm.tsx`
+- `WurfForm.tsx`
+- `ArtikelEditor.tsx`
 - `DogGalleryUploader.tsx`
 - `DogPhotoGrid.tsx`
 - `DogBgUploader.tsx`
@@ -1309,40 +1445,74 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `ConversationView.tsx`
 - `KontaktForm.tsx`
 - `WelpenAlertButton.tsx`
+- `WelpenFilter.tsx`
+- `ListingFilter.tsx`
+- `BreedSearch.tsx`
+- `LocationSearch.tsx`
+- `LocationMap.tsx`
 - `DashboardHeader.tsx`
 - `ListingImageGallery.tsx`
+- `ListingCard.tsx`
 - `VerifizierungSection.tsx`
 - `VerifizierungAdmin.tsx`
+- `MediathekClient.tsx`
 - `AdminDashboard.tsx`
+- `CookieBanner.tsx`
+- `CookieSettingsButton.tsx`
+- `SearchForm.tsx`
+- `RichEditor.tsx`
+- `ProfilForm.tsx`
+- `KategorienManager.tsx`
+- `ServiceProfilForm.tsx`
+- `ServiceGallery.tsx`
+- `OpenStatus.tsx`
 
 #### Seiten → `src/app/...`
 - `src/app/page.tsx` — Homepage
+- `src/app/layout.tsx` — Root Layout (mit CookieBanner)
 - `src/app/zuchtrueden/page.tsx` — Deckrüden-Übersicht
 - `src/app/zuechter/page.tsx` — Züchterverzeichnis
-- `src/app/hund/[id]/page.tsx` — Deckrüden-Detailseite (öffentlich, mit Züchter-Kontaktkarte)
+- `src/app/hund/[id]/page.tsx` — Deckrüden-Detailseite (Slug oder ID, Züchter-Kontaktkarte)
 - `src/app/hunde/page.tsx` — Erwachsene Hunde Übersicht
-- `src/app/welpen/page.tsx` — Welpen-Übersicht
-- `src/app/welpen/[id]/page.tsx` — Welpen-Detailseite
+- `src/app/welpen/page.tsx` — Welpen-Übersicht (mit PLZ/Ort-Suche)
+- `src/app/welpen/[id]/page.tsx` — Welpen-Detailseite (Slug oder ID, mit Standortkarte)
 - `src/app/(auth)/register/page.tsx` — Registrierung (mit Verband-Pflichtfeld)
 - `src/app/admin/verifizierung/page.tsx` — Admin: Verifizierungen prüfen
+- `src/app/admin/mediathek/page.tsx` — Admin: Mediathek
+- `src/app/admin/artikel/[id]/page.tsx` — Admin: Artikel bearbeiten (mit Sidebar-Produkt)
 - `src/app/dashboard/page.tsx` — Züchter-Dashboard
 - `src/app/dashboard/profil/page.tsx` — Züchter-Profil mit Verifizierung
-- `src/app/zuechter/[slug]/page.tsx` — Züchter-Hauptseite
-- `src/app/zuechter/[slug]/zuchthunde/page.tsx` — Unsere Hunde
-- `src/app/zuechter/[slug]/hund/[id]/page.tsx` — Hund-Detail im Züchter-Layout
-- `src/app/zuechter/[slug]/kontakt/page.tsx` — Kontaktformular
-- `src/app/ratgeber/[slug]/page.tsx` — Ratgeber-Artikel mit Sidebar
-- `src/app/dashboard/page.tsx` — Züchter-Dashboard
 - `src/app/dashboard/hund/[id]/page.tsx` — Hund bearbeiten
+- `src/app/dashboard/hund-eintragen/page.tsx` — Hund anlegen
+- `src/app/dashboard/wurf-eintragen/page.tsx` — Wurf anlegen
+- `src/app/dashboard/wurf/[id]/page.tsx` — Wurf bearbeiten
 - `src/app/dashboard/theme/page.tsx` — Theme-Editor
 - `src/app/dashboard/nachrichten/page.tsx` — Posteingang
 - `src/app/dashboard/nachrichten/[id]/page.tsx` — Einzelne Konversation
+- `src/app/zuechter/[slug]/page.tsx` — Züchter-Hauptseite
+- `src/app/zuechter/[slug]/zuchthunde/page.tsx` — Unsere Hunde
+- `src/app/zuechter/[slug]/hund/[id]/page.tsx` — Hund-Detail im Züchter-Layout (Slug oder ID)
+- `src/app/zuechter/[slug]/wuerfe/[litterId]/page.tsx` — Wurf-Detail
+- `src/app/zuechter/[slug]/kontakt/page.tsx` — Kontaktformular
+- `src/app/ratgeber/page.tsx` — Ratgeber-Übersicht mit dynamischen Kategorie-Tabs
+- `src/app/ratgeber/[slug]/page.tsx` — Ratgeber-Artikel mit Sidebar
+- `src/app/impressum/page.tsx` — Impressum
+- `src/app/datenschutz/page.tsx` — Datenschutzerklärung
+- `src/app/agb/page.tsx` — AGB
+- `src/app/badges/page.tsx` — Badge-Erklärungen (noindex)
+- `src/app/inserate/[id]/page.tsx` — Inserat-Detail (erwachsene Hunde)
+- `src/app/dienste/page.tsx` — Dienstleister-Übersicht
+- `src/app/dienste/[id]/page.tsx` — Dienstleister-Detail (anpassbares Design)
+- `src/app/dashboard-service/page.tsx` — Dienstleister-Dashboard
+- `src/app/dashboard-service/profil/page.tsx` — Dienstleister-Profil bearbeiten
+- `src/app/admin/kategorien/page.tsx` — Admin: Artikel-Kategorien verwalten
 
 #### API-Routen → `src/app/api/...`
 - `src/app/api/hunde/[id]/route.ts` — Hund CRUD
-- `src/app/api/media-item/[id]/route.ts` — Media PATCH/DELETE (isPrimary, purpose)
-- `src/app/api/upload/route.ts` — Bild-Upload mit Sharp-Kompression (WebP, Resize)
-- `src/app/api/profil/route.ts` — Züchter-Profil + Theme
+- `src/app/api/inserate/route.ts` — Inserat erstellen (mit Slug-Generierung)
+- `src/app/api/media-item/[id]/route.ts` — Media PATCH/DELETE
+- `src/app/api/upload/route.ts` — Bild-Upload mit Sharp-Kompression
+- `src/app/api/profil/route.ts` — Züchter-Profil + Auto-Geocoding
 - `src/app/api/messages/route.ts` — Nachrichten
 - `src/app/api/messages/[id]/route.ts` — Konversation
 - `src/app/api/welpen-alert/route.ts` — Welpen-Alerts
@@ -1352,17 +1522,24 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/app/api/verifizierung/didit/route.ts` — Didit Session + Status-Check
 - `src/app/api/verifizierung/didit-webhook/route.ts` — Didit Webhook-Handler
 - `src/app/api/admin/verifizierung/[id]/route.ts` — Admin: Approve/Reject
+- `src/app/api/admin/mediathek/route.ts` — Admin: Mediathek CRUD
+- `src/app/api/admin/kategorien/route.ts` — Admin: Artikel-Kategorien CRUD
+- `src/app/api/admin/geocode-all/route.ts` — Admin: Alle Züchter geocoden (einmalig)
+- `src/app/api/service-profil/route.ts` — Dienstleister-Profil PATCH
+- `src/app/api/service-upload/route.ts` — Dienstleister-Bilder Upload (Logo/BG/Galerie)
 
 #### Sonstiges
+- `src/middleware.ts` — Subdomain-Rewrite (skipRewrite-Liste inkl. /badges)
 - `src/app/actions/auth.ts` — Server Action signOutAction
 - `src/lib/mail-alerts.ts` — Welpen-Alert E-Mail-Versand
 - `src/lib/subdomain.ts` — Subdomain-Validierung, Reserved-Liste, Canonical-URL-Helper
-- `src/lib/breeder-metadata.ts` — generateBreederMetadata für Canonical-Tags auf Züchterseiten
-- `src/lib/render-markdown.ts` — Markdown→HTML mit Boxen (tipp/info/warnung/fazit/box), Produkt-Karten, renderBoxContent()
+- `src/lib/breeder-metadata.ts` — generateBreederMetadata für Canonical-Tags
+- `src/lib/render-markdown.ts` — Markdown→HTML Renderer
 - `src/lib/verbaende.ts` — Shared VERBAENDE-Liste (28 Vereine)
 - `src/lib/didit.ts` — Didit Identity Verification API-Helper
+- `src/lib/geocode.ts` — Nominatim Geocoding + Haversine-Distanz
+- `src/lib/listing-slug.ts` — SEO-Slug-Generator für Inserate
 - `prisma/schema.prisma` — Datenbankschema
-- `prisma/migrations/` — Migrationen (SQL ausführen + resolve)
 - `.gitignore`
 
 ---

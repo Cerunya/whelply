@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { Suspense } from 'react'
+import DiensteSuche from '@/components/DiensteSuche'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -18,10 +20,30 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default async function DienstePage({
   searchParams,
 }: {
-  searchParams: { kategorie?: string }
+  searchParams: { kategorie?: string; ort?: string; region?: string; radius?: string }
 }) {
+  // Umkreissuche
+  let radiusFilter: any = {}
+  const radiusKm = Number(searchParams.radius) || 0
+  if (searchParams.ort && radiusKm > 0) {
+    const { geocodeAddress } = await import('@/lib/geocode')
+    const coords = await geocodeAddress({ zip: searchParams.ort, city: searchParams.ort })
+    if (coords) {
+      const delta = radiusKm / 111
+      radiusFilter = {
+        lat: { gte: coords.lat - delta, lte: coords.lat + delta },
+        lng: { gte: coords.lng - delta, lte: coords.lng + delta },
+      }
+    }
+  }
+
   const providers = await prisma.serviceProvider.findMany({
-    where: searchParams.kategorie ? { category: searchParams.kategorie as any } : undefined,
+    where: {
+      ...(searchParams.kategorie ? { category: searchParams.kategorie as any } : {}),
+      ...(searchParams.region ? { state: searchParams.region } : {}),
+      ...(searchParams.ort && !radiusKm ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+      ...radiusFilter,
+    },
     orderBy: [{ isPremium: 'desc' }, { createdAt: 'desc' }],
   })
 
@@ -68,6 +90,13 @@ export default async function DienstePage({
                 {label}
               </a>
             ))}
+          </div>
+
+          {/* Standortsuche */}
+          <div className="flex flex-wrap gap-3 items-center mb-6">
+            <Suspense fallback={null}>
+              <DiensteSuche />
+            </Suspense>
           </div>
 
           {providers.length === 0 ? (
