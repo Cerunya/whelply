@@ -34,7 +34,7 @@ export default function DiensteSuche() {
   }
 
   return (
-    <>
+    <div className="flex flex-wrap gap-3 items-center">
       <select
         value={currentKategorie}
         onChange={(e) => update('kategorie', e.target.value)}
@@ -74,6 +74,6 @@ export default function DiensteSuche() {
           Filter zurücksetzen ×
         </button>
       )}
-    </>
+    </div>
   )
 }
