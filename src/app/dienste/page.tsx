@@ -47,8 +47,6 @@ export default async function DienstePage({
     orderBy: [{ isPremium: 'desc' }, { createdAt: 'desc' }],
   })
 
-  const categories = Object.entries(CATEGORY_LABELS)
-
   return (
     <>
       <Navbar />
@@ -64,41 +62,18 @@ export default async function DienstePage({
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto px-4 py-10">
-          {/* Kategorie-Filter */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            <a
-              href="/dienste"
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                !searchParams.kategorie
-                  ? 'bg-forest text-white'
-                  : 'bg-white border border-cream-deep text-stone-600 hover:border-forest/30'
-              }`}
-            >
-              Alle
-            </a>
-            {categories.map(([key, label]) => (
-              <a
-                key={key}
-                href={`/dienste?kategorie=${key}`}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  searchParams.kategorie === key
-                    ? 'bg-forest text-white'
-                    : 'bg-white border border-cream-deep text-stone-600 hover:border-forest/30'
-                }`}
-              >
-                {label}
-              </a>
-            ))}
-          </div>
-
-          {/* Standortsuche */}
-          <div className="flex flex-wrap gap-3 items-center mb-6">
-            <Suspense fallback={null}>
+        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
+          <div className="max-w-5xl mx-auto flex flex-wrap gap-3 items-center justify-between">
+            <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
               <DiensteSuche />
             </Suspense>
+            <span className="text-sm text-stone-400">
+              {providers.length} {providers.length === 1 ? 'Eintrag' : 'Einträge'}
+            </span>
           </div>
+        </div>
 
+        <div className="max-w-5xl mx-auto px-4 py-10">
           {providers.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-cream-deep">
               <svg className="w-12 h-12 mx-auto text-stone-200 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
