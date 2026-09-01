@@ -11,7 +11,7 @@ const BUNDESLAENDER = [
   'Sachsen-Anhalt', 'Schleswig-Holstein', 'Thüringen',
 ]
 
-type Breed = { id: number; nameDe: string; slug: string }
+type Breed = { id: number | string; nameDe: string; slug: string }
 
 export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds: Breed[]; basePath?: string }) {
   const router = useRouter()
