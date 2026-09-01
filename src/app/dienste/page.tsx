@@ -52,7 +52,7 @@ export default async function DienstePage({
       <Navbar />
       <main className="min-h-screen bg-cream">
         <section className="bg-forest px-4 py-12">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h1 className="font-serif text-3xl font-bold text-white mb-2">
               Dienstleister rund um den Hund
             </h1>
@@ -63,7 +63,7 @@ export default async function DienstePage({
         </section>
 
         <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
-          <div className="max-w-5xl mx-auto flex flex-wrap gap-3 items-center justify-between">
+          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
             <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
               <DiensteSuche />
             </Suspense>
@@ -73,7 +73,7 @@ export default async function DienstePage({
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="max-w-6xl mx-auto px-4 py-10">
           {providers.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-cream-deep">
               <svg className="w-12 h-12 mx-auto text-stone-200 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
