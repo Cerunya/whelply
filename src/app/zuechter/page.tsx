@@ -207,7 +207,7 @@ export default async function ZuechterVerzeichnisPage({
           )}
 
           {/* Zuletzt eingetragene Züchter — ganz unten */}
-          {newestBreeders.length > 0 && !searchParams.rasse && !searchParams.bundesland && (
+          {newestBreeders.length > 0 && !searchParams.rasse && !searchParams.region && (
             <div className="mt-16 pt-10 border-t border-cream-deep">
               <h2 className="font-serif text-xl font-bold text-stone-900 mb-6">Zuletzt eingetragene Züchter</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
