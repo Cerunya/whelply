@@ -5,6 +5,7 @@ import ListingCard from '@/components/ListingCard'
 import WelpenFilter from '@/components/WelpenFilter'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { BOOST_MAX_SLOTS } from '@/lib/boost'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -35,9 +36,30 @@ export default async function HundePage({
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
   }
 
+  const now = new Date()
+
+  // ── Empfohlen-Bereich (geboostete Inserate) ─────────────────────
+  const boosted = await prisma.listing.findMany({
+    where: { ...where, boostExpiresAt: { gt: now } },
+    orderBy: [{ boostImpressions: 'asc' }, { boostExpiresAt: 'asc' }],
+    take: BOOST_MAX_SLOTS,
+    include: {
+      breed: { select: { nameDe: true } },
+      breeder: { select: { kennelName: true, city: true, state: true } },
+      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+    },
+  }).catch(() => [])
+  const boostedIds = boosted.map((l) => l.id)
+  if (boostedIds.length > 0) {
+    prisma.listing.updateMany({
+      where: { id: { in: boostedIds } },
+      data: { boostImpressions: { increment: 1 } },
+    }).catch(() => {})
+  }
+
   const [listings, total] = await Promise.all([
     prisma.listing.findMany({
-      where,
+      where: { ...where, id: { notIn: boostedIds } },
       orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
       skip: (page - 1) * perPage,
       take: perPage,
@@ -47,10 +69,9 @@ export default async function HundePage({
         media: { where: { isPrimary: true }, take: 1, select: { url: true } },
       },
     }).catch(() => []),
-    prisma.listing.count({ where }).catch(() => 0),
+    prisma.listing.count({ where: { ...where, id: { notIn: boostedIds } } }).catch(() => 0),
   ])
 
-  const now = new Date()
   const totalPages = Math.ceil(total / perPage)
 
   function buildUrl(params: Record<string, string | undefined>) {
@@ -87,6 +108,35 @@ export default async function HundePage({
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-10">
+
+          {/* Empfohlen-Bereich (geboostete Inserate, max. 5, faire Rotation) */}
+          {boosted.length > 0 && (
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-honey">★</span>
+                <h2 className="font-serif text-lg font-bold text-stone-900">Empfohlen</h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-stretch">
+                {boosted.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    id={listing.id}
+                    slug={listing.slug}
+                    listingType={listing.type}
+                    breedName={listing.breed.nameDe}
+                    kennelName={listing.breeder.kennelName}
+                    puppyName={listing.title}
+                    city={listing.breeder.city}
+                    state={listing.breeder.state}
+                    priceCents={listing.priceCents}
+                    isBoosted={true}
+                    imageUrl={listing.media[0]?.url}
+                    tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {listings.length === 0 ? (
             <div className="text-center py-24 bg-white rounded-2xl border border-cream-deep">
