@@ -1469,6 +1469,7 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `ServiceGallery.tsx`
 - `OpenStatus.tsx`
 - `BoostKaufButton.tsx`
+- `EinstellungenForm.tsx`
 
 #### Seiten → `src/app/...`
 - `src/app/page.tsx` — Homepage
@@ -1511,6 +1512,7 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/app/dashboard-service/page.tsx` — Dienstleister-Dashboard
 - `src/app/dashboard-service/profil/page.tsx` — Dienstleister-Profil bearbeiten
 - `src/app/admin/kategorien/page.tsx` — Admin: Artikel-Kategorien verwalten
+- `src/app/admin/einstellungen/page.tsx` — Admin: Boost-Einstellungen (Preis + Frequenz-Deckel)
 
 #### API-Routen → `src/app/api/...`
 - `src/app/api/hunde/[id]/route.ts` — Hund CRUD
@@ -1534,6 +1536,7 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/app/api/service-upload/route.ts` — Dienstleister-Bilder Upload (Logo/BG/Galerie)
 - `src/app/api/boost/route.ts` — Boost-Checkout-Session erstellen (POST)
 - `src/app/api/boost/webhook/route.ts` — Stripe-Webhook (checkout.session.completed)
+- `src/app/api/admin/einstellungen/route.ts` — Admin: Boost-Einstellungen lesen/ändern (GET/PATCH)
 
 #### Sonstiges
 - `src/middleware.ts` — Subdomain-Rewrite (skipRewrite-Liste inkl. /badges), `/api/boost` in alwaysAllowed
@@ -1687,3 +1690,37 @@ Umsetzung der 1-€-Topanzeige mit den besprochenen Schutzmechanismen gegen "Sin
 - `src/app/welpen/page.tsx`, `src/app/hunde/page.tsx` — Empfohlen-Block + Impressionen
 - `src/app/dashboard/page.tsx` — Boost-Statistiken
 - `src/middleware.ts` — `/api/boost` in alwaysAllowed
+
+---
+
+### ✅ Admin-Einstellungen: Boost-Preis & Frequenz-Deckel (2026-09-04) — FERTIG
+
+Der Boost-Preis und der Frequenz-Deckel (Cooldown) sind zur Laufzeit im Admin-Dashboard
+änderbar — kein Code-Deploy nötig.
+
+#### Neue Tabelle `platform_settings` (VOR dem Deploy manuell anlegen!)
+```bash
+psql -U whelply -d whelply -c "CREATE TABLE IF NOT EXISTS platform_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT now());"
+```
+- Key-Value-Tabelle (`key` TEXT PK, `value` TEXT, `updated_at`), Prisma-Model `PlatformSetting`
+- Bekannte Keys: `boost_price_cents` (Standard 100), `boost_cooldown_days` (Standard 7)
+- Fehlen die Keys oder ist die Tabelle (noch) nicht da, greifen automatisch die Defaults
+  aus `src/lib/boost.ts` — die App läuft also auch ohne die Tabelle fehlerfrei weiter
+
+#### Admin-UI & API
+- `/admin/einstellungen` — Formular mit Preis-Eingabe in € (Komma-Dezimal), live berechnetem
+  Netto nach Stripe-Gebühr (1,5 % + 0,25 €) und Deckel-Eingabe in Tagen; verlinkt als Karte
+  "Boost-Einstellungen" im Admin-Dashboard-Overview
+- `GET/PATCH /api/admin/einstellungen` — Admin-only; Validierung: Preis 50–50000 Cent
+  (50 Cent = Stripe-Mindestbetrag), Deckel 1–30 Tage; upsertet beide Keys
+- Middleware: keine Änderung nötig (`/api/admin` steht bereits in alwaysAllowed)
+
+#### Dynamisch geworden (lesen `getBoostSettings()` zur Laufzeit)
+- `/api/boost` — Checkout-Betrag kommt aus den Settings
+- `checkBoostEligibility()` — Cooldown + Begründungstext dynamisch
+- Boost-Kaufseite (`/dashboard/boost/[id]`) — Preis + "1 Boost pro Woche"-Text dynamisch
+- Dashboard (`/dashboard`) — "X € buchen"-Buttons dynamisch
+- Webhook + Erfolgsseite übergeben `amount_total` an `activateBoost()` — im Boost-Eintrag
+  steht immer der tatsächlich gezahlte Betrag (Preisänderungen verfälschen keine Historie)
+- **Stripe-seitig ist bei Preisänderungen nichts zu tun** — der Preis wird pro Checkout
+  als `price_data` übergeben, es gibt keine fixen Products/Prices im Stripe-Dashboard
