@@ -47,7 +47,9 @@ export default async function BoostErfolgPage({
       const paid = checkout.payment_status === 'paid' || checkout.payment_status === 'no_payment_required'
 
       if (belongsToListing && paid) {
-        await activateBoost(listing.id, checkout.id)
+        // Tatsächlich gezahlten Betrag übernehmen (stimmt auch nach Preisänderung im Admin)
+        const amountCents = typeof checkout.amount_total === 'number' ? checkout.amount_total : undefined
+        await activateBoost(listing.id, checkout.id, amountCents)
         paymentOk = true
       } else if (!paid) {
         errorMessage = 'Die Zahlung wurde noch nicht abgeschlossen.'
