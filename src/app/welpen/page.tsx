@@ -7,6 +7,7 @@ import WelpenFilter from '@/components/WelpenFilter'
 import WelpenAlertButton from '@/components/WelpenAlertButton'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { BOOST_MAX_SLOTS } from '@/lib/boost'
 
 // Immer dynamisch rendern, damit Aenderungen (Theme, Status, neue Inserate etc.)
 // sofort sichtbar sind, ohne dass der Full Route Cache veraltete Daten zeigt.
@@ -57,9 +58,33 @@ export default async function WelpenPage({
     ...(searchParams.geschlecht === 'female' ? { sex: 'female' as const } : {}),
   }
 
+  const now = new Date()
+
+  // ── Empfohlen-Bereich (geboostete Inserate) ─────────────────────
+  // Gleiche Filter wie die normale Suche; faire Rotation: Inserate mit den
+  // wenigsten bisherigen Einblendungen kommen zuerst. Max. BOOST_MAX_SLOTS.
+  const boosted = await prisma.listing.findMany({
+    where: { ...where, boostExpiresAt: { gt: now } },
+    orderBy: [{ boostImpressions: 'asc' }, { boostExpiresAt: 'asc' }],
+    take: BOOST_MAX_SLOTS,
+    include: {
+      breed: { select: { nameDe: true } },
+      breeder: { select: { kennelName: true, city: true, state: true } },
+      media: { where: { isPrimary: true }, take: 1, select: { url: true } },
+    },
+  }).catch(() => [])
+  const boostedIds = boosted.map((l) => l.id)
+  if (boostedIds.length > 0) {
+    // Impressionen zählen (fire-and-forget, Seite nicht ausbremsen)
+    prisma.listing.updateMany({
+      where: { id: { in: boostedIds } },
+      data: { boostImpressions: { increment: 1 } },
+    }).catch(() => {})
+  }
+
   const [listings, total] = await Promise.all([
     prisma.listing.findMany({
-      where,
+      where: { ...where, id: { notIn: boostedIds } },
       orderBy: [{ boostExpiresAt: 'desc' }, { createdAt: 'desc' }],
       skip: (page - 1) * perPage,
       take: perPage,
@@ -70,10 +95,9 @@ export default async function WelpenPage({
         // sex field is a scalar, automatically included
       },
     }).catch(() => []),
-    prisma.listing.count({ where }).catch(() => 0),
+    prisma.listing.count({ where: { ...where, id: { notIn: boostedIds } } }).catch(() => 0),
   ])
 
-  const now = new Date()
   const totalPages = Math.ceil(total / perPage)
 
   // Würfe mit erwarteten Welpen (pregnant / planned) für die Sektion unten
@@ -134,6 +158,35 @@ export default async function WelpenPage({
                 breedId={selectedBreed?.id}
                 state={searchParams.region}
               />
+            </div>
+          )}
+
+          {/* Empfohlen-Bereich (geboostete Inserate, max. 5, faire Rotation) */}
+          {boosted.length > 0 && (
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-honey">★</span>
+                <h2 className="font-serif text-lg font-bold text-stone-900">Empfohlen</h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-stretch">
+                {boosted.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    id={listing.id}
+                    slug={listing.slug}
+                    listingType={listing.type}
+                    breedName={listing.breed.nameDe}
+                    kennelName={listing.breeder.kennelName}
+                    puppyName={listing.title}
+                    city={listing.breeder.city}
+                    state={listing.breeder.state}
+                    priceCents={listing.priceCents}
+                    isBoosted={true}
+                    imageUrl={listing.media[0]?.url}
+                    tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
