@@ -32,7 +32,9 @@ export async function POST(request: Request) {
 
     if (listingId && paid) {
       try {
-        await activateBoost(listingId, obj.id)
+        // Tatsächlich gezahlten Betrag übernehmen (stimmt auch nach Preisänderung im Admin)
+        const amountCents = typeof obj?.amount_total === 'number' ? obj.amount_total : undefined
+        await activateBoost(listingId, obj.id, amountCents)
       } catch (err) {
         console.error('Boost-Aktivierung via Webhook fehlgeschlagen:', err)
         // 500 → Stripe versucht es erneut (Retry-Mechanismus)
