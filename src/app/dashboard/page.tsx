@@ -7,6 +7,7 @@ import MobileNav from '@/components/MobileNav'
 export const dynamic = 'force-dynamic'
 import { slugify } from '@/lib/slugify'
 import BreederStatusToggles from '@/components/BreederStatusToggles'
+import { getBoostSettings, formatBoostPrice } from '@/lib/boost'
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -75,6 +76,10 @@ export default async function DashboardPage() {
   const plan = breeder.subscription?.plan ?? 'free'
   const maxFree = 15
   const canAddMore = plan !== 'free' || activeListings.length < maxFree
+
+  // Aktueller Boost-Preis aus den Admin-Einstellungen (für die "X € buchen"-Buttons)
+  const boostSettings = await getBoostSettings()
+  const boostPriceLabel = formatBoostPrice(boostSettings.priceCents)
 
   return (
     <div className="min-h-screen bg-cream font-sans">
@@ -434,7 +439,7 @@ export default async function DashboardPage() {
                                 href={`/dashboard/boost/${listing.id}`}
                                 className="text-xs text-stone-400 hover:text-honey transition-colors font-medium"
                               >
-                                1 € buchen
+                                {boostPriceLabel} buchen
                               </Link>
                               {listing.boostImpressions > 0 && (
                                 <span className="block text-[10px] text-stone-300 mt-0.5">
@@ -507,7 +512,7 @@ export default async function DashboardPage() {
                           <span className="text-honey font-semibold">★ Boost aktiv · {listing.boostImpressions} Einblendungen</span>
                         ) : (
                           <Link href={`/dashboard/boost/${listing.id}`} className="text-stone-400 hover:text-honey transition-colors font-medium">
-                            Boost: 1 € buchen
+                            Boost: {boostPriceLabel} buchen
                           </Link>
                         )}
                       </div>
