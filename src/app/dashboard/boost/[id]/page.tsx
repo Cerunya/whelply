@@ -4,7 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from '@/components/DashboardHeader'
 import BoostKaufButton from '@/components/BoostKaufButton'
-import { BOOST_PRICE_CENTS, BOOST_MAX_SLOTS, BOOST_COOLDOWN_DAYS, checkBoostEligibility } from '@/lib/boost'
+import { BOOST_MAX_SLOTS, getBoostSettings, formatBoostPrice, cooldownLabel, checkBoostEligibility } from '@/lib/boost'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +29,8 @@ export default async function BoostPage({ params }: { params: { id: string } }) 
   if (!listing || listing.breederId !== breeder.id) notFound()
 
   const eligibility = await checkBoostEligibility(listing.id)
-  const priceLabel = (BOOST_PRICE_CENTS / 100).toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' €'
+  const settings = await getBoostSettings()
+  const priceLabel = formatBoostPrice(settings.priceCents)
   const listingTitle = listing.title || listing.breed.nameDe
   const targetPage = listing.type === 'adult_dog' ? '/hunde' : '/welpen'
 
@@ -88,14 +89,14 @@ export default async function BoostPage({ params }: { params: { id: string } }) 
                 <li className="flex gap-3">
                   <span className="text-stone-300 flex-shrink-0">•</span>
                   <span className="text-stone-500">
-                    Pro Inserat ist {BOOST_COOLDOWN_DAYS === 7 ? '1 Boost pro Woche' : `1 Boost alle ${BOOST_COOLDOWN_DAYS} Tage`} möglich.
+                    Pro Inserat ist {cooldownLabel(settings.cooldownDays)} möglich.
                   </span>
                 </li>
               </ul>
               <div className="mt-6 pt-6 border-t border-cream-deep">
                 <BoostKaufButton listingId={listing.id} priceLabel={priceLabel} />
                 <p className="text-xs text-stone-400 text-center mt-3">
-                  Sichere Zahlung über Stripe (Kreditkarte, SEPA, giropay). Kein Abo — einmalige Zahlung.
+                  Sichere Zahlung über Stripe (Kreditkarte, Apple Pay, Google Pay). Kein Abo — einmalige Zahlung.
                 </p>
               </div>
             </div>
