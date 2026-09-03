@@ -1,6 +1,6 @@
 # Whelply.de — Projektgedächtnis
 <!-- Diese Datei am Anfang jeder neuen Claude-Konversation einfügen -->
-<!-- Letzte Aktualisierung: 2026-08-08 -->
+<!-- Letzte Aktualisierung: 2026-09-04 -->
 
 ## Was wir bauen
 Deutsche Rassehunde-Plattform. Nur FCI-anerkannte Rassen. Kein Tierschutz, keine Mischlinge, keine Designerrassen (Maltipoo etc.). Inspiriert von chiens-de-france.com, aber moderner, mit KI-Features, und mit klarem Fokus auf seriöse VDH-Züchter.
@@ -35,7 +35,7 @@ Deutsche Rassehunde-Plattform. Nur FCI-anerkannte Rassen. Kein Tierschutz, keine
 ## Pricing-Modell
 | Produkt | Preis |
 |---------|-------|
-| Basis-Account | 0 € (max. 3 Inserate) |
+| Basis-Account | 0 € (max. 15 Inserate) |
 | 24h Topanzeige | 1,00 € |
 | Pro-Abo | 14,90 €/Monat |
 | Premium-Abo | 29,90 €/Monat |
@@ -52,6 +52,8 @@ NEXT_PUBLIC_APP_URL=https://whelply.de
 NEXT_PUBLIC_BASE_DOMAIN=whelply.de
 PREVIEW_PASSWORD=...
 NIXPACKS_NODE_VERSION=22
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 ## Workflow-Hinweise für Claude (wichtig!)
@@ -548,7 +550,7 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 
 ## Offene Tasks
 - [ ] Task 7 Rest: Fehlende Seiten (siehe Liste oben)
-- [ ] Task 8: Boost-Zahlung (Stripe Payment Intent für 1€)
+- [x] Task 8: Boost-Zahlung (Stripe, 1 € / 24 h) — siehe "Boost-System (2026-09-04)" ganz unten
 - [ ] Task 9: KI-Features (Rassen-Finder, Textgenerator)
 - [ ] Task 10: SEO + Bildupload (MinIO einrichten)
 - [ ] Task 11: Pflichtseiten (Impressum, Datenschutz, AGB)
@@ -1007,12 +1009,12 @@ Migration `20260623020000_social_links`: `social_instagram/facebook/tiktok/youtu
 - **DashboardHeader**: alle Unterseiten nutzen `DashboardHeader` mit `backHref`/`backLabel`/`action`
 
 #### Middleware alwaysAllowed (vollständig)
-`['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/api/upload', '/api/media', '/api/media-item', '/api/profil', '/api/hunde', '/api/news', '/api/admin', '/api/bookmarks', '/api/reports', '/api/reviews', '/api/upgrade-to-breeder', '/api/user-profile', '/api/welpen-alert', '/api/cron', '/api/messages', '/api/artikel', '/api/passwort', '/api/produkte', '/api/profil/check-subdomain', '/welpen-alert', '/passwort-', '/admin', '/preview', '/_next', '/favicon.ico']`
+`['/api/auth', '/api/preview-login', '/api/inserate', '/api/wuerfe', '/api/upload', '/api/media', '/api/media-item', '/api/profil', '/api/hunde', '/api/news', '/api/admin', '/api/bookmarks', '/api/reports', '/api/reviews', '/api/upgrade-to-breeder', '/api/user-profile', '/api/welpen-alert', '/api/cron', '/api/messages', '/api/artikel', '/api/passwort', '/api/produkte', '/api/profil/check-subdomain', '/api/boost', '/welpen-alert', '/passwort-', '/admin', '/preview', '/_next', '/favicon.ico']`
 
 #### Infrastruktur
 - `resend` npm-Package für E-Mail-Versand
 - `.gitignore`: `node_modules/`, `.next/`, `.env*`
-- Coolify Env-Vars: `RESEND_API_KEY`, `CRON_SECRET`
+- Coolify Env-Vars: `RESEND_API_KEY`, `CRON_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 - cron-job.org: `GET https://whelply.de/api/cron/welpen-alerts?secret=CRON_SECRET` täglich 08:00
 
 ---
@@ -1466,6 +1468,7 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `ServiceProfilForm.tsx`
 - `ServiceGallery.tsx`
 - `OpenStatus.tsx`
+- `BoostKaufButton.tsx`
 
 #### Seiten → `src/app/...`
 - `src/app/page.tsx` — Homepage
@@ -1473,14 +1476,16 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/app/zuchtrueden/page.tsx` — Deckrüden-Übersicht
 - `src/app/zuechter/page.tsx` — Züchterverzeichnis
 - `src/app/hund/[id]/page.tsx` — Deckrüden-Detailseite (Slug oder ID, Züchter-Kontaktkarte)
-- `src/app/hunde/page.tsx` — Erwachsene Hunde Übersicht
-- `src/app/welpen/page.tsx` — Welpen-Übersicht (mit PLZ/Ort-Suche)
+- `src/app/hunde/page.tsx` — Erwachsene Hunde Übersicht (mit "Empfohlen"-Block)
+- `src/app/welpen/page.tsx` — Welpen-Übersicht (mit PLZ/Ort-Suche + "Empfohlen"-Block)
 - `src/app/welpen/[id]/page.tsx` — Welpen-Detailseite (Slug oder ID, mit Standortkarte)
 - `src/app/(auth)/register/page.tsx` — Registrierung (mit Verband-Pflichtfeld)
 - `src/app/admin/verifizierung/page.tsx` — Admin: Verifizierungen prüfen
 - `src/app/admin/mediathek/page.tsx` — Admin: Mediathek
 - `src/app/admin/artikel/[id]/page.tsx` — Admin: Artikel bearbeiten (mit Sidebar-Produkt)
-- `src/app/dashboard/page.tsx` — Züchter-Dashboard
+- `src/app/dashboard/page.tsx` — Züchter-Dashboard (mit Boost-Spalte/-Statistiken)
+- `src/app/dashboard/boost/[id]/page.tsx` — Boost buchen (Produktseite mit ehrlichen Bedingungen)
+- `src/app/dashboard/boost/[id]/erfolg/page.tsx` — Boost-Erfolg + Auswertung (Fallback-Aktivierung)
 - `src/app/dashboard/profil/page.tsx` — Züchter-Profil mit Verifizierung
 - `src/app/dashboard/hund/[id]/page.tsx` — Hund bearbeiten
 - `src/app/dashboard/hund-eintragen/page.tsx` — Hund anlegen
@@ -1527,9 +1532,11 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/app/api/admin/geocode-all/route.ts` — Admin: Alle Züchter geocoden (einmalig)
 - `src/app/api/service-profil/route.ts` — Dienstleister-Profil PATCH
 - `src/app/api/service-upload/route.ts` — Dienstleister-Bilder Upload (Logo/BG/Galerie)
+- `src/app/api/boost/route.ts` — Boost-Checkout-Session erstellen (POST)
+- `src/app/api/boost/webhook/route.ts` — Stripe-Webhook (checkout.session.completed)
 
 #### Sonstiges
-- `src/middleware.ts` — Subdomain-Rewrite (skipRewrite-Liste inkl. /badges)
+- `src/middleware.ts` — Subdomain-Rewrite (skipRewrite-Liste inkl. /badges), `/api/boost` in alwaysAllowed
 - `src/app/actions/auth.ts` — Server Action signOutAction
 - `src/lib/mail-alerts.ts` — Welpen-Alert E-Mail-Versand
 - `src/lib/subdomain.ts` — Subdomain-Validierung, Reserved-Liste, Canonical-URL-Helper
@@ -1539,6 +1546,8 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 - `src/lib/didit.ts` — Didit Identity Verification API-Helper
 - `src/lib/geocode.ts` — Nominatim Geocoding + Haversine-Distanz
 - `src/lib/listing-slug.ts` — SEO-Slug-Generator für Inserate
+- `src/lib/stripe.ts` — Stripe REST-API ohne SDK (Checkout, Webhook-Signatur)
+- `src/lib/boost.ts` — Boost-Logik (Preis/Dauer/Cooldown/Slots, Eligibility, Aktivierung)
 - `prisma/schema.prisma` — Datenbankschema
 - `.gitignore`
 
@@ -1623,3 +1632,58 @@ Alle Dateien werden relativ zum Projekt-Root kopiert. Die Ordnerstruktur im Outp
 
 #### ~~TODO: Subdomain-Routing~~ → ✅ FERTIG (2026-07-13)
 - Siehe "Subdomain-Routing Phase 2" weiter oben
+
+---
+
+### ✅ Boost-System: 1 € Topanzeige (2026-09-04) — FERTIG
+
+Umsetzung der 1-€-Topanzeige mit den besprochenen Schutzmechanismen gegen "Sinnlosigkeit bei vielen Käufern".
+
+#### Kauf-Flow
+1. Dashboard → Inserate-Tabelle → "Boost" → `/dashboard/boost/[id]`
+2. Produktseite mit ehrlicher Beschreibung (Empfohlen-Bereich über den Suchergebnissen, max. 5 Plätze mit fairer Rotation, **kein Platz-1-Versprechen**, 1 Boost pro Woche)
+3. Stripe Checkout (1,00 €, Karte etc.)
+4. Webhook `checkout.session.completed` → Boost aktiviert (24 h)
+5. Erfolgsseite `/dashboard/boost/[id]/erfolg` — prüft die Stripe-Session selbst und aktiviert den Boost notfalls auch ohne Webhook (Fallback); beide Wege idempotent über `stripe_payment_id`
+
+#### Stripe OHNE SDK
+- **Kein neues npm-Paket** (`npm ci` im Coolify-Build würde am Lockfile scheitern) — REST-API via `fetch` in `src/lib/stripe.ts`, gleiches Muster wie Resend
+- `createCheckoutSession()` — form-urlencoded POST auf `api.stripe.com/v1/checkout/sessions`, `mode=payment`, `metadata[listing_id]`
+- `getCheckoutSession()` — für die Erfolgsseiten-Verifikation
+- `verifyWebhookSignature()` — Signatur selbst geprüft: HMAC-SHA256 über `${t}.${payload}`, `timingSafeEqual`, 5-Minuten-Toleranz
+
+#### Regeln (`src/lib/boost.ts`)
+- `BOOST_PRICE_CENTS = 100`, `BOOST_DURATION_HOURS = 24`, `BOOST_COOLDOWN_DAYS = 7`, `BOOST_MAX_SLOTS = 5`
+- `checkBoostEligibility(listingId)`: Inserat muss Status `available` haben, kein aktiver Boost, Cooldown über letztes `boosts.paid_at` + 7 Tage (liefert `nextAvailableAt` für die Anzeige)
+- `activateBoost(listingId, stripeSessionId)`: idempotent (Dedup über `stripe_payment_id`), legt Boost-Eintrag an, setzt `boostExpiresAt` und `boostImpressions = 0`
+
+#### Anzeige & Fairness
+- "★ Empfohlen"-Block auf `/welpen` und `/hunde` ÜBER den normalen Ergebnissen, max. 5 Karten (`grid-cols-2 md:grid-cols-5`)
+- **Faire Rotation**: `orderBy: [{ boostImpressions: 'asc' }, { boostExpiresAt: 'asc' }]` — wer am wenigsten Einblendungen hatte, steht vorn
+- Impressionen: `updateMany ... { increment: 1 }` fire-and-forget beim Rendern des Blocks
+- Geboostete Inserate werden aus den normalen Ergebnissen ausgeschlossen (keine Doppelanzeige)
+- **Frequenz-Deckel**: 1 Boost pro Inserat pro Woche
+
+#### Auswertung für den Züchter
+- Erfolgsseite zeigt Ablaufzeitpunkt + Live-Statistik (Einblendungen / Aufrufe)
+- Dashboard Boost-Spalte: "★ Aktiv" + "X Einblendungen" während des Boosts; danach "Letzter Boost: X Einblendungen" unter dem Buchen-Button
+
+#### Setup (VOR dem Deploy!)
+- DB-Spalte manuell anlegen:
+  ```bash
+  psql -U whelply -d whelply -c "ALTER TABLE listings ADD COLUMN IF NOT EXISTS boost_impressions INT NOT NULL DEFAULT 0;"
+  ```
+  (Tabelle `boosts` mit `stripe_payment_id`, `boost_type`, `amount_cents`, `paid_at`, `expires_at` existierte bereits im Schema)
+- Coolify Env-Vars: `STRIPE_SECRET_KEY` (sk_live_... oder sk_test_...) + `STRIPE_WEBHOOK_SECRET` (whsec_...)
+- Stripe-Dashboard → Entwickler → Webhooks → Endpoint `https://whelply.de/api/boost/webhook` mit Event `checkout.session.completed` → Signing Secret als `STRIPE_WEBHOOK_SECRET` hinterlegen
+- Ohne `STRIPE_SECRET_KEY` antwortet `/api/boost` mit 503 (Boost-Seite bleibt sichtbar, Kauf nicht möglich)
+
+#### Geänderte/Neue Dateien
+- `prisma/schema.prisma` — `Listing.boostImpressions` (map `boost_impressions`)
+- `src/lib/stripe.ts` (NEU), `src/lib/boost.ts` (NEU)
+- `src/app/api/boost/route.ts` (NEU), `src/app/api/boost/webhook/route.ts` (NEU)
+- `src/components/BoostKaufButton.tsx` (NEU)
+- `src/app/dashboard/boost/[id]/page.tsx` (NEU), `src/app/dashboard/boost/[id]/erfolg/page.tsx` (NEU)
+- `src/app/welpen/page.tsx`, `src/app/hunde/page.tsx` — Empfohlen-Block + Impressionen
+- `src/app/dashboard/page.tsx` — Boost-Statistiken
+- `src/middleware.ts` — `/api/boost` in alwaysAllowed
