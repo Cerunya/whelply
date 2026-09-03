@@ -422,14 +422,26 @@ export default async function DashboardPage() {
                         </td>
                         <td className="px-6 py-4">
                           {isBoosted ? (
-                            <span className="text-xs text-honey font-semibold">★ Aktiv</span>
+                            <span className="text-xs text-honey font-semibold">
+                              ★ Aktiv
+                              <span className="block text-stone-400 font-normal">
+                                {listing.boostImpressions} {listing.boostImpressions === 1 ? 'Einblendung' : 'Einblendungen'}
+                              </span>
+                            </span>
                           ) : (
-                            <Link
-                              href={`/dashboard/boost/${listing.id}`}
-                              className="text-xs text-stone-400 hover:text-honey transition-colors font-medium"
-                            >
-                              1 € buchen
-                            </Link>
+                            <>
+                              <Link
+                                href={`/dashboard/boost/${listing.id}`}
+                                className="text-xs text-stone-400 hover:text-honey transition-colors font-medium"
+                              >
+                                1 € buchen
+                              </Link>
+                              {listing.boostImpressions > 0 && (
+                                <span className="block text-[10px] text-stone-300 mt-0.5">
+                                  Letzter Boost: {listing.boostImpressions} Einblendungen
+                                </span>
+                              )}
+                            </>
                           )}
                         </td>
                         <td className="px-6 py-4 text-right">
@@ -492,7 +504,7 @@ export default async function DashboardPage() {
                           {listing.viewCount}
                         </span>
                         {isBoosted ? (
-                          <span className="text-honey font-semibold">★ Boost aktiv</span>
+                          <span className="text-honey font-semibold">★ Boost aktiv · {listing.boostImpressions} Einblendungen</span>
                         ) : (
                           <Link href={`/dashboard/boost/${listing.id}`} className="text-stone-400 hover:text-honey transition-colors font-medium">
                             Boost: 1 € buchen
