@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isStripeConfigured, createCheckoutSession } from '@/lib/stripe'
-import { BOOST_PRICE_CENTS, checkBoostEligibility } from '@/lib/boost'
+import { getBoostSettings, checkBoostEligibility } from '@/lib/boost'
 
 // POST /api/boost — Stripe-Checkout-Session für einen 24h-Boost erstellen
 // Body: { listingId: string }
@@ -54,6 +54,9 @@ export async function POST(request: Request) {
     )
   }
 
+  // Preis aus den Admin-Einstellungen (platform_settings, Fallback: 1,00 €)
+  const { priceCents } = await getBoostSettings()
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
   const listingTitle = listing.title || listing.breed.nameDe
 
@@ -61,7 +64,7 @@ export async function POST(request: Request) {
     const checkout = await createCheckoutSession({
       listingId: listing.id,
       listingTitle,
-      amountCents: BOOST_PRICE_CENTS,
+      amountCents: priceCents,
       successUrl: `${appUrl}/dashboard/boost/${listing.id}/erfolg?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${appUrl}/dashboard/boost/${listing.id}`,
     })
