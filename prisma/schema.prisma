@@ -391,6 +391,8 @@ model Listing {
   // Boost: NULL oder Timestamp in der Zukunft = geboostet
   // Geschäftsregel: boost_expires_at > NOW() → oben anzeigen
   boostExpiresAt DateTime?     @map("boost_expires_at")
+  // Impressions im "Empfohlen"-Block während des aktuellen Boosts (wird bei Kauf auf 0 gesetzt)
+  boostImpressions Int         @default(0) @map("boost_impressions")
   viewCount      Int           @default(0) @map("view_count")
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime      @updatedAt @map("updated_at")
