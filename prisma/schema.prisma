@@ -714,3 +714,18 @@ model ArticleCategory {
 
   @@map("article_categories")
 }
+
+// ─────────────────────────────────────────────
+// PLATTFORM-EINSTELLUNGEN (Key-Value, im Admin pflegbar)
+// ─────────────────────────────────────────────
+// Bekannte Keys:
+//   boost_price_cents   — Preis der 24h-Topanzeige in Cent (Standard: 100)
+//   boost_cooldown_days — Frequenz-Deckel in Tagen (Standard: 7)
+// Tabelle muss VOR dem Deploy manuell per psql angelegt werden (siehe PROJEKT.md)
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("platform_settings")
+}
