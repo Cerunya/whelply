@@ -98,6 +98,7 @@ export function middleware(request: NextRequest) {
     '/api/artikel',
     '/api/passwort',
     '/api/produkte',
+    '/api/boost',
     '/api/profil/check-subdomain',
     '/welpen-alert',
     '/passwort-',
