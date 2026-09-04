@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import OnboardingChecklist from '@/components/OnboardingChecklist'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,24 @@ export default async function ServiceDashboardPage() {
   })
   if (!provider) redirect('/')
 
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { onboardingDismissedAt: true },
+  })
+
   const isComplete = !!(provider.name && provider.city && provider.phone)
+
+  // Für die Onboarding-Checkliste: Galerie-Bilder zählen
+  const mediaCount = await prisma.media.count({ where: { serviceId: provider.id } })
+
+  // Onboarding-Checkliste (Dienstleister) — Häkchen kommen aus echten DB-Daten
+  const onboardingItems = [
+    { key: 'beschreibung', label: 'Beschreibung schreiben', href: '/dashboard-service/profil', done: !!provider.description },
+    { key: 'adresse', label: 'Adresse & Telefon eintragen', href: '/dashboard-service/profil', done: !!(provider.city && provider.phone) },
+    { key: 'logo', label: 'Logo hochladen', href: '/dashboard-service/profil', done: !!provider.logoUrl },
+    { key: 'zeiten', label: 'Öffnungszeiten eintragen', href: '/dashboard-service/profil', done: !!provider.openingHours },
+    { key: 'galerie', label: 'Galerie-Bilder hinzufügen', href: '/dashboard-service/profil', done: mediaCount > 0 },
+  ]
 
   return (
     <>
@@ -42,6 +60,15 @@ export default async function ServiceDashboardPage() {
               <p className="text-amber-600 text-xs mt-1">Füge Adresse, Telefon und eine Beschreibung hinzu, damit Kunden dich finden können.</p>
               <Link href="/dashboard-service/profil" className="text-amber-700 text-xs font-bold hover:underline mt-2 inline-block">Profil vervollständigen →</Link>
             </div>
+          )}
+
+          {/* Onboarding-Checkliste (ausblendbar, Fortschritt aus echten Daten) */}
+          {!user?.onboardingDismissedAt && (
+            <OnboardingChecklist
+              title="Erste Schritte"
+              subtitle="So finden dich Kunden auf Whelply"
+              items={onboardingItems}
+            />
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
