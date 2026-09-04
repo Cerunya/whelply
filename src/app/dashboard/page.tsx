@@ -8,13 +8,14 @@ export const dynamic = 'force-dynamic'
 import { slugify } from '@/lib/slugify'
 import BreederStatusToggles from '@/components/BreederStatusToggles'
 import { getBoostSettings, formatBoostPrice } from '@/lib/boost'
+import OnboardingChecklist from '@/components/OnboardingChecklist'
 
 export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
   // Nutzer-Rolle prüfen
-  const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } })
+  const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true, onboardingDismissedAt: true } })
   if (!user) redirect('/login')
 
   // Dienstleister → eigenes Dashboard
@@ -51,7 +52,7 @@ export default async function DashboardPage() {
       },
       subscription: true,
       user: { select: { role: true } },
-      _count: { select: { listings: true } },
+      _count: { select: { listings: true, dogs: true } },
     },
   })
 
@@ -80,6 +81,17 @@ export default async function DashboardPage() {
   // Aktueller Boost-Preis aus den Admin-Einstellungen (für die "X € buchen"-Buttons)
   const boostSettings = await getBoostSettings()
   const boostPriceLabel = formatBoostPrice(boostSettings.priceCents)
+
+  // Onboarding-Checkliste (Züchter) — Häkchen kommen aus echten DB-Daten
+  const onboardingItems = [
+    { key: 'profil', label: 'Profil ausfüllen (Ort, Kontaktdaten)', href: '/dashboard/profil', done: !!breeder.city },
+    { key: 'ueber-uns', label: '„Über uns“-Text schreiben', href: '/dashboard/ueber-uns', done: !!breeder.bio },
+    { key: 'hund', label: 'Ersten Zuchthund eintragen', href: '/dashboard/hund-eintragen', done: breeder._count.dogs > 0 },
+    { key: 'wurf', label: 'Ersten Wurf eintragen', href: '/dashboard/wurf-eintragen', done: breeder.litters.length > 0 },
+    { key: 'inserat', label: 'Erstes Inserat erstellen', href: '/dashboard/inserat-erstellen', done: breeder._count.listings > 0 },
+    { key: 'verifizierung', label: 'Verifizierung starten (ID-Check)', href: '/dashboard/profil', done: breeder.diditStatus === 'approved' || breeder.verificationLevel !== 'none' },
+    { key: 'theme', label: 'Züchterseite gestalten (Theme & Branding)', href: '/dashboard/theme', done: !!breeder.themeColor },
+  ]
 
   return (
     <div className="min-h-screen bg-cream font-sans">
@@ -150,6 +162,15 @@ export default async function DashboardPage() {
             initialActive={breeder.isActive ?? true}
           />
         </div>
+
+        {/* Onboarding-Checkliste (ausblendbar, Fortschritt aus echten Daten) */}
+        {!user.onboardingDismissedAt && (
+          <OnboardingChecklist
+            title="Erste Schritte auf Whelply"
+            subtitle="Richte deinen Zwinger ein — so finden dich Welpeninteressenten"
+            items={onboardingItems}
+          />
+        )}
 
         {/* Stat-Karten */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
