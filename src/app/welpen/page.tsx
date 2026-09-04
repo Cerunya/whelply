@@ -268,7 +268,7 @@ export default async function WelpenPage({
 
         {/* Welpen erwartet — Sektion wie auf französischen Seiten */}
         {expectedLitters.length > 0 && (
-          <div className="mt-16 mb-8">
+          <div className="max-w-6xl mx-auto px-4 mt-16 mb-8">
             <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Welpen demnächst erwartet</h2>
             <p className="text-stone-400 text-sm mb-8">Züchter mit geplanten oder bestätigten Würfen</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
