@@ -95,7 +95,6 @@ export default function WurfForm({
 
           <div>
             <label className={labelClass}>Rasse <span className="text-red-400">*</span></label>
-            <select name="breedId" required value={form.breedId} onChange={handleChange} className={inputClass + ' hidden'} />
             <BreedSearch
               breeds={breeds}
               value={form.breedId}
