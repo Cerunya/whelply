@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar'
 import Link from 'next/link'
 import NutzerNameForm from '@/components/NutzerNameForm'
 import PasswortAendernForm from '@/components/PasswortAendernForm'
+import OnboardingChecklist from '@/components/OnboardingChecklist'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +15,7 @@ export default async function NutzerDashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { email: true, role: true, displayName: true, createdAt: true },
+    select: { email: true, role: true, displayName: true, createdAt: true, onboardingDismissedAt: true },
   })
   if (!user) redirect('/login')
 
@@ -29,6 +30,18 @@ export default async function NutzerDashboardPage() {
       conversation: { userId: session.user.id },
     },
   })
+
+  // Für die Onboarding-Checkliste: Alert + erste Kontaktaufnahme
+  const alertCount = await prisma.welpenAlert.count({ where: { email: user.email } })
+  const conversationCount = await prisma.conversation.count({ where: { userId: session.user.id } })
+
+  // Onboarding-Checkliste (Welpensucher) — Häkchen kommen aus echten DB-Daten
+  const onboardingItems = [
+    { key: 'name', label: 'Deinen Namen eintragen', href: '/dashboard/nutzer', done: !!user.displayName },
+    { key: 'merkliste', label: 'Ersten Welpen auf die Merkliste setzen', href: '/welpen', done: bookmarkCount > 0 },
+    { key: 'alert', label: 'Welpen-Alert einrichten (Filter wählen → „Alert einrichten“)', href: '/welpen', done: alertCount > 0 },
+    { key: 'nachricht', label: 'Einem Züchter eine Nachricht schreiben', href: '/zuechter', done: conversationCount > 0 },
+  ]
 
   return (
     <>
@@ -49,6 +62,15 @@ export default async function NutzerDashboardPage() {
               </button>
             </form>
           </div>
+
+          {/* Onboarding-Checkliste (ausblendbar, Fortschritt aus echten Daten) */}
+          {!user.onboardingDismissedAt && (
+            <OnboardingChecklist
+              title="Erste Schritte"
+              subtitle="So findest du deinen Welpen am schnellsten"
+              items={onboardingItems}
+            />
+          )}
 
           {/* Name bearbeiten */}
           <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-4">
