@@ -23,7 +23,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null
 
         const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email },
+          // Groß-/Kleinschreibung der E-Mail soll beim Login egal sein
+          where: { email: parsed.data.email.toLowerCase().trim() },
           include: { breederProfile: true },
         })
 
