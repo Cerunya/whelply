@@ -52,7 +52,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { email, password, role, kennelName, verband, serviceName, serviceCategory } = parsed.data
+    const { password, role, kennelName, verband, serviceName, serviceCategory } = parsed.data
+    // E-Mails immer klein schreiben — sonst funktionieren Login und Dubletten-Check
+    // nur mit exakt der Schreibweise wie bei der Registrierung
+    const email = parsed.data.email.toLowerCase().trim()
 
     // Züchter braucht Zwingernamen
     if (role === 'breeder' && !kennelName) {
