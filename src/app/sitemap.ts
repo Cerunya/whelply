@@ -45,13 +45,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Deckrüden
+  // Hinweis: Dog hat kein updatedAt-Feld im Schema — createdAt als lastModified
   const studs = await prisma.dog.findMany({
     where: { isStud: true, slug: { not: null } },
-    select: { slug: true, updatedAt: true },
+    select: { slug: true, createdAt: true },
   })
   const studPages: MetadataRoute.Sitemap = studs.map((d) => ({
     url: `${BASE}/hund/${d.slug}`,
-    lastModified: d.updatedAt,
+    lastModified: d.createdAt,
     changeFrequency: 'weekly',
     priority: 0.6,
   }))
@@ -81,12 +82,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Dienstleister
+  // Hinweis: ServiceProvider hat kein updatedAt-Feld im Schema — createdAt als lastModified
   const services = await prisma.serviceProvider.findMany({
-    select: { id: true, updatedAt: true },
+    select: { id: true, createdAt: true },
   })
   const servicePages: MetadataRoute.Sitemap = services.map((s) => ({
     url: `${BASE}/dienste/${s.id}`,
-    lastModified: s.updatedAt,
+    lastModified: s.createdAt,
     changeFrequency: 'weekly',
     priority: 0.5,
   }))
