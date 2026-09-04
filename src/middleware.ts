@@ -99,6 +99,7 @@ export function middleware(request: NextRequest) {
     '/api/passwort',
     '/api/produkte',
     '/api/boost',
+    '/api/onboarding',
     '/api/profil/check-subdomain',
     '/welpen-alert',
     '/passwort-',
