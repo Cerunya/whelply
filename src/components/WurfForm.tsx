@@ -101,6 +101,7 @@ export default function WurfForm({
               value={form.breedId}
               onChange={(v) => setForm({ ...form, breedId: v })}
               valueKey="id"
+              valueKey="id"
               placeholder="Rasse suchen..."
             />
           </div>

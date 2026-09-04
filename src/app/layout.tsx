@@ -16,8 +16,26 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: 'Whelply – Rassewelpen von seriösen Züchtern',
-  description: 'Die Plattform für seriöse Rassehunde-Züchter in Deutschland. Nur FCI-anerkannte Rassen. Kein Tierschutz, keine Mischlinge.',
+  title: {
+    default: 'Whelply – Rassewelpen von seriösen Züchtern',
+    template: '%s | Whelply',
+  },
+  description: 'Die Plattform für seriöse Rassehunde-Züchter in Deutschland. Finde Welpen, Deckrüden und Dienstleister — nur FCI-anerkannte Rassen.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'),
+  openGraph: {
+    type: 'website',
+    locale: 'de_DE',
+    siteName: 'Whelply',
+    title: 'Whelply – Rassewelpen von seriösen Züchtern',
+    description: 'Die Plattform für seriöse Rassehunde-Züchter in Deutschland. Finde Welpen, Deckrüden und Dienstleister.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
