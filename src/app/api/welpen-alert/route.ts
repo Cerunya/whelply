@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
   }
 
-  const { email, breedId, state } = parsed.data
+  const { breedId, state } = parsed.data
+  // klein geschrieben speichern — Dubletten-Check und Versand bleiben konsistent
+  const email = parsed.data.email.toLowerCase().trim()
 
   // Doppelte Abonnements vermeiden
   const existing = await prisma.welpenAlert.findFirst({
