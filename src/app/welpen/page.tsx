@@ -100,11 +100,15 @@ export default async function WelpenPage({
 
   const totalPages = Math.ceil(total / perPage)
 
-  // Würfe mit erwarteten Welpen (pregnant / planned) für die Sektion unten
-  const expectedLitters = await prisma.litter.findMany({
+  // Würfe mit erwarteten Welpen (pregnant / planned) für die Sektion unten.
+  // Mit aktivem Rassenfilter: nur Würfe dieser Rasse. Ohne Filter: alle Rassen.
+  // Die Reihenfolge rotiert bei jedem Seitenaufruf (Zufallsauswahl aus den
+  // 60 neuesten Würfen), damit nicht immer dieselben Würfe gezeigt werden.
+  const litterPool = await prisma.litter.findMany({
     where: {
       status: { in: ['pregnant', 'planned'] as const },
       breeder: { isActive: true, isPublished: true },
+      ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
     },
     include: {
       breed: { select: { nameDe: true } },
@@ -114,8 +118,16 @@ export default async function WelpenPage({
       media: { take: 2, select: { url: true } },
     },
     orderBy: { createdAt: 'desc' },
-    take: 12,
+    take: 60,
   })
+  // Fisher-Yates-Shuffle, dann die ersten 12 anzeigen
+  for (let i = litterPool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = litterPool[i]
+    litterPool[i] = litterPool[j]
+    litterPool[j] = tmp
+  }
+  const expectedLitters = litterPool.slice(0, 12)
 
   function buildUrl(params: Record<string, string | undefined>) {
     const p = new URLSearchParams()
@@ -266,11 +278,15 @@ export default async function WelpenPage({
           )}
         </div>
 
-        {/* Welpen erwartet — Sektion wie auf französischen Seiten */}
+        {/* Welpen erwartet — folgt dem Rassenfilter; ohne Filter alle Rassen, rotierend */}
         {expectedLitters.length > 0 && (
           <div className="max-w-6xl mx-auto px-4 mt-16 mb-8">
             <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Welpen demnächst erwartet</h2>
-            <p className="text-stone-400 text-sm mb-8">Züchter mit geplanten oder bestätigten Würfen</p>
+            <p className="text-stone-400 text-sm mb-8">
+              {selectedBreed
+                ? `Züchter mit geplanten oder bestätigten ${selectedBreed.nameDe}-Würfen`
+                : 'Züchter mit geplanten oder bestätigten Würfen — alle Rassen'}
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {expectedLitters.map((litter) => (
                 <div key={litter.id} className="bg-white rounded-2xl border border-cream-deep overflow-hidden hover:shadow-md transition-all">
@@ -292,6 +308,7 @@ export default async function WelpenPage({
                     )}
                   </div>
                   <div className="p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-400">{litter.breed.nameDe}</p>
                     <p className="font-semibold text-forest text-sm">{litter.breeder.kennelName}</p>
                     <p className="text-xs text-stone-500 mt-0.5">
                       {litter.status === 'pregnant' ? 'Trächtigkeit bestätigt' : 'Wurf geplant'}
