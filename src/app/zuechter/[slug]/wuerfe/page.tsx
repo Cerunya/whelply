@@ -31,8 +31,8 @@ export default async function ZuechterWuerfePage({
     include: {
       breed: { select: { nameDe: true } },
       media: { take: 1, select: { url: true } },
-      dam: { select: { id: true, name: true } },
-      sire: { select: { id: true, name: true } },
+      dam: { select: { id: true, name: true, slug: true } },
+      sire: { select: { id: true, name: true, slug: true } },
       listings: {
         where: { type: 'puppy' },
         select: { status: true, sex: true },
@@ -187,7 +187,7 @@ export default async function ZuechterWuerfePage({
                       <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-cream-deep">
                         {litter.sire ? (
                           <Link
-                            href={`/hund/${litter.sire.id}`}
+                            href={`/hund/${litter.sire.slug || litter.sire.id}`}
                             className="text-sm bg-cream border border-cream-deep rounded-full px-3.5 py-1.5 text-stone-600 hover:border-forest/30 hover:text-forest transition-colors"
                           >
                             {'Vater: ' + litter.sire.name}
@@ -199,7 +199,7 @@ export default async function ZuechterWuerfePage({
                         ) : null}
                         {litter.dam && (
                           <Link
-                            href={`/hund/${litter.dam.id}`}
+                            href={`/hund/${litter.dam.slug || litter.dam.id}`}
                             className="text-sm bg-cream border border-cream-deep rounded-full px-3.5 py-1.5 text-stone-600 hover:border-forest/30 hover:text-forest transition-colors"
                           >
                             {'Mutter: ' + litter.dam.name}
