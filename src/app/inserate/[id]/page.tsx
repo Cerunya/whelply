@@ -434,7 +434,7 @@ export default async function WelpenDetailPage({
               {/* Link zum vollständigen Stammbaum */}
               <div className="mt-8 text-center">
                 <Link
-                  href={`/welpen/${listing.id}/stammbaum`}
+                  href={`/welpen/${listing.slug || listing.id}/stammbaum`}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-forest border border-forest/30 rounded-xl px-6 py-3 hover:bg-forest hover:text-white transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
