@@ -84,10 +84,10 @@ export default async function ZuechterErwachseneHundePage({
                   : tint === 'female' ? 'border-pink-300 bg-pink-50'
                   : 'border-cream-deep bg-white hover:border-forest/20'
                 const price = listing.priceCents
-                  ? (listing.priceCents / 100).toLocaleString('de-DE') + ' \u20ac'
+                  ? (listing.priceCents / 100).toLocaleString('de-DE') + ' €'
                   : 'Auf Anfrage'
                 return (
-                  <a key={listing.id} href={`/welpen/${listing.id}`}
+                  <a key={listing.id} href={`/inserate/${listing.slug || listing.id}`}
                     className={`flex items-start gap-4 rounded-xl border p-4 hover:shadow-sm transition-all ${borderClass}`}>
                     {listing.media[0]?.url ? (
                       <img src={listing.media[0].url} alt={listing.title ?? ''} className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
