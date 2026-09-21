@@ -6,6 +6,7 @@ import BreederFooter from '@/components/BreederFooter'
 import BreederPageHeader from '@/components/BreederPageHeader'
 import BreederPageContent from '@/components/BreederPageContent'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import { getDogLink } from '@/lib/subdomain'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 import { generateBreederMetadata } from '@/lib/breeder-metadata'
 
@@ -32,8 +33,8 @@ export default async function LitterDetailPage({
     where: { id: params.litterId },
     include: {
       breed: { select: { nameDe: true } },
-      dam: { select: { id: true, name: true, slug: true, titles: true, media: { take: 1, select: { url: true } } } },
-      sire: { select: { id: true, name: true, slug: true, titles: true, media: { take: 1, select: { url: true } } } },
+      dam: { select: { id: true, name: true, slug: true, titles: true, breederId: true, breeder: { select: { subdomain: true, kennelName: true } }, media: { take: 1, select: { url: true } } } },
+      sire: { select: { id: true, name: true, slug: true, titles: true, breederId: true, breeder: { select: { subdomain: true, kennelName: true } }, media: { take: 1, select: { url: true } } } },
       media: { take: 1, select: { url: true } },
       listings: {
         where: { type: 'puppy' },
@@ -237,7 +238,7 @@ export default async function LitterDetailPage({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {litter.dam && (
                   <Link
-                    href={`/hund/${litter.dam.slug || litter.dam.id}`}
+                    href={getDogLink(litter.dam, breeder.id)}
                     className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all flex items-center gap-4"
                   >
                     {litter.dam.media[0]?.url && (
@@ -259,7 +260,7 @@ export default async function LitterDetailPage({
                 {(litter.sire || litter.sireExternal) && (
                   litter.sire ? (
                     <Link
-                      href={`/hund/${litter.sire.slug || litter.sire.id}`}
+                      href={getDogLink(litter.sire, breeder.id)}
                       className="bg-white rounded-xl border border-cream-deep p-5 hover:border-forest/30 hover:shadow-sm transition-all flex items-center gap-4"
                     >
                       {litter.sire.media[0]?.url && (
