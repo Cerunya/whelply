@@ -23,23 +23,16 @@ const LITTER_STATUS: Record<string, string> = {
   available: 'Abgabebereit', sold_out: 'Vergeben',
 }
 
-// Level 3: Urgroßeltern — Name+ID+Besitzer (für züchterübergreifende Links)
-const ggpSelect = { select: { id: true, name: true, slug: true, breederId: true, breeder: { select: { subdomain: true, kennelName: true } } } }
+// Großeltern: Name+ID+Besitzer (für züchterübergreifende Links)
+const gpSelect = { select: { id: true, name: true, slug: true, breederId: true, breeder: { select: { subdomain: true, kennelName: true } } } }
 
-// Level 2: Großeltern — Bild + Besitzer + deren Eltern (Urgroßeltern)
-const gpInclude = {
-  media: { take: 1, select: { url: true } },
-  breeder: { select: { subdomain: true, kennelName: true } },
-  parentSire: ggpSelect,
-  parentDam: ggpSelect,
-}
-
-// Level 1: Eltern — Bild + Besitzer + deren Eltern (Großeltern) die wiederum Urgroßeltern haben
+// Eltern: Bild + Besitzer + deren Eltern (Großeltern)
+// Urgroßeltern lädt diese Seite nicht — die Vollansicht (4 Generationen) liegt auf /hund/[id]/stammbaum
 const parentInclude = {
   media: { take: 1, select: { url: true } },
   breeder: { select: { subdomain: true, kennelName: true } },
-  parentSire: { include: gpInclude },
-  parentDam: { include: gpInclude },
+  parentSire: gpSelect,
+  parentDam: gpSelect,
 }
 
 export default async function ZuechterHundPage({ params }: { params: { slug: string; id: string } }) {
@@ -118,22 +111,6 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
         }`}>
         <p className={`text-[10px] font-semibold mb-1 ${color === 'pink' ? 'text-pink-400' : 'text-blue-400'}`}>{role}</p>
         <p className="text-xs font-semibold text-stone-800 line-clamp-2">{d.name}</p>
-      </Link>
-    )
-  }
-
-  function GreatCard({ dog: d, role }: { dog: SimpleDog; role: string }) {
-    if (!d) return (
-      <div className="bg-cream rounded-lg border border-cream-deep p-2 text-center w-full">
-        <p className="text-[10px] text-stone-300 leading-tight">{role}</p>
-        <p className="text-xs text-stone-200 mt-0.5">—</p>
-      </div>
-    )
-    return (
-      <Link href={getDogLink(d, currentBreederId)}
-        className="bg-white rounded-lg border border-stone-200 hover:border-stone-400 p-2 block text-center transition-colors w-full">
-        <p className="text-[10px] text-stone-400 leading-tight">{role}</p>
-        <p className="text-xs font-medium text-stone-700 line-clamp-2 leading-tight mt-0.5">{d.name}</p>
       </Link>
     )
   }
@@ -239,7 +216,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
             </div>
           )}
 
-          {/* Stammbaum — 4 Generationen als Kartenbaum (kein Scrollbereich) */}
+          {/* Stammbaum — kompakt bis Großeltern, Vollansicht (4 Generationen) auf eigener Seite */}
           <div className="bg-white rounded-2xl border border-cream-deep p-5 sm:p-7 mb-6">
             <h2 className="font-semibold text-stone-800 mb-6">Stammbaum</h2>
 
@@ -271,7 +248,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
               </div>
             </div>
 
-            {/* Generation 2 + 3: nur wenn mindestens ein Elternteil eingetragen */}
+            {/* Generation 2 (Großeltern) + Link zur Vollansicht — nur wenn mindestens ein Elternteil eingetragen */}
             {(dam || sire) && (
               <>
                 <div className="grid grid-cols-2 gap-4">
@@ -287,28 +264,17 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
                   <div className="flex flex-col items-center"><Connector /><GrandCard dog={sire?.parentDam ?? null} role="Großmutter (v)" color="pink" /></div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-2">
-                  {[0, 1, 2, 3].map((i) => <Connector key={i} />)}
-                </div>
-                <div className="grid grid-cols-4 gap-2">
-                  {[0, 1, 2, 3].map((i) => <Connector key={i} horizontal />)}
-                </div>
-                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                  {([
-                    [(dam?.parentSire as any)?.parentSire, 'Urgroßvater'],
-                    [(dam?.parentSire as any)?.parentDam, 'Urgroßmutter'],
-                    [(dam?.parentDam as any)?.parentSire, 'Urgroßvater'],
-                    [(dam?.parentDam as any)?.parentDam, 'Urgroßmutter'],
-                    [(sire?.parentSire as any)?.parentSire, 'Urgroßvater'],
-                    [(sire?.parentSire as any)?.parentDam, 'Urgroßmutter'],
-                    [(sire?.parentDam as any)?.parentSire, 'Urgroßvater'],
-                    [(sire?.parentDam as any)?.parentDam, 'Urgroßmutter'],
-                  ] as [SimpleDog, string][]).map(([d, role], i) => (
-                    <div key={i} className="flex flex-col items-center">
-                      <div className="w-0.5 h-4 bg-stone-200" />
-                      <GreatCard dog={d} role={role} />
-                    </div>
-                  ))}
+                {/* Vollständiger Stammbaum (4 Generationen) auf eigener Seite */}
+                <div className="mt-8 text-center">
+                  <Link
+                    href={`/hund/${dog.slug || dog.id}/stammbaum`}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-forest border border-forest/30 rounded-xl px-6 py-3 hover:bg-forest hover:text-white transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Vollständiger Stammbaum
+                  </Link>
                 </div>
               </>
             )}
