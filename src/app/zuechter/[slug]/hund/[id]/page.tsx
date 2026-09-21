@@ -74,6 +74,69 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
   const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
   const bestImg = photos.find((m) => m.purpose === 'primary')?.url ?? photos.find((m) => m.isPrimary)?.url ?? photos[0]?.url ?? null
 
+  const dam = dog.parentDam
+  const sire = dog.parentSire
+
+  type ParentDogType = NonNullable<typeof dam>
+  type SimpleDog = { id: string; name: string; slug?: string | null } | null
+
+  function ParentCard({ dog: d, role, color }: { dog: ParentDogType; role: string; color: 'pink' | 'blue' }) {
+    return (
+      <Link href={`/hund/${d.slug || d.id}`}
+        className={`bg-white rounded-2xl border-2 p-4 hover:shadow-md transition-all block w-full max-w-[180px] ${
+          color === 'pink' ? 'border-pink-200 hover:border-pink-400' : 'border-blue-200 hover:border-blue-400'
+        }`}>
+        {d.media[0]?.url && (
+          <img src={d.media[0].url} alt={d.name} className="w-14 h-14 rounded-xl object-cover mx-auto mb-2" />
+        )}
+        <p className={`text-[10px] font-bold uppercase tracking-wide text-center mb-1 ${color === 'pink' ? 'text-pink-500' : 'text-blue-500'}`}>{role}</p>
+        <p className="font-serif font-bold text-stone-900 text-sm text-center leading-snug">{d.name}</p>
+        {d.titles && <p className="text-xs text-stone-400 text-center mt-1 line-clamp-1">{d.titles}</p>}
+        {d.birthDate && <p className="text-xs text-stone-300 text-center mt-1">Geb. {new Date(d.birthDate).toLocaleDateString('de-DE')}</p>}
+      </Link>
+    )
+  }
+
+  function GrandCard({ dog: d, role, color }: { dog: SimpleDog; role: string; color: 'pink' | 'blue' }) {
+    if (!d) return (
+      <div className="bg-cream rounded-xl border border-cream-deep p-3 text-center w-full">
+        <p className={`text-[10px] font-semibold mb-1 ${color === 'pink' ? 'text-pink-300' : 'text-blue-300'}`}>{role}</p>
+        <p className="text-xs text-stone-300">—</p>
+      </div>
+    )
+    return (
+      <Link href={`/hund/${d.slug || d.id}`}
+        className={`bg-white rounded-xl border-2 p-3 block text-center hover:shadow transition-all w-full ${
+          color === 'pink' ? 'border-pink-100 hover:border-pink-300' : 'border-blue-100 hover:border-blue-300'
+        }`}>
+        <p className={`text-[10px] font-semibold mb-1 ${color === 'pink' ? 'text-pink-400' : 'text-blue-400'}`}>{role}</p>
+        <p className="text-xs font-semibold text-stone-800 line-clamp-2">{d.name}</p>
+      </Link>
+    )
+  }
+
+  function GreatCard({ dog: d, role }: { dog: SimpleDog; role: string }) {
+    if (!d) return (
+      <div className="bg-cream rounded-lg border border-cream-deep p-2 text-center w-full">
+        <p className="text-[10px] text-stone-300 leading-tight">{role}</p>
+        <p className="text-xs text-stone-200 mt-0.5">—</p>
+      </div>
+    )
+    return (
+      <Link href={`/hund/${d.slug || d.id}`}
+        className="bg-white rounded-lg border border-stone-200 hover:border-stone-400 p-2 block text-center transition-colors w-full">
+        <p className="text-[10px] text-stone-400 leading-tight">{role}</p>
+        <p className="text-xs font-medium text-stone-700 line-clamp-2 leading-tight mt-0.5">{d.name}</p>
+      </Link>
+    )
+  }
+
+  function Connector({ horizontal = false }: { horizontal?: boolean }) {
+    return horizontal
+      ? <div className="flex justify-center"><div className="w-1/2 h-0.5 bg-stone-300" /></div>
+      : <div className="flex justify-center"><div className="w-0.5 h-6 bg-stone-300" /></div>
+  }
+
   return (
     <>
       <BreederNavbar />
@@ -169,51 +232,83 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
             </div>
           )}
 
-          {/* Stammbaum — 3 Generationen, responsive */}
-          <div className="bg-white rounded-2xl border border-cream-deep p-7 mb-6">
-            <h2 className="font-semibold text-stone-800 mb-4">Stammbaum</h2>
-            {/* Desktop: Tabelle */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full min-w-[700px] border-collapse">
-                <tbody>
-                  <tr>
-                    <td colSpan={8} className="text-center pb-4">
-                      <div className="inline-block"><TreeCard name={dog.name} imgUrl={bestImg} sex={dog.sex} highlight /></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={4} className="text-center pb-4 border-r border-stone-200">
-                      <TreeCard name={dog.parentSire?.name} imgUrl={dog.parentSire?.media?.[0]?.url} sex="male" label="Vater" link={dog.parentSire ? `/hund/${dog.parentSire.slug || dog.parentSire.id}` : undefined} />
-                    </td>
-                    <td colSpan={4} className="text-center pb-4">
-                      <TreeCard name={dog.parentDam?.name} imgUrl={dog.parentDam?.media?.[0]?.url} sex="female" label="Mutter" link={dog.parentDam ? `/hund/${dog.parentDam.slug || dog.parentDam.id}` : undefined} />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={2} className="text-center pb-4"><TreeCard name={dog.parentSire?.parentSire?.name} imgUrl={dog.parentSire?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentSire?.parentSire ? `/hund/${dog.parentSire.parentSire.slug || dog.parentSire.parentSire.id}` : undefined} /></td>
-                    <td colSpan={2} className="text-center pb-4 border-r border-stone-200"><TreeCard name={dog.parentSire?.parentDam?.name} imgUrl={dog.parentSire?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentSire?.parentDam ? `/hund/${dog.parentSire.parentDam.slug || dog.parentSire.parentDam.id}` : undefined} /></td>
-                    <td colSpan={2} className="text-center pb-4"><TreeCard name={dog.parentDam?.parentSire?.name} imgUrl={dog.parentDam?.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={dog.parentDam?.parentSire ? `/hund/${dog.parentDam.parentSire.slug || dog.parentDam.parentSire.id}` : undefined} /></td>
-                    <td colSpan={2} className="text-center pb-4"><TreeCard name={dog.parentDam?.parentDam?.name} imgUrl={dog.parentDam?.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={dog.parentDam?.parentDam ? `/hund/${dog.parentDam.parentDam.slug || dog.parentDam.parentDam.id}` : undefined} /></td>
-                  </tr>
-                  <tr>
-                    <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                    <td className="text-center"><TreeCard name={dog.parentSire?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                    <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                    <td className="text-center"><TreeCard name={dog.parentSire?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                    <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                    <td className="text-center"><TreeCard name={dog.parentDam?.parentSire?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                    <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentSire?.name} sex="male" label="UGV" tiny /></td>
-                    <td className="text-center"><TreeCard name={dog.parentDam?.parentDam?.parentDam?.name} sex="female" label="UGM" tiny /></td>
-                  </tr>
-                </tbody>
-              </table>
+          {/* Stammbaum — 4 Generationen als Kartenbaum (kein Scrollbereich) */}
+          <div className="bg-white rounded-2xl border border-cream-deep p-5 sm:p-7 mb-6">
+            <h2 className="font-semibold text-stone-800 mb-6">Stammbaum</h2>
+
+            {/* Generation 0: Dieser Hund */}
+            <div className="flex justify-center">
+              <div className="bg-white rounded-2xl border-2 border-forest/30 p-4 w-44 text-center shadow-sm">
+                {bestImg && <img src={bestImg} alt={dog.name} className="w-16 h-16 rounded-xl object-cover mx-auto mb-2" />}
+                <p className="text-[10px] text-stone-400 uppercase tracking-wide mb-1">{dog.sex === 'male' ? 'Rüde' : 'Hündin'}</p>
+                <p className="font-serif font-bold text-stone-900 text-sm leading-snug">{dog.name}</p>
+                <p className="text-[10px] text-stone-400 mt-0.5">{dog.breed.nameDe}</p>
+              </div>
             </div>
-            {/* Mobile: vertikal gestapelt */}
-            <div className="md:hidden space-y-6">
-              <div className="flex justify-center"><TreeCard name={dog.name} imgUrl={bestImg} sex={dog.sex} highlight /></div>
-              <PedigreeBranch parent={dog.parentSire} label="Vater" sex="male" />
-              <PedigreeBranch parent={dog.parentDam} label="Mutter" sex="female" />
+            <Connector />
+            <Connector horizontal />
+
+            {/* Generation 1: Eltern */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col items-center">
+                <Connector />
+                {dam
+                  ? <ParentCard dog={dam} role="Mutter" color="pink" />
+                  : <div className="bg-cream rounded-2xl border border-cream-deep p-4 w-full text-center text-stone-400 text-sm">Mutter nicht eingetragen</div>}
+              </div>
+              <div className="flex flex-col items-center">
+                <Connector />
+                {sire
+                  ? <ParentCard dog={sire} role="Vater" color="blue" />
+                  : <div className="bg-cream rounded-2xl border border-cream-deep p-4 w-full text-center text-stone-400 text-sm">Vater nicht eingetragen</div>}
+              </div>
             </div>
+
+            {/* Generation 2 + 3: nur wenn mindestens ein Elternteil eingetragen */}
+            {(dam || sire) && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <Connector /><Connector />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Connector horizontal /><Connector horizontal />
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="flex flex-col items-center"><Connector /><GrandCard dog={dam?.parentSire ?? null} role="Großvater (m)" color="blue" /></div>
+                  <div className="flex flex-col items-center"><Connector /><GrandCard dog={dam?.parentDam ?? null} role="Großmutter (m)" color="pink" /></div>
+                  <div className="flex flex-col items-center"><Connector /><GrandCard dog={sire?.parentSire ?? null} role="Großvater (v)" color="blue" /></div>
+                  <div className="flex flex-col items-center"><Connector /><GrandCard dog={sire?.parentDam ?? null} role="Großmutter (v)" color="pink" /></div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-2">
+                  {[0, 1, 2, 3].map((i) => <Connector key={i} />)}
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {[0, 1, 2, 3].map((i) => <Connector key={i} horizontal />)}
+                </div>
+                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+                  {([
+                    [(dam?.parentSire as any)?.parentSire, 'Urgroßvater'],
+                    [(dam?.parentSire as any)?.parentDam, 'Urgroßmutter'],
+                    [(dam?.parentDam as any)?.parentSire, 'Urgroßvater'],
+                    [(dam?.parentDam as any)?.parentDam, 'Urgroßmutter'],
+                    [(sire?.parentSire as any)?.parentSire, 'Urgroßvater'],
+                    [(sire?.parentSire as any)?.parentDam, 'Urgroßmutter'],
+                    [(sire?.parentDam as any)?.parentSire, 'Urgroßvater'],
+                    [(sire?.parentDam as any)?.parentDam, 'Urgroßmutter'],
+                  ] as [SimpleDog, string][]).map(([d, role], i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <div className="w-0.5 h-4 bg-stone-200" />
+                      <GreatCard dog={d} role={role} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <p className="text-xs text-stone-400 mt-8 text-center">
+              Nur auf Whelply eingetragene und verknüpfte Hunde sind im Stammbaum sichtbar.
+            </p>
           </div>
 
         </BreederPageContent>
@@ -225,66 +320,5 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
         socialTiktok={breeder.socialTiktok} socialYoutube={breeder.socialYoutube} website={breeder.website}
       />
     </>
-  )
-}
-
-function TreeCard({ name, imgUrl, sex, label, link, highlight, small, tiny }: {
-  name?: string | null; imgUrl?: string | null; sex?: string; label?: string; link?: string; highlight?: boolean; small?: boolean; tiny?: boolean
-}) {
-  const borderColor = highlight ? 'border-forest/40 bg-forest/5' : sex === 'female' ? 'border-pink-200' : 'border-blue-200'
-  const labelColor = sex === 'female' ? 'text-pink-400' : 'text-blue-400'
-  const hover = link ? (sex === 'female' ? 'hover:border-pink-400 hover:shadow' : 'hover:border-blue-400 hover:shadow') : ''
-
-  if (tiny) {
-    const inner = (
-      <div className={`rounded-lg border ${name ? borderColor : 'border-dashed border-stone-200'} px-2 py-1.5 text-center mx-0.5 ${hover} transition-all`}>
-        <p className={`text-[8px] ${labelColor}`}>{label}</p>
-        <p className="text-[9px] font-medium text-stone-600 truncate">{name ?? '—'}</p>
-      </div>
-    )
-    return link && name ? <Link href={link} className="block">{inner}</Link> : inner
-  }
-
-  const inner = (
-    <div className={`inline-block ${small ? 'w-28' : 'w-36'} rounded-xl border-2 ${name ? borderColor : 'border-dashed border-stone-200'} ${hover} bg-white p-2 text-center transition-all`}>
-      {imgUrl && <img src={imgUrl} alt={name ?? ''} className={`${small ? 'w-8 h-8' : 'w-11 h-11'} rounded-lg object-cover mx-auto mb-1`} />}
-      {label && <p className={`text-[9px] ${labelColor}`}>{label}</p>}
-      <p className={`font-bold text-stone-900 truncate ${small ? 'text-[10px]' : 'text-xs'}`}>{name ?? '—'}</p>
-      {link && name && <p className={`text-[8px] ${labelColor}`}>{'→'}</p>}
-    </div>
-  )
-  return link && name ? <Link href={link} className="inline-block">{inner}</Link> : inner
-}
-
-function PedigreeBranch({ parent, label, sex }: { parent: any; label: string; sex: string }) {
-  const borderColor = sex === 'female' ? 'border-pink-100' : 'border-blue-100'
-  return (
-    <div className={`border-l-4 ${borderColor} pl-4 space-y-3`}>
-      <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide">{label}</p>
-      <TreeCard name={parent?.name} imgUrl={parent?.media?.[0]?.url} sex={sex} link={parent ? `/hund/${parent.slug || parent.id}` : undefined} />
-      {parent && (
-        <div className="ml-4 space-y-3">
-          <div className="flex flex-wrap gap-2">
-            <TreeCard name={parent.parentSire?.name} imgUrl={parent.parentSire?.media?.[0]?.url} sex="male" label="GV" small link={parent.parentSire ? `/hund/${parent.parentSire.slug || parent.parentSire.id}` : undefined} />
-            <TreeCard name={parent.parentDam?.name} imgUrl={parent.parentDam?.media?.[0]?.url} sex="female" label="GM" small link={parent.parentDam ? `/hund/${parent.parentDam.slug || parent.parentDam.id}` : undefined} />
-          </div>
-          <div className="flex flex-wrap gap-1 ml-2">
-            {parent.parentSire?.parentSire && <MiniCard name={parent.parentSire.parentSire.name} label="UGV" />}
-            {parent.parentSire?.parentDam && <MiniCard name={parent.parentSire.parentDam.name} label="UGM" />}
-            {parent.parentDam?.parentSire && <MiniCard name={parent.parentDam.parentSire.name} label="UGV" />}
-            {parent.parentDam?.parentDam && <MiniCard name={parent.parentDam.parentDam.name} label="UGM" />}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function MiniCard({ name, label }: { name: string; label: string }) {
-  return (
-    <div className="bg-cream rounded-lg border border-cream-deep px-2 py-1 text-center w-20">
-      <p className="text-[8px] text-stone-400">{label}</p>
-      <p className="text-[9px] font-medium text-stone-600 truncate">{name}</p>
-    </div>
   )
 }
