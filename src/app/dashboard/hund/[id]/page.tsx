@@ -45,6 +45,7 @@ export default async function HundBearbeitenPage({
       dog={{
         id: dog.id,
         name: dog.name,
+        slug: dog.slug,
         kennelName: breeder.kennelName,
         breedId: dog.breedId,
         sex: dog.sex,
