@@ -72,6 +72,10 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
 
   if (!dog || dog.breederId !== breeder.id) notFound()
 
+  // In eigene Konstante ziehen: TypeScript-Narrowing gilt nicht in den
+  // verschachtelten Komponenten-Funktionen (hoisted function declarations)
+  const currentBreederId = breeder.id
+
   const tabs = await getBreederTabs(breeder.id)
   const litters = dog.sex === 'male' ? dog.littersAsSire : dog.littersAsDam
   const photos = dog.media.filter((m) => m.purpose !== 'dog_bg')
@@ -85,7 +89,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
 
   function ParentCard({ dog: d, role, color }: { dog: ParentDogType; role: string; color: 'pink' | 'blue' }) {
     return (
-      <Link href={getDogLink(d, breeder.id)}
+      <Link href={getDogLink(d, currentBreederId)}
         className={`bg-white rounded-2xl border-2 p-4 hover:shadow-md transition-all block w-full max-w-[180px] ${
           color === 'pink' ? 'border-pink-200 hover:border-pink-400' : 'border-blue-200 hover:border-blue-400'
         }`}>
@@ -108,7 +112,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
       </div>
     )
     return (
-      <Link href={getDogLink(d, breeder.id)}
+      <Link href={getDogLink(d, currentBreederId)}
         className={`bg-white rounded-xl border-2 p-3 block text-center hover:shadow transition-all w-full ${
           color === 'pink' ? 'border-pink-100 hover:border-pink-300' : 'border-blue-100 hover:border-blue-300'
         }`}>
@@ -126,7 +130,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
       </div>
     )
     return (
-      <Link href={getDogLink(d, breeder.id)}
+      <Link href={getDogLink(d, currentBreederId)}
         className="bg-white rounded-lg border border-stone-200 hover:border-stone-400 p-2 block text-center transition-colors w-full">
         <p className="text-[10px] text-stone-400 leading-tight">{role}</p>
         <p className="text-xs font-medium text-stone-700 line-clamp-2 leading-tight mt-0.5">{d.name}</p>
