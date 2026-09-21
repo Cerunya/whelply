@@ -14,6 +14,7 @@ type Breed = { id: number; nameDe: string; slug: string }
 type DogData = {
   id: string
   name: string
+  slug?: string | null
   breedId: number
   sex: string
   kennelName?: string
@@ -249,7 +250,7 @@ export default function HundEditForm({ dog, breeds, allDogs = [] }: { dog: DogDa
             <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
               <p className="font-medium mb-2">✓ Gespeichert.</p>
               <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-2">
-                <Link href={dog.isStud && dog.sex === 'male' ? `/hund/${dog.id}` : dog.kennelName ? `/zuechter/${slugify(dog.kennelName)}/hund/${dog.id}` : `/hund/${dog.id}`}
+                <Link href={dog.isStud && dog.sex === 'male' ? `/hund/${dog.slug || dog.id}` : dog.kennelName ? `/zuechter/${slugify(dog.kennelName)}/hund/${dog.slug || dog.id}` : `/hund/${dog.slug || dog.id}`}
                   className="inline-flex items-center justify-center gap-1 text-xs font-semibold bg-white border border-green-200 text-green-700 rounded-lg px-3 py-1.5 hover:bg-green-100 transition-colors">
                   Profil ansehen →
                 </Link>
