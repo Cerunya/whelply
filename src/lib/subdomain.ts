@@ -1,3 +1,5 @@
+import { slugify } from './slugify'
+
 /**
  * Subdomain-Utilities für Whelply
  *
@@ -70,4 +72,33 @@ export function validateSubdomain(value: string): string | null {
   if (!SUBDOMAIN_REGEX.test(value)) return 'Nur Kleinbuchstaben, Ziffern und Bindestriche erlaubt.'
   if (RESERVED.has(value)) return 'Diese Subdomain ist reserviert.'
   return null
+}
+
+// ── Hunde-Links aus Züchter-Kontext ─────────────────────────────────────
+
+/** Minimale Daten, um einen Hund züchterübergreifend zu verlinken. */
+export type DogLinkTarget = {
+  id: string
+  slug?: string | null
+  breederId?: string | null
+  breeder?: { subdomain: string | null; kennelName: string } | null
+}
+
+/**
+ * Link zu einem Hund aus Züchter-Kontext (Subdomain-Seiten, Wurfs-Seiten, Stammbaum):
+ * - Hund desselben Züchters → relativer Pfad (bleibt im aktuellen Kontext,
+ *   funktioniert auf Subdomain und Hauptdomain gleichermaßen)
+ * - Hund eines anderen Züchters → kanonische URL (Subdomain bevorzugt,
+ *   sonst /zuechter/slug auf der Hauptdomain)
+ */
+export function getDogLink(dog: DogLinkTarget, currentBreederId?: string | null): string {
+  const dogSlug = dog.slug || dog.id
+  if (currentBreederId && dog.breederId === currentBreederId) {
+    return `/hund/${dogSlug}`
+  }
+  if (dog.breeder) {
+    return getBreederCanonicalUrl(dog.breeder.subdomain, slugify(dog.breeder.kennelName), `/hund/${dogSlug}`)
+  }
+  const base = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
+  return `${base}/hund/${dogSlug}`
 }
