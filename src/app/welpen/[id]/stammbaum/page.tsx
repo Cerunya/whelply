@@ -62,6 +62,10 @@ export default async function StammbaumPage({
 
   if (!listing || !listing.litter) notFound()
 
+  // In eigene Konstante ziehen: TypeScript-Narrowing gilt nicht in den
+  // verschachtelten Komponenten-Funktionen (hoisted function declarations)
+  const listingBreederId = listing.breederId
+
   const pupilName = listing.title || `Welpe`
   const photo = listing.media[0]?.url
   const sex = listing.sex === 'male' ? 'Rüde' : listing.sex === 'female' ? 'Hündin' : ''
@@ -72,7 +76,7 @@ export default async function StammbaumPage({
 
   function ParentCard({ dog, role, color }: { dog: NonNullable<typeof dam>; role: string; color: 'pink' | 'blue' }) {
     return (
-      <Link href={getDogLink(dog, listing.breederId)}
+      <Link href={getDogLink(dog, listingBreederId)}
         className={`bg-white rounded-2xl border-2 p-4 hover:shadow-md transition-all block ${
           color === 'pink' ? 'border-pink-200 hover:border-pink-400' : 'border-blue-200 hover:border-blue-400'
         }`}>
@@ -95,7 +99,7 @@ export default async function StammbaumPage({
       </div>
     )
     return (
-      <Link href={getDogLink(dog, listing.breederId)}
+      <Link href={getDogLink(dog, listingBreederId)}
         className={`bg-white rounded-xl border-2 p-3 block text-center hover:shadow transition-all ${
           color === 'pink' ? 'border-pink-100 hover:border-pink-300' : 'border-blue-100 hover:border-blue-300'
         }`}>
@@ -113,7 +117,7 @@ export default async function StammbaumPage({
       </div>
     )
     return (
-      <Link href={getDogLink(dog, listing.breederId)}
+      <Link href={getDogLink(dog, listingBreederId)}
         className="bg-white rounded-lg border border-stone-200 hover:border-stone-400 p-2 block text-center transition-colors">
         <p className="text-xs text-stone-400 leading-tight">{role}</p>
         <p className="text-xs font-medium text-stone-700 line-clamp-2 leading-tight mt-0.5">{dog.name}</p>
