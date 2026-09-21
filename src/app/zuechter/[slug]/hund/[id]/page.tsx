@@ -9,6 +9,7 @@ import BreederPageContent from '@/components/BreederPageContent'
 import BreederContactSidebar from '@/components/BreederContactSidebar'
 import DogPhotoGrid from '@/components/DogPhotoGrid'
 import { getBreederBySlug, getBreederTabs } from '@/lib/breeder'
+import { getDogLink, type DogLinkTarget } from '@/lib/subdomain'
 import { generateBreederMetadata } from '@/lib/breeder-metadata'
 
 export async function generateMetadata({ params }: { params: { slug: string; id: string } }) {
@@ -22,19 +23,21 @@ const LITTER_STATUS: Record<string, string> = {
   available: 'Abgabebereit', sold_out: 'Vergeben',
 }
 
-// Level 3: Urgroßeltern — nur Name+ID
-const ggpSelect = { select: { id: true, name: true, slug: true } }
+// Level 3: Urgroßeltern — Name+ID+Besitzer (für züchterübergreifende Links)
+const ggpSelect = { select: { id: true, name: true, slug: true, breederId: true, breeder: { select: { subdomain: true, kennelName: true } } } }
 
-// Level 2: Großeltern — Bild + deren Eltern (Urgroßeltern)
+// Level 2: Großeltern — Bild + Besitzer + deren Eltern (Urgroßeltern)
 const gpInclude = {
   media: { take: 1, select: { url: true } },
+  breeder: { select: { subdomain: true, kennelName: true } },
   parentSire: ggpSelect,
   parentDam: ggpSelect,
 }
 
-// Level 1: Eltern — Bild + deren Eltern (Großeltern) die wiederum Urgroßeltern haben
+// Level 1: Eltern — Bild + Besitzer + deren Eltern (Großeltern) die wiederum Urgroßeltern haben
 const parentInclude = {
   media: { take: 1, select: { url: true } },
+  breeder: { select: { subdomain: true, kennelName: true } },
   parentSire: { include: gpInclude },
   parentDam: { include: gpInclude },
 }
@@ -78,11 +81,11 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
   const sire = dog.parentSire
 
   type ParentDogType = NonNullable<typeof dam>
-  type SimpleDog = { id: string; name: string; slug?: string | null } | null
+  type SimpleDog = (DogLinkTarget & { name: string }) | null
 
   function ParentCard({ dog: d, role, color }: { dog: ParentDogType; role: string; color: 'pink' | 'blue' }) {
     return (
-      <Link href={`/hund/${d.slug || d.id}`}
+      <Link href={getDogLink(d, breeder.id)}
         className={`bg-white rounded-2xl border-2 p-4 hover:shadow-md transition-all block w-full max-w-[180px] ${
           color === 'pink' ? 'border-pink-200 hover:border-pink-400' : 'border-blue-200 hover:border-blue-400'
         }`}>
@@ -105,7 +108,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
       </div>
     )
     return (
-      <Link href={`/hund/${d.slug || d.id}`}
+      <Link href={getDogLink(d, breeder.id)}
         className={`bg-white rounded-xl border-2 p-3 block text-center hover:shadow transition-all w-full ${
           color === 'pink' ? 'border-pink-100 hover:border-pink-300' : 'border-blue-100 hover:border-blue-300'
         }`}>
@@ -123,7 +126,7 @@ export default async function ZuechterHundPage({ params }: { params: { slug: str
       </div>
     )
     return (
-      <Link href={`/hund/${d.slug || d.id}`}
+      <Link href={getDogLink(d, breeder.id)}
         className="bg-white rounded-lg border border-stone-200 hover:border-stone-400 p-2 block text-center transition-colors w-full">
         <p className="text-[10px] text-stone-400 leading-tight">{role}</p>
         <p className="text-xs font-medium text-stone-700 line-clamp-2 leading-tight mt-0.5">{d.name}</p>
