@@ -37,6 +37,7 @@ export default async function AdminVerifizierungPage() {
       fullName: true,
       idDocKey: true,
       idDocBackKey: true,
+      idDocSelfieKey: true,
       idDocRequestedAt: true,
       user: { select: { email: true } },
     },
@@ -81,6 +82,7 @@ export default async function AdminVerifizierungPage() {
               email: p.user.email,
               docKey: p.idDocKey!,
               backKey: p.idDocBackKey,
+              selfieKey: p.idDocSelfieKey,
               requestedAt: p.idDocRequestedAt?.toISOString() ?? '',
             }))}
           />
