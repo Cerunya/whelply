@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createDiditSession, getDiditSession } from '@/lib/didit'
+import { getIdVerificationMode } from '@/lib/id-verification'
 
 const MONTHLY_LIMIT = 500
 
@@ -16,10 +17,14 @@ async function getMonthlyCount(): Promise<number> {
   })
 }
 
-// GET: Monatliches Limit prüfen
+// GET: Verfügbarkeit prüfen (Admin-Schalter 'manual' → Didit deaktiviert)
 export async function GET() {
+  const mode = await getIdVerificationMode()
+  if (mode === 'manual') {
+    return NextResponse.json({ count: 0, limit: MONTHLY_LIMIT, available: false, mode })
+  }
   const count = await getMonthlyCount()
-  return NextResponse.json({ count, limit: MONTHLY_LIMIT, available: count < MONTHLY_LIMIT })
+  return NextResponse.json({ count, limit: MONTHLY_LIMIT, available: count < MONTHLY_LIMIT, mode })
 }
 
 // POST: Didit-Session erstellen
@@ -33,6 +38,12 @@ export async function POST() {
   // Bereits per Didit verifiziert?
   if (breeder.diditStatus === 'approved') {
     return NextResponse.json({ error: 'ID bereits verifiziert' }, { status: 400 })
+  }
+
+  // Admin-Schalter: manuelle Prüfung aktiv → Didit deaktiviert
+  const mode = await getIdVerificationMode()
+  if (mode === 'manual') {
+    return NextResponse.json({ error: 'Die Online-Prüfung ist derzeit deaktiviert. Bitte nutze die manuelle Prüfung.' }, { status: 403 })
   }
 
   // Monatslimit prüfen
