@@ -53,6 +53,8 @@ export default async function ProfilPage() {
           verifiedAt: breeder.verifiedAt?.toISOString() ?? null,
           rejectReason: breeder.verificationRejectReason ?? null,
           diditStatus: breeder.diditStatus ?? null,
+          idDocPending: !!breeder.idDocKey,
+          idDocRejectReason: breeder.idDocRejectReason ?? null,
         }}
       />
       <div className="max-w-xl mx-auto px-4 pb-12">
