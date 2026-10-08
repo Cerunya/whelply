@@ -211,6 +211,7 @@ model BreederProfile {
   // gesetzt, damit alle bestehenden "ID geprüft"-Anzeigen unverändert greifen.
   idDocKey           String?   @map("id_doc_key")
   idDocBackKey       String?   @map("id_doc_back_key")
+  idDocSelfieKey     String?   @map("id_doc_selfie_key")
   idDocRequestedAt   DateTime? @map("id_doc_requested_at")
   idDocRejectReason  String?   @map("id_doc_reject_reason")
   bio               String?           @db.Text
