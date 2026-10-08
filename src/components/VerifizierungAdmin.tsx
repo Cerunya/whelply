@@ -20,6 +20,7 @@ type IdPendingItem = {
   email: string
   docKey: string
   backKey: string | null
+  selfieKey: string | null
   requestedAt: string
 }
 
@@ -131,7 +132,7 @@ export default function VerifizierungAdmin({ pending, idPending }: { pending: Pe
           <div>
             <h2 className="font-serif text-lg font-bold text-stone-900">ID-Prüfungen ({idPending.length})</h2>
             <p className="text-xs text-stone-500 mt-1">
-              Prüfe, ob der Name auf dem Ausweis zum Profilnamen passt. Die Dokumente werden nach deiner Entscheidung sofort gelöscht.
+              Prüfe, ob der Name auf dem Ausweis zum Profilnamen passt und ob das Selfie zur Person auf dem Ausweis passt. Die Dokumente werden nach deiner Entscheidung sofort gelöscht.
             </p>
           </div>
           {idPending.map((item) => (
@@ -147,9 +148,10 @@ export default function VerifizierungAdmin({ pending, idPending }: { pending: Pe
                 </div>
               </div>
 
-              <div className={`grid gap-4 mb-4 ${item.backKey ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+              <div className="grid gap-4 mb-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 <DocPreview docKey={item.docKey} label="Ausweis Vorderseite" />
                 {item.backKey && <DocPreview docKey={item.backKey} label="Ausweis Rückseite" />}
+                {item.selfieKey && <DocPreview docKey={item.selfieKey} label="Selfie mit Ausweis" />}
               </div>
 
               <ActionButtons apiPath="/api/admin/id-verifizierung" itemId={item.id} />
