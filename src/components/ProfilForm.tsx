@@ -45,7 +45,7 @@ type BreederData = {
   damVisitPossible: boolean
 }
 
-export default function ProfilForm({ breeder, verification }: { breeder: BreederData; verification?: { level: string; verifiedAt: string | null; rejectReason: string | null; diditStatus?: string | null } }) {
+export default function ProfilForm({ breeder, verification }: { breeder: BreederData; verification?: { level: string; verifiedAt: string | null; rejectReason: string | null; diditStatus?: string | null; idDocPending?: boolean; idDocRejectReason?: string | null } }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -124,6 +124,8 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
             verifiedAt={verification.verifiedAt}
             rejectReason={verification.rejectReason}
             diditStatus={verification.diditStatus ?? null}
+            idDocPending={verification.idDocPending ?? false}
+            idDocRejectReason={verification.idDocRejectReason ?? null}
           />
         </div>
       )}
