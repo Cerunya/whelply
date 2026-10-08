@@ -7,9 +7,11 @@ type Props = {
   verifiedAt: string | null
   rejectReason: string | null
   diditStatus: string | null
+  idDocPending?: boolean
+  idDocRejectReason?: string | null
 }
 
-export default function VerifizierungSection({ verificationLevel, verifiedAt, rejectReason, diditStatus: initialDiditStatus }: Props) {
+export default function VerifizierungSection({ verificationLevel, verifiedAt, rejectReason, diditStatus: initialDiditStatus, idDocPending = false, idDocRejectReason = null }: Props) {
   const [diditStatus, setDiditStatus] = useState(initialDiditStatus)
   const [diditLoading, setDiditLoading] = useState(false)
   const [diditAvailable, setDiditAvailable] = useState(true)
@@ -18,6 +20,12 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
   const [error, setError] = useState('')
   const [docSuccess, setDocSuccess] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  // Manuelle ID-Prüfung (Ausweis-Upload)
+  const [idManualPending, setIdManualPending] = useState(idDocPending)
+  const [idUploading, setIdUploading] = useState(false)
+  const [idConsent, setIdConsent] = useState(false)
+  const frontRef = useRef<HTMLInputElement>(null)
+  const backRef = useRef<HTMLInputElement>(null)
 
   // Prüfe ob Didit-Checks diesen Monat noch verfügbar sind
   useEffect(() => {
@@ -65,6 +73,31 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
     }
   }
 
+  async function handleIdUpload() {
+    const front = frontRef.current?.files?.[0]
+    const back = backRef.current?.files?.[0]
+    if (!front) return setError('Bitte lade mindestens die Vorderseite deines Ausweises hoch.')
+    if (!idConsent) return setError('Bitte bestätige die Einwilligung.')
+    setError('')
+    setIdUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('front', front)
+      if (back) formData.append('back', back)
+      formData.append('consent', 'true')
+      const res = await fetch('/api/verifizierung/id', { method: 'POST', body: formData })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Fehler beim Hochladen')
+      }
+      setIdManualPending(true)
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setIdUploading(false)
+    }
+  }
+
   // ── Vollständig verifiziert ──
   if (verificationLevel === 'doc_verified') {
     return (
@@ -84,7 +117,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
           </span>
           <span className="text-green-700">📄 Züchterstatus bestätigt</span>
         </div>
-        {diditStatus !== 'approved' && diditAvailable && (
+        {diditStatus !== 'approved' && diditAvailable && !idManualPending && (
           <div className="mt-4 pt-4 border-t border-green-200">
             <p className="text-xs text-green-700 mb-2">Möchtest du zusätzlich deine Identität per Ausweischeck bestätigen?</p>
             <button onClick={startDiditCheck} disabled={diditLoading}
@@ -108,7 +141,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
             <p className="text-sm text-amber-600">Dein Dokument wird von unserem Team geprüft. Das dauert in der Regel 1–2 Werktage.</p>
           </div>
         </div>
-        {diditStatus !== 'approved' && diditAvailable && (
+        {diditStatus !== 'approved' && diditAvailable && !idManualPending && (
           <div className="mt-4 pt-4 border-t border-amber-200">
             <p className="text-xs text-amber-700 mb-2">Du kannst in der Zwischenzeit deine Identität per Ausweischeck bestätigen.</p>
             <button onClick={startDiditCheck} disabled={diditLoading}
@@ -152,15 +185,9 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
 
           {idDone ? (
             <p className="text-sm text-green-700 ml-10">Identität bestätigt</p>
-          ) : idDeclined ? (
+          ) : idManualPending ? (
             <div className="ml-10">
-              <p className="text-sm text-red-600 mb-2">ID-Prüfung fehlgeschlagen. Bitte versuche es erneut.</p>
-              {diditAvailable && (
-                <button onClick={startDiditCheck} disabled={diditLoading}
-                  className="bg-forest text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-forest-light disabled:opacity-40">
-                  {diditLoading ? 'Wird gestartet...' : 'Erneut versuchen'}
-                </button>
-              )}
+              <p className="text-sm text-amber-600">Dein Ausweis wird manuell geprüft. Das dauert in der Regel 1–2 Werktage.</p>
             </div>
           ) : idPending ? (
             <div className="ml-10">
@@ -185,31 +212,83 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
                 {diditLoading ? 'Wird geprüft...' : 'Status aktualisieren'}
               </button>
             </div>
-          ) : diditAvailable ? (
-            <div className="ml-10">
-              <p className="text-xs text-stone-500 mb-3">
-                Verifiziere deine Identität mit einem gültigen Ausweisdokument und einem kurzen Selfie. Dauert ca. 30 Sekunden.
-              </p>
-              <button onClick={startDiditCheck} disabled={diditLoading}
-                className="bg-forest text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-forest-light disabled:opacity-40">
-                {diditLoading ? 'Wird gestartet...' : 'ID-Prüfung starten'}
-              </button>
-            </div>
           ) : (
-            <p className="text-xs text-stone-400 ml-10">
-              Die automatische ID-Prüfung ist diesen Monat nicht verfügbar. Du kannst direkt mit Schritt 2 fortfahren.
-            </p>
+            <div className="ml-10 space-y-4">
+              {idDeclined && (
+                <p className="text-sm text-red-600">Die automatische ID-Prüfung ist fehlgeschlagen. Bitte versuche es erneut oder nutze die manuelle Prüfung unten.</p>
+              )}
+              {idDocRejectReason && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                  <p className="font-semibold mb-0.5">ID-Prüfung abgelehnt</p>
+                  <p>{idDocRejectReason}</p>
+                </div>
+              )}
+
+              {diditAvailable && (
+                <div>
+                  <p className="text-xs font-semibold text-stone-700 mb-1">Option 1: Online-Prüfung</p>
+                  <p className="text-xs text-stone-500 mb-3">
+                    Verifiziere deine Identität mit einem gültigen Ausweisdokument und einem kurzen Selfie. Dauert ca. 30 Sekunden.
+                  </p>
+                  <button onClick={startDiditCheck} disabled={diditLoading}
+                    className="bg-forest text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-forest-light disabled:opacity-40">
+                    {diditLoading ? 'Wird gestartet...' : 'Online ID-Prüfung starten'}
+                  </button>
+                </div>
+              )}
+
+              {diditAvailable && <div className="border-t border-cream-deep" />}
+
+              <div>
+                <p className="text-xs font-semibold text-stone-700 mb-1">
+                  {diditAvailable ? 'Option 2: Manuelle Prüfung' : 'Manuelle Prüfung'}
+                </p>
+                <p className="text-xs text-stone-500 mb-3">
+                  Lade dein Ausweisdokument (Personalausweis oder Reisepass) hoch — wir prüfen es von Hand.
+                  Die Dateien werden nach der Prüfung automatisch gelöscht.
+                </p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-stone-600 mb-1">Vorderseite *</label>
+                    <input ref={frontRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
+                      className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-stone-600 mb-1">Rückseite (optional)</label>
+                    <input ref={backRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
+                      className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
+                  </div>
+                  <p className="text-xs text-stone-400">JPG, PNG, WebP oder PDF · max. 10 MB pro Datei</p>
+
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" checked={idConsent} onChange={(e) => setIdConsent(e.target.checked)}
+                      className="w-4 h-4 mt-0.5 rounded border-stone-300 text-forest focus:ring-forest" />
+                    <span className="text-xs text-stone-500 leading-relaxed">
+                      Ich willige ein, dass dieses Dokument ausschließlich zur Prüfung meiner Identität
+                      verwendet und nach der Entscheidung automatisch gelöscht wird.
+                    </span>
+                  </label>
+
+                  {error && <p className="text-sm text-red-600">{error}</p>}
+
+                  <button onClick={handleIdUpload} disabled={idUploading}
+                    className="border border-forest text-forest text-xs font-bold px-4 py-2 rounded-lg hover:bg-forest/5 disabled:opacity-40">
+                    {idUploading ? 'Wird hochgeladen...' : 'Ausweis einreichen'}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
         {/* ── Schritt 2: Dokument-Upload ── */}
-        <div className={`rounded-xl border p-5 ${!idDone && diditAvailable ? 'border-cream-deep opacity-50' : 'border-cream-deep'}`}>
+        <div className={`rounded-xl border p-5 ${!idDone && !idManualPending && diditAvailable ? 'border-cream-deep opacity-50' : 'border-cream-deep'}`}>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-7 h-7 rounded-full bg-stone-300 flex items-center justify-center text-white text-xs font-bold">2</div>
             <p className="font-semibold text-stone-900 text-sm">Züchterstatus belegen</p>
           </div>
 
-          {(!idDone && diditAvailable) ? (
+          {(!idDone && !idManualPending && diditAvailable) ? (
             <p className="text-xs text-stone-400 ml-10">Bitte schließe zuerst die Identitätsprüfung ab.</p>
           ) : (
             <div className="ml-10 space-y-3">
