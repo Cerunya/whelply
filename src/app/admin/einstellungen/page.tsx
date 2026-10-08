@@ -3,7 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import EinstellungenForm from '@/components/EinstellungenForm'
 import BildOptimierung from '@/components/BildOptimierung'
+import IdVerifizierungSchalter from '@/components/IdVerifizierungSchalter'
 import { getBoostSettings } from '@/lib/boost'
+import { getIdVerificationMode } from '@/lib/id-verification'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +17,7 @@ export default async function AdminEinstellungenPage() {
   if (!user || user.role !== 'admin') redirect('/')
 
   const settings = await getBoostSettings()
+  const idMode = await getIdVerificationMode()
 
   return (
     <div className="min-h-screen bg-cream">
@@ -22,7 +25,7 @@ export default async function AdminEinstellungenPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-serif text-2xl font-bold text-stone-900">Einstellungen</h1>
-            <p className="text-sm text-stone-500 mt-1">Boost-Preis, Frequenz-Deckel und Wartung</p>
+            <p className="text-sm text-stone-500 mt-1">Boost-Preis, Frequenz-Deckel, ID-Verifizierung und Wartung</p>
           </div>
           <a href="/admin" className="text-sm text-forest hover:underline">← Admin-Dashboard</a>
         </div>
@@ -32,6 +35,9 @@ export default async function AdminEinstellungenPage() {
           initialPriceCents={settings.priceCents}
           initialCooldownDays={settings.cooldownDays}
         />
+
+        <h2 className="font-serif text-lg font-bold text-stone-900 mt-10 mb-3">ID-Verifizierung</h2>
+        <IdVerifizierungSchalter initialMode={idMode} />
 
         <h2 className="font-serif text-lg font-bold text-stone-900 mt-10 mb-3">Bilder-Optimierung</h2>
         <BildOptimierung />
