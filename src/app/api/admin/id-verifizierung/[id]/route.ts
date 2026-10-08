@@ -16,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const breeder = await prisma.breederProfile.findUnique({
     where: { id: params.id },
-    select: { id: true, idDocKey: true, idDocBackKey: true },
+    select: { id: true, idDocKey: true, idDocBackKey: true, idDocSelfieKey: true },
   })
   if (!breeder) return NextResponse.json({ error: 'Züchter nicht gefunden' }, { status: 404 })
   if (!breeder.idDocKey) {
@@ -30,7 +30,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   // Dokumente sofort aus dem Storage löschen (DSGVO) — unabhängig von der Entscheidung
-  for (const key of [breeder.idDocKey, breeder.idDocBackKey]) {
+  for (const key of [breeder.idDocKey, breeder.idDocBackKey, breeder.idDocSelfieKey]) {
     if (!key) continue
     try {
       await s3.send(new DeleteObjectCommand({ Bucket: MINIO_BUCKET, Key: key }))
@@ -49,6 +49,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         diditStatus: 'approved',
         idDocKey: null,
         idDocBackKey: null,
+        idDocSelfieKey: null,
         idDocRejectReason: null,
       },
     })
@@ -58,6 +59,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       data: {
         idDocKey: null,
         idDocBackKey: null,
+        idDocSelfieKey: null,
         idDocRejectReason: typeof body.reason === 'string' && body.reason.trim()
           ? body.reason.trim()
           : 'Ausweisdokument konnte nicht bestätigt werden.',
