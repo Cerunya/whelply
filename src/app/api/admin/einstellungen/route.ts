@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma'
 
 // GET/PATCH /api/admin/einstellungen — Plattform-Einstellungen (nur Admins)
 // Gespeichert in platform_settings (Key-Value). Bekannte Keys:
-//   boost_price_cents   — Preis der 24h-Topanzeige in Cent (50–50000)
-//   boost_cooldown_days — Frequenz-Deckel in Tagen (1–30)
+//   boost_price_cents     — Preis der 24h-Topanzeige in Cent (50–50000)
+//   boost_cooldown_days   — Frequenz-Deckel in Tagen (1–30)
+//   id_verification_mode  — 'didit' (Online-Prüfung) | 'manual' (Ausweis-Upload)
 
 async function requireAdmin() {
   const session = await auth()
@@ -22,7 +23,7 @@ export async function GET() {
   if (!admin) return NextResponse.json({ error: 'Nur Admins' }, { status: 403 })
 
   const rows = await prisma.platformSetting.findMany({
-    where: { key: { in: ['boost_price_cents', 'boost_cooldown_days'] } },
+    where: { key: { in: ['boost_price_cents', 'boost_cooldown_days', 'id_verification_mode'] } },
   })
   const map: Record<string, string> = {}
   for (const r of rows) map[r.key] = r.value
@@ -59,6 +60,16 @@ export async function PATCH(req: NextRequest) {
       )
     }
     updates.push({ key: 'boost_cooldown_days', value: String(v) })
+  }
+
+  if (body.idVerificationMode !== undefined) {
+    if (body.idVerificationMode !== 'didit' && body.idVerificationMode !== 'manual') {
+      return NextResponse.json(
+        { error: 'Ungültiger Modus. Erlaubt: didit, manual.' },
+        { status: 400 }
+      )
+    }
+    updates.push({ key: 'id_verification_mode', value: body.idVerificationMode })
   }
 
   if (updates.length === 0) {
