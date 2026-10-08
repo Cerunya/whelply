@@ -205,6 +205,14 @@ model BreederProfile {
   diditSessionId    String?   @map("didit_session_id")
   diditStatus       String?   @map("didit_status")
   diditCheckedAt    DateTime? @map("didit_checked_at")
+  // Manuelle ID-Verifizierung (Ausweis-Upload, Admin prüft von Hand)
+  // Ausstehend = idDocKey gesetzt. Nach Entscheidung werden die Dokumente
+  // sofort gelöscht (DSGVO); bei Freigabe wird diditStatus = 'approved'
+  // gesetzt, damit alle bestehenden "ID geprüft"-Anzeigen unverändert greifen.
+  idDocKey           String?   @map("id_doc_key")
+  idDocBackKey       String?   @map("id_doc_back_key")
+  idDocRequestedAt   DateTime? @map("id_doc_requested_at")
+  idDocRejectReason  String?   @map("id_doc_reject_reason")
   bio               String?           @db.Text
   website           String?
   // Kontaktdaten — standardmäßig NICHT öffentlich, Züchter kann dies in den Privatsphäre-Einstellungen ändern
