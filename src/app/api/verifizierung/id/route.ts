@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   const breeder = await prisma.breederProfile.findUnique({
     where: { userId: session.user.id },
-    select: { id: true, diditStatus: true, idDocKey: true, idDocBackKey: true },
+    select: { id: true, diditStatus: true, idDocKey: true, idDocBackKey: true, idDocSelfieKey: true },
   })
   if (!breeder) return NextResponse.json({ error: 'Kein Züchterprofil' }, { status: 404 })
 
@@ -44,16 +44,20 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData()
   const front = formData.get('front') as File | null
   const back = formData.get('back') as File | null
+  const selfie = formData.get('selfie') as File | null
   const consent = formData.get('consent')
 
   if (!front || front.size === 0) {
     return NextResponse.json({ error: 'Bitte lade die Vorderseite deines Ausweises hoch.' }, { status: 400 })
   }
+  if (!selfie || selfie.size === 0) {
+    return NextResponse.json({ error: 'Bitte lade ein Selfie hoch, auf dem du deinen Ausweis in der Hand hältst.' }, { status: 400 })
+  }
   if (consent !== 'true') {
     return NextResponse.json({ error: 'Bitte bestätige die Einwilligung.' }, { status: 400 })
   }
 
-  for (const [label, file] of [['Vorderseite', front], ['Rückseite', back]] as const) {
+  for (const [label, file] of [['Vorderseite', front], ['Rückseite', back], ['Selfie', selfie]] as const) {
     if (!file || file.size === 0) continue
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json({ error: `${label}: Nur JPG, PNG, WebP oder PDF erlaubt.` }, { status: 400 })
@@ -64,7 +68,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Alte Dokumente entfernen (erneute Einreichung ersetzt die vorherige)
-  for (const oldKey of [breeder.idDocKey, breeder.idDocBackKey]) {
+  for (const oldKey of [breeder.idDocKey, breeder.idDocBackKey, breeder.idDocSelfieKey]) {
     if (!oldKey) continue
     try {
       await s3.send(new DeleteObjectCommand({ Bucket: MINIO_BUCKET, Key: oldKey }))
@@ -89,12 +93,14 @@ export async function POST(req: NextRequest) {
 
   const frontKey = await upload(front, 'front')
   const backKey = back && back.size > 0 ? await upload(back, 'back') : null
+  const selfieKey = await upload(selfie, 'selfie')
 
   await prisma.breederProfile.update({
     where: { id: breeder.id },
     data: {
       idDocKey: frontKey,
       idDocBackKey: backKey,
+      idDocSelfieKey: selfieKey,
       idDocRequestedAt: new Date(),
       idDocRejectReason: null,
     },
