@@ -1,9 +1,16 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
+import { CredentialsSignin } from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+
+// Wird geworfen, wenn die E-Mail noch nicht bestätigt ist —
+// der Code landet als error-Parameter beim Client (Login-Seite zeigt passenden Hinweis)
+class EmailNotVerifiedError extends CredentialsSignin {
+  code = 'email_not_verified'
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -36,6 +43,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         )
 
         if (!passwordMatch) return null
+
+        // E-Mail muss bestätigt sein (Bestandsaccounts wurden per SQL nachgezogen)
+        if (!user.emailVerifiedAt) {
+          throw new EmailNotVerifiedError()
+        }
 
         return {
           id: user.id,
