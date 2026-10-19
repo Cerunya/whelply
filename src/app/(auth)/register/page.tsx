@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { VERBAENDE } from '@/lib/verbaende'
 
@@ -15,8 +13,8 @@ const ROLES: { value: Role; label: string; desc: string; icon: string }[] = [
 ]
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [role, setRole] = useState<Role>('buyer')
+  const [registered, setRegistered] = useState(false)
   const [form, setForm] = useState({ email: '', password: '', kennelName: '', verband: '', serviceName: '', serviceCategory: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -52,13 +50,9 @@ export default function RegisterPage() {
       return
     }
 
-    await signIn('credentials', {
-      email: form.email,
-      password: form.password,
-      redirect: false,
-    })
-
-    router.push('/dashboard')
+    // Kein Auto-Login mehr: erst muss die E-Mail bestätigt werden
+    setRegistered(true)
+    setLoading(false)
   }
 
   const inputClass = 'w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest'
@@ -72,6 +66,26 @@ export default function RegisterPage() {
           <p className="text-stone-400 text-sm mt-1">Wähle, wie du Whelply nutzen möchtest</p>
         </div>
 
+        {registered ? (
+          <div className="bg-white rounded-2xl border border-cream-deep p-8 space-y-5 shadow-sm text-center">
+            <div className="text-4xl">📬</div>
+            <h2 className="text-lg font-semibold text-stone-800">Fast geschafft!</h2>
+            <p className="text-sm text-stone-500 leading-relaxed">
+              Wir haben eine E-Mail an <span className="font-medium text-stone-700">{form.email}</span> geschickt.
+              Bitte bestätige deine Adresse über den Link darin – erst danach kannst du dich einloggen.
+            </p>
+            <p className="text-xs text-stone-400">
+              Keine E-Mail bekommen? Schau auch im Spam-Ordner nach oder{' '}
+              <Link href="/email-bestaetigen" className="text-forest hover:underline">fordere einen neuen Link an</Link>.
+            </p>
+            <Link
+              href="/login"
+              className="inline-block bg-forest text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors"
+            >
+              Zum Login
+            </Link>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-8 space-y-6 shadow-sm">
 
           {/* Rollenauswahl */}
@@ -219,6 +233,7 @@ export default function RegisterPage() {
             <Link href="/login" className="text-forest font-medium hover:underline">Anmelden</Link>
           </p>
         </form>
+        )}
       </div>
     </div>
   )
