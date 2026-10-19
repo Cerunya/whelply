@@ -181,9 +181,27 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
   const labelClass = 'block text-sm font-semibold text-stone-700 mb-1.5'
   const inputClass = 'w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest transition-colors'
 
+  // Oeffentliche Zuechterseite: gespeicherte Subdomain oder Fallback auf den Kennelname-Slug
+  const publicPath = `/zuechter/${breeder.subdomain ?? breeder.zuechterSlug}`
+
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <DashboardHeader title="Theme & Branding" />
+      <DashboardHeader
+        title="Theme & Branding"
+        action={
+          <Link
+            href={publicPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 bg-forest text-white text-xs font-bold px-3.5 py-2 rounded-lg hover:bg-forest-light transition-colors"
+          >
+            Zuechterseite ansehen
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </Link>
+        }
+      />
 
       <main className="max-w-5xl mx-auto px-4 py-10 space-y-8">
         {error && (
