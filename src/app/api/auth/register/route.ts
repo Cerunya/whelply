@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { createAndSendVerificationToken } from '@/lib/email-verification'
 
 const registerSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse'),
@@ -98,7 +99,8 @@ export async function POST(req: NextRequest) {
             userId: newUser.id,
             kennelName,
             verband: verband || null,
-            verificationLevel: 'email_verified',
+            // 'email_verified' wird erst gesetzt, wenn die E-Mail tatsächlich bestätigt wurde
+            verificationLevel: 'none',
           },
         })
         await tx.subscription.create({
@@ -118,6 +120,14 @@ export async function POST(req: NextRequest) {
 
       return newUser
     })
+
+    // Bestätigungs-Mail schicken — Fehler hier brechen die Registrierung nicht,
+    // der Nutzer kann sich den Link erneut schicken lassen (/email-bestaetigen)
+    try {
+      await createAndSendVerificationToken(user.id, email)
+    } catch (e) {
+      console.error('Verification mail error:', e)
+    }
 
     return NextResponse.json(
       { message: 'Registrierung erfolgreich', userId: user.id },
