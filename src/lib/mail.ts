@@ -71,3 +71,22 @@ export async function sendPasswordResetLink(email: string, token: string) {
   `)
   return sendMail(email, 'Passwort zurücksetzen — Whelply', html)
 }
+
+export async function sendEmailVerification(email: string, token: string) {
+  const url = `${BASE_URL}/email-bestaetigen?token=${token}`
+  const html = wrapHtml('E-Mail-Adresse bestätigen', `
+    <h2 style="color:#1c1917;margin:0 0 12px;font-size:20px;">Willkommen bei Whelply!</h2>
+    <p style="color:#57534e;line-height:1.6;margin:0 0 24px;">
+      Bitte bestätige deine E-Mail-Adresse, um dein Konto zu aktivieren.
+      Erst danach kannst du dich einloggen.
+      <br><br>Wenn du dich <strong>nicht</strong> registriert hast, ignoriere diese E-Mail einfach.
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${url}" style="display:inline-block;padding:14px 32px;background:#2d5a3d;color:#fff;border-radius:12px;text-decoration:none;font-weight:bold;font-size:15px;">
+        E-Mail-Adresse bestätigen
+      </a>
+    </div>
+    <p style="color:#a8a29e;font-size:12px;margin:24px 0 0;">Dieser Link ist 24 Stunden gültig.</p>
+  `)
+  return sendMail(email, 'Bitte bestätige deine E-Mail-Adresse — Whelply', html)
+}
