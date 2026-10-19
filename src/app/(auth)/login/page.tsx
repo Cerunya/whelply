@@ -11,10 +11,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [emailNotVerified, setEmailNotVerified] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setEmailNotVerified(false)
     setLoading(true)
 
     const result = await signIn('credentials', {
@@ -26,7 +28,12 @@ export default function LoginPage() {
     setLoading(false)
 
     if (result?.error) {
-      setError('E-Mail oder Passwort falsch.')
+      if (result.error === 'email_not_verified') {
+        setError('Bitte bestätige zuerst deine E-Mail-Adresse.')
+        setEmailNotVerified(true)
+      } else {
+        setError('E-Mail oder Passwort falsch.')
+      }
     } else {
       router.push('/dashboard')
     }
@@ -46,6 +53,13 @@ export default function LoginPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
               {error}
+              {emailNotVerified && (
+                <div className="mt-2">
+                  <Link href="/email-bestaetigen" className="text-forest font-medium hover:underline">
+                    Bestätigungslink erneut senden →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
