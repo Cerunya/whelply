@@ -15,7 +15,7 @@ const ROLES: { value: Role; label: string; desc: string; icon: string }[] = [
 export default function RegisterPage() {
   const [role, setRole] = useState<Role>('buyer')
   const [registered, setRegistered] = useState(false)
-  const [form, setForm] = useState({ email: '', password: '', kennelName: '', verband: '', serviceName: '', serviceCategory: '' })
+  const [form, setForm] = useState({ email: '', password: '', passwordConfirm: '', kennelName: '', verband: '', serviceName: '', serviceCategory: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -26,6 +26,12 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+
+    if (form.password !== form.passwordConfirm) {
+      setError('Die Passwörter stimmen nicht überein.')
+      return
+    }
+
     setLoading(true)
 
     const res = await fetch('/api/auth/register', {
@@ -210,6 +216,20 @@ export default function RegisterPage() {
               required
               minLength={8}
               placeholder="Mindestens 8 Zeichen"
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1.5">Passwort wiederholen</label>
+            <input
+              type="password"
+              name="passwordConfirm"
+              value={form.passwordConfirm}
+              onChange={handleChange}
+              required
+              minLength={8}
+              placeholder="Passwort erneut eingeben"
               className={inputClass}
             />
           </div>
