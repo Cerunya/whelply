@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 :root {
+  /* Die Seite hat keinen Dark Mode — Formulare sollen bei dunklem OS-Theme nicht weiß-auf-weiß rendern */
+  color-scheme: light;
   --color-forest: #1B3A2D;
   --color-honey: #C8861A;
   --color-cream: #FDFAF4;
