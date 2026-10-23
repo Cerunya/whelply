@@ -256,10 +256,17 @@ export default function AdminDashboard({
               </div>
               <span className="text-forest text-sm font-semibold">Verwalten →</span>
             </Link>
-            <Link href="/admin/einstellungen" className="flex items-center justify-between bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
+            <Link href="/admin/boost" className="flex items-center justify-between bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
               <div>
                 <p className="font-semibold text-stone-900">Boost-Einstellungen</p>
                 <p className="text-xs text-stone-400 mt-0.5">Preis und Frequenz-Deckel der Topanzeige anpassen</p>
+              </div>
+              <span className="text-forest text-sm font-semibold">Verwalten →</span>
+            </Link>
+            <Link href="/admin/einstellungen" className="flex items-center justify-between bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
+              <div>
+                <p className="font-semibold text-stone-900">Allgemeine Einstellungen</p>
+                <p className="text-xs text-stone-400 mt-0.5">ID-Verifizierung (Didit / manuell), Bilder-Optimierung und Wartung</p>
               </div>
               <span className="text-forest text-sm font-semibold">Verwalten →</span>
             </Link>
