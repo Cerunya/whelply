@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { sendKennelVerified } from '@/lib/mail'
 
 async function requireAdmin() {
   const session = await auth()
@@ -28,10 +29,28 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
   }
 
+  // Zustand vor der Aenderung laden (fuer die Benachrichtigungs-Mail)
+  const before = await prisma.breederProfile.findUnique({
+    where: { id: params.id },
+    select: { verificationLevel: true, kennelName: true, user: { select: { email: true } } },
+  })
+  if (!before) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
+
   await prisma.breederProfile.update({
     where: { id: params.id },
     data: { verificationLevel: parsed.data.verificationLevel },
   })
+
+  // Mail nur beim Uebergang von "nicht verifiziert" -> "verifiziert" senden
+  const wasVerified = before.verificationLevel === 'kennel_verified' || before.verificationLevel === 'doc_verified'
+  const nowVerified = parsed.data.verificationLevel === 'kennel_verified' || parsed.data.verificationLevel === 'doc_verified'
+  if (!wasVerified && nowVerified) {
+    try {
+      await sendKennelVerified(before.user.email, before.kennelName)
+    } catch (e) {
+      console.error('Kennel-verified mail error:', e)
+    }
+  }
 
   return NextResponse.json({ ok: true })
 }
