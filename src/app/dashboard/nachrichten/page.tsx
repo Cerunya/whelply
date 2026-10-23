@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from '@/components/DashboardHeader'
+import NachrichtenEinstellungen from '@/components/NachrichtenEinstellungen'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,10 +15,15 @@ export default async function NachrichtenPage() {
   if (!user) redirect('/login')
 
   let conversations: any[] = []
+  let messageEmailOptIn: boolean | null = null
 
   if (user.role === 'breeder') {
-    const breeder = await prisma.breederProfile.findUnique({ where: { userId: user.id } })
+    const breeder = await prisma.breederProfile.findUnique({
+      where: { userId: user.id },
+      select: { id: true, messageEmailOptIn: true },
+    })
     if (breeder) {
+      messageEmailOptIn = breeder.messageEmailOptIn
       conversations = await prisma.conversation.findMany({
         where: { breederId: breeder.id },
         include: {
@@ -45,6 +51,7 @@ export default async function NachrichtenPage() {
       <DashboardHeader title="Nachrichten" />
       <main className="max-w-2xl mx-auto px-4 py-10">
         <h1 className="font-serif text-2xl font-bold text-stone-900 mb-6">Nachrichten</h1>
+        {messageEmailOptIn !== null && <NachrichtenEinstellungen initial={messageEmailOptIn} />}
         {conversations.length === 0 ? (
           <div className="bg-white rounded-2xl border border-cream-deep p-12 text-center">
             <p className="text-stone-400">Noch keine Nachrichten.</p>
