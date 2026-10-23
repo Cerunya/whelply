@@ -81,7 +81,7 @@ export default function NachrichtButton({
                   placeholder="Deine Nachricht..."
                   rows={5}
                   maxLength={2000}
-                  className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-forest/30 mb-1"
+                  className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 placeholder-stone-400 bg-white resize-none focus:outline-none focus:ring-2 focus:ring-forest/30 mb-1"
                 />
                 <p className="text-xs text-stone-300 text-right mb-4">{content.length}/2000</p>
                 {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
