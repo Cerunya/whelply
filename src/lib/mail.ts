@@ -154,3 +154,23 @@ export async function sendIdVerificationRejected(email: string, reason: string) 
   `)
   return sendMail(email, 'Deine ID-Prüfung — Whelply', html)
 }
+
+// Nutzer hat einem Züchter eine Nachricht geschickt (nur wenn der Züchter das Opt-in aktiviert hat)
+export async function sendNewMessageNotification(email: string, senderName: string) {
+  const html = wrapHtml('Neue Nachricht', `
+    <h2 style="color:#1c1917;margin:0 0 12px;font-size:20px;">Du hast eine neue Nachricht erhalten</h2>
+    <p style="color:#57534e;line-height:1.6;margin:0 0 24px;">
+      <strong>${esc(senderName)}</strong> hat dir über Whelply eine Nachricht geschickt.
+      Logge dich ein, um sie zu lesen und zu antworten.
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${BASE_URL}/dashboard/nachrichten" style="display:inline-block;padding:14px 32px;background:#2d5a3d;color:#fff;border-radius:12px;text-decoration:none;font-weight:bold;font-size:15px;">
+        Nachricht lesen
+      </a>
+    </div>
+    <p style="color:#a8a29e;font-size:12px;margin:24px 0 0;">
+      Du erhältst diese E-Mail, weil du die Benachrichtigung in deinem Dashboard unter „Nachrichten" aktiviert hast. Dort kannst du sie auch wieder abschalten.
+    </p>
+  `)
+  return sendMail(email, 'Neue Nachricht auf Whelply — Whelply', html)
+}
