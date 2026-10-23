@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { s3, MINIO_BUCKET } from '@/lib/s3'
 import { DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { sendIdVerificationApproved, sendIdVerificationRejected } from '@/lib/mail'
 
 // PATCH — Admin entscheidet über eine manuelle ID-Prüfung
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
@@ -16,7 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const breeder = await prisma.breederProfile.findUnique({
     where: { id: params.id },
-    select: { id: true, idDocKey: true, idDocBackKey: true, idDocSelfieKey: true },
+    select: { id: true, idDocKey: true, idDocBackKey: true, idDocSelfieKey: true, user: { select: { email: true } } },
   })
   if (!breeder) return NextResponse.json({ error: 'Züchter nicht gefunden' }, { status: 404 })
   if (!breeder.idDocKey) {
@@ -54,17 +55,31 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       },
     })
   } else {
+    const reason = typeof body.reason === 'string' && body.reason.trim()
+      ? body.reason.trim()
+      : 'Ausweisdokument konnte nicht bestätigt werden.'
     await prisma.breederProfile.update({
       where: { id: breeder.id },
       data: {
         idDocKey: null,
         idDocBackKey: null,
         idDocSelfieKey: null,
-        idDocRejectReason: typeof body.reason === 'string' && body.reason.trim()
-          ? body.reason.trim()
-          : 'Ausweisdokument konnte nicht bestätigt werden.',
+        idDocRejectReason: reason,
       },
     })
+    try {
+      await sendIdVerificationRejected(breeder.user.email, reason)
+    } catch (e) {
+      console.error('ID-reject mail error:', e)
+    }
+    return NextResponse.json({ ok: true })
+  }
+
+  // approve: Nutzer per Mail benachrichtigen
+  try {
+    await sendIdVerificationApproved(breeder.user.email)
+  } catch (e) {
+    console.error('ID-approve mail error:', e)
   }
 
   return NextResponse.json({ ok: true })
