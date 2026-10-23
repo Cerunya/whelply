@@ -1,11 +1,43 @@
 import Link from 'next/link'
 import { auth, signOut } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import MobileNav from './MobileNav'
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
 
 export default async function Navbar() {
   const session = await auth()
+
+  // Ungelesene Nachrichten zählen (für Züchter und Interessenten)
+  let unreadCount = 0
+  if (session?.user?.id) {
+    const me = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } })
+    if (me?.role === 'breeder') {
+      unreadCount = await prisma.message.count({
+        where: { senderRole: 'user', readAt: null, conversation: { breeder: { userId: session.user.id } } },
+      })
+    } else if (me) {
+      unreadCount = await prisma.message.count({
+        where: { senderRole: 'breeder', readAt: null, conversation: { userId: session.user.id } },
+      })
+    }
+  }
+
+  const unreadBadge = unreadCount > 0 && (
+    <a
+      href={`${BASE}/dashboard/nachrichten`}
+      className="relative inline-flex items-center text-stone-600 hover:text-forest transition-colors"
+      title={`${unreadCount} ungelesene Nachricht${unreadCount === 1 ? '' : 'en'}`}
+    >
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+      <span className="absolute -top-1.5 -right-2.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-0.5 flex items-center justify-center">
+        {unreadCount > 9 ? '9+' : unreadCount}
+      </span>
+    </a>
+  )
+
   const navItems = [
     { href: '/welpen', label: 'Welpen' },
     { href: '/hunde', label: 'Erwachsene Hunde' },
@@ -37,6 +69,7 @@ export default async function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {session ? (
             <>
+              {unreadBadge}
               <a href={`${BASE}/dashboard`} className="text-sm text-stone-600 hover:text-forest transition-colors font-medium">
                 {session.user.kennelName ?? 'Dashboard'}
               </a>
@@ -65,6 +98,7 @@ export default async function Navbar() {
           extra={
             session ? (
               <>
+                {unreadBadge}
                 <a href={`${BASE}/dashboard`} className="font-medium text-stone-700 hover:text-forest transition-colors">
                   {session.user.kennelName ?? 'Dashboard'}
                 </a>
