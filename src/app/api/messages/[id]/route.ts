@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { sendNewMessageNotification } from '@/lib/mail'
 
 // GET — alle Nachrichten einer Conversation
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const conversation = await prisma.conversation.findUnique({
     where: { id: params.id },
-    include: { breeder: { select: { userId: true } } },
+    include: { breeder: { select: { userId: true, messageEmailOptIn: true, user: { select: { email: true } } } } },
   })
   if (!conversation) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
 
@@ -58,6 +59,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   })
 
   await prisma.conversation.update({ where: { id: params.id }, data: { updatedAt: new Date() } })
+
+  // Antwort eines Nutzers -> Züchter per Mail benachrichtigen (wenn Opt-in aktiv)
+  if (senderRole === 'user' && conversation.breeder.messageEmailOptIn) {
+    try {
+      const sender = await prisma.user.findUnique({ where: { id: session.user.id }, select: { displayName: true } })
+      await sendNewMessageNotification(conversation.breeder.user.email, sender?.displayName || 'Ein Interessent')
+    } catch (e) {
+      console.error('Message notification mail error:', e)
+    }
+  }
 
   return NextResponse.json(message)
 }
