@@ -90,3 +90,67 @@ export async function sendEmailVerification(email: string, token: string) {
   `)
   return sendMail(email, 'Bitte bestätige deine E-Mail-Adresse — Whelply', html)
 }
+
+function esc(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+// Admin hat die Zuchtstätte verifiziert (Toggle im Admin-Dashboard)
+export async function sendKennelVerified(email: string, kennelName: string) {
+  const html = wrapHtml('Zuchtstätte verifiziert', `
+    <h2 style="color:#1c1917;margin:0 0 12px;font-size:20px;">Deine Zuchtstätte wurde verifiziert ✓</h2>
+    <p style="color:#57534e;line-height:1.6;margin:0 0 24px;">
+      Gute Nachrichten: Deine Zuchtstätte <strong>${esc(kennelName)}</strong> wurde von uns geprüft und verifiziert.
+      Dein Profil zeigt jetzt das Verifizierungs-Badge und gewinnt damit mehr Vertrauen bei Interessenten.
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${BASE_URL}/dashboard" style="display:inline-block;padding:14px 32px;background:#2d5a3d;color:#fff;border-radius:12px;text-decoration:none;font-weight:bold;font-size:15px;">
+        Zum Dashboard
+      </a>
+    </div>
+  `)
+  return sendMail(email, 'Deine Zuchtstätte wurde verifiziert — Whelply', html)
+}
+
+// Admin hat die manuelle ID-Prüfung freigegeben
+export async function sendIdVerificationApproved(email: string) {
+  const html = wrapHtml('Identität bestätigt', `
+    <h2 style="color:#1c1917;margin:0 0 12px;font-size:20px;">Deine Identität wurde bestätigt ✓</h2>
+    <p style="color:#57534e;line-height:1.6;margin:0 0 24px;">
+      Deine eingereichten Ausweisdokumente wurden geprüft und freigegeben.
+      Dein Profil erhält jetzt das Badge <strong>„ID geprüft"</strong>.
+      Aus Datenschutzgründen wurden die hochgeladenen Dokumente anschließend gelöscht.
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${BASE_URL}/dashboard" style="display:inline-block;padding:14px 32px;background:#2d5a3d;color:#fff;border-radius:12px;text-decoration:none;font-weight:bold;font-size:15px;">
+        Zum Dashboard
+      </a>
+    </div>
+  `)
+  return sendMail(email, 'Deine Identität wurde bestätigt — Whelply', html)
+}
+
+// Admin hat die manuelle ID-Prüfung abgelehnt
+export async function sendIdVerificationRejected(email: string, reason: string) {
+  const html = wrapHtml('ID-Prüfung abgelehnt', `
+    <h2 style="color:#1c1917;margin:0 0 12px;font-size:20px;">Deine ID-Prüfung konnte nicht bestätigt werden</h2>
+    <p style="color:#57534e;line-height:1.6;margin:0 0 12px;">
+      Leider konnten wir deine eingereichten Ausweisdokumente nicht bestätigen.
+    </p>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px;margin:0 0 16px;">
+      <p style="color:#991b1b;font-size:13px;font-weight:bold;margin:0 0 4px;">Grund:</p>
+      <p style="color:#7f1d1d;font-size:14px;margin:0;">${esc(reason)}</p>
+    </div>
+    <p style="color:#57534e;line-height:1.6;margin:0 0 24px;">
+      Du kannst die Prüfung jederzeit erneut starten — lade dazu deine Dokumente im Dashboard unter
+      <strong>„Verifizierung"</strong> noch einmal hoch. Achte dabei auf gut lesbare, vollständige Aufnahmen.
+      Aus Datenschutzgründen wurden die bisherigen Dokumente gelöscht.
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${BASE_URL}/dashboard" style="display:inline-block;padding:14px 32px;background:#2d5a3d;color:#fff;border-radius:12px;text-decoration:none;font-weight:bold;font-size:15px;">
+        Erneut verifizieren
+      </a>
+    </div>
+  `)
+  return sendMail(email, 'Deine ID-Prüfung — Whelply', html)
+}
