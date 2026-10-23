@@ -258,6 +258,8 @@ model BreederProfile {
   socialFacebook    String?           @map("social_facebook")
   socialTiktok      String?           @map("social_tiktok")
   socialYoutube     String?           @map("social_youtube")
+  // E-Mail-Benachrichtigung bei neuen Nachrichten (Opt-in, Standard: aus)
+  messageEmailOptIn Boolean           @default(false) @map("message_email_opt_in")
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
 
