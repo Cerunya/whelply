@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { sendNewMessageNotification } from '@/lib/mail'
 
 const sendSchema = z.object({
   breederId: z.string(),
@@ -57,7 +58,10 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Nutzer nicht gefunden' }, { status: 404 })
 
   // Züchter können keine Nachricht an sich selbst schicken
-  const breeder = await prisma.breederProfile.findUnique({ where: { id: breederId } })
+  const breeder = await prisma.breederProfile.findUnique({
+    where: { id: breederId },
+    include: { user: { select: { email: true } } },
+  })
   if (!breeder) return NextResponse.json({ error: 'Züchter nicht gefunden' }, { status: 404 })
   if (breeder.userId === session.user.id) return NextResponse.json({ error: 'Du kannst dir nicht selbst schreiben' }, { status: 400 })
 
@@ -69,6 +73,15 @@ export async function POST(req: NextRequest) {
     create: { userId: session.user.id, breederId, messages: { create: { senderRole: 'user', content } } },
     update: { updatedAt: new Date(), messages: { create: { senderRole: 'user', content } } },
   })
+
+  // Züchter per Mail benachrichtigen, wenn er das Opt-in aktiviert hat
+  if (breeder.messageEmailOptIn) {
+    try {
+      await sendNewMessageNotification(breeder.user.email, user.displayName || 'Ein Interessent')
+    } catch (e) {
+      console.error('Message notification mail error:', e)
+    }
+  }
 
   return NextResponse.json({ conversationId: conversation.id })
 }
