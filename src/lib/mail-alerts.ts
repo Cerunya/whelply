@@ -5,6 +5,15 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_EMAIL = 'alerts@whelply.de'
 const BASE_URL = process.env.NEXTAUTH_URL ?? 'https://whelply.de'
 
+function esc(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+// Media-URLs sind relativ (/api/media/...) — in E-Mails muessen sie absolut sein
+function absoluteUrl(url: string) {
+  return url.startsWith('http') ? url : `${BASE_URL}${url}`
+}
+
 function buildEmailHtml(opts: {
   listings: { id: string; name: string; breed: string; price: string; kennelName: string; imageUrl?: string }[]
   label: string
@@ -14,14 +23,20 @@ function buildEmailHtml(opts: {
 
   const cards = listings.map((l) => `
     <tr>
-      <td style="padding:8px 0; border-bottom:1px solid #f0ece3;">
-        ${l.imageUrl ? `<img src="${l.imageUrl}" alt="${l.name}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;display:inline-block;vertical-align:middle;margin-right:12px;">` : ''}
-        <span style="vertical-align:middle;">
-          <strong style="display:block;color:#1c1917;">${l.name}</strong>
-          <span style="color:#78716c;font-size:13px;">${l.breed} · ${l.kennelName}</span><br>
-          <span style="color:#b45309;font-weight:600;">${l.price}</span>
-        </span>
-        <a href="${BASE_URL}/welpen/${l.id}" style="display:inline-block;margin-left:16px;padding:6px 14px;background:#2d5a3d;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;vertical-align:middle;">Ansehen</a>
+      <td style="padding:10px 0;border-bottom:1px solid #f0ece3;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            ${l.imageUrl ? `<td width="72" style="width:72px;vertical-align:middle;"><img src="${l.imageUrl}" alt="" width="72" height="72" style="width:72px;height:72px;object-fit:cover;border-radius:8px;display:block;"></td>` : ''}
+            <td style="vertical-align:middle;${l.imageUrl ? 'padding-left:12px;' : ''}">
+              <strong style="display:block;color:#1c1917;font-size:15px;">${esc(l.name)}</strong>
+              <span style="color:#78716c;font-size:13px;">${esc(l.breed)} · ${esc(l.kennelName)}</span><br>
+              <span style="color:#b45309;font-weight:600;font-size:14px;">${esc(l.price)}</span>
+            </td>
+            <td width="80" align="right" style="width:80px;vertical-align:middle;">
+              <a href="${BASE_URL}/welpen/${l.id}" style="display:inline-block;padding:8px 16px;background:#2d5a3d;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;">Ansehen</a>
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>
   `).join('')
@@ -39,7 +54,7 @@ function buildEmailHtml(opts: {
     </tr>
     <tr>
       <td style="padding:24px 32px;">
-        <p style="color:#1c1917;margin:0 0 16px;">Heute wurden <strong>${listings.length} neue Welpen</strong> eingetragen:</p>
+        <p style="color:#1c1917;margin:0 0 16px;">${listings.length === 1 ? 'Heute wurde <strong>1 neuer Welpe</strong> eingetragen:' : `Heute wurden <strong>${listings.length} neue Welpen</strong> eingetragen:`}</p>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${cards}
         </table>
@@ -120,7 +135,7 @@ export async function sendWelpenAlerts() {
       breed: l.breed.nameDe,
       kennelName: l.breeder.kennelName,
       price: l.priceCents ? `${(l.priceCents / 100).toLocaleString('de-DE')} €` : 'Preis auf Anfrage',
-      imageUrl: l.media[0]?.url,
+      imageUrl: l.media[0]?.url ? absoluteUrl(l.media[0].url) : undefined,
     }))
 
     const html = buildEmailHtml({ listings: listingsData, label, unsubscribeUrl })
@@ -135,7 +150,7 @@ export async function sendWelpenAlerts() {
         body: JSON.stringify({
           from: `Whelply Alerts <${FROM_EMAIL}>`,
           to: [alert.email],
-          subject: `${matching.length} neue Welpen: ${label}`,
+          subject: matching.length === 1 ? `1 neuer Welpe: ${label}` : `${matching.length} neue Welpen: ${label}`,
           html,
           headers: {
             'List-Unsubscribe': `<${unsubscribeUrl}>`,
