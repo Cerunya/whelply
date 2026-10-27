@@ -73,10 +73,10 @@ export default async function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {session ? (
             <>
-              {mailBadge}
               <a href={`${BASE}/dashboard`} className="text-sm text-stone-600 hover:text-forest transition-colors font-medium">
                 {session.user.kennelName ?? 'Dashboard'}
               </a>
+              {mailBadge}
               <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
                 <button type="submit" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
                   Abmelden
@@ -102,10 +102,10 @@ export default async function Navbar() {
           extra={
             session ? (
               <>
-                {mailBadge}
                 <a href={`${BASE}/dashboard`} className="font-medium text-stone-700 hover:text-forest transition-colors">
                   {session.user.kennelName ?? 'Dashboard'}
                 </a>
+                {mailBadge}
                 <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
                   <button type="submit" className="text-stone-400 hover:text-stone-700 transition-colors">
                     Abmelden
