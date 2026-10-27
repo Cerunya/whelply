@@ -91,8 +91,7 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   // Onboarding-Checkliste: gesetzt = User hat die Checkliste ausgeblendet
   onboardingDismissedAt DateTime? @map("onboarding_dismissed_at")
-  // E-Mail-Bestätigung: NULL = nicht bestätigt → Login blockiert
-  // (Bestandsaccounts per SQL nachgezogen)
+  // E-Mail-Bestätigung: gesetzt = User hat die Checkliste ausgeblendet
   emailVerifiedAt DateTime? @map("email_verified_at")
 
   // Auth.js sessions
@@ -128,12 +127,12 @@ model PasswordChangeRequest {
 }
 
 model PasswordResetToken {
-  id        String    @id @default(cuid())
-  userId    String    @map("user_id")
-  tokenHash String    @map("token_hash")
-  expiresAt DateTime  @map("expires_at")
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
   usedAt    DateTime? @map("used_at")
-  createdAt DateTime  @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -416,6 +415,15 @@ model Listing {
   isDewormed     Boolean       @default(false) @map("is_dewormed")    // entwurmt
   isChipped      Boolean       @default(false) @map("is_chipped")     // gechippt
   isInsured      Boolean       @default(false) @map("is_insured")     // versichert
+  // Training & Sozialisierung (Welpen)
+  trainingMedical              Boolean  @default(false) @map("training_medical")
+  trainingCharaktertest        Boolean  @default(false) @map("training_charaktertest")
+  trainingAndereTiere          Boolean  @default(false) @map("training_andere_tiere")
+  trainingHaushaltsgeraeusche  Boolean  @default(false) @map("training_haushaltsgeraeusche")
+  trainingKinder               Boolean  @default(false) @map("training_kinder")
+  trainingAutofahren           Boolean  @default(false) @map("training_autofahren")
+  trainingBelebteOrte          Boolean  @default(false) @map("training_belebte_orte")
+  trainingNotes                String?  @map("training_notes") @db.Text
   birthLocation  String?       @map("birth_location")  // z.B. "A l'élevage" → "Beim Züchter"
   chipNumber     String?       @map("chip_number")
   status         ListingStatus @default(draft)
