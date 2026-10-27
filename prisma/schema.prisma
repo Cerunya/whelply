@@ -142,12 +142,12 @@ model PasswordResetToken {
 
 // E-Mail-Bestätigung bei Registrierung (gleiches Muster wie PasswordResetToken)
 model EmailVerificationToken {
-  id        String    @id @default(cuid())
-  userId    String    @map("user_id")
-  tokenHash String    @map("token_hash")
-  expiresAt DateTime  @map("expires_at")
-  usedAt    DateTime? @map("used_at")
-  createdAt DateTime  @default(now()) @map("created_at")
+  id        String     @id @default(cuid())
+  userId    String     @map("user_id")
+  tokenHash String     @map("token_hash")
+  expiresAt DateTime   @map("expires_at")
+  usedAt    DateTime?  @map("used_at")
+  createdAt DateTime   @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
