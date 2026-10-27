@@ -262,6 +262,29 @@ export default async function WelpenDetailPage({
               )}
             </div>
 
+            {/* Training & Sozialisierung */}
+            <div className="bg-white rounded-2xl border border-cream-deep p-5">
+              <h2 className="font-semibold text-stone-800 text-sm mb-3">Training &amp; Sozialisierung</h2>
+              {(listing.trainingMedical || listing.trainingCharaktertest || listing.trainingAndereTiere || listing.trainingHaushaltsgeraeusche || listing.trainingKinder || listing.trainingAutofahren || listing.trainingBelebteOrte || listing.trainingNotes) ? (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {listing.trainingMedical && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Medical Training</span>}
+                    {listing.trainingCharaktertest && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Charaktertest</span>}
+                    {listing.trainingAndereTiere && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Andere Tiere</span>}
+                    {listing.trainingHaushaltsgeraeusche && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Haushaltsgeräusche</span>}
+                    {listing.trainingKinder && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Kinder</span>}
+                    {listing.trainingAutofahren && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Autofahren</span>}
+                    {listing.trainingBelebteOrte && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Belebte Orte</span>}
+                  </div>
+                  {listing.trainingNotes && (
+                    <p className="text-stone-600 text-sm mt-3 whitespace-pre-line">{listing.trainingNotes}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-stone-400 text-sm">Noch keine Angaben</p>
+              )}
+            </div>
+
             {/* Züchter + Kontakt */}
             <div className="bg-forest rounded-2xl p-5 text-white flex flex-col justify-between">
               <div>
