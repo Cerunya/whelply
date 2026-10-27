@@ -91,7 +91,8 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   // Onboarding-Checkliste: gesetzt = User hat die Checkliste ausgeblendet
   onboardingDismissedAt DateTime? @map("onboarding_dismissed_at")
-  // E-Mail-Bestätigung: gesetzt = User hat die Checkliste ausgeblendet
+  // E-Mail-Bestätigung: NULL = nicht bestätigt → Login blockiert
+  // (Bestandsaccounts per SQL nachgezogen)
   emailVerifiedAt DateTime? @map("email_verified_at")
 
   // Auth.js sessions
