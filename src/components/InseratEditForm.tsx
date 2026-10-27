@@ -25,6 +25,14 @@ type Listing = {
   isDewormed: boolean
   isChipped: boolean
   isInsured: boolean
+  trainingMedical: boolean
+  trainingCharaktertest: boolean
+  trainingAndereTiere: boolean
+  trainingHaushaltsgeraeusche: boolean
+  trainingKinder: boolean
+  trainingAutofahren: boolean
+  trainingBelebteOrte: boolean
+  trainingNotes: string | null
   birthLocation: string | null
   chipNumber: string | null
 }
@@ -59,6 +67,14 @@ export default function InseratEditForm({
     isDewormed: listing.isDewormed,
     isChipped: listing.isChipped,
     isInsured: listing.isInsured,
+    trainingMedical: listing.trainingMedical,
+    trainingCharaktertest: listing.trainingCharaktertest,
+    trainingAndereTiere: listing.trainingAndereTiere,
+    trainingHaushaltsgeraeusche: listing.trainingHaushaltsgeraeusche,
+    trainingKinder: listing.trainingKinder,
+    trainingAutofahren: listing.trainingAutofahren,
+    trainingBelebteOrte: listing.trainingBelebteOrte,
+    trainingNotes: listing.trainingNotes ?? '',
     birthLocation: listing.birthLocation ?? '',
     chipNumber: listing.chipNumber ?? '',
   })
@@ -92,6 +108,14 @@ export default function InseratEditForm({
         isDewormed: form.isDewormed,
         isChipped: form.isChipped,
         isInsured: form.isInsured,
+        trainingMedical: form.trainingMedical,
+        trainingCharaktertest: form.trainingCharaktertest,
+        trainingAndereTiere: form.trainingAndereTiere,
+        trainingHaushaltsgeraeusche: form.trainingHaushaltsgeraeusche,
+        trainingKinder: form.trainingKinder,
+        trainingAutofahren: form.trainingAutofahren,
+        trainingBelebteOrte: form.trainingBelebteOrte,
+        trainingNotes: form.trainingNotes || null,
         birthLocation: form.birthLocation || null,
         chipNumber: form.chipNumber || null,
       }),
@@ -298,6 +322,39 @@ export default function InseratEditForm({
                     </label>
                   ))}
                 </div>
+              </div>
+
+              <div>
+                <label className={`${labelClass} mb-3`}>Training &amp; Sozialisierung</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: 'trainingMedical', label: 'Medical Training' },
+                    { key: 'trainingCharaktertest', label: 'Charaktertest' },
+                    { key: 'trainingAndereTiere', label: 'Andere Tiere' },
+                    { key: 'trainingHaushaltsgeraeusche', label: 'Haushaltsgeräusche' },
+                    { key: 'trainingKinder', label: 'Kinder' },
+                    { key: 'trainingAutofahren', label: 'Autofahren' },
+                    { key: 'trainingBelebteOrte', label: 'Belebte Orte' },
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-3 p-3 bg-cream rounded-xl border border-cream-deep cursor-pointer hover:bg-stone-50 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={form[key as keyof typeof form] as boolean}
+                        onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
+                        className="w-4 h-4 rounded accent-forest"
+                      />
+                      <span className="text-sm text-stone-700">{label}</span>
+                    </label>
+                  ))}
+                </div>
+                <textarea
+                  value={form.trainingNotes}
+                  onChange={(e) => setForm({ ...form, trainingNotes: e.target.value })}
+                  rows={3}
+                  maxLength={1000}
+                  placeholder="Weitere Angaben zu Training & Sozialisierung (optional)"
+                  className={inputClass + ' resize-none mt-3'}
+                />
               </div>
             </>
           )}
