@@ -93,6 +93,10 @@ export default async function WelpenDetailPage({
   const sex =
     listing.sex === 'male' ? 'Rüde' : listing.sex === 'female' ? 'Hündin' : 'Nicht angegeben'
 
+  // Pfoten neben dem Namen: blau = Rüde, rosa = Hündin, neutral = Waldgrün
+  const pawColor =
+    listing.sex === 'male' ? 'text-blue-500' : listing.sex === 'female' ? 'text-pink-500' : 'text-forest/40'
+
   const birthDate = listing.dog?.birthDate ?? listing.litter?.bornDate ?? null
   let ageText: string | null = null
   if (birthDate) {
@@ -112,8 +116,24 @@ export default async function WelpenDetailPage({
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-cream">
-        <div className="max-w-4xl mx-auto px-4 py-10">
+      <main className="min-h-screen bg-cream relative">
+        {/* Dezentes Pfotenmuster im Kopfbereich */}
+        <div className="absolute top-0 left-0 right-0 h-[320px] overflow-hidden pointer-events-none" aria-hidden="true">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="pawPattern" width="120" height="120" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
+                <g fill="#2f5d40" opacity="0.05">
+                  <ellipse cx="30" cy="38" rx="13" ry="16" />
+                  <ellipse cx="12" cy="20" rx="6" ry="8" />
+                  <ellipse cx="30" cy="14" rx="6" ry="8" />
+                  <ellipse cx="48" cy="20" rx="6" ry="8" />
+                </g>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#pawPattern)" />
+          </svg>
+        </div>
+        <div className="max-w-5xl mx-auto px-4 py-10 relative">
           {/* Eigentümer-Hinweis */}
           {isOwner && (
             <div className="bg-honey-pale border border-honey/30 rounded-xl px-5 py-3 mb-6 flex items-center justify-between flex-wrap gap-3">
@@ -135,14 +155,20 @@ export default async function WelpenDetailPage({
             </div>
           )}
 
-          {/* === HERO: Galerie + Kopfzeile === */}
-          <div className="mb-8">
+          {/* === HERO: Kopfzeile + Galerie (volle Breite) === */}
+          <div className="mb-5">
             {/* Titel-Zeile */}
             <div className="flex items-start justify-between gap-4 mb-5">
               <div>
-                <p className="text-xs font-semibold text-forest uppercase tracking-wider mb-1">{listing.breed.nameDe}</p>
-                <h1 className="font-serif text-3xl md:text-4xl font-bold text-stone-900 leading-tight">
-                  {listing.title || listing.breeder.kennelName}
+                <p className="inline-block text-[11px] font-extrabold text-white bg-forest px-3 py-1.5 rounded-full uppercase tracking-wider mb-2 -rotate-2">{listing.breed.nameDe}</p>
+                <h1 className="font-serif text-3xl md:text-5xl font-extrabold text-stone-900 leading-tight">
+                  <span className="inline-flex items-center gap-2 flex-wrap">
+                    {listing.title || listing.breeder.kennelName}
+                    <span className={`inline-flex items-end ${pawColor}`} aria-hidden="true">
+                      <svg width="34" height="34" viewBox="0 0 60 60" className="rotate-[14deg]" fill="currentColor"><ellipse cx="30" cy="40" rx="13" ry="15" /><ellipse cx="13" cy="22" rx="6" ry="8" /><ellipse cx="30" cy="16" rx="6" ry="8" /><ellipse cx="47" cy="22" rx="6" ry="8" /></svg>
+                      <svg width="20" height="20" viewBox="0 0 60 60" className="-rotate-[18deg] -ml-1 mb-1.5" fill="currentColor"><ellipse cx="30" cy="40" rx="13" ry="15" /><ellipse cx="13" cy="22" rx="6" ry="8" /><ellipse cx="30" cy="16" rx="6" ry="8" /><ellipse cx="47" cy="22" rx="6" ry="8" /></svg>
+                    </span>
+                  </span>
                 </h1>
                 <div className="flex items-center gap-3 mt-2 flex-wrap">
                   {sex && (
@@ -166,8 +192,11 @@ export default async function WelpenDetailPage({
                   )}
                 </div>
               </div>
-              <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
-                <p className="text-2xl font-bold text-forest">{price}</p>
+              <div className="flex-shrink-0 flex flex-col items-end gap-2">
+                <div className="bg-white border-[2.5px] border-honey rounded-2xl px-5 py-2.5 text-center rotate-[1.5deg] shadow-sm">
+                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#92610a]">Preis</p>
+                  <p className="text-2xl font-extrabold text-forest">{price}</p>
+                </div>
                 {isLoggedIn && !viewerBreeder && (
                   <BookmarkButton
                     listingId={listing.id}
@@ -178,162 +207,171 @@ export default async function WelpenDetailPage({
               </div>
             </div>
 
-            {/* Galerie — volle Breite, klickbar */}
-            {listing.media.length > 0 ? (
-              <ListingImageGallery media={listing.media} breedName={listing.breed.nameDe} />
-            ) : (
-              <div className="bg-cream-dark rounded-2xl aspect-[16/9] flex items-center justify-center border border-cream-deep">
-                <div className="text-center text-stone-300">
-                  <svg className="w-20 h-20 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <p className="text-sm">Noch kein Foto</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* === INFO-KACHELN: 3-spaltig auf Desktop === */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-
-            {/* Eckdaten */}
-            <div className="bg-white rounded-2xl border border-cream-deep p-5">
-              <h2 className="font-semibold text-stone-800 text-sm mb-3">Eckdaten</h2>
-              <div className="space-y-2.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-stone-400">Rasse</span>
-                  <span className="font-medium text-stone-800">{listing.breed.nameDe}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-stone-400">Geschlecht</span>
-                  <span className="font-medium text-stone-800">{sex}</span>
-                </div>
-                {birthDate && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Geboren</span>
-                    <span className="font-medium text-stone-800">
-                      {birthDate.toLocaleDateString('de-DE')}{ageText && ` (${ageText})`}
-                    </span>
-                  </div>
-                )}
-                {listing.litter?.handoverDate && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Abgabe ab</span>
-                    <span className="font-medium text-stone-800">
-                      {listing.litter.handoverDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
-                    </span>
-                  </div>
-                )}
-                {listing.dog?.color && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Farbe</span>
-                    <span className="font-medium text-stone-800">{listing.dog.color}</span>
-                  </div>
-                )}
-                {listing.birthLocation && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Geburtsort</span>
-                    <span className="font-medium text-stone-800">{listing.birthLocation}</span>
-                  </div>
-                )}
-                {listing.chipNumber && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">Chip-Nr.</span>
-                    <span className="font-medium text-stone-800">{listing.chipNumber}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Gesundheit & Dokumente */}
-            <div className="bg-white rounded-2xl border border-cream-deep p-5">
-              <h2 className="font-semibold text-stone-800 text-sm mb-3">Gesundheit & Dokumente</h2>
-              {(listing.hasPedigree || listing.isVaccinated || listing.isDewormed || listing.isChipped || listing.isInsured) ? (
-                <div className="flex flex-wrap gap-2">
-                  {listing.hasPedigree && <a href="/badges#ahnentafel" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Ahnentafel</a>}
-                  {listing.isVaccinated && <a href="/badges#geimpft" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Geimpft</a>}
-                  {listing.isDewormed && <a href="/badges#entwurmt" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Entwurmt</a>}
-                  {listing.isChipped && <a href="/badges#gechipt" className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1 hover:border-forest/50 transition-colors">Gechipt</a>}
-                  {listing.isInsured && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Versichert</span>}
-                </div>
+            {/* Galerie — volle Breite, Sticker-Rahmen */}
+            <div className="rounded-[1.5rem] overflow-hidden border-[3px] border-white shadow-[0_6px_0_#e3d9c6]">
+              {listing.media.length > 0 ? (
+                <ListingImageGallery media={listing.media} breedName={listing.breed.nameDe} />
               ) : (
-                <p className="text-stone-400 text-sm">Noch keine Angaben</p>
+                <div className="bg-cream-dark aspect-[21/9] flex items-center justify-center">
+                  <div className="text-center text-stone-300">
+                    <svg className="w-20 h-20 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p className="text-sm">Noch kein Foto</p>
+                  </div>
+                </div>
               )}
             </div>
+          </div>
 
-            {/* Training & Sozialisierung */}
-            <div className="bg-white rounded-2xl border border-cream-deep p-5">
-              <h2 className="font-semibold text-stone-800 text-sm mb-3">Training &amp; Sozialisierung</h2>
-              {(listing.trainingMedical || listing.trainingCharaktertest || listing.trainingAndereTiere || listing.trainingHaushaltsgeraeusche || listing.trainingKinder || listing.trainingAutofahren || listing.trainingBelebteOrte || listing.trainingNotes) ? (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {listing.trainingMedical && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Medical Training</span>}
-                    {listing.trainingCharaktertest && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Charaktertest</span>}
-                    {listing.trainingAndereTiere && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Andere Tiere</span>}
-                    {listing.trainingHaushaltsgeraeusche && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Haushaltsgeräusche</span>}
-                    {listing.trainingKinder && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Kinder</span>}
-                    {listing.trainingAutofahren && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Autofahren</span>}
-                    {listing.trainingBelebteOrte && <span className="text-xs font-medium bg-white border border-stone-300 text-stone-700 rounded-full px-2.5 py-1">Belebte Orte</span>}
+          {/* === INFO-BEREICH: Details links, Züchter-Karte rechts (sticky) === */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+
+            {/* Linke Spalte: Eckdaten + Gesundheit + Training */}
+            <div className="md:col-span-2 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                {/* Eckdaten */}
+                <div className="bg-white rounded-3xl border-2 border-cream-deep shadow-[0_4px_0_#e9e0d2] p-5">
+                  <h2 className="font-extrabold text-stone-900 text-sm mb-3">Eckdaten</h2>
+                  <div className="space-y-2.5">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-stone-400">Rasse</span>
+                      <span className="font-semibold text-stone-800">{listing.breed.nameDe}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-stone-400">Geschlecht</span>
+                      <span className="font-semibold text-stone-800">{sex}</span>
+                    </div>
+                    {birthDate && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-stone-400">Geboren</span>
+                        <span className="font-semibold text-stone-800">
+                          {birthDate.toLocaleDateString('de-DE')}{ageText && ` (${ageText})`}
+                        </span>
+                      </div>
+                    )}
+                    {listing.litter?.handoverDate && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-stone-400">Abgabe ab</span>
+                        <span className="font-semibold text-stone-800">
+                          {listing.litter.handoverDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        </span>
+                      </div>
+                    )}
+                    {listing.dog?.color && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-stone-400">Farbe</span>
+                        <span className="font-semibold text-stone-800">{listing.dog.color}</span>
+                      </div>
+                    )}
+                    {listing.birthLocation && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-stone-400">Geburtsort</span>
+                        <span className="font-semibold text-stone-800">{listing.birthLocation}</span>
+                      </div>
+                    )}
+                    {listing.chipNumber && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-stone-400">Chip-Nr.</span>
+                        <span className="font-semibold text-stone-800">{listing.chipNumber}</span>
+                      </div>
+                    )}
                   </div>
-                  {listing.trainingNotes && (
-                    <p className="text-stone-600 text-sm mt-3 whitespace-pre-line">{listing.trainingNotes}</p>
+                </div>
+
+                {/* Gesundheit & Dokumente */}
+                <div className="bg-white rounded-3xl border-2 border-cream-deep shadow-[0_4px_0_#e9e0d2] p-5">
+                  <h2 className="font-extrabold text-stone-900 text-sm mb-3">Gesundheit &amp; Dokumente</h2>
+                  {(listing.hasPedigree || listing.isVaccinated || listing.isDewormed || listing.isChipped || listing.isInsured) ? (
+                    <div className="flex flex-wrap gap-2.5">
+                      {listing.hasPedigree && <a href="/badges#ahnentafel" className="text-[11px] font-bold bg-[#e3f0e5] text-forest rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#bcdcc2] hover:-translate-y-px transition-transform">Ahnentafel</a>}
+                      {listing.isVaccinated && <a href="/badges#geimpft" className="text-[11px] font-bold bg-[#e3f0e5] text-forest rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#bcdcc2] hover:-translate-y-px transition-transform">Geimpft</a>}
+                      {listing.isDewormed && <a href="/badges#entwurmt" className="text-[11px] font-bold bg-[#e3f0e5] text-forest rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#bcdcc2] hover:-translate-y-px transition-transform">Entwurmt</a>}
+                      {listing.isChipped && <a href="/badges#gechipt" className="text-[11px] font-bold bg-[#e3f0e5] text-forest rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#bcdcc2] hover:-translate-y-px transition-transform">Gechipt</a>}
+                      {listing.isInsured && <span className="text-[11px] font-bold bg-[#e3f0e5] text-forest rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#bcdcc2] hover:-translate-y-px transition-transform">Versichert</span>}
+                    </div>
+                  ) : (
+                    <p className="text-stone-400 text-sm">Noch keine Angaben</p>
                   )}
-                </>
-              ) : (
-                <p className="text-stone-400 text-sm">Noch keine Angaben</p>
-              )}
-            </div>
+                </div>
+              </div>
 
-            {/* Züchter + Kontakt */}
-            <div className="bg-forest rounded-2xl p-5 text-white flex flex-col justify-between">
-              <div>
-                <p className="font-serif font-bold text-lg mb-0.5">{listing.breeder.kennelName}</p>
-                {(listing.breeder.verificationLevel !== 'none' || listing.breeder.diditStatus === 'approved') && (
-                  <div className="flex flex-wrap gap-1.5 mb-4">{listing.breeder.diditStatus === 'approved' && (<a href="/badges#id-geprueft" className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full hover:bg-white/30 transition-colors">ID geprüft</a>)}{listing.breeder.verificationLevel === 'doc_verified' && (<a href="/badges#zucht-verifiziert" className="text-xs bg-white/20 text-white/90 px-2 py-0.5 rounded-full hover:bg-white/30 transition-colors">Zucht verifiziert</a>)}</div>
+              {/* Training & Sozialisierung */}
+              <div className="bg-white rounded-3xl border-2 border-cream-deep shadow-[0_4px_0_#e9e0d2] p-5">
+                <h2 className="font-extrabold text-stone-900 text-sm mb-3">Training &amp; Sozialisierung</h2>
+                {(listing.trainingMedical || listing.trainingCharaktertest || listing.trainingAndereTiere || listing.trainingHaushaltsgeraeusche || listing.trainingKinder || listing.trainingAutofahren || listing.trainingBelebteOrte || listing.trainingNotes) ? (
+                  <>
+                    <div className="flex flex-wrap gap-2.5">
+                      {listing.trainingMedical && <span className="text-[11px] font-bold bg-[#fdf0d5] text-[#92610a] rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#f2d8a0]">Medical Training</span>}
+                      {listing.trainingCharaktertest && <span className="text-[11px] font-bold bg-[#fdf0d5] text-[#92610a] rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#f2d8a0]">Charaktertest</span>}
+                      {listing.trainingAndereTiere && <span className="text-[11px] font-bold bg-[#fdf0d5] text-[#92610a] rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#f2d8a0]">Andere Tiere</span>}
+                      {listing.trainingHaushaltsgeraeusche && <span className="text-[11px] font-bold bg-[#fdf0d5] text-[#92610a] rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#f2d8a0]">Haushaltsgeräusche</span>}
+                      {listing.trainingKinder && <span className="text-[11px] font-bold bg-[#fdf0d5] text-[#92610a] rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#f2d8a0]">Kinder</span>}
+                      {listing.trainingAutofahren && <span className="text-[11px] font-bold bg-[#fdf0d5] text-[#92610a] rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#f2d8a0]">Autofahren</span>}
+                      {listing.trainingBelebteOrte && <span className="text-[11px] font-bold bg-[#fdf0d5] text-[#92610a] rounded-lg px-3 py-1.5 shadow-[2.5px_2.5px_0_#f2d8a0]">Belebte Orte</span>}
+                    </div>
+                    {listing.trainingNotes && (
+                      <p className="text-stone-600 text-sm mt-3 whitespace-pre-line font-medium">{listing.trainingNotes}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-stone-400 text-sm">Noch keine Angaben</p>
                 )}
               </div>
-              <div className="space-y-2">
-                {listing.breeder.phone && (
-                  <a href={`tel:${listing.breeder.phone}`}
-                    className="block w-full bg-honey text-white text-center py-3 rounded-xl text-sm font-bold hover:bg-honey-light transition-colors">
-                    Anrufen
-                  </a>
+            </div>
+
+            {/* Rechte Spalte: Züchter + Kontakt (sticky) */}
+            <div>
+              <div className="bg-gradient-to-b from-[#3a7250] to-forest rounded-3xl border-[3px] border-[#234a31] shadow-[0_6px_0_#234a31] p-6 text-white md:sticky md:top-5">
+                <p className="text-[11px] font-extrabold uppercase tracking-widest text-honey mb-1">Dein Züchter</p>
+                <p className="font-serif font-bold text-2xl mb-3">{listing.breeder.kennelName}</p>
+                {(listing.breeder.verificationLevel !== 'none' || listing.breeder.diditStatus === 'approved') && (
+                  <div className="flex flex-wrap gap-2 mb-5">{listing.breeder.diditStatus === 'approved' && (<a href="/badges#id-geprueft" className="text-[11px] font-bold bg-honey text-[#234a31] px-2.5 py-1 rounded-md shadow-[2.5px_2.5px_0_#b87e1a] hover:-translate-y-px transition-transform">✓ ID geprüft</a>)}{listing.breeder.verificationLevel === 'doc_verified' && (<a href="/badges#zucht-verifiziert" className="text-[11px] font-bold bg-white/15 text-white px-2.5 py-1 rounded-md shadow-[2.5px_2.5px_0_#234a31] hover:-translate-y-px transition-transform">✓ Zucht verifiziert</a>)}</div>
                 )}
-                {listing.breeder.isPublished !== false && (
-                  <a href={getBreederCanonicalUrl(listing.breeder.subdomain, slugify(listing.breeder.kennelName))}
-                    className="block w-full bg-white/10 text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors">
-                    Züchter-Profil ansehen
-                  </a>
-                )}
-                {!isOwner && (
-                  <div className="pt-1">
-                    <NachrichtButton
-                      breederId={listing.breeder.id}
-                      kennelName={listing.breeder.kennelName}
-                      isLoggedIn={isLoggedIn}
-                      isOwnProfile={false}
-                      variant="dark"
-                    />
-                  </div>
-                )}
+                <div className="space-y-2.5">
+                  {listing.breeder.phone && (
+                    <a href={`tel:${listing.breeder.phone}`}
+                      className="block w-full bg-honey text-stone-900 text-center py-3 rounded-full text-sm font-extrabold hover:bg-honey-light transition-colors">
+                      Anrufen
+                    </a>
+                  )}
+                  {listing.breeder.isPublished !== false && (
+                    <a href={getBreederCanonicalUrl(listing.breeder.subdomain, slugify(listing.breeder.kennelName))}
+                      className="block w-full bg-white/15 text-white text-center py-3 rounded-full text-sm font-bold hover:bg-white/25 transition-colors">
+                      Züchter-Profil ansehen
+                    </a>
+                  )}
+                  {!isOwner && (
+                    <div>
+                      <NachrichtButton
+                        breederId={listing.breeder.id}
+                        kennelName={listing.breeder.kennelName}
+                        isLoggedIn={isLoggedIn}
+                        isOwnProfile={false}
+                        variant="dark"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
           </div>
 
-          {/* Beschreibung — volle Breite unter den 3 Blöcken */}
+          {/* Beschreibung — volle Breite unter den Details */}
           {listing.description && (
-            <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-8">
-              <h2 className="font-semibold text-stone-800 text-sm mb-3">Beschreibung</h2>
-              <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">{listing.description}</p>
+            <div className="bg-white rounded-3xl border-2 border-cream-deep shadow-[0_4px_0_#e9e0d2] p-6 mb-5">
+              <h2 className="font-extrabold text-stone-900 text-sm mb-3">{listing.title ? `Über ${listing.title}` : 'Beschreibung'}</h2>
+              <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line font-medium">{listing.description}</p>
             </div>
           )}
 
-          {/* Standort-Karte */}
+          {/* Standort-Karte — volle Breite */}
           {listing.breeder.latitude && listing.breeder.longitude && (
-            <div className="bg-white rounded-2xl border border-cream-deep p-6 mb-8">
-              <h2 className="font-semibold text-stone-800 text-sm mb-3">Ungefährer Standort</h2>
+            <div className="bg-white rounded-3xl border-2 border-cream-deep shadow-[0_4px_0_#e9e0d2] p-6 mb-8">
+              <h2 className="font-extrabold text-stone-900 text-sm mb-3">Ungefährer Standort</h2>
               <LocationMap
                 lat={listing.breeder.latitude}
                 lng={listing.breeder.longitude}
