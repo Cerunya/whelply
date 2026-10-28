@@ -83,6 +83,7 @@ export default async function Home() {
     .slice(0, 9)
 
   const now = new Date()
+  const heroImages = listings.filter((listing) => listing.media[0]?.url).slice(0, 2)
 
   return (
     <>
@@ -90,43 +91,94 @@ export default async function Home() {
       <main className="bg-cream">
 
         {/* ── Hero ── */}
-        <section className="bg-forest px-4 py-20 md:py-28 relative overflow-visible">
-          {/* Subtile Textur-Punkte */}
-          <div className="absolute inset-0 opacity-5"
-            style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }}
-          />
-          <div className="max-w-6xl mx-auto relative">
-            <div className="max-w-2xl">
-              <span className="inline-block text-xs font-semibold text-honey uppercase tracking-widest mb-5">
+        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#1B3A2D_0%,#122619_100%)] px-4 pb-16 pt-12 md:pb-[72px]">
+          <svg className="absolute inset-0 h-full w-full text-white opacity-[0.035]" aria-hidden="true">
+            <defs>
+              <pattern id="home-paw-pattern" width="190" height="190" patternUnits="userSpaceOnUse">
+                <g fill="currentColor" transform="translate(22 24) rotate(-18 30 30)">
+                  <ellipse cx="30" cy="40" rx="13" ry="15" />
+                  <ellipse cx="10" cy="25" rx="6" ry="8" />
+                  <ellipse cx="23" cy="14" rx="6" ry="8" />
+                  <ellipse cx="37" cy="14" rx="6" ry="8" />
+                  <ellipse cx="50" cy="25" rx="6" ry="8" />
+                </g>
+                <g fill="currentColor" transform="translate(112 108) rotate(16 30 30)">
+                  <ellipse cx="30" cy="40" rx="13" ry="15" />
+                  <ellipse cx="10" cy="25" rx="6" ry="8" />
+                  <ellipse cx="23" cy="14" rx="6" ry="8" />
+                  <ellipse cx="37" cy="14" rx="6" ry="8" />
+                  <ellipse cx="50" cy="25" rx="6" ry="8" />
+                </g>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#home-paw-pattern)" />
+          </svg>
+
+          <div className="max-w-6xl mx-auto relative grid items-start gap-10 lg:grid-cols-[minmax(0,570px)_minmax(0,1fr)]">
+            <div className="relative z-10 max-w-[570px]">
+              <span className="mb-6 inline-flex rounded-lg border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-honey-light">
                 Nur FCI-anerkannte Rassen
               </span>
-              <h1 className="font-serif text-5xl md:text-6xl font-bold text-white leading-tight mb-5">
+              <h1 className="mb-6 font-serif text-5xl font-bold leading-[1.08] text-white md:text-6xl">
                 Finde deinen<br />
-                <span className="text-honey">Rassewelpen.</span>
+                <span className="text-honey-light">Rassewelpen.</span>
               </h1>
-              <p className="text-white/75 text-lg mb-10 leading-relaxed">
-                Whelply verbindet dich mit geprüften Züchtern in ganz Deutschland —
-                mit FCI-Stammbaum, ohne Vermehrer.
+              <p className="mb-8 max-w-[540px] text-lg leading-relaxed text-white/75">
+                Finde deutschlandweit Welpen, erwachsene Hunde und Deckrüden von seriösen Züchtern.
               </p>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2">
+              <div className="rounded-2xl bg-white/10 p-2 backdrop-blur-sm">
                 <SearchForm breeds={breeds} />
               </div>
             </div>
+
+            {heroImages.length > 0 && (
+              <div className="relative z-10 mt-6 h-[350px] sm:h-[390px] lg:mt-0 lg:h-[400px]">
+                <div className="absolute -top-10 right-0 h-[440px] w-[440px] rounded-full bg-honey-light/10" aria-hidden="true" />
+                <div className="absolute right-2 top-2 h-40 w-40 rounded-full border border-honey-light/40" aria-hidden="true" />
+
+                <div className="absolute right-0 top-4 w-[78%] max-w-[400px] rotate-3">
+                  <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-[30px] bg-forest-dark" aria-hidden="true" />
+                  <img
+                    src={heroImages[0].media[0]?.url ?? undefined}
+                    alt={heroImages[0].title ?? 'Welpenfoto'}
+                    className="relative aspect-[400/385] w-full rounded-[30px] border-[6px] border-white object-cover"
+                  />
+                </div>
+
+                {heroImages[1]?.media[0]?.url && (
+                  <div className="absolute left-0 top-[47%] w-[58%] max-w-[250px] -rotate-6">
+                    <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-[26px] bg-forest-dark" aria-hidden="true" />
+                    <img
+                      src={heroImages[1].media[0]?.url ?? undefined}
+                      alt={heroImages[1].title ?? 'Welpenfoto'}
+                      className="relative aspect-[250/235] w-full rounded-[26px] border-[5px] border-white object-cover"
+                    />
+                  </div>
+                )}
+
+                <Link
+                  href="/welpen"
+                  className="absolute bottom-[-42px] right-0 -rotate-3 rounded-xl bg-honey px-5 py-3 text-center text-forest-dark shadow-[6px_6px_0_#122619] transition-transform hover:-translate-y-1"
+                >
+                  <span className="block text-sm font-bold">Welpen entdecken</span>
+                  <span className="mt-0.5 block text-[10px]">von echten Züchtern</span>
+                </Link>
+              </div>
+            )}
           </div>
         </section>
 
         {/* ── Statistiken ── */}
-        <section className="bg-forest-dark px-4 py-5">
-          <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-10 md:gap-20">
+        <section className="bg-[#35634B] px-4 py-4">
+          <div className="max-w-6xl mx-auto grid grid-cols-3 divide-x divide-white/15">
             {[
               { value: totalListings, label: 'aktive Inserate' },
               { value: totalBreeders, label: 'Züchter' },
               { value: breeds.length, label: 'Rassen' },
-              { value: '100%', label: 'FCI-anerkannt' },
             ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-2xl font-bold text-white font-serif">{stat.value}</p>
-                <p className="text-xs text-white/60 mt-0.5">{stat.label}</p>
+              <div key={stat.label} className="px-2 text-center sm:px-4">
+                <p className="font-serif text-[22px] font-bold leading-tight text-white">{stat.value}</p>
+                <p className="mt-1 text-[10px] text-white/75 sm:text-xs">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -255,7 +307,7 @@ export default async function Home() {
           <section className="bg-white border-y border-cream-deep py-16 px-4"><div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Hunde jeden Alters</p>
+                <p className="text-xs font-semibold text-forest uppercase tracking-wider mb-1">Hunde jeden Alters</p>
                 <h2 className="font-serif text-3xl font-bold text-stone-900">Erwachsene Hunde</h2>
               </div>
               <Link href="/hunde" className="text-sm font-semibold text-forest hover:underline">
