@@ -91,7 +91,7 @@ export default async function Home() {
       <main className="bg-cream">
 
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#1B3A2D_0%,#122619_100%)] px-4 pb-16 pt-12 md:pb-[72px]">
+        <section className="relative overflow-visible bg-[linear-gradient(135deg,#1B3A2D_0%,#122619_100%)] px-4 pb-16 pt-12 md:pb-[72px]">
           <svg className="absolute inset-0 h-full w-full text-white opacity-[0.035]" aria-hidden="true">
             <defs>
               <pattern id="home-paw-pattern" width="190" height="190" patternUnits="userSpaceOnUse">
@@ -186,12 +186,14 @@ export default async function Home() {
 
         {/* ── Aktuelle Welpen ── */}
         <section className="max-w-6xl mx-auto px-4 py-16">
-          <div className="flex items-end justify-between mb-8">
+          <div className="mb-10 flex items-end justify-between gap-4">
             <div>
-              <h2 className="font-serif text-3xl font-bold text-stone-900">Aktuelle Welpen</h2>
-              <p className="text-stone-400 text-sm mt-1">Zuletzt eingetragene Inserate</p>
+              <span className="mb-4 inline-flex rounded-lg border border-forest/10 bg-[#EAF3EC] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-forest shadow-[3px_3px_0_#EDE4CE]">
+                Frisch eingestellt
+              </span>
+              <h2 className="font-serif text-3xl font-bold text-stone-900 sm:text-4xl">Aktuelle Welpen</h2>
             </div>
-            <Link href="/welpen" className="text-sm text-forest font-semibold hover:text-forest-light transition-colors">
+            <Link href="/welpen" className="whitespace-nowrap text-sm text-forest font-semibold hover:text-forest-light transition-colors">
               Alle anzeigen →
             </Link>
           </div>
@@ -211,7 +213,7 @@ export default async function Home() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
+            <div className="grid grid-cols-2 items-stretch gap-6 sm:gap-7 md:grid-cols-3">
               {listings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -227,6 +229,7 @@ export default async function Home() {
                   isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
                   imageUrl={listing.media[0]?.url}
                   tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                  sticker
                 />
               ))}
             </div>
