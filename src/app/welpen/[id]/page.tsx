@@ -124,9 +124,10 @@ export default async function WelpenDetailPage({
               <pattern id="pawPattern" width="120" height="120" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
                 <g fill="#2f5d40" opacity="0.05">
                   <ellipse cx="30" cy="38" rx="13" ry="16" />
-                  <ellipse cx="12" cy="20" rx="6" ry="8" />
-                  <ellipse cx="30" cy="14" rx="6" ry="8" />
-                  <ellipse cx="48" cy="20" rx="6" ry="8" />
+                  <ellipse cx="10" cy="25" rx="6" ry="8" />
+                  <ellipse cx="23" cy="14" rx="6" ry="8" />
+                  <ellipse cx="37" cy="14" rx="6" ry="8" />
+                  <ellipse cx="50" cy="25" rx="6" ry="8" />
                 </g>
               </pattern>
             </defs>
@@ -165,8 +166,8 @@ export default async function WelpenDetailPage({
                   <span className="inline-flex items-center gap-2 flex-wrap">
                     {listing.title || listing.breeder.kennelName}
                     <span className={`inline-flex items-end ${pawColor}`} aria-hidden="true">
-                      <svg width="34" height="34" viewBox="0 0 60 60" className="rotate-[14deg]" fill="currentColor"><ellipse cx="30" cy="40" rx="13" ry="15" /><ellipse cx="13" cy="22" rx="6" ry="8" /><ellipse cx="30" cy="16" rx="6" ry="8" /><ellipse cx="47" cy="22" rx="6" ry="8" /></svg>
-                      <svg width="20" height="20" viewBox="0 0 60 60" className="-rotate-[18deg] -ml-1 mb-1.5" fill="currentColor"><ellipse cx="30" cy="40" rx="13" ry="15" /><ellipse cx="13" cy="22" rx="6" ry="8" /><ellipse cx="30" cy="16" rx="6" ry="8" /><ellipse cx="47" cy="22" rx="6" ry="8" /></svg>
+                      <svg width="34" height="34" viewBox="0 0 60 60" className="rotate-[14deg]" fill="currentColor"><ellipse cx="30" cy="40" rx="13" ry="15" /><ellipse cx="10" cy="25" rx="6" ry="8" /><ellipse cx="23" cy="14" rx="6" ry="8" /><ellipse cx="37" cy="14" rx="6" ry="8" /><ellipse cx="50" cy="25" rx="6" ry="8" /></svg>
+                      <svg width="20" height="20" viewBox="0 0 60 60" className="-rotate-[18deg] -ml-1 mb-1.5" fill="currentColor"><ellipse cx="30" cy="40" rx="13" ry="15" /><ellipse cx="10" cy="25" rx="6" ry="8" /><ellipse cx="23" cy="14" rx="6" ry="8" /><ellipse cx="37" cy="14" rx="6" ry="8" /><ellipse cx="50" cy="25" rx="6" ry="8" /></svg>
                     </span>
                   </span>
                 </h1>
