@@ -307,7 +307,7 @@ export default async function Home() {
           <section className="bg-white border-y border-cream-deep py-16 px-4"><div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <p className="text-xs font-semibold text-forest uppercase tracking-wider mb-1">Hunde jeden Alters</p>
+                <p className="text-xs font-semibold text-forest uppercase tracking-widest mb-1">Hunde jeden Alters</p>
                 <h2 className="font-serif text-3xl font-bold text-stone-900">Erwachsene Hunde</h2>
               </div>
               <Link href="/hunde" className="text-sm font-semibold text-forest hover:underline">
