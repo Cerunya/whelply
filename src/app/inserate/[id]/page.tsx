@@ -118,7 +118,7 @@ export default async function WelpenDetailPage({
       <Navbar />
       <main className="min-h-screen bg-cream relative">
         {/* Dezentes Pfotenmuster im Kopfbereich */}
-        <div className="absolute top-0 left-0 right-0 h-[320px] overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute top-0 left-0 right-0 h-[480px] overflow-hidden pointer-events-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_45%,transparent_100%)]" aria-hidden="true">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="pawPattern" width="120" height="120" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
@@ -172,7 +172,7 @@ export default async function WelpenDetailPage({
                 </h1>
                 <div className="flex items-center gap-3 mt-2 flex-wrap">
                   {sex && (
-                    <span className={`text-sm font-semibold ${listing.sex === 'male' ? 'text-blue-500' : 'text-pink-500'}`}>{sex}</span>
+                    <span className={`text-sm font-semibold ${listing.sex === 'male' ? 'text-blue-500' : listing.sex === 'female' ? 'text-pink-500' : 'text-stone-400'}`}>{sex}</span>
                   )}
                   {listing.status !== 'available' && listing.status !== 'draft' && (
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
@@ -524,7 +524,18 @@ export default async function WelpenDetailPage({
                   return (
                     <Link key={sibling.id} href={`/welpen/${sibling.slug || sibling.id}`}
                       className={`flex-shrink-0 w-40 sm:w-auto rounded-xl border-2 overflow-hidden hover:shadow-md transition-all ${borderClass}`}>
-                      <div className="bg-cream-dark aspect-square flex items-center justify-center">
+                      <div className="relative bg-cream-dark aspect-square flex items-center justify-center">
+                        {sibling.status !== 'draft' && (
+                          <span className={`absolute top-2 left-2 text-[10px] font-bold rounded-md px-2 py-1 ${
+                            sibling.status === 'available'
+                              ? 'bg-[#e3f0e5] text-forest shadow-[2.5px_2.5px_0_#bcdcc2]'
+                              : sibling.status === 'reserved'
+                              ? 'bg-[#fdf0d5] text-[#92610a] shadow-[2.5px_2.5px_0_#f2d8a0]'
+                              : 'bg-stone-200 text-stone-600 shadow-[2.5px_2.5px_0_#d6d3d1]'
+                          }`}>
+                            {sibling.status === 'available' ? 'Frei' : sibling.status === 'reserved' ? 'Reserviert' : 'Verkauft'}
+                          </span>
+                        )}
                         {sibling.media[0]?.url ? (
                           <img src={sibling.media[0].url} alt={sibling.dog?.name ?? ''} className="w-full h-full object-cover" />
                         ) : (
