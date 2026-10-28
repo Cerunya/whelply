@@ -118,7 +118,7 @@ export default async function WelpenDetailPage({
       <Navbar />
       <main className="min-h-screen bg-cream relative">
         {/* Dezentes Pfotenmuster im Kopfbereich */}
-        <div className="absolute top-0 left-0 right-0 h-[320px] overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute top-0 left-0 right-0 h-[320px] overflow-hidden pointer-events-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_45%,transparent_100%)]" aria-hidden="true">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="pawPattern" width="120" height="120" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
@@ -172,7 +172,7 @@ export default async function WelpenDetailPage({
                 </h1>
                 <div className="flex items-center gap-3 mt-2 flex-wrap">
                   {sex && (
-                    <span className={`text-sm font-semibold ${listing.sex === 'male' ? 'text-blue-500' : 'text-pink-500'}`}>{sex}</span>
+                    <span className={`text-sm font-semibold ${listing.sex === 'male' ? 'text-blue-500' : listing.sex === 'female' ? 'text-pink-500' : 'text-stone-400'}`}>{sex}</span>
                   )}
                   {listing.status !== 'available' && listing.status !== 'draft' && (
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
