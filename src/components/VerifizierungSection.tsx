@@ -14,7 +14,7 @@ type Props = {
 export default function VerifizierungSection({ verificationLevel, verifiedAt, rejectReason, diditStatus: initialDiditStatus, idDocPending = false, idDocRejectReason = null }: Props) {
   const [diditStatus, setDiditStatus] = useState(initialDiditStatus)
   const [diditLoading, setDiditLoading] = useState(false)
-  const [diditAvailable, setDiditAvailable] = useState(true)
+  const [diditAvailable, setDiditAvailable] = useState<boolean | null>(null)
   const [uploading, setUploading] = useState(false)
   const [consent, setConsent] = useState(false)
   const [error, setError] = useState('')
@@ -102,6 +102,70 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
     }
   }
 
+  const idDone = diditStatus === 'approved'
+  const idDeclined = diditStatus === 'declined'
+  const idPending = diditStatus === 'pending'
+
+  function renderManualIdUpload() {
+    return (
+      <div className="ml-10 space-y-4">
+            {idDeclined && (
+              <p className="text-sm text-red-600">Die automatische ID-Prüfung ist fehlgeschlagen.</p>
+            )}
+            {idDocRejectReason && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                <p className="font-semibold mb-0.5">ID-Prüfung abgelehnt</p>
+                <p>{idDocRejectReason}</p>
+              </div>
+            )}
+
+            <div>
+              <p className="text-xs font-semibold text-stone-700 mb-1">Manuelle Prüfung</p>
+              <p className="text-xs text-stone-500 mb-3">
+                Die automatische Online-Prüfung ist derzeit nicht verfügbar. Lade stattdessen dein
+                Ausweisdokument (Personalausweis oder Reisepass) sowie ein Selfie hoch, auf dem du den
+                Ausweis in der Hand hältst — wir prüfen beides von Hand.
+                Die Dateien werden nach der Prüfung automatisch gelöscht.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-stone-600 mb-1">Ausweis Vorderseite *</label>
+                  <input ref={frontRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
+                    className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-stone-600 mb-1">Ausweis Rückseite (optional)</label>
+                  <input ref={backRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
+                    className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-stone-600 mb-1">Selfie mit Ausweis in der Hand *</label>
+                  <input ref={selfieRef} type="file" accept="image/jpeg,image/png,image/webp"
+                    className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
+                </div>
+                <p className="text-xs text-stone-400">JPG, PNG, WebP oder PDF (Selfie: nur Bild) · max. 10 MB pro Datei</p>
+
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={idConsent} onChange={(e) => setIdConsent(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded border-stone-300 text-forest focus:ring-forest" />
+                  <span className="text-xs text-stone-500 leading-relaxed">
+                    Ich willige ein, dass diese Dateien ausschließlich zur Prüfung meiner Identität
+                    verwendet und nach der Entscheidung automatisch gelöscht werden.
+                  </span>
+                </label>
+
+                {error && <p className="text-sm text-red-600">{error}</p>}
+
+                <button onClick={handleIdUpload} disabled={idUploading}
+                  className="bg-forest text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-forest-light disabled:opacity-40">
+                  {idUploading ? 'Wird hochgeladen...' : 'Ausweis & Selfie einreichen'}
+                </button>
+              </div>
+            </div>
+                </div>
+    )
+  }
+
   // ── Vollständig verifiziert ──
   if (verificationLevel === 'doc_verified') {
     return (
@@ -121,7 +185,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
           </span>
           <span className="text-green-700">📄 Züchterstatus bestätigt</span>
         </div>
-        {diditStatus !== 'approved' && diditAvailable && !idManualPending && (
+        {diditStatus !== 'approved' && diditAvailable === true && !idManualPending && (
           <div className="mt-4 pt-4 border-t border-green-200">
             <p className="text-xs text-green-700 mb-2">Möchtest du zusätzlich deine Identität per Ausweischeck bestätigen?</p>
             <button onClick={startDiditCheck} disabled={diditLoading}
@@ -130,6 +194,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
             </button>
           </div>
         )}
+        {diditStatus !== 'approved' && diditAvailable === false && !idManualPending && renderManualIdUpload()}
       </div>
     )
   }
@@ -145,7 +210,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
             <p className="text-sm text-amber-600">Dein Dokument wird von unserem Team geprüft. Das dauert in der Regel 1–2 Werktage.</p>
           </div>
         </div>
-        {diditStatus !== 'approved' && diditAvailable && !idManualPending && (
+        {diditStatus !== 'approved' && diditAvailable === true && !idManualPending && (
           <div className="mt-4 pt-4 border-t border-amber-200">
             <p className="text-xs text-amber-700 mb-2">Du kannst in der Zwischenzeit deine Identität per Ausweischeck bestätigen.</p>
             <button onClick={startDiditCheck} disabled={diditLoading}
@@ -154,14 +219,12 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
             </button>
           </div>
         )}
+        {diditStatus !== 'approved' && diditAvailable === false && !idManualPending && renderManualIdUpload()}
       </div>
     )
   }
 
   // ── Zwei-Schritt-Verifizierung ──
-  const idDone = diditStatus === 'approved'
-  const idDeclined = diditStatus === 'declined'
-  const idPending = diditStatus === 'pending'
 
   return (
     <div className="bg-white border border-cream-deep rounded-2xl p-6">
@@ -216,62 +279,10 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
                 {diditLoading ? 'Wird geprüft...' : 'Status aktualisieren'}
               </button>
             </div>
-          ) : !diditAvailable ? (
-            <div className="ml-10 space-y-4">
-              {idDeclined && (
-                <p className="text-sm text-red-600">Die automatische ID-Prüfung ist fehlgeschlagen.</p>
-              )}
-              {idDocRejectReason && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-                  <p className="font-semibold mb-0.5">ID-Prüfung abgelehnt</p>
-                  <p>{idDocRejectReason}</p>
-                </div>
-              )}
-
-              <div>
-                <p className="text-xs font-semibold text-stone-700 mb-1">Manuelle Prüfung</p>
-                <p className="text-xs text-stone-500 mb-3">
-                  Die automatische Online-Prüfung ist derzeit nicht verfügbar. Lade stattdessen dein
-                  Ausweisdokument (Personalausweis oder Reisepass) sowie ein Selfie hoch, auf dem du den
-                  Ausweis in der Hand hältst — wir prüfen beides von Hand.
-                  Die Dateien werden nach der Prüfung automatisch gelöscht.
-                </p>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-stone-600 mb-1">Ausweis Vorderseite *</label>
-                    <input ref={frontRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
-                      className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-stone-600 mb-1">Ausweis Rückseite (optional)</label>
-                    <input ref={backRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
-                      className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-stone-600 mb-1">Selfie mit Ausweis in der Hand *</label>
-                    <input ref={selfieRef} type="file" accept="image/jpeg,image/png,image/webp"
-                      className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
-                  </div>
-                  <p className="text-xs text-stone-400">JPG, PNG, WebP oder PDF (Selfie: nur Bild) · max. 10 MB pro Datei</p>
-
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" checked={idConsent} onChange={(e) => setIdConsent(e.target.checked)}
-                      className="w-4 h-4 mt-0.5 rounded border-stone-300 text-forest focus:ring-forest" />
-                    <span className="text-xs text-stone-500 leading-relaxed">
-                      Ich willige ein, dass diese Dateien ausschließlich zur Prüfung meiner Identität
-                      verwendet und nach der Entscheidung automatisch gelöscht werden.
-                    </span>
-                  </label>
-
-                  {error && <p className="text-sm text-red-600">{error}</p>}
-
-                  <button onClick={handleIdUpload} disabled={idUploading}
-                    className="bg-forest text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-forest-light disabled:opacity-40">
-                    {idUploading ? 'Wird hochgeladen...' : 'Ausweis & Selfie einreichen'}
-                  </button>
-                </div>
-              </div>
-            </div>
+          ) : diditAvailable === false ? (
+            renderManualIdUpload()
+          ) : diditAvailable === null ? (
+            <p className="text-xs text-stone-400 ml-10">Prüfmöglichkeiten werden geladen...</p>
           ) : idDeclined ? (
             <div className="ml-10">
               <p className="text-sm text-red-600 mb-2">ID-Prüfung fehlgeschlagen. Bitte versuche es erneut.</p>
@@ -294,13 +305,13 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
         </div>
 
         {/* ── Schritt 2: Dokument-Upload ── */}
-        <div className={`rounded-xl border p-5 ${!idDone && !idManualPending && diditAvailable ? 'border-cream-deep opacity-50' : 'border-cream-deep'}`}>
+        <div className={`rounded-xl border p-5 ${!idDone && !idManualPending && diditAvailable === true ? 'border-cream-deep opacity-50' : 'border-cream-deep'}`}>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-7 h-7 rounded-full bg-stone-300 flex items-center justify-center text-white text-xs font-bold">2</div>
             <p className="font-semibold text-stone-900 text-sm">Züchterstatus belegen</p>
           </div>
 
-          {(!idDone && !idManualPending && diditAvailable) ? (
+          {(!idDone && !idManualPending && diditAvailable === true) ? (
             <p className="text-xs text-stone-400 ml-10">Bitte schließe zuerst die Identitätsprüfung ab.</p>
           ) : (
             <div className="ml-10 space-y-3">
