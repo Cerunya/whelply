@@ -62,7 +62,7 @@ export default async function Home() {
       isPublished: true,
       isActive: true,
       subdomain: true,
-      dogs: { take: 1, select: { breed: { select: { nameDe: true } } } },
+      dogs: { select: { sex: true, isStud: true, breed: { select: { nameDe: true } } } },
       media: { where: { purpose: 'card' }, take: 1, select: { url: true } },
       listings: {
         where: { status: 'available', type: 'puppy' },
@@ -260,7 +260,7 @@ export default async function Home() {
               </defs>
               <rect width="100%" height="100%" fill="url(#breeder-paw-pattern)" />
             </svg>
-            <div className="absolute right-[-40px] top-[-100px] h-[340px] w-[340px] rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
+            <div className="absolute right-12 top-10 h-44 w-44 rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
 
             <div className="max-w-6xl mx-auto relative">
               <div className="mb-10 flex items-end justify-between gap-4">
@@ -302,6 +302,12 @@ export default async function Home() {
                               <span className="text-[8px] font-black uppercase leading-tight">
                                 {breeder.litters[0].status === 'pregnant' ? 'erwartet' : 'geplant'}
                               </span>
+                            </div>
+                          )}
+                          {breeder.dogs.some((dog) => dog.sex === 'male' && dog.isStud) && (
+                            <div className="flex h-16 w-16 flex-col items-center justify-center rounded-full border-[3px] border-white bg-forest text-center text-white shadow-lg">
+                              <span className="text-[8px] font-black uppercase leading-tight">Deckrüde</span>
+                              <span className="text-[8px] font-black uppercase leading-tight">verfügbar</span>
                             </div>
                           )}
                         </div>
