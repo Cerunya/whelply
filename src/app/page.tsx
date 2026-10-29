@@ -260,7 +260,7 @@ export default async function Home() {
               </defs>
               <rect width="100%" height="100%" fill="url(#breeder-paw-pattern)" />
             </svg>
-            <div className="absolute right-12 top-10 h-44 w-44 rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
+            <div className="pointer-events-none absolute right-4 top-[-90px] h-[380px] w-[380px] rounded-full bg-honey-light/[0.08] sm:right-[3%]" aria-hidden="true" />
 
             <div className="max-w-6xl mx-auto relative">
               <div className="mb-10 flex items-end justify-between gap-4">
@@ -276,6 +276,7 @@ export default async function Home() {
               <div className="grid grid-cols-1 items-stretch gap-7 sm:grid-cols-2 lg:grid-cols-3">
                 {featuredBreeders.map((breeder, index) => {
                   const breederUrl = getBreederCanonicalUrl(breeder.subdomain, slugify(breeder.kennelName))
+                  const badgeCount = Number(breeder.listings.length > 0) + Number(breeder.litters.length > 0) + Number(breeder.dogs.some((dog) => dog.sex === 'male' && dog.isStud))
                   const rotations = ['-rotate-[1.2deg]', 'rotate-[0.8deg]', '-rotate-[0.7deg]', 'rotate-[0.8deg]', '-rotate-[0.9deg]', 'rotate-[1deg]']
                   return (
                     <a key={breeder.id} href={breederUrl} className={`group relative block ${rotations[index % rotations.length]}`}>
@@ -312,7 +313,7 @@ export default async function Home() {
                           )}
                         </div>
 
-                        <div className="min-h-[108px] flex-1 bg-white p-4 pt-3">
+                        <div className={`min-h-[108px] flex-1 bg-white p-4 ${badgeCount > 0 ? 'pt-10' : 'pt-3'}`}>
                           <p className="font-serif text-lg font-bold text-forest">{breeder.kennelName}</p>
                           {breeder.dogs[0]?.breed?.nameDe && (
                             <p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-forest">
