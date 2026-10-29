@@ -6,7 +6,7 @@ const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://whelply.de'
 export default async function Footer() {
   const session = await auth()
   return (
-    <footer className="bg-forest text-white/60 mt-20 relative z-10">
+    <footer className="relative z-10 bg-forest text-white/60">
       <div className="max-w-6xl mx-auto px-4 py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div className="col-span-2 md:col-span-1">
