@@ -260,10 +260,9 @@ export default async function Home() {
               </defs>
               <rect width="100%" height="100%" fill="url(#breeder-paw-pattern)" />
             </svg>
-            <div className="pointer-events-none absolute right-4 top-[-90px] h-[380px] w-[380px] rounded-full bg-honey-light/[0.08] sm:right-[3%]" aria-hidden="true" />
-
             <div className="max-w-6xl mx-auto relative">
-              <div className="mb-10 flex items-end justify-between gap-4">
+              <div className="pointer-events-none absolute right-[-40px] top-[-150px] z-20 h-[380px] w-[380px] rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
+              <div className="relative z-30 mb-10 flex items-end justify-between gap-4">
                 <div>
                   <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-honey-light">Unsere Züchter</p>
                   <h2 className="font-serif text-3xl font-bold text-white sm:text-4xl">Züchter entdecken</h2>
@@ -290,7 +289,7 @@ export default async function Home() {
                           />
                         </div>
 
-                        <div className="absolute right-4 top-24 z-10 flex gap-2">
+                        <div className="absolute right-4 top-24 z-40 flex gap-2">
                           {breeder.listings.length > 0 && (
                             <div className="flex h-16 w-16 flex-col items-center justify-center rounded-full border-[3px] border-white bg-honey text-center text-white shadow-lg">
                               <span className="text-[8px] font-black uppercase leading-tight">Welpen</span>
@@ -313,7 +312,7 @@ export default async function Home() {
                           )}
                         </div>
 
-                        <div className={`min-h-[108px] flex-1 bg-white p-4 ${badgeCount > 0 ? 'pt-10' : 'pt-3'}`}>
+                        <div className={`relative z-30 min-h-[108px] flex-1 bg-white p-4 ${badgeCount > 0 ? 'pt-10' : 'pt-3'}`}>
                           <p className="font-serif text-lg font-bold text-forest">{breeder.kennelName}</p>
                           {breeder.dogs[0]?.breed?.nameDe && (
                             <p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-forest">
