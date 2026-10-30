@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import BreedSearch from './BreedSearch'
+import PuppyCareFields, { EMPTY_PUPPY_CARE } from './PuppyCareFields'
 
 type Breed = { id: number; nameDe: string; slug: string }
 type DogOption = { id: string; name: string; sex: string; breedId: number }
@@ -21,6 +22,7 @@ export default function WurfForm({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [puppyCare, setPuppyCare] = useState({ ...EMPTY_PUPPY_CARE })
   const [form, setForm] = useState({
     breedId: '',
     damId: '',
@@ -59,6 +61,8 @@ export default function WurfForm({
         sireExternal: form.sireId ? null : (form.sireExternal || null),
         notes: form.notes || null,
         status: form.status,
+        ...puppyCare,
+        trainingNotes: puppyCare.trainingNotes || null,
       }),
     })
 
@@ -199,6 +203,15 @@ export default function WurfForm({
               />
             </div>
           )}
+
+          <div className="border-t border-cream-deep pt-5">
+            <h3 className="font-serif text-lg font-bold text-stone-900">Standardwerte für die Welpen</h3>
+            <p className="mt-1 text-xs text-stone-400">
+              Diese Angaben werden beim Anlegen neuer Welpen automatisch übernommen und können pro Welpe individuell angepasst werden.
+            </p>
+          </div>
+
+          <PuppyCareFields values={puppyCare} onChange={setPuppyCare} />
 
           <div>
             <label className={labelClass}>Notizen</label>
