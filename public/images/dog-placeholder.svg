@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title desc">
+  <title id="title">Noch kein Hundefoto</title>
+  <desc id="desc">Whelply Platzhalter mit Pfotenabdruck</desc>
+  <rect width="900" height="600" fill="#EAF3EC"/>
+  <circle cx="450" cy="274" r="142" fill="#FAF8F4" stroke="#D8E7DC" stroke-width="4"/>
+  <g fill="#70947D" transform="translate(360 174)">
+    <ellipse cx="90" cy="122" rx="52" ry="60"/>
+    <ellipse cx="10" cy="62" rx="24" ry="32" transform="rotate(-18 10 62)"/>
+    <ellipse cx="62" cy="18" rx="24" ry="32" transform="rotate(-6 62 18)"/>
+    <ellipse cx="118" cy="18" rx="24" ry="32" transform="rotate(6 118 18)"/>
+    <ellipse cx="170" cy="62" rx="24" ry="32" transform="rotate(18 170 62)"/>
+  </g>
+  <text x="450" y="472" text-anchor="middle" fill="#1B3A2D" font-family="Georgia, serif" font-size="42" font-weight="bold">whelply</text>
+  <text x="450" y="514" text-anchor="middle" fill="#668070" font-family="Arial, sans-serif" font-size="22">Foto folgt in Kürze</text>
+</svg>
