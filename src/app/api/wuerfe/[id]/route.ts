@@ -31,7 +31,7 @@ export async function PATCH(
     where: { id: params.id },
     include: {
       _count: { select: { listings: true } },
-      listings: { select: { id: true, dogId: true } },
+      listings: { select: { id: true, dogId: true, dog: { select: { birthDate: true } } } },
     },
   })
   if (!litter || litter.breederId !== breeder.id) {
@@ -98,6 +98,25 @@ export async function PATCH(
     where: { id: params.id },
     data,
   })
+
+  // Wurfdatum ändern: alle Welpendaten gemeinsam verschieben und individuelle
+  // Abweichungen (z.B. +1/-1 Tag) beibehalten.
+  if (parsed.data.bornDate !== undefined) {
+    const oldDate = litter.bornDate
+    const newDate = parsed.data.bornDate ? new Date(parsed.data.bornDate) : null
+    const changed = (oldDate?.toISOString().slice(0, 10) ?? null) !== (newDate?.toISOString().slice(0, 10) ?? null)
+
+    if (changed) {
+      const deltaMs = oldDate && newDate ? newDate.getTime() - oldDate.getTime() : null
+      await Promise.all(litter.listings.map((listing) => {
+        if (!listing.dogId) return Promise.resolve()
+        const puppyDate = deltaMs !== null && listing.dog?.birthDate
+          ? new Date(listing.dog.birthDate.getTime() + deltaMs)
+          : newDate
+        return prisma.dog.update({ where: { id: listing.dogId }, data: { birthDate: puppyDate } })
+      }))
+    }
+  }
 
   // Rassenänderung auf alle Welpen dieses Wurfs übertragen (Dog + Listing)
   if (parsed.data.breedId !== undefined && parsed.data.breedId !== litter.breedId) {
