@@ -83,7 +83,16 @@ export default async function Home() {
     .slice(0, 6)
 
   const now = new Date()
-  const heroImages = listings.filter((listing) => listing.media[0]?.url).slice(0, 2)
+  const heroImages = [
+    {
+      url: 'https://images.pexels.com/photos/25902170/pexels-photo-25902170.jpeg?auto=compress&cs=tinysrgb&w=1200',
+      alt: 'Weißer Welpe mit einem lila Kuscheltier im Gras',
+    },
+    {
+      url: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=900',
+      alt: 'Junger Hund liegt auf einer hellen Decke',
+    },
+  ]
 
   return (
     <>
@@ -139,18 +148,18 @@ export default async function Home() {
                 <div className="absolute right-0 top-4 w-[78%] max-w-[400px] rotate-3">
                   <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-[30px] bg-forest-dark" aria-hidden="true" />
                   <img
-                    src={heroImages[0].media[0]?.url ?? undefined}
-                    alt={heroImages[0].title ?? 'Welpenfoto'}
+                    src={heroImages[0].url}
+                    alt={heroImages[0].alt}
                     className="relative aspect-[400/385] w-full rounded-[30px] border-[6px] border-white object-cover"
                   />
                 </div>
 
-                {heroImages[1]?.media[0]?.url && (
+                {heroImages[1].url && (
                   <div className="absolute left-0 top-[47%] w-[58%] max-w-[250px] -rotate-6">
                     <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-[26px] bg-forest-dark" aria-hidden="true" />
                     <img
-                      src={heroImages[1].media[0]?.url ?? undefined}
-                      alt={heroImages[1].title ?? 'Welpenfoto'}
+                      src={heroImages[1].url}
+                      alt={heroImages[1].alt}
                       className="relative aspect-[250/235] w-full rounded-[26px] border-[5px] border-white object-cover"
                     />
                   </div>
