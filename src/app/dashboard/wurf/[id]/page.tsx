@@ -81,6 +81,7 @@ export default async function WurfDetailPage({
         status: l.status,
         priceCents: l.priceCents,
         imageUrl: l.media[0]?.url ?? null,
+        birthDate: l.dog?.birthDate?.toISOString().slice(0, 10) ?? null,
       }))}
     />
   )
