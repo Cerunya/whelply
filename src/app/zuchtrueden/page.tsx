@@ -16,15 +16,16 @@ export default async function ZuchtrudenPage({
 }) {
   // Umkreissuche
   let radiusFilter: any = {}
+  let searchCoords: { lat: number; lng: number } | null = null
   const radiusKm = Number(searchParams.radius) || 0
   if (searchParams.ort && radiusKm > 0) {
     const { geocodeAddress } = await import('@/lib/geocode')
-    const coords = await geocodeAddress({ zip: searchParams.ort, city: searchParams.ort })
-    if (coords) {
+    searchCoords = await geocodeAddress({ city: searchParams.ort })
+    if (searchCoords) {
       const delta = radiusKm / 111
       radiusFilter = {
-        latitude: { gte: coords.lat - delta, lte: coords.lat + delta },
-        longitude: { gte: coords.lng - delta, lte: coords.lng + delta },
+        latitude: { gte: searchCoords.lat - delta, lte: searchCoords.lat + delta },
+        longitude: { gte: searchCoords.lng - delta, lte: searchCoords.lng + delta },
       }
     }
   }
@@ -36,7 +37,7 @@ export default async function ZuchtrudenPage({
       breeder: {
         isActive: true,
         ...(searchParams.region ? { state: searchParams.region } : {}),
-        ...(searchParams.ort && !radiusKm ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+        ...(searchParams.ort && (!radiusKm || !searchCoords) ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
         ...radiusFilter,
       },
       ...(searchParams.rasse ? { breed: { slug: searchParams.rasse } } : {}),
