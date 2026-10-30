@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
+import PuppyCareFields, { type PuppyCareValues } from './PuppyCareFields'
 
 type LitterInfo = {
   id: string
   breedId: number
   breedName: string
   bornDate: string | null
+  care: PuppyCareValues
 }
 
 export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; hasPuppies: boolean }) {
@@ -20,6 +22,8 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
   const [litterBornDate, setLitterBornDate] = useState(litter.bornDate ?? '')
   const [puppyAdded, setPuppyAdded] = useState(hasPuppies)
   const birthDateLocked = puppyAdded || !!litterBornDate
+  const [useLitterCare, setUseLitterCare] = useState(true)
+  const [puppyCare, setPuppyCare] = useState<PuppyCareValues>({ ...litter.care })
   const [form, setForm] = useState({
     name: '',
     sex: 'male',
@@ -50,6 +54,9 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
         chipNumber: form.chipNumber || null,
         priceCents: form.priceCents ? Math.round(Number(form.priceCents) * 100) : null,
         status: form.status,
+        useLitterCare,
+        ...puppyCare,
+        trainingNotes: puppyCare.trainingNotes || null,
       }),
     })
 
@@ -83,7 +90,7 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
             Fotos hinzufügen
           </a>
           <button
-            onClick={() => { setSuccessId(null); setForm({ name: '', sex: 'male', birthDate: litterBornDate, color: '', chipNumber: '', priceCents: '', status: 'draft' }) }}
+            onClick={() => { setSuccessId(null); setUseLitterCare(true); setPuppyCare({ ...litter.care }); setForm({ name: '', sex: 'male', birthDate: litterBornDate, color: '', chipNumber: '', priceCents: '', status: 'draft' }) }}
             className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-forest text-white rounded-xl px-4 py-2.5 hover:bg-forest-light transition-colors">
             + Weiteren Welpen anlegen
           </button>
@@ -182,6 +189,27 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
               className={inputClass}
             />
           </div>
+
+          <div className="border-t border-cream-deep pt-5">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={useLitterCare}
+                onChange={(e) => {
+                  const checked = e.target.checked
+                  setUseLitterCare(checked)
+                  if (checked) setPuppyCare({ ...litter.care })
+                }}
+                className="h-4 w-4 rounded accent-forest"
+              />
+              <span className="text-sm font-medium text-stone-700">Daten aus Wurf übernehmen</span>
+            </label>
+            <p className="mt-1 text-xs text-stone-400">
+              Deaktiviere diese Option, um die Angaben für diesen Welpen individuell auszuwählen.
+            </p>
+          </div>
+
+          <PuppyCareFields values={puppyCare} onChange={setPuppyCare} disabled={useLitterCare} />
 
           <div>
             <label className={labelClass}>Status</label>
