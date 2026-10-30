@@ -422,7 +422,7 @@ export default async function Home() {
               <>
                 <div>
                   <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-forest-dark">Für Züchter</p>
-                  <h2 className="mb-4 font-serif text-4xl font-bold text-forest-dark">Dein Zwinger auf Whelply.</h2>
+                  <h2 className="mb-4 font-serif text-4xl font-bold text-forest-dark">Deine Zuchtstätte auf Whelply.</h2>
                   <p className="max-w-2xl leading-relaxed text-forest-dark">
                     Profil anlegen, Würfe eintragen und Käufer in ganz Deutschland erreichen. Kostenlos, ohne versteckte Gebühren.
                   </p>
