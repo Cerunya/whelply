@@ -15,6 +15,19 @@ const schema = z.object({
   handoverDate: z.string().nullable().optional(),
   puppyCount: z.number().int().min(1).max(20).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
+  hasPedigree: z.boolean().optional(),
+  isVaccinated: z.boolean().optional(),
+  isDewormed: z.boolean().optional(),
+  isChipped: z.boolean().optional(),
+  isInsured: z.boolean().optional(),
+  trainingMedical: z.boolean().optional(),
+  trainingCharaktertest: z.boolean().optional(),
+  trainingAndereTiere: z.boolean().optional(),
+  trainingHaushaltsgeraeusche: z.boolean().optional(),
+  trainingKinder: z.boolean().optional(),
+  trainingAutofahren: z.boolean().optional(),
+  trainingBelebteOrte: z.boolean().optional(),
+  trainingNotes: z.string().max(1000).nullable().optional(),
 })
 
 export async function PATCH(
@@ -93,6 +106,25 @@ export async function PATCH(
   }
   if (parsed.data.puppyCount !== undefined) data.puppyCount = parsed.data.puppyCount
   if (parsed.data.notes !== undefined) data.notes = parsed.data.notes
+
+  const careFields = [
+    'hasPedigree',
+    'isVaccinated',
+    'isDewormed',
+    'isChipped',
+    'isInsured',
+    'trainingMedical',
+    'trainingCharaktertest',
+    'trainingAndereTiere',
+    'trainingHaushaltsgeraeusche',
+    'trainingKinder',
+    'trainingAutofahren',
+    'trainingBelebteOrte',
+    'trainingNotes',
+  ] as const
+  for (const field of careFields) {
+    if (parsed.data[field] !== undefined) data[field] = parsed.data[field]
+  }
 
   await prisma.litter.update({
     where: { id: params.id },
