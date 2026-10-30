@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
+import { resizeImage } from '@/lib/image-resize'
 
 type Breed = { id: number; nameDe: string }
 
@@ -11,6 +12,10 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [createdDogId, setCreatedDogId] = useState<string | null>(null)
+  const [images, setImages] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
+  const inputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
     name: '',
     breedId: '',
@@ -21,6 +26,30 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
     titles: '',
     isStud: false,
   })
+
+  useEffect(() => {
+    const urls = images.map((file) => URL.createObjectURL(file))
+    setPreviews(urls)
+    return () => urls.forEach((url) => URL.revokeObjectURL(url))
+  }, [images])
+
+  function handleImages(files: FileList | null) {
+    if (!files) return
+    const valid = Array.from(files).filter((file) => ['image/jpeg', 'image/png', 'image/webp'].includes(file.type))
+    setImages((prev) => [...prev, ...valid])
+    setError('')
+  }
+
+  async function uploadImages(dogId: string) {
+    for (const file of images) {
+      const resized = await resizeImage(file, 1920, 0.85)
+      const formData = new FormData()
+      formData.append('file', resized)
+      formData.append('dogId', dogId)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload fehlgeschlagen')
+    }
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target
@@ -34,6 +63,7 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setCreatedDogId(null)
     setLoading(true)
 
     const res = await fetch('/api/hunde', {
@@ -54,6 +84,15 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
     const data = await res.json()
     if (!res.ok) {
       setError(data.error ?? 'Fehler beim Speichern.')
+      setLoading(false)
+      return
+    }
+
+    try {
+      await uploadImages(data.id)
+    } catch {
+      setCreatedDogId(data.id)
+      setError('Der Hund wurde angelegt, aber nicht alle Bilder konnten hochgeladen werden. Du kannst den Upload auf der Hundeseite wiederholen.')
       setLoading(false)
       return
     }
@@ -84,6 +123,11 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
               {error}
+              {createdDogId && (
+                <Link href={`/dashboard/hund/${createdDogId}`} className="mt-2 inline-block font-semibold underline">
+                  Zum angelegten Hund
+                </Link>
+              )}
             </div>
           )}
 
@@ -141,6 +185,45 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
           </div>
 
           <div>
+            <label className={labelClass}>Bilder</label>
+            {previews.length > 0 && (
+              <div className="mb-3 grid grid-cols-3 gap-3">
+                {previews.map((url, index) => (
+                  <div key={url} className="relative aspect-square overflow-hidden rounded-xl border border-cream-deep bg-cream">
+                    <img src={url} alt={`Ausgewähltes Bild ${index + 1}`} className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setImages((prev) => prev.filter((_, i) => i !== index))}
+                      className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white"
+                      aria-label="Bild entfernen"
+                    >
+                      ✕
+                    </button>
+                    {index === 0 && <span className="absolute bottom-1.5 left-1.5 rounded bg-forest px-1.5 py-0.5 text-[9px] font-bold text-white">Titelbild</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div
+              onClick={() => inputRef.current?.click()}
+              onDrop={(e) => { e.preventDefault(); handleImages(e.dataTransfer.files) }}
+              onDragOver={(e) => e.preventDefault()}
+              className="cursor-pointer rounded-xl border-2 border-dashed border-stone-200 p-6 text-center hover:border-forest/40 hover:bg-cream/50"
+            >
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={(e) => { handleImages(e.target.files); e.target.value = '' }}
+              />
+              <p className="text-sm font-medium text-stone-500">Bilder auswählen</p>
+              <p className="mt-1 text-xs text-stone-400">Mehrere möglich · werden beim Speichern hochgeladen</p>
+            </div>
+          </div>
+
+          <div>
             <label className={labelClass}>Ahnentafel-Nummer</label>
             <input
               type="text"
@@ -186,7 +269,7 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
               disabled={loading || !form.name || !form.breedId}
               className="flex-1 bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
             >
-              {loading ? 'Wird gespeichert...' : 'Hund speichern'}
+              {loading ? (images.length ? 'Hund und Bilder werden gespeichert...' : 'Wird gespeichert...') : 'Hund speichern'}
             </button>
             <Link
               href="/dashboard"
