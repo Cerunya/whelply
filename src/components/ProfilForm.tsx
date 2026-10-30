@@ -33,6 +33,7 @@ type BreederData = {
   socialYoutube: string | null
   verband: string | null
   mitgliedsnummer: string | null
+  memberships: { verband: string; mitgliedsnummer: string | null }[]
   phone: string | null
   street: string | null
   zip: string | null
@@ -50,6 +51,13 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [memberships, setMemberships] = useState(
+    breeder.memberships.length > 0
+      ? breeder.memberships.map((m) => ({ verband: m.verband, mitgliedsnummer: m.mitgliedsnummer ?? '' }))
+      : breeder.verband
+        ? [{ verband: breeder.verband, mitgliedsnummer: breeder.mitgliedsnummer ?? '' }]
+        : []
+  )
   const [form, setForm] = useState({
     displayName: breeder.displayName ?? '',
     fullName: breeder.fullName ?? '',
@@ -62,8 +70,6 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
     socialFacebook: breeder.socialFacebook ?? '',
     socialTiktok: breeder.socialTiktok ?? '',
     socialYoutube: breeder.socialYoutube ?? '',
-    verband: breeder.verband ?? '',
-    mitgliedsnummer: breeder.mitgliedsnummer ?? '',
     phone: breeder.phone ?? '',
     street: breeder.street ?? '',
     zip: breeder.zip ?? '',
@@ -87,6 +93,21 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
     setSuccess(false)
   }
 
+  function updateMembership(index: number, field: 'verband' | 'mitgliedsnummer', value: string) {
+    setMemberships((current) => current.map((membership, i) => i === index ? { ...membership, [field]: value } : membership))
+    setSuccess(false)
+  }
+
+  function addMembership() {
+    setMemberships((current) => [...current, { verband: '', mitgliedsnummer: '' }])
+    setSuccess(false)
+  }
+
+  function removeMembership(index: number) {
+    setMemberships((current) => current.filter((_, i) => i !== index))
+    setSuccess(false)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -95,7 +116,10 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
     const res = await fetch('/api/profil', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        memberships: memberships.filter((membership) => membership.verband),
+      }),
     })
 
     setLoading(false)
@@ -134,7 +158,7 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Profil</h2>
         <p className="text-stone-400 text-sm mb-8">
           Zwingername: <span className="font-medium text-stone-600">{breeder.kennelName}</span>
-          {' '}(nicht änderbar{breeder.verband ? ` — ${breeder.verband}-registriert` : ''})
+          {' '}(nicht änderbar{memberships.length > 0 ? ` — ${memberships.map((m) => m.verband).filter(Boolean).join(', ')}-registriert` : ''})
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -229,33 +253,64 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-stone-700">Zuchtverbände</p>
+                <p className="mt-1 text-xs text-stone-400">
+                  Füge für jede Rasse beziehungsweise Mitgliedschaft einen Verband hinzu. Die Mitgliedsnummer ist optional und kann pro Verband abweichen.
+                </p>
+              </div>
+              <div className="space-y-3">
+                {memberships.map((membership, index) => (
+                  <div key={index} className="rounded-xl border border-stone-200 bg-stone-50 p-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass} htmlFor={`verband-${index}`}>Verband {index + 1}</label>
+                        <select
+                          id={`verband-${index}`}
+                          value={membership.verband}
+                          onChange={(e) => updateMembership(index, 'verband', e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="">— Verband wählen —</option>
+                          {VERBAENDE.map((v) => (
+                            <option key={v.value} value={v.value}>{v.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor={`mitgliedsnummer-${index}`}>Mitgliedsnummer</label>
+                        <input
+                          id={`mitgliedsnummer-${index}`}
+                          type="text"
+                          maxLength={50}
+                          value={membership.mitgliedsnummer}
+                          onChange={(e) => updateMembership(index, 'mitgliedsnummer', e.target.value)}
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeMembership(index)}
+                      className="mt-2 text-xs font-medium text-stone-400 hover:text-red-600"
+                    >
+                      Mitgliedschaft entfernen
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addMembership}
+                className="mt-3 rounded-xl border border-forest/25 px-4 py-2.5 text-sm font-semibold text-forest hover:bg-forest/5"
+              >
+                + Weiteren Verband hinzufügen
+              </button>
               <div>
-                <label className={labelClass}>Verband</label>
-                <select
-                  name="verband"
-                  value={form.verband}
-                  onChange={handleChange}
-                  className={inputClass}
-                >
-                  <option value="">— Kein Verband —</option>
-                  {VERBAENDE.map((v) => (
-                    <option key={v.value} value={v.value}>{v.label}</option>
-                  ))}
-                </select>
-                <a href="mailto:info@whelply.de?subject=Verband%20vorschlagen&body=Hallo%2C%0A%0Aich%20möchte%20folgenden%20Verband%20vorschlagen%3A%0A%0AName%3A%20%0AWebsite%3A%20%0A%0ADanke!" className="text-xs text-forest hover:underline mt-1.5 inline-block">
+                <a href="mailto:info@whelply.de?subject=Verband%20vorschlagen&body=Hallo%2C%0A%0Aich%20möchte%20folgenden%20Verband%20vorschlagen%3A%0A%0AName%3A%20%0AWebsite%3A%20%0A%0ADanke!" className="text-xs text-forest hover:underline mt-2 inline-block">
                   Dein Verband fehlt? Vorschlagen →
                 </a>
-              </div>
-              <div>
-                <label className={labelClass}>Mitgliedsnummer</label>
-                <input
-                  type="text"
-                  name="mitgliedsnummer"
-                  value={form.mitgliedsnummer}
-                  onChange={handleChange}
-                  className={inputClass}
-                />
               </div>
             </div>
 
