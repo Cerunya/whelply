@@ -37,6 +37,7 @@ type Puppy = {
   status: string
   priceCents: number | null
   imageUrl: string | null
+  birthDate: string | null
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -88,6 +89,35 @@ export default function LitterDashboard({
   const matchingSires = sires.filter((s) => s.breedId === Number(details.breedId))
 
   const hasPuppies = puppies.length > 0
+  const [puppyDates, setPuppyDates] = useState<Record<string, string | null>>(
+    Object.fromEntries(puppies.map((puppy) => [puppy.listingId, puppy.birthDate]))
+  )
+  const [savingPuppyDate, setSavingPuppyDate] = useState<string | null>(null)
+
+  async function adjustPuppyDate(puppy: Puppy, days: number) {
+    if (!puppy.dogId || savingPuppyDate) return
+    const current = puppyDates[puppy.listingId] ?? litter.bornDate
+    if (!current) return
+    const date = new Date(`${current}T00:00:00.000Z`)
+    date.setUTCDate(date.getUTCDate() + days)
+    const nextDate = date.toISOString().slice(0, 10)
+    const previousDate = puppyDates[puppy.listingId]
+
+    setSavingPuppyDate(puppy.listingId)
+    setPuppyDates((prev) => ({ ...prev, [puppy.listingId]: nextDate }))
+    const res = await fetch(`/api/wuerfe/${litter.id}/welpen/${puppy.dogId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ birthDate: nextDate }),
+    })
+    if (!res.ok) {
+      setPuppyDates((prev) => ({ ...prev, [puppy.listingId]: previousDate }))
+      setDetailsError('Das Geburtsdatum des Welpen konnte nicht gespeichert werden.')
+    } else {
+      setDetailsError('')
+    }
+    setSavingPuppyDate(null)
+  }
 
   function handleDetailsChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
@@ -138,6 +168,18 @@ export default function LitterDashboard({
     }
 
     setDetailsSuccess(true)
+    const previousDate = litter.bornDate
+    const nextDate = details.bornDate || null
+    if (previousDate !== nextDate) {
+      const deltaMs = previousDate && nextDate
+        ? new Date(`${nextDate}T00:00:00.000Z`).getTime() - new Date(`${previousDate}T00:00:00.000Z`).getTime()
+        : null
+      setPuppyDates((prev) => Object.fromEntries(Object.entries(prev).map(([id, date]) => {
+        if (!nextDate) return [id, null]
+        if (deltaMs === null || !date) return [id, nextDate]
+        return [id, new Date(new Date(`${date}T00:00:00.000Z`).getTime() + deltaMs).toISOString().slice(0, 10)]
+      })))
+    }
     router.refresh()
   }
 
@@ -293,6 +335,11 @@ export default function LitterDashboard({
                 onChange={handleDetailsChange}
                 className={inputClass}
               />
+              {hasPuppies && (
+                <p className="text-xs text-amber-600 mt-1">
+                  ⚠ Eine Änderung des Geburtsdatums wird auf alle bereits eingetragenen Welpen dieses Wurfs übertragen. Individuelle Abweichungen bleiben erhalten.
+                </p>
+              )}
             </div>
           )}
 
@@ -417,40 +464,63 @@ export default function LitterDashboard({
           ) : (
             <div className="space-y-2">
               {puppies.map((puppy) => (
-                <Link
-                  key={puppy.listingId}
-                  href={`/dashboard/inserat/${puppy.listingId}`}
-                  className="flex items-center gap-4 p-3 rounded-xl border border-cream-deep hover:border-forest/30 transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-cream-dark overflow-hidden flex items-center justify-center flex-shrink-0">
-                    {puppy.imageUrl ? (
-                      <img src={puppy.imageUrl} alt={puppy.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )}
+                <div key={puppy.listingId} className="rounded-xl border border-cream-deep p-3">
+                  <div className="flex items-center gap-4">
+                    <Link href={`/dashboard/inserat/${puppy.listingId}`} className="flex min-w-0 flex-1 items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-cream-dark overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {puppy.imageUrl ? (
+                          <img src={puppy.imageUrl} alt={puppy.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-stone-800 text-sm">{puppy.name}</p>
+                        <p className="text-xs text-stone-400">
+                          {puppy.sex === 'male' ? 'Rüde' : puppy.sex === 'female' ? 'Hündin' : ''}
+                          {puppy.priceCents ? ` · ${(puppy.priceCents / 100).toLocaleString('de-DE')} €` : ' · Auf Anfrage'}
+                        </p>
+                      </div>
+                    </Link>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                      puppy.status === 'available' ? 'bg-green-50 text-green-700'
+                      : puppy.status === 'reserved' ? 'bg-amber-50 text-amber-700'
+                      : puppy.status === 'sold' ? 'bg-stone-200 text-stone-600'
+                      : 'bg-stone-100 text-stone-500'
+                    }`}>
+                      {puppy.status === 'available' ? 'Aktiv'
+                        : puppy.status === 'reserved' ? 'Reserviert'
+                        : puppy.status === 'sold' ? 'Verkauft'
+                        : 'Entwurf'}
+                    </span>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-stone-800 text-sm">{puppy.name}</p>
-                    <p className="text-xs text-stone-400">
-                      {puppy.sex === 'male' ? 'Rüde' : puppy.sex === 'female' ? 'Hündin' : ''}
-                      {puppy.priceCents ? ` · ${(puppy.priceCents / 100).toLocaleString('de-DE')} €` : ' · Auf Anfrage'}
-                    </p>
-                  </div>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                    puppy.status === 'available' ? 'bg-green-50 text-green-700'
-                    : puppy.status === 'reserved' ? 'bg-amber-50 text-amber-700'
-                    : puppy.status === 'sold' ? 'bg-stone-200 text-stone-600'
-                    : 'bg-stone-100 text-stone-500'
-                  }`}>
-                    {puppy.status === 'available' ? 'Aktiv'
-                      : puppy.status === 'reserved' ? 'Reserviert'
-                      : puppy.status === 'sold' ? 'Verkauft'
-                      : 'Entwurf'}
-                  </span>
-                </Link>
+                  {puppy.dogId && puppyDates[puppy.listingId] && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-cream-deep pt-3 text-xs">
+                      <span className="text-stone-500">Geboren: {new Date(`${puppyDates[puppy.listingId]}T00:00:00.000Z`).toLocaleDateString('de-DE', { timeZone: 'UTC' })}</span>
+                      <div className="ml-auto flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => adjustPuppyDate(puppy, -1)}
+                          disabled={savingPuppyDate === puppy.listingId}
+                          className="rounded-lg border border-stone-200 px-2.5 py-1.5 font-semibold text-stone-600 hover:border-forest/30 disabled:opacity-40"
+                        >
+                          −1 Tag
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => adjustPuppyDate(puppy, 1)}
+                          disabled={savingPuppyDate === puppy.listingId}
+                          className="rounded-lg border border-stone-200 px-2.5 py-1.5 font-semibold text-stone-600 hover:border-forest/30 disabled:opacity-40"
+                        >
+                          +1 Tag
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}
