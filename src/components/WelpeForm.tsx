@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import PuppyCareFields, { type PuppyCareValues } from './PuppyCareFields'
+import PendingImagePicker from './PendingImagePicker'
+import { resizeImage } from '@/lib/image-resize'
 
 type LitterInfo = {
   id: string
@@ -19,11 +21,13 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [successId, setSuccessId] = useState<string | null>(null)
+  const [createdListingId, setCreatedListingId] = useState<string | null>(null)
   const [litterBornDate, setLitterBornDate] = useState(litter.bornDate ?? '')
   const [puppyAdded, setPuppyAdded] = useState(hasPuppies)
   const birthDateLocked = puppyAdded || !!litterBornDate
   const [useLitterCare, setUseLitterCare] = useState(true)
   const [puppyCare, setPuppyCare] = useState<PuppyCareValues>({ ...litter.care })
+  const [images, setImages] = useState<File[]>([])
   const [form, setForm] = useState({
     name: '',
     sex: 'male',
@@ -38,9 +42,21 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
+  async function uploadImages(listingId: string) {
+    for (const file of images) {
+      const resized = await resizeImage(file, 1200, 0.80)
+      const formData = new FormData()
+      formData.append('file', resized)
+      formData.append('listingId', listingId)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload fehlgeschlagen')
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setCreatedListingId(null)
     setLoading(true)
 
     const res = await fetch(`/api/wuerfe/${litter.id}/welpen`, {
@@ -67,6 +83,15 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
       return
     }
 
+    try {
+      await uploadImages(data.listingId)
+    } catch {
+      setCreatedListingId(data.listingId)
+      setError('Der Welpe wurde angelegt, aber nicht alle Bilder konnten hochgeladen werden. Du kannst den Upload auf der Bearbeitungsseite wiederholen.')
+      setLoading(false)
+      return
+    }
+
     setLoading(false)
     setSuccessId(data.listingId)
     setLitterBornDate(data.bornDate?.slice(0, 10) ?? litterBornDate)
@@ -87,10 +112,10 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
           </a>
           <a href={`/dashboard/inserat/${successId}`}
             className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-white border border-green-200 text-green-700 rounded-xl px-4 py-2.5 hover:bg-green-50 transition-colors">
-            Fotos hinzufügen
+            Inserat bearbeiten
           </a>
           <button
-            onClick={() => { setSuccessId(null); setUseLitterCare(true); setPuppyCare({ ...litter.care }); setForm({ name: '', sex: 'male', birthDate: litterBornDate, color: '', chipNumber: '', priceCents: '', status: 'draft' }) }}
+            onClick={() => { setSuccessId(null); setUseLitterCare(true); setPuppyCare({ ...litter.care }); setImages([]); setForm({ name: '', sex: 'male', birthDate: litterBornDate, color: '', chipNumber: '', priceCents: '', status: 'draft' }) }}
             className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-forest text-white rounded-xl px-4 py-2.5 hover:bg-forest-light transition-colors">
             + Weiteren Welpen anlegen
           </button>
@@ -113,6 +138,11 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
               {error}
+              {createdListingId && (
+                <Link href={`/dashboard/inserat/${createdListingId}`} className="mt-2 inline-block font-semibold underline">
+                  Zum angelegten Inserat
+                </Link>
+              )}
             </div>
           )}
 
@@ -190,6 +220,11 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
             />
           </div>
 
+          <div>
+            <label className={labelClass}>Bilder</label>
+            <PendingImagePicker images={images} onChange={setImages} />
+          </div>
+
           <div className="border-t border-cream-deep pt-5">
             <label className="flex cursor-pointer items-center gap-3">
               <input
@@ -225,7 +260,7 @@ export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; 
               disabled={loading || !form.name}
               className="flex-1 bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
             >
-              {loading ? 'Wird gespeichert...' : 'Weiter zu Fotos →'}
+              {loading ? (images.length ? 'Welpe und Bilder werden gespeichert...' : 'Wird gespeichert...') : 'Welpe speichern'}
             </button>
             <Link
               href={`/dashboard/wurf/${litter.id}`}
