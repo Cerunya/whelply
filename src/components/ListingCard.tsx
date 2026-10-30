@@ -28,7 +28,7 @@ export default function ListingCard({
   const basePath = listingType === 'puppy' || !listingType ? '/welpen' : '/inserate'
 
   let cardClasses = sticker
-    ? 'rounded-[26px] border overflow-hidden transition-all duration-200 hover:-translate-y-1 '
+    ? 'relative rounded-[26px] border overflow-hidden transition-all duration-200 hover:-translate-y-1 '
     : 'rounded-2xl border overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 '
   if (tint === 'sold') {
     cardClasses += 'border-stone-300 bg-stone-100 opacity-60'
@@ -65,17 +65,17 @@ export default function ListingCard({
               </svg>
             </div>
           )}
-          {sticker && (
-            <span className="absolute left-3 top-3 rounded-lg border border-forest/10 bg-[#EAF3EC] px-3 py-2 text-xs font-bold text-forest shadow-[3px_3px_0_rgba(27,58,45,0.08)]">
-              {status === 'sold' ? 'Verkauft' : status === 'reserved' ? 'Reserviert' : 'Frei'}
-            </span>
-          )}
           {isBoosted && (
             <span className={`absolute top-2 ${sticker ? 'right-2' : 'left-2'} bg-honey text-white text-xs font-semibold px-2.5 py-1 rounded-full`}>
               {!sticker && '★ '}Topanzeige
             </span>
           )}
         </div>
+        {sticker && (
+          <span className="mx-3 mt-3 inline-flex w-fit rounded-lg border border-forest/10 bg-[#EAF3EC] px-3 py-1.5 text-xs font-bold text-forest shadow-[3px_3px_0_rgba(27,58,45,0.08)] md:absolute md:left-3 md:top-3 md:m-0 md:px-3 md:py-2">
+            {status === 'sold' ? 'Verkauft' : status === 'reserved' ? 'Reserviert' : 'Frei'}
+          </span>
+        )}
 
         <div className={`${sticker ? 'p-4 pb-6 sm:p-5 sm:pb-7' : 'p-4'} flex flex-col flex-1`}>
           <p className={`${sticker ? 'text-[11px] font-bold' : 'text-xs font-semibold'} text-forest uppercase tracking-wider mb-1`}>
