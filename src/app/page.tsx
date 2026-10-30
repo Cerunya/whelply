@@ -70,7 +70,7 @@ export default async function Home() {
         select: { id: true },
       },
       litters: {
-        where: { status: { in: ['planned', 'pregnant'] } },
+        where: { status: { in: ['planned', 'pregnant'] },
         take: 1,
         select: { id: true, status: true },
       },
@@ -89,8 +89,8 @@ export default async function Home() {
       alt: 'Weißer Welpe mit einem lila Kuscheltier im Gras',
     },
     {
-      url: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=900',
-      alt: 'Junger Hund liegt auf einer hellen Decke',
+      url: '/images/hero-welpe-vordergrund.svg',
+      alt: 'Schwarz-weißer Welpe mit blauen Augen und rotem Geschirr',
     },
   ]
 
