@@ -23,6 +23,7 @@ type BreederContactSidebarProps = {
   themeColor: string | null
   themeAccentColor: string | null
   verband?: string | null
+  verbaende?: string[]
   verificationLevel?: string
   diditStatus?: string | null
   breederId?: string
@@ -35,10 +36,11 @@ export default function BreederContactSidebar({
   city, state, street, zip, showAddress,
   phone, showPhone, website,
   socialInstagram, socialFacebook, socialTiktok, socialYoutube,
-  verband, verificationLevel, diditStatus,
+  verband, verbaende = [], verificationLevel, diditStatus,
   breederId, isLoggedIn = false, isOwnProfile = false,
 }: BreederContactSidebarProps) {
   const shownName = displayName || kennelName
+  const shownVerbaende = verbaende.length > 0 ? verbaende : (verband ? verband.split('|') : [])
 
   return (
     <div className="sticky top-20 bg-white/95 backdrop-blur-sm rounded-2xl border border-cream-deep shadow-sm p-6 space-y-5">
@@ -52,13 +54,13 @@ export default function BreederContactSidebar({
       </div>
 
       {/* Verband + Verifizierungs-Badges */}
-      {(verband || (verificationLevel && verificationLevel !== 'none') || diditStatus === 'approved') && (
+      {(shownVerbaende.length > 0 || (verificationLevel && verificationLevel !== 'none') || diditStatus === 'approved') && (
         <div className="flex items-center gap-2 flex-wrap">
-          {verband && (
-            <span className="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-cream border border-cream-deep text-stone-600">
-              {verband}
+          {shownVerbaende.map((name) => (
+            <span key={name} className="text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-cream border border-cream-deep text-stone-600">
+              {name}
             </span>
-          )}
+          ))}
           {diditStatus === 'approved' && (
             <a href="/badges#id-geprueft" className="flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full hover:border-green-400 transition-colors">
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -79,7 +81,7 @@ export default function BreederContactSidebar({
       )}
 
       {/* Trennlinie wenn beides vorhanden */}
-      {(verband || (verificationLevel && verificationLevel !== 'none')) && (showAddress || showPhone) && (
+      {(shownVerbaende.length > 0 || (verificationLevel && verificationLevel !== 'none')) && (showAddress || showPhone) && (
         <hr className="border-cream-deep" />
       )}
 
