@@ -16,10 +16,18 @@ const RADIUS_OPTIONS = ['10', '25', '50', '100', '200']
 export default function LocationSearch({ value, onChange, radius, onRadiusChange, placeholder = 'PLZ oder Ort...', className = '' }: Props) {
   const [query, setQuery] = useState(value)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const focusedRef = useRef(false)
 
   useEffect(() => {
-    setQuery(value)
+    // Während des Tippens darf ein verzögerter URL-Stand die lokale Eingabe
+    // nicht überschreiben. Externe Änderungen (z.B. Filter zurücksetzen)
+    // werden weiterhin übernommen, sobald das Feld nicht fokussiert ist.
+    if (!focusedRef.current) setQuery(value)
   }, [value])
+
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+  }, [])
 
   function handleChange(val: string) {
     setQuery(val)
@@ -30,6 +38,7 @@ export default function LocationSearch({ value, onChange, radius, onRadiusChange
   }
 
   function handleClear() {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
     setQuery('')
     onChange('')
     onRadiusChange?.('')
@@ -42,6 +51,8 @@ export default function LocationSearch({ value, onChange, radius, onRadiusChange
           type="text"
           value={query}
           onChange={(e) => handleChange(e.target.value)}
+          onFocus={() => { focusedRef.current = true }}
+          onBlur={() => { focusedRef.current = false }}
           placeholder={placeholder}
           className="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest shadow-sm pr-8"
         />
