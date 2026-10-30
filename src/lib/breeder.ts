@@ -12,6 +12,10 @@ export async function getBreederBySlug(slug: string) {
   const breeder = await prisma.breederProfile.findUnique({
     where: { id: match.id },
     include: {
+      memberships: {
+        orderBy: { createdAt: 'asc' },
+        select: { verband: true, mitgliedsnummer: true },
+      },
       media: {
         where: { purpose: { in: ['header', 'background'] } },
         select: { url: true, purpose: true },
@@ -25,7 +29,14 @@ export async function getBreederBySlug(slug: string) {
     },
   })
 
-  return breeder
+  if (!breeder) return null
+  return {
+    ...breeder,
+    // Bestehende Seiten erhalten alle Verbände über das bisherige Feld.
+    verband: breeder.memberships.length > 0
+      ? breeder.memberships.map((membership) => membership.verband).join('|')
+      : breeder.verband,
+  }
 }
 
 
