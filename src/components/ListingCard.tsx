@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { ListingStatus } from '@prisma/client'
 
 type ListingCardProps = {
   id: string
@@ -14,7 +15,7 @@ type ListingCardProps = {
   imageUrl?: string | null
   tint?: 'male' | 'female' | 'sold' | null
   sticker?: boolean
-  status?: 'available' | 'reserved' | 'sold'
+  status?: ListingStatus
 }
 
 export default function ListingCard({
