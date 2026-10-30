@@ -1,7 +1,6 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
 import LitterDashboard from '@/components/LitterDashboard'
 
 export default async function WurfDetailPage({
@@ -69,6 +68,21 @@ export default async function WurfDetailPage({
         status: litter.status,
         notes: litter.notes,
         imageUrl: litter.media[0]?.url ?? null,
+        care: {
+          hasPedigree: litter.hasPedigree,
+          isVaccinated: litter.isVaccinated,
+          isDewormed: litter.isDewormed,
+          isChipped: litter.isChipped,
+          isInsured: litter.isInsured,
+          trainingMedical: litter.trainingMedical,
+          trainingCharaktertest: litter.trainingCharaktertest,
+          trainingAndereTiere: litter.trainingAndereTiere,
+          trainingHaushaltsgeraeusche: litter.trainingHaushaltsgeraeusche,
+          trainingKinder: litter.trainingKinder,
+          trainingAutofahren: litter.trainingAutofahren,
+          trainingBelebteOrte: litter.trainingBelebteOrte,
+          trainingNotes: litter.trainingNotes ?? '',
+        },
       }}
       breeds={breeds}
       dams={dams}
