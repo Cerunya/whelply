@@ -51,6 +51,21 @@ export default async function InseratBearbeitenPage({
     label: `${l.name ? l.name + ' · ' : ''}${l.breed.nameDe} — ${LITTER_STATUS_LABELS[l.status]}${
       l.bornDate ? ` (${l.bornDate.toLocaleDateString('de-DE')})` : ''
     }`,
+    care: {
+      hasPedigree: l.hasPedigree,
+      isVaccinated: l.isVaccinated,
+      isDewormed: l.isDewormed,
+      isChipped: l.isChipped,
+      isInsured: l.isInsured,
+      trainingMedical: l.trainingMedical,
+      trainingCharaktertest: l.trainingCharaktertest,
+      trainingAndereTiere: l.trainingAndereTiere,
+      trainingHaushaltsgeraeusche: l.trainingHaushaltsgeraeusche,
+      trainingKinder: l.trainingKinder,
+      trainingAutofahren: l.trainingAutofahren,
+      trainingBelebteOrte: l.trainingBelebteOrte,
+      trainingNotes: l.trainingNotes ?? '',
+    },
   }))
 
   const media = listing.media.map((m) => ({
