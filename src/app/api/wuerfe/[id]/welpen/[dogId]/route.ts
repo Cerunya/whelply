@@ -24,14 +24,26 @@ export async function PATCH(
       breederId: breeder.id,
       type: 'puppy',
     },
-    select: { id: true },
+    select: { id: true, litter: { select: { bornDate: true } } },
   })
   if (!listing) return NextResponse.json({ error: 'Welpe nicht gefunden' }, { status: 404 })
 
   const parsed = schema.safeParse(await req.json())
   if (!parsed.success) return NextResponse.json({ error: 'Ungültiges Geburtsdatum.' }, { status: 400 })
+  if (!listing.litter?.bornDate) {
+    return NextResponse.json({ error: 'Im Wurf fehlt das Geburtsdatum.' }, { status: 400 })
+  }
 
-  const birthDate = new Date(parsed.data.birthDate)
+  const birthDate = new Date(`${parsed.data.birthDate}T00:00:00.000Z`)
+  const baseDate = listing.litter.bornDate
+  const offsetDays = Math.round((birthDate.getTime() - baseDate.getTime()) / 86400000)
+  if (Math.abs(offsetDays) > 1) {
+    return NextResponse.json(
+      { error: 'Das Geburtsdatum darf höchstens einen Tag vom Wurfdatum abweichen.' },
+      { status: 400 }
+    )
+  }
+
   await prisma.dog.update({ where: { id: params.dogId }, data: { birthDate } })
 
   return NextResponse.json({ ok: true, birthDate: birthDate.toISOString() })
