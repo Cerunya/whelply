@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic'
 export default async function WelpenPage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string; ort?: string; radius?: string }
+  searchParams: { rasse?: string; region?: string; seite?: string; geschlecht?: string; status?: string; ort?: string; radius?: string }
 }) {
   const page = Number(searchParams.seite ?? 1)
   const perPage = 36
@@ -45,7 +45,9 @@ export default async function WelpenPage({
   }
 
   const where = {
-    status: { in: ['available', 'reserved', 'sold'] as ('available' | 'reserved' | 'sold')[] },
+    status: searchParams.status && ['available', 'reserved', 'sold'].includes(searchParams.status)
+      ? searchParams.status as 'available' | 'reserved' | 'sold'
+      : { in: ['available', 'reserved', 'sold'] as ('available' | 'reserved' | 'sold')[] },
     type: 'puppy' as const,
     breeder: {
       isActive: true,
@@ -131,7 +133,7 @@ export default async function WelpenPage({
 
   function buildUrl(params: Record<string, string | undefined>) {
     const p = new URLSearchParams()
-    const merged = { rasse: searchParams.rasse, region: searchParams.region, geschlecht: searchParams.geschlecht, ort: searchParams.ort, radius: searchParams.radius, ...params }
+    const merged = { rasse: searchParams.rasse, region: searchParams.region, geschlecht: searchParams.geschlecht, status: searchParams.status, ort: searchParams.ort, radius: searchParams.radius, ...params }
     Object.entries(merged).forEach(([k, v]) => { if (v) p.set(k, v) })
     return `/welpen?${p.toString()}`
   }
@@ -142,19 +144,26 @@ export default async function WelpenPage({
       <main className="min-h-screen bg-cream">
         <section className="relative overflow-hidden bg-forest px-4 pb-24 pt-12">
           <div className="pointer-events-none absolute inset-0 opacity-[0.08]" aria-hidden="true">
-            <svg className="h-full w-full" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+            <svg className="absolute inset-0 h-full w-full text-white opacity-[0.035]" aria-hidden="true">
               <defs>
-                <pattern id="welpen-paws" width="90" height="75" patternUnits="userSpaceOnUse">
-                  <g fill="white" transform="translate(22 19) rotate(-18) scale(0.5)">
-                    <ellipse cx="0" cy="18" rx="15" ry="12" />
-                    <ellipse cx="-18" cy="-2" rx="6" ry="9" />
-                    <ellipse cx="-6" cy="-12" rx="6" ry="9" />
-                    <ellipse cx="8" cy="-12" rx="6" ry="9" />
-                    <ellipse cx="20" cy="-1" rx="6" ry="9" />
+                <pattern id="welpen-paw-pattern" width="190" height="190" patternUnits="userSpaceOnUse">
+                  <g fill="currentColor" transform="translate(22 24) rotate(-18 30 30)">
+                    <ellipse cx="30" cy="40" rx="13" ry="15" />
+                    <ellipse cx="10" cy="25" rx="6" ry="8" />
+                    <ellipse cx="23" cy="14" rx="6" ry="8" />
+                    <ellipse cx="37" cy="14" rx="6" ry="8" />
+                    <ellipse cx="50" cy="25" rx="6" ry="8" />
+                  </g>
+                  <g fill="currentColor" transform="translate(112 108) rotate(16 30 30)">
+                    <ellipse cx="30" cy="40" rx="13" ry="15" />
+                    <ellipse cx="10" cy="25" rx="6" ry="8" />
+                    <ellipse cx="23" cy="14" rx="6" ry="8" />
+                    <ellipse cx="37" cy="14" rx="6" ry="8" />
+                    <ellipse cx="50" cy="25" rx="6" ry="8" />
                   </g>
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill="url(#welpen-paws)" />
+              <rect width="100%" height="100%" fill="url(#welpen-paw-pattern)" />
             </svg>
           </div>
           <div className="pointer-events-none absolute -right-16 -top-28 h-[330px] w-[330px] rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
@@ -255,6 +264,28 @@ export default async function WelpenPage({
                           : value === 'female' ? 'bg-pink-100 border-pink-300 text-pink-700'
                           : 'bg-stone-800 border-stone-800 text-white'
                         : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400'
+                    }`}
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+
+              <div className="mb-6 flex flex-wrap items-center gap-2">
+                <span className="text-sm text-stone-500">Verfügbarkeit:</span>
+                {[
+                  { label: 'Alle', value: undefined },
+                  { label: 'Frei', value: 'available' },
+                  { label: 'Reserviert', value: 'reserved' },
+                  { label: 'Verkauft', value: 'sold' },
+                ].map(({ label, value }) => (
+                  <a
+                    key={label}
+                    href={buildUrl({ status: value, seite: undefined })}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                      searchParams.status === value || (!value && !searchParams.status)
+                        ? 'border-forest bg-forest text-white'
+                        : 'border-stone-200 bg-white text-stone-600 hover:border-stone-400'
                     }`}
                   >
                     {label}
