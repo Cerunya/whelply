@@ -12,7 +12,13 @@ type DogMedia = {
 export default function DogPhotoGrid({ media, dogName }: { media: DogMedia[]; dogName: string }) {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
 
-  if (media.length === 0) return null
+  if (media.length === 0) {
+    return (
+      <div className="rounded-2xl overflow-hidden mb-8 bg-[#EAF3EC] border border-cream-deep flex items-center justify-center" style={{ height: '400px' }}>
+        <img src="/images/dog-placeholder.svg" alt={`Noch kein Foto von ${dogName}`} className="h-full w-full object-contain" />
+      </div>
+    )
+  }
 
   const primary = media.find((m) => m.purpose === 'primary') ?? media[0]
   const grid_tl = media.find((m) => m.purpose === 'grid_tl')
