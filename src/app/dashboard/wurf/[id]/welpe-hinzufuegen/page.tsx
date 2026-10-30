@@ -18,13 +18,14 @@ export default async function WelpeHinzufuegenPage({
 
   const litter = await prisma.litter.findUnique({
     where: { id: params.id },
-    include: { breed: { select: { nameDe: true } } },
+    include: { breed: { select: { nameDe: true } }, _count: { select: { listings: true } } },
   })
 
   if (!litter || litter.breederId !== breeder.id) notFound()
 
   return (
     <WelpeForm
+      hasPuppies={litter._count.listings > 0}
       litter={{
         id: litter.id,
         breedId: litter.breedId,
