@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
+import PendingImagePicker from './PendingImagePicker'
+import { resizeImage } from '@/lib/image-resize'
 
 type Breed = { id: number; nameDe: string }
 type Litter = { id: string; breedId: number; label: string }
@@ -12,6 +14,8 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [createdListingId, setCreatedListingId] = useState<string | null>(null)
+  const [images, setImages] = useState<File[]>([])
   const [form, setForm] = useState({
     title: '',
     type: 'adult_dog',
@@ -39,9 +43,21 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
     setForm({ ...form, [name]: value })
   }
 
+  async function uploadImages(listingId: string) {
+    for (const file of images) {
+      const resized = await resizeImage(file, 1200, 0.80)
+      const formData = new FormData()
+      formData.append('file', resized)
+      formData.append('listingId', listingId)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload fehlgeschlagen')
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setCreatedListingId(null)
     setLoading(true)
 
     const res = await fetch('/api/inserate', {
@@ -66,7 +82,15 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
       return
     }
 
-    // Direkt zur Bearbeitungsseite — dort können sofort Fotos hinzugefügt werden
+    try {
+      await uploadImages(data.id)
+    } catch {
+      setCreatedListingId(data.id)
+      setError('Das Inserat wurde angelegt, aber nicht alle Bilder konnten hochgeladen werden. Du kannst den Upload auf der Bearbeitungsseite wiederholen.')
+      setLoading(false)
+      return
+    }
+
     router.push(`/dashboard/inserat/${data.id}`)
     router.refresh()
   }
@@ -81,13 +105,18 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
       <main className="max-w-xl mx-auto px-4 py-12">
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Inserat erstellen</h2>
         <p className="text-stone-400 text-sm mb-8">
-          Nach dem Speichern kannst du direkt Fotos hinzufügen.
+          Alle Angaben und Fotos kannst du direkt hier eintragen.
         </p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-deep p-7 space-y-5">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
               {error}
+              {createdListingId && (
+                <Link href={`/dashboard/inserat/${createdListingId}`} className="mt-2 inline-block font-semibold underline">
+                  Zum angelegten Inserat
+                </Link>
+              )}
             </div>
           )}
 
@@ -175,6 +204,11 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
           </div>
 
           <div>
+            <label className={labelClass}>Bilder</label>
+            <PendingImagePicker images={images} onChange={setImages} />
+          </div>
+
+          <div>
             <label className={labelClass}>Status</label>
             <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
               <option value="draft">Entwurf (nicht sichtbar)</option>
@@ -188,7 +222,7 @@ export default function InseratErstellen({ breeds, litters = [] }: { breeds: Bre
               disabled={loading || !form.breedId}
               className="flex-1 bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
             >
-              {loading ? 'Wird gespeichert...' : 'Weiter zu Fotos →'}
+              {loading ? (images.length ? 'Inserat und Bilder werden gespeichert...' : 'Wird gespeichert...') : 'Inserat speichern'}
             </button>
             <Link
               href="/dashboard"
