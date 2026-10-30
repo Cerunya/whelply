@@ -70,7 +70,7 @@ export default async function Home() {
         select: { id: true },
       },
       litters: {
-        where: { status: { in: ['planned', 'pregnant'] },
+        where: { status: { in: ['planned', 'pregnant'] } },
         take: 1,
         select: { id: true, status: true },
       },
