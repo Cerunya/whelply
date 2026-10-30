@@ -138,10 +138,13 @@ export default async function HundDetailPage({
                 {isStud ? (
                   <DogPhotoGrid media={photos} dogName={dog.name} />
                 ) : (
-                  photos.length > 0 && (
-                    <div className="mb-8">
-                      <div className="rounded-2xl overflow-hidden bg-cream-dark mb-3" style={{ height: '400px' }}>
-                        <img src={photos[0].url} alt={dog.name} className="w-full h-full object-cover" />
+                  <div className="mb-8">
+                      <div className="rounded-2xl overflow-hidden bg-[#EAF3EC] mb-3" style={{ height: '400px' }}>
+                        <img
+                          src={photos[0]?.url || '/images/dog-placeholder.svg'}
+                          alt={photos[0] ? dog.name : `Noch kein Foto von ${dog.name}`}
+                          className={`w-full h-full ${photos[0] ? 'object-cover' : 'object-contain'}`}
+                        />
                       </div>
                       {photos.length > 1 && (
                         <div className="flex gap-2 overflow-x-auto pb-2">
@@ -150,8 +153,7 @@ export default async function HundDetailPage({
                           ))}
                         </div>
                       )}
-                    </div>
-                  )
+                  </div>
                 )}
               </>
             )
