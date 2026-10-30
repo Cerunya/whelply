@@ -143,7 +143,7 @@ export default async function WelpenPage({
       <Navbar />
       <main className="min-h-screen bg-cream">
         <section className="relative overflow-hidden bg-forest px-4 pb-24 pt-12">
-          <div className="pointer-events-none absolute inset-0 opacity-[0.08]" aria-hidden="true">
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
             <svg className="absolute inset-0 h-full w-full text-white opacity-[0.035]" aria-hidden="true">
               <defs>
                 <pattern id="welpen-paw-pattern" width="190" height="190" patternUnits="userSpaceOnUse">
@@ -271,27 +271,6 @@ export default async function WelpenPage({
                 ))}
               </div>
 
-              <div className="mb-6 flex flex-wrap items-center gap-2">
-                <span className="text-sm text-stone-500">Verfügbarkeit:</span>
-                {[
-                  { label: 'Alle', value: undefined },
-                  { label: 'Frei', value: 'available' },
-                  { label: 'Reserviert', value: 'reserved' },
-                  { label: 'Verkauft', value: 'sold' },
-                ].map(({ label, value }) => (
-                  <a
-                    key={label}
-                    href={buildUrl({ status: value, seite: undefined })}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                      searchParams.status === value || (!value && !searchParams.status)
-                        ? 'border-forest bg-forest text-white'
-                        : 'border-stone-200 bg-white text-stone-600 hover:border-stone-400'
-                    }`}
-                  >
-                    {label}
-                  </a>
-                ))}
-              </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
                 {listings.map((listing) => (
