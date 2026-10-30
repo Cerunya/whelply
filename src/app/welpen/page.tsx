@@ -34,7 +34,7 @@ export default async function WelpenPage({
   const radiusKm = Number(searchParams.radius) || 0
   if (searchParams.ort && radiusKm > 0) {
     const { geocodeAddress } = await import('@/lib/geocode')
-    searchCoords = await geocodeAddress({ zip: searchParams.ort, city: searchParams.ort })
+    searchCoords = await geocodeAddress({ city: searchParams.ort })
     if (searchCoords) {
       const delta = radiusKm / 111 // ~1° ≈ 111km
       radiusFilter = {
@@ -52,7 +52,7 @@ export default async function WelpenPage({
     breeder: {
       isActive: true,
       ...(searchParams.region ? { state: searchParams.region } : {}),
-      ...(searchParams.ort && !radiusKm ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+      ...(searchParams.ort && (!radiusKm || !searchCoords) ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
       ...radiusFilter,
     },
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
