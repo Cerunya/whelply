@@ -23,6 +23,10 @@ const schema = z.object({
   socialYoutube: z.string().url().or(z.literal('')).nullable().optional(),
   verband: z.string().max(50).optional(),
   mitgliedsnummer: z.string().max(50).optional(),
+  memberships: z.array(z.object({
+    verband: z.string().min(1).max(50),
+    mitgliedsnummer: z.string().max(50).nullable().optional(),
+  })).max(20).optional(),
   phone: z.string().max(20).optional(),
   street: z.string().max(120).optional(),
   zip: z.string().max(5).optional(),
@@ -70,9 +74,14 @@ export async function PATCH(req: NextRequest) {
     parsed.data.subdomain = sub
   }
 
+  const { memberships, ...profileValues } = parsed.data
+  const normalizedMemberships = memberships
+    ? Array.from(new Map(memberships.map((membership) => [membership.verband, membership])).values())
+    : undefined
+
   // Leere Strings als null speichern (Booleans unverändert lassen)
   const data = Object.fromEntries(
-    Object.entries(parsed.data).map(([key, value]) => [
+    Object.entries(profileValues).map(([key, value]) => [
       key,
       typeof value === 'string' && value === '' ? null : value,
     ])
@@ -83,9 +92,30 @@ export async function PATCH(req: NextRequest) {
     data.isPublished = false
   }
 
-  await prisma.breederProfile.update({
-    where: { userId: session.user.id },
-    data,
+  await prisma.$transaction(async (tx) => {
+    await tx.breederProfile.update({
+      where: { userId: session.user.id },
+      data: {
+        ...data,
+        ...(normalizedMemberships ? {
+          verband: normalizedMemberships[0]?.verband ?? null,
+          mitgliedsnummer: normalizedMemberships[0]?.mitgliedsnummer || null,
+        } : {}),
+      },
+    })
+
+    if (normalizedMemberships) {
+      await tx.breederMembership.deleteMany({ where: { breederId: breeder.id } })
+      if (normalizedMemberships.length > 0) {
+        await tx.breederMembership.createMany({
+          data: normalizedMemberships.map((membership) => ({
+            breederId: breeder.id,
+            verband: membership.verband,
+            mitgliedsnummer: membership.mitgliedsnummer || null,
+          })),
+        })
+      }
+    }
   })
 
   // Koordinaten aktualisieren wenn Adresse geändert wurde
