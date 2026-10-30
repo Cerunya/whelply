@@ -18,6 +18,7 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
   const searchParams = useSearchParams()
   const currentRasse = searchParams.get('rasse') ?? ''
   const currentRegion = searchParams.get('region') ?? ''
+  const currentStatus = searchParams.get('status') ?? ''
   const currentOrt = searchParams.get('ort') ?? ''
   const currentRadius = searchParams.get('radius') ?? ''
 
@@ -62,7 +63,19 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
         ))}
       </select>
 
-      {(currentRasse || currentRegion || currentOrt || currentRadius) && (
+      <select
+        value={currentStatus}
+        onChange={(e) => update('status', e.target.value)}
+        aria-label="Verfügbarkeit"
+        className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
+      >
+        <option value="">Alle Verfügbarkeiten</option>
+        <option value="available">Frei</option>
+        <option value="reserved">Reserviert</option>
+        <option value="sold">Verkauft</option>
+      </select>
+
+      {(currentRasse || currentRegion || currentStatus || currentOrt || currentRadius) && (
         <button
           onClick={() => router.push(basePath)}
           className="text-sm text-stone-500 hover:text-stone-900 transition-colors"
