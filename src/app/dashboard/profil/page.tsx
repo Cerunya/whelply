@@ -12,6 +12,7 @@ export default async function ProfilPage() {
     where: { userId: session.user.id },
     include: {
       media: { where: { purpose: 'card' }, take: 1, select: { url: true } },
+      memberships: { orderBy: { createdAt: 'asc' }, select: { verband: true, mitgliedsnummer: true } },
     },
   })
   if (!breeder) redirect('/login')
@@ -35,6 +36,7 @@ export default async function ProfilPage() {
           socialYoutube: breeder.socialYoutube,
           verband: breeder.verband,
           mitgliedsnummer: breeder.mitgliedsnummer,
+          memberships: breeder.memberships,
           phone: (breeder.phone ?? '').slice(0, 20),
           street: breeder.street,
           zip: breeder.zip,
