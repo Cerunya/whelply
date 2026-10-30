@@ -23,7 +23,10 @@ export async function POST(
   const breeder = await prisma.breederProfile.findUnique({ where: { userId: session.user.id } })
   if (!breeder) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 })
 
-  const litter = await prisma.litter.findUnique({ where: { id: params.id } })
+  const litter = await prisma.litter.findUnique({
+    where: { id: params.id },
+    include: { _count: { select: { listings: true } } },
+  })
   if (!litter || litter.breederId !== breeder.id) {
     return NextResponse.json({ error: 'Wurf nicht gefunden' }, { status: 404 })
   }
@@ -34,6 +37,12 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
   }
 
+  if (!litter.bornDate && !parsed.data.birthDate) {
+    return NextResponse.json({ error: 'Bitte gib beim ersten Welpen das Geburtsdatum des Wurfs an.' }, { status: 400 })
+  }
+
+  const birthDate = litter.bornDate ?? new Date(parsed.data.birthDate!)
+
   // Chip-Nummer ist unique — vorher prüfen, um saubere Fehlermeldung zu geben
   if (parsed.data.chipNumber) {
     const existing = await prisma.dog.findUnique({ where: { chipNumber: parsed.data.chipNumber } })
@@ -42,33 +51,44 @@ export async function POST(
     }
   }
 
-  // Dog und Listing zusammen anlegen
-  const dog = await prisma.dog.create({
-    data: {
-      breederId: breeder.id,
-      breedId: litter.breedId,
-      name: parsed.data.name,
-      sex: parsed.data.sex,
-      birthDate: parsed.data.birthDate ? new Date(parsed.data.birthDate) : null,
-      color: parsed.data.color ?? null,
-      chipNumber: parsed.data.chipNumber ?? null,
-      isForSale: parsed.data.status === 'available',
-    },
+  const result = await prisma.$transaction(async (tx) => {
+    const dog = await tx.dog.create({
+      data: {
+        breederId: breeder.id,
+        breedId: litter.breedId,
+        name: parsed.data.name,
+        sex: parsed.data.sex,
+        birthDate,
+        color: parsed.data.color ?? null,
+        chipNumber: parsed.data.chipNumber ?? null,
+        isForSale: parsed.data.status === 'available',
+      },
+    })
+
+    const listing = await tx.listing.create({
+      data: {
+        breederId: breeder.id,
+        breedId: litter.breedId,
+        litterId: litter.id,
+        dogId: dog.id,
+        title: parsed.data.name,
+        type: 'puppy',
+        sex: parsed.data.sex,
+        priceCents: parsed.data.priceCents ?? null,
+        status: parsed.data.status,
+      },
+    })
+
+    if (!litter.bornDate) {
+      await tx.litter.update({ where: { id: litter.id }, data: { bornDate: birthDate } })
+    }
+
+    return { dog, listing }
   })
 
-  const listing = await prisma.listing.create({
-    data: {
-      breederId: breeder.id,
-      breedId: litter.breedId,
-      litterId: litter.id,
-      dogId: dog.id,
-      title: parsed.data.name,
-      type: 'puppy',
-      sex: parsed.data.sex,
-      priceCents: parsed.data.priceCents ?? null,
-      status: parsed.data.status,
-    },
-  })
-
-  return NextResponse.json({ dogId: dog.id, listingId: listing.id }, { status: 201 })
+  return NextResponse.json({
+    dogId: result.dog.id,
+    listingId: result.listing.id,
+    bornDate: birthDate.toISOString(),
+  }, { status: 201 })
 }
