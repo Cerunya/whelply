@@ -31,6 +31,21 @@ export default async function WelpeHinzufuegenPage({
         breedId: litter.breedId,
         breedName: litter.breed.nameDe,
         bornDate: litter.bornDate?.toISOString().slice(0, 10) ?? null,
+        care: {
+          hasPedigree: litter.hasPedigree,
+          isVaccinated: litter.isVaccinated,
+          isDewormed: litter.isDewormed,
+          isChipped: litter.isChipped,
+          isInsured: litter.isInsured,
+          trainingMedical: litter.trainingMedical,
+          trainingCharaktertest: litter.trainingCharaktertest,
+          trainingAndereTiere: litter.trainingAndereTiere,
+          trainingHaushaltsgeraeusche: litter.trainingHaushaltsgeraeusche,
+          trainingKinder: litter.trainingKinder,
+          trainingAutofahren: litter.trainingAutofahren,
+          trainingBelebteOrte: litter.trainingBelebteOrte,
+          trainingNotes: litter.trainingNotes ?? '',
+        },
       }}
     />
   )
