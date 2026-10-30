@@ -72,7 +72,7 @@ enum ServiceCategory {
 
 enum BoostType {
   top_24h     // 1 € — 24h Topanzeige (Kern-Feature)
-  top_7d      // 4,90 € — 7 Tage
+  top_7d      // 4,90 € — Startseiten-Spotlight
   homepage_7d // 19,90 € — Startseiten-Spotlight
   etalon_top  // 14,90 € — Etalon-Hervorhebung
 }
@@ -114,13 +114,13 @@ model User {
 }
 
 model PasswordChangeRequest {
-  id              String   @id @default(cuid())
-  userId          String   @map("user_id")
-  newPasswordHash String   @map("new_password_hash")
-  tokenHash       String   @map("token_hash")
-  expiresAt       DateTime @map("expires_at")
-  usedAt          DateTime? @map("used_at")
-  createdAt       DateTime @default(now()) @map("created_at")
+  id              String           @id @default(cuid())
+  userId          String           @map("user_id")
+  newPasswordHash String           @map("new_password_hash")
+  tokenHash       String           @map("token_hash")
+  expiresAt       DateTime         @map("expires_at")
+  usedAt          DateTime?        @map("used_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -128,12 +128,12 @@ model PasswordChangeRequest {
 }
 
 model PasswordResetToken {
-  id        String    @id @default(cuid())
-  userId    String    @map("user_id")
-  tokenHash String    @map("token_hash")
-  expiresAt DateTime  @map("expires_at")
-  usedAt    DateTime? @map("used_at")
-  createdAt DateTime  @default(now()) @map("created_at")
+  id              String           @id @default(cuid())
+  userId          String           @map("user_id")
+  tokenHash       String           @map("token_hash")
+  expiresAt       DateTime         @map("expires_at")
+  usedAt          DateTime?        @map("used_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -142,12 +142,12 @@ model PasswordResetToken {
 
 // E-Mail-Bestätigung bei Registrierung (gleiches Muster wie PasswordResetToken)
 model EmailVerificationToken {
-  id        String    @id @default(cuid())
-  userId    String    @map("user_id")
-  tokenHash String    @map("token_hash")
-  expiresAt DateTime  @map("expires_at")
-  usedAt    DateTime? @map("used_at")
-  createdAt DateTime  @default(now()) @map("created_at")
+  id              String           @id @default(cuid())
+  userId          String           @map("user_id")
+  tokenHash       String           @map("token_hash")
+  expiresAt       DateTime         @map("expires_at")
+  usedAt          DateTime?        @map("used_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -156,17 +156,17 @@ model EmailVerificationToken {
 
 // Auth.js Pflicht-Tabellen
 model Account {
-  id                String  @id @default(cuid())
-  userId            String  @map("user_id")
+  id                String    @id @default(cuid())
+  userId            String    @map("user_id")
   type              String
   provider          String
-  providerAccountId String  @map("provider_account_id")
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  providerAccountId String    @map("provider_account_id")
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?   @db.Text
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -176,10 +176,10 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
-  expires      DateTime
+  id            String   @id @default(cuid())
+  sessionToken  String   @unique @map("session_token")
+  userId        String   @map("user_id")
+  expires       DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -252,7 +252,7 @@ model BreederProfile {
   themeFont         String?           @map("theme_font")         // Google Fonts Familienname, z.B. "Playfair Display"
   themeAlign        String?           @map("theme_align")        // "left" | "center" | "right"
   themeBgFixed      Boolean           @default(true) @map("theme_bg_fixed")
-  themeBgOverlay    String?           @map("theme_bg_overlay")   // Gradient/Hintergrundfarbe hinter dem Bild
+  themeBgOverlay    String?           @map("theme_bg_overlay")   // Gradient/Hintergrundbild
   // Social Media
   socialInstagram   String?           @map("social_instagram")
   socialFacebook    String?           @map("social_facebook")
@@ -289,7 +289,7 @@ model Breed {
   fciNumber  Int    @map("fci_number")  // FCI-Rassenummer (nicht unique, da Varietäten)
   nameDe     String @map("name_de")             // Offizieller dt. Name
   nameEn     String @map("name_en")
-  fciGroup   Int    @map("fci_group")           // FCI-Gruppe 1–10
+  fciGroup   Int    @map("fci_group")   // FCI-Gruppe 1–10
   fciSection Int    @map("fci_section")
   slug       String @unique                     // für URLs: /rassen/golden-retriever
 
@@ -373,6 +373,20 @@ model Litter {
   handoverDate DateTime?    @map("handover_date") @db.Date // Abgabe-/Abholdatum der Welpen
   status       LitterStatus @default(planned)
   notes        String?      @db.Text
+  // Standardwerte, die beim Anlegen neuer Welpen übernommen werden
+  hasPedigree    Boolean       @default(false) @map("has_pedigree")
+  isVaccinated   Boolean       @default(false) @map("is_vaccinated")
+  isDewormed     Boolean       @default(false) @map("is_dewormed")
+  isChipped      Boolean       @default(false) @map("is_chipped")
+  isInsured      Boolean       @default(false) @map("is_insured")
+  trainingMedical              Boolean  @default(false) @map("training_medical")
+  trainingCharaktertest        Boolean  @default(false) @map("training_charaktertest")
+  trainingAndereTiere          Boolean  @default(false) @map("training_andere_tiere")
+  trainingHaushaltsgeraeusche  Boolean  @default(false) @map("training_haushaltsgeraeusche")
+  trainingKinder               Boolean  @default(false) @map("training_kinder")
+  trainingAutofahren           Boolean  @default(false) @map("training_autofahren")
+  trainingBelebteOrte          Boolean  @default(false) @map("training_belebte_orte")
+  trainingNotes                String?  @map("training_notes") @db.Text
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
 
@@ -460,10 +474,10 @@ model Listing {
 model Boost {
   id             String    @id @default(cuid())
   listingId      String    @map("listing_id")
-  boostType      BoostType @map("boost_type")
-  amountCents    Int       @map("amount_cents")  // 100 = 1,00 €
+  boostType      BoostType
+  amountCents    Int       @map("amount_cents")  // 1 € = 100
   stripePaymentId String?  @map("stripe_payment_id")
-  paidAt         DateTime  @default(now()) @map("paid_at")
+  paidAt         DateTime? @map("paid_at")
   expiresAt      DateTime  @map("expires_at")
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
@@ -472,14 +486,14 @@ model Boost {
 }
 
 model Subscription {
-  id              String           @id @default(cuid())
-  breederId       String           @unique @map("breeder_id")
-  plan            SubscriptionPlan @default(free)
-  stripeSubId     String?          @unique @map("stripe_sub_id")
-  stripeCustomerId String?         @map("stripe_customer_id")
-  startedAt       DateTime         @default(now()) @map("started_at")
-  expiresAt       DateTime?        @map("expires_at")
-  canceledAt      DateTime?        @map("canceled_at")
+  id             String           @id @default(cuid())
+  breederId      String           @unique @map("breeder_id")
+  plan           SubscriptionPlan @default(free)
+  stripeSubId    String?          @unique @map("stripe_sub_id")
+  stripeCustomerId String?        @map("stripe_customer_id")
+  startedAt      DateTime         @default(now()) @map("started_at")
+  expiresAt      DateTime?        @map("expires_at")
+  canceledAt     DateTime?        @map("canceled_at")
 
   breeder BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
 
@@ -492,10 +506,10 @@ model Subscription {
 
 model ServiceProvider {
   id          String          @id @default(cuid())
-  userId      String          @unique @map("user_id")
+  userId      String          @map("user_id")
   name        String
   category    ServiceCategory
-  description String?         @db.Text
+  description String?
   street      String?
   city        String?
   zip         String?
@@ -529,7 +543,6 @@ model ServiceProvider {
 // ─────────────────────────────────────────────
 
 // Polymorphe Zuordnung: eine Tabelle für alle Foto-Typen
-// Gespeichert in MinIO (S3-kompatibel auf Coolify)
 model Media {
   id          String   @id @default(cuid())
   storageKey  String   @unique @map("storage_key")  // MinIO object key
@@ -551,7 +564,7 @@ model Media {
   serviceId   String?  @map("service_id")
   newsPostId  String?  @map("news_post_id")
 
-  breeder  BreederProfile?  @relation("BreederMedia",  fields: [breederId],  references: [id], onDelete: Cascade)
+  breeder  BreederProfile?  @relation("BreederMedia",  fields: [breederId], references: [id], onDelete: Cascade)
   dog      Dog?             @relation("DogMedia",      fields: [dogId],      references: [id], onDelete: Cascade)
   litter   Litter?          @relation("LitterMedia",   fields: [litterId],   references: [id], onDelete: Cascade)
   listing  Listing?         @relation("ListingMedia",  fields: [listingId],  references: [id], onDelete: Cascade)
@@ -566,12 +579,12 @@ model Media {
 // ─────────────────────────────────────────────
 
 model NewsPost {
-  id        String   @id @default(cuid())
-  breederId String   @map("breeder_id")
-  title     String
-  content   String   @db.Text
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(cuid())
+  breederId  String   @map("breeder_id")
+  title      String
+  content    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   breeder BreederProfile @relation(fields: [breederId], references: [id], onDelete: Cascade)
   media   Media[]        @relation("NewsPostMedia")
@@ -586,9 +599,9 @@ model NewsPost {
 
 model Review {
   id        String   @id @default(cuid())
-  userId    String   @map("user_id")
   breederId String   @map("breeder_id")
-  rating    Int      // 1-5
+  userId    String   @map("user_id")
+  rating    Int
   title     String?
   content   String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
@@ -609,7 +622,7 @@ model Report {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
   listingId String   @map("listing_id")
-  reason    String   // z.B. "spam", "falsche_infos", "betrug", "sonstiges"
+  reason    String   // "spam", "falsche_infos", "verdaechtig", "sonstiges"
   comment   String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -634,7 +647,7 @@ model Bookmark {
   user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   listing Listing?        @relation(fields: [listingId], references: [id], onDelete: Cascade)
   litter  Litter?         @relation(fields: [litterId], references: [id], onDelete: Cascade)
-  breeder BreederProfile? @relation("BookmarkedBreeder", fields: [breederId], references: [id], onDelete: Cascade)
+  breeder BreederProfile? @relation(fields: [breederId], references: [id], onDelete: Cascade)
 
   @@map("bookmarks")
 }
@@ -644,13 +657,13 @@ model Bookmark {
 // ─────────────────────────────────────────────
 
 model WelpenAlert {
-  id               String    @id @default(cuid())
+  id               String   @id @default(cuid())
   email            String
-  breedId          Int?      @map("breed_id")
+  breedId          Int?     @map("breed_id")
   state            String?
-  unsubscribeToken String    @unique @map("unsubscribe_token")
+  unsubscribeToken String   @unique @map("unsubscribe_token")
   lastSentAt       DateTime? @map("last_sent_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
+  createdAt        DateTime @default(now()) @map("created_at")
 
   breed Breed? @relation(fields: [breedId], references: [id], onDelete: SetNull)
 
@@ -659,7 +672,7 @@ model WelpenAlert {
 }
 
 // ─────────────────────────────────────────────
-// NACHRICHTEN — Nutzer schreiben Züchtern
+// NACHRICHTEN — Nutzer schreiben Züchter
 // ─────────────────────────────────────────────
 
 model Conversation {
@@ -678,12 +691,12 @@ model Conversation {
 }
 
 model Message {
-  id             String       @id @default(cuid())
-  conversationId String       @map("conversation_id")
-  senderRole     String       @map("sender_role") // 'user' | 'breeder'
-  content        String       @db.Text
-  readAt         DateTime?    @map("read_at")
-  createdAt      DateTime     @default(now()) @map("created_at")
+  id             String   @id @default(cuid())
+  conversationId String   @map("conversation_id")
+  senderRole     String   @map("sender_role") // 'user' oder 'breeder'
+  content        String   @db.Text
+  readAt         DateTime? @map("read_at")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
@@ -693,10 +706,9 @@ model Message {
 
 // ─────────────────────────────────────────────
 // DECKRÜDEN-SEITE — Styling (nur für isStud=true, sex=male)
-// ─────────────────────────────────────────────
 // pageCardColor: Hintergrundfarbe der Inhaltskarten (default: #ffffff)
-// pageTextColor: Textfarbe (default: #44403c)
-// pageHeadingColor: Überschriften-Farbe (default: #1c1917)
+// pageTextColor: Farbe der normalen Texte (default: #44403c)
+// pageHeadingColor: Farbe der Überschriften (default: #1c1917)
 // pageBgFixed: Hintergrundbild fixiert (true) oder scrollend (false)
 
 
@@ -704,41 +716,41 @@ model Message {
 // ARTIKEL / RATGEBER (SEO-Content)
 // ─────────────────────────────────────────────
 model Article {
-  id              String    @id @default(cuid())
-  slug            String    @unique
-  title           String
-  excerpt         String?   @db.Text
-  content         String    @db.Text
-  category        String    @default("ratgeber")  // ratgeber | rassen | news
-  coverImageUrl   String?   @map("cover_image_url")
-  metaTitle       String?   @map("meta_title")
-  metaDescription String?   @map("meta_description") @db.Text
-  breedId         Int?      @map("breed_id")
-  breed           Breed?    @relation(fields: [breedId], references: [id])
-  authorName      String?   @map("author_name")
-  sidebarProductId String?  @map("sidebar_product_id")
-  sidebarProduct   Product? @relation(fields: [sidebarProductId], references: [id])
-  isPublished     Boolean   @default(false) @map("is_published")
-  publishedAt     DateTime? @map("published_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String?  @db.Text
+  content     String   @db.Text
+  category    String   @default("ratgeber")  // ratgeber | rassen | news
+  coverImageUrl String? @map("cover_image_url")
+  metaTitle   String?  @map("meta_title")
+  metaDescription String? @map("meta_description") @db.Text
+  breedId     Int?     @map("breed_id")
+  breed       Breed?   @relation(fields: [breedId], references: [id])
+  authorName  String?  @map("author_name")
+  sidebarProductId String? @map("sidebar_product_id")
+  sidebarProduct Product? @relation(fields: [sidebarProductId], references: [id])
+  isPublished Boolean  @default(false) @map("is_published")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("articles")
 }
 
 model Product {
-  id             String    @id @default(cuid())
-  asin           String    @unique                          // Amazon ASIN
-  name           String                                     // Produktname
-  imageUrl       String?   @map("image_url")                // Produktbild (selbst gehostet)
-  affiliateTag   String    @default("whelply-21") @map("affiliate_tag") // Amazon Partner-Tag
-  category       String    @default("zubehoer")             // zubehoer | futter | pflege | gesundheit | training
-  description    String?   @db.Text                         // Kurzbeschreibung
-  priceCents     Int?      @map("price_cents")              // Preis in Cent (optional, für PA-API später)
-  priceUpdatedAt DateTime? @map("price_updated_at")         // Wann wurde der Preis zuletzt aktualisiert
-  isAvailable    Boolean   @default(true) @map("is_available") // Verfügbarkeit (PA-API später)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id             String   @id @default(cuid())
+  asin           String   @unique
+  name           String
+  imageUrl       String?  @map("image_url")  // selbst gehostet, keine Amazon-Hotlinks
+  affiliateTag   String   @default("whelply-21") @map("affiliate_tag")
+  category       String   @default("zubehoer")  // zubehoer | futter | pflege | gesundheit | training
+  description    String?  @db.Text
+  priceCents     Int?     @map("price_cents")
+  priceUpdatedAt DateTime? @map("price_updated_at")
+  isAvailable    Boolean  @default(true) @map("is_available")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
   sidebarArticles  Article[]
 
   @@map("products")
