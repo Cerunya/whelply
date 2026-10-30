@@ -6,9 +6,10 @@ import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import ImageUploader from '@/components/ImageUploader'
 import SaveToast from '@/components/SaveToast'
+import type { PuppyCareValues } from './PuppyCareFields'
 
 type Breed = { id: number; nameDe: string }
-type Litter = { id: string; breedId: number; label: string }
+type Litter = { id: string; breedId: number; label: string; care: PuppyCareValues }
 type MediaItem = { id: string; url: string; isPrimary: boolean }
 type Listing = {
   id: string
@@ -78,11 +79,30 @@ export default function InseratEditForm({
     birthLocation: listing.birthLocation ?? '',
     chipNumber: listing.chipNumber ?? '',
   })
+  const [useLitterCare, setUseLitterCare] = useState(() => {
+    const care = litters.find((litter) => litter.id === listing.litterId)?.care
+    if (!care) return false
+    return (Object.keys(care) as (keyof PuppyCareValues)[]).every((key) => {
+      const listingValue = key === 'trainingNotes' ? listing.trainingNotes ?? '' : listing[key]
+      return listingValue === care[key]
+    })
+  })
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    if (name === 'litterId') {
+      const litter = litters.find((item) => item.id === value)
+      setForm({
+        ...form,
+        litterId: value,
+        ...(litter ? { breedId: String(litter.breedId), ...litter.care } : {}),
+      })
+      setUseLitterCare(!!litter)
+    } else {
+      setForm({ ...form, [name]: value })
+    }
     setSuccess(false)
   }
 
@@ -301,6 +321,29 @@ export default function InseratEditForm({
                 />
               </div>
 
+              {form.litterId && (
+                <div className="border-t border-cream-deep pt-5">
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={useLitterCare}
+                      onChange={(e) => {
+                        const checked = e.target.checked
+                        setUseLitterCare(checked)
+                        const care = litters.find((litter) => litter.id === form.litterId)?.care
+                        if (checked && care) setForm({ ...form, ...care })
+                        setSuccess(false)
+                      }}
+                      className="h-4 w-4 rounded accent-forest"
+                    />
+                    <span className="text-sm font-medium text-stone-700">Daten aus Wurf übernehmen</span>
+                  </label>
+                  <p className="mt-1 text-xs text-stone-400">
+                    Deaktiviere diese Option, um die Angaben für diesen Welpen individuell auszuwählen.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className={`${labelClass} mb-3`}>Gesundheit & Dokumente</label>
                 <div className="grid grid-cols-2 gap-3">
@@ -311,12 +354,13 @@ export default function InseratEditForm({
                     { key: 'isChipped', label: 'Gechipt' },
                     { key: 'isInsured', label: 'Versichert' },
                   ].map(({ key, label }) => (
-                    <label key={key} className="flex items-center gap-3 p-3 bg-cream rounded-xl border border-cream-deep cursor-pointer hover:bg-stone-50 transition-colors">
+                    <label key={key} className={`flex items-center gap-3 p-3 bg-cream rounded-xl border border-cream-deep transition-colors ${useLitterCare ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-stone-50'}`}>
                       <input
                         type="checkbox"
                         checked={form[key as keyof typeof form] as boolean}
+                        disabled={useLitterCare}
                         onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
-                        className="w-4 h-4 rounded accent-forest"
+                        className="w-4 h-4 rounded accent-forest disabled:cursor-not-allowed"
                       />
                       <span className="text-sm text-stone-700">{label}</span>
                     </label>
@@ -336,12 +380,13 @@ export default function InseratEditForm({
                     { key: 'trainingAutofahren', label: 'Autofahren' },
                     { key: 'trainingBelebteOrte', label: 'Belebte Orte' },
                   ].map(({ key, label }) => (
-                    <label key={key} className="flex items-center gap-3 p-3 bg-cream rounded-xl border border-cream-deep cursor-pointer hover:bg-stone-50 transition-colors">
+                    <label key={key} className={`flex items-center gap-3 p-3 bg-cream rounded-xl border border-cream-deep transition-colors ${useLitterCare ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-stone-50'}`}>
                       <input
                         type="checkbox"
                         checked={form[key as keyof typeof form] as boolean}
+                        disabled={useLitterCare}
                         onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
-                        className="w-4 h-4 rounded accent-forest"
+                        className="w-4 h-4 rounded accent-forest disabled:cursor-not-allowed"
                       />
                       <span className="text-sm text-stone-700">{label}</span>
                     </label>
@@ -349,11 +394,12 @@ export default function InseratEditForm({
                 </div>
                 <textarea
                   value={form.trainingNotes}
+                  disabled={useLitterCare}
                   onChange={(e) => setForm({ ...form, trainingNotes: e.target.value })}
                   rows={3}
                   maxLength={1000}
                   placeholder="Weitere Angaben zu Training & Sozialisierung (optional)"
-                  className={inputClass + ' resize-none mt-3'}
+                  className={inputClass + ' resize-none mt-3 disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-stone-400'}
                 />
               </div>
             </>
