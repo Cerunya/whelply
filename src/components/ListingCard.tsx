@@ -14,10 +14,11 @@ type ListingCardProps = {
   imageUrl?: string | null
   tint?: 'male' | 'female' | 'sold' | null
   sticker?: boolean
+  status?: 'available' | 'reserved' | 'sold'
 }
 
 export default function ListingCard({
-  id, slug, listingType, breedName, kennelName, puppyName, city, state, priceCents, isBoosted, imageUrl, tint, sticker = false,
+  id, slug, listingType, breedName, kennelName, puppyName, city, state, priceCents, isBoosted, imageUrl, tint, sticker = false, status = 'available',
 }: ListingCardProps) {
   const price = priceCents
     ? `${(priceCents / 100).toLocaleString('de-DE')} €`
@@ -63,9 +64,9 @@ export default function ListingCard({
               </svg>
             </div>
           )}
-          {sticker && tint !== 'sold' && (
+          {sticker && (
             <span className="absolute left-3 top-3 rounded-lg border border-forest/10 bg-[#EAF3EC] px-3 py-2 text-xs font-bold text-forest shadow-[3px_3px_0_rgba(27,58,45,0.08)]">
-              Frei
+              {status === 'sold' ? 'Verkauft' : status === 'reserved' ? 'Reserviert' : 'Frei'}
             </span>
           )}
           {isBoosted && (
