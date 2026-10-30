@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { distanceKm, geocodeAddress } from '@/lib/geocode'
 import { slugify } from '@/lib/slugify'
 import { getBreederCanonicalUrl } from '@/lib/subdomain'
 import Navbar from '@/components/Navbar'
@@ -20,6 +21,11 @@ export default async function ZuechterVerzeichnisPage({
     select: { id: true, nameDe: true, slug: true },
     orderBy: { nameDe: 'asc' },
   })
+
+  const radiusKm = Number(searchParams.radius) || 0
+  const searchCoords = searchParams.ort && radiusKm > 0
+    ? await geocodeAddress({ city: searchParams.ort })
+    : null
 
   const breeders = await prisma.breederProfile.findMany({
     include: {
@@ -70,7 +76,12 @@ export default async function ZuechterVerzeichnisPage({
   if (searchParams.region) {
     filtered = filtered.filter((b) => b.state === searchParams.region)
   }
-  if (searchParams.ort) {
+  if (searchParams.ort && radiusKm > 0 && searchCoords) {
+    filtered = filtered.filter((b) =>
+      b.latitude !== null && b.longitude !== null &&
+      distanceKm(searchCoords.lat, searchCoords.lng, b.latitude, b.longitude) <= radiusKm
+    )
+  } else if (searchParams.ort) {
     const ort = searchParams.ort.toLowerCase()
     filtered = filtered.filter((b) =>
       (b.zip && b.zip.startsWith(ort)) || (b.city && b.city.toLowerCase().includes(ort))
