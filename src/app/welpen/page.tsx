@@ -144,8 +144,8 @@ export default async function WelpenPage({
           <div className="pointer-events-none absolute inset-0 opacity-[0.08]" aria-hidden="true">
             <svg className="h-full w-full" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
               <defs>
-                <pattern id="welpen-paws" width="180" height="150" patternUnits="userSpaceOnUse">
-                  <g fill="white" transform="translate(45 38) rotate(-18)">
+                <pattern id="welpen-paws" width="90" height="75" patternUnits="userSpaceOnUse">
+                  <g fill="white" transform="translate(22 19) rotate(-18) scale(0.5)">
                     <ellipse cx="0" cy="18" rx="15" ry="12" />
                     <ellipse cx="-18" cy="-2" rx="6" ry="9" />
                     <ellipse cx="-6" cy="-12" rx="6" ry="9" />
@@ -158,7 +158,7 @@ export default async function WelpenPage({
             </svg>
           </div>
           <div className="pointer-events-none absolute -right-16 -top-28 h-[330px] w-[330px] rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
-          <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative z-10 mx-auto flex max-w-6xl px-4 flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-honey-light">Welpen von verifizierten Züchtern</p>
               <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl">Finde deinen neuen besten Freund</h1>
@@ -219,6 +219,7 @@ export default async function WelpenPage({
                     isBoosted={true}
                     imageUrl={listing.media[0]?.url}
                     tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                    status={listing.status}
                     sticker
                   />
                 ))}
@@ -277,6 +278,7 @@ export default async function WelpenPage({
                     isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
                     imageUrl={listing.media[0]?.url}
                     tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                    status={listing.status}
                     sticker
                   />
                 ))}
