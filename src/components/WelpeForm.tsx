@@ -12,11 +12,14 @@ type LitterInfo = {
   bornDate: string | null
 }
 
-export default function WelpeForm({ litter }: { litter: LitterInfo }) {
+export default function WelpeForm({ litter, hasPuppies }: { litter: LitterInfo; hasPuppies: boolean }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [successId, setSuccessId] = useState<string | null>(null)
+  const [litterBornDate, setLitterBornDate] = useState(litter.bornDate ?? '')
+  const [puppyAdded, setPuppyAdded] = useState(hasPuppies)
+  const birthDateLocked = puppyAdded || !!litterBornDate
   const [form, setForm] = useState({
     name: '',
     sex: 'male',
@@ -59,6 +62,8 @@ export default function WelpeForm({ litter }: { litter: LitterInfo }) {
 
     setLoading(false)
     setSuccessId(data.listingId)
+    setLitterBornDate(data.bornDate?.slice(0, 10) ?? litterBornDate)
+    setPuppyAdded(true)
   }
 
   const labelClass = 'block text-sm font-medium text-stone-700 mb-1.5'
@@ -78,7 +83,7 @@ export default function WelpeForm({ litter }: { litter: LitterInfo }) {
             Fotos hinzufügen
           </a>
           <button
-            onClick={() => { setSuccessId(null); setForm({ name: '', sex: 'male', birthDate: litter.bornDate ?? '', color: '', chipNumber: '', priceCents: '', status: 'draft' }) }}
+            onClick={() => { setSuccessId(null); setForm({ name: '', sex: 'male', birthDate: litterBornDate, color: '', chipNumber: '', priceCents: '', status: 'draft' }) }}
             className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-forest text-white rounded-xl px-4 py-2.5 hover:bg-forest-light transition-colors">
             + Weiteren Welpen anlegen
           </button>
@@ -133,8 +138,13 @@ export default function WelpeForm({ litter }: { litter: LitterInfo }) {
                 name="birthDate"
                 value={form.birthDate}
                 onChange={handleChange}
-                className={inputClass}
+                required={!birthDateLocked}
+                readOnly={birthDateLocked}
+                className={inputClass + (birthDateLocked ? ' cursor-not-allowed bg-stone-50 text-stone-500' : '')}
               />
+              <p className="mt-1 text-xs text-stone-400">
+                {birthDateLocked ? 'Vom Wurf übernommen. Individuelle Abweichungen kannst du später in der Wurfübersicht einstellen.' : 'Wird als Geburtsdatum für den gesamten Wurf übernommen.'}
+              </p>
             </div>
             <div>
               <label className={labelClass}>Farbe</label>
