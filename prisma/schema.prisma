@@ -543,6 +543,7 @@ model ServiceProvider {
 // ─────────────────────────────────────────────
 
 // Polymorphe Zuordnung: eine Tabelle für alle Foto-Typen
+// Gespeichert in MinIO (S3-kompatibel auf Coolify)
 model Media {
   id          String   @id @default(cuid())
   storageKey  String   @unique @map("storage_key")  // MinIO object key
@@ -647,7 +648,7 @@ model Bookmark {
   user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   listing Listing?        @relation(fields: [listingId], references: [id], onDelete: Cascade)
   litter  Litter?         @relation(fields: [litterId], references: [id], onDelete: Cascade)
-  breeder BreederProfile? @relation(fields: [breederId], references: [id], onDelete: Cascade)
+  breeder BreederProfile? @relation("BookmarkedBreeder", fields: [breederId], references: [id], onDelete: Cascade)
 
   @@map("bookmarks")
 }
@@ -672,7 +673,7 @@ model WelpenAlert {
 }
 
 // ─────────────────────────────────────────────
-// NACHRICHTEN — Nutzer schreiben Züchter
+// NACHRICHTEN — Nutzer schreiben Züchtern
 // ─────────────────────────────────────────────
 
 model Conversation {
