@@ -140,29 +140,52 @@ export default async function WelpenPage({
     <>
       <Navbar />
       <main className="min-h-screen bg-cream">
-        <section className="bg-forest px-4 py-12">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="font-serif text-3xl font-bold text-white mb-2">
-              Welpen
-            </h1>
-            <p className="text-white/70 text-sm">
-              Welpen unserer Züchter — von der Wurfankündigung bis zum abgabebereiten Hund.
-            </p>
+        <section className="relative overflow-hidden bg-forest px-4 pb-24 pt-12">
+          <div className="pointer-events-none absolute inset-0 opacity-[0.08]" aria-hidden="true">
+            <svg className="h-full w-full" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <pattern id="welpen-paws" width="180" height="150" patternUnits="userSpaceOnUse">
+                  <g fill="white" transform="translate(45 38) rotate(-18)">
+                    <ellipse cx="0" cy="18" rx="15" ry="12" />
+                    <ellipse cx="-18" cy="-2" rx="6" ry="9" />
+                    <ellipse cx="-6" cy="-12" rx="6" ry="9" />
+                    <ellipse cx="8" cy="-12" rx="6" ry="9" />
+                    <ellipse cx="20" cy="-1" rx="6" ry="9" />
+                  </g>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#welpen-paws)" />
+            </svg>
+          </div>
+          <div className="pointer-events-none absolute -right-16 -top-28 h-[330px] w-[330px] rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
+          <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-honey-light">Welpen von verifizierten Züchtern</p>
+              <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl">Finde deinen neuen besten Freund</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+                Aktuelle Welpen und angekündigte Würfe aus seriöser, eingetragener Zucht.
+              </p>
+            </div>
+            <div className="max-w-xs rounded-2xl border border-white/15 bg-white/[0.07] p-5 lg:mr-0">
+              <p className="text-sm font-bold text-white">Nur eingetragene Züchter</p>
+              <p className="mt-2 text-xs leading-relaxed text-white/70">Mit transparenten Angaben zu Elterntieren und Gesundheit.</p>
+            </div>
           </div>
         </section>
 
-        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
-          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
-            <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
+        <div className="relative z-20 mx-auto -mt-16 max-w-6xl px-4">
+          <div className="rounded-2xl border border-cream-deep bg-white p-5 shadow-[7px_7px_0_rgba(18,38,25,0.08)]">
+            <Suspense fallback={<div className="h-12 w-full animate-pulse rounded-lg bg-stone-100" />}>
               <WelpenFilter breeds={breeds} />
             </Suspense>
-            <span className="text-sm text-stone-400">
-              {total} {total === 1 ? 'Inserat' : 'Inserate'}
-            </span>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="max-w-6xl mx-auto px-4 pb-10 pt-10">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 className="font-serif text-2xl font-bold text-stone-900">{total} {total === 1 ? 'Welpe gefunden' : 'Welpen gefunden'}</h2>
+            <span className="text-sm text-stone-400">Neueste zuerst</span>
+          </div>
           {(selectedBreed || searchParams.region) && (
             <div className="flex items-center justify-end mb-6">
               <WelpenAlertButton
@@ -196,6 +219,7 @@ export default async function WelpenPage({
                     isBoosted={true}
                     imageUrl={listing.media[0]?.url}
                     tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                    sticker
                   />
                 ))}
               </div>
@@ -253,6 +277,7 @@ export default async function WelpenPage({
                     isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
                     imageUrl={listing.media[0]?.url}
                     tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                    sticker
                   />
                 ))}
               </div>
@@ -285,7 +310,7 @@ export default async function WelpenPage({
             <p className="text-stone-400 text-sm mb-8">
               {selectedBreed
                 ? `Züchter mit geplanten oder bestätigten ${selectedBreed.nameDe}-Würfen`
-                : 'Züchter mit geplanten oder bestätigten Würfen — alle Rassen'}
+                : 'Geplante und bestätigte Würfe unserer Züchter mit Blick auf die Elterntiere'}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {expectedLitters.map((litter) => (
@@ -341,6 +366,16 @@ export default async function WelpenPage({
             </div>
           </div>
         )}
+
+        <section className="bg-[#EAF3EC] px-4 py-14">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+            <div>
+              <h2 className="font-serif text-2xl font-bold text-forest sm:text-3xl">Noch kein passender Welpe dabei?</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-stone-500">Erstelle einen Suchauftrag und erfahre sofort von neuen Würfen deiner Wunschrasse.</p>
+            </div>
+            <WelpenAlertButton breedName={selectedBreed?.nameDe} breedId={selectedBreed?.id} state={searchParams.region} />
+          </div>
+        </section>
       </main>
       <Footer />
     </>
