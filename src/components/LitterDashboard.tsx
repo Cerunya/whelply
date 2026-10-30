@@ -6,6 +6,7 @@ import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import LitterImageUploader from './LitterImageUploader'
 import SaveToast from './SaveToast'
+import PuppyCareFields, { type PuppyCareValues } from './PuppyCareFields'
 
 type Litter = {
   id: string
@@ -24,6 +25,7 @@ type Litter = {
   status: string
   notes: string | null
   imageUrl: string | null
+  care: PuppyCareValues
 }
 
 type DogOption = { id: string; name: string; sex: string; breedId: number }
@@ -46,6 +48,10 @@ const STATUS_LABELS: Record<string, string> = {
   born: 'Geboren',
   available: 'Welpen abgabebereit',
   sold_out: 'Ausverkauft',
+}
+
+function dayOffset(date: string, baseDate: string) {
+  return Math.round((new Date(`${date}T00:00:00.000Z`).getTime() - new Date(`${baseDate}T00:00:00.000Z`).getTime()) / 86400000)
 }
 
 export default function LitterDashboard({
@@ -81,6 +87,7 @@ export default function LitterDashboard({
     handoverDate: litter.handoverDate ?? '',
     notes: litter.notes ?? '',
   })
+  const [puppyCare, setPuppyCare] = useState<PuppyCareValues>({ ...litter.care })
   const [savingDetails, setSavingDetails] = useState(false)
   const [detailsError, setDetailsError] = useState('')
   const [detailsSuccess, setDetailsSuccess] = useState(false)
@@ -95,11 +102,14 @@ export default function LitterDashboard({
   const [savingPuppyDate, setSavingPuppyDate] = useState<string | null>(null)
 
   async function adjustPuppyDate(puppy: Puppy, days: number) {
-    if (!puppy.dogId || savingPuppyDate) return
+    if (!puppy.dogId || savingPuppyDate || !litter.bornDate) return
     const current = puppyDates[puppy.listingId] ?? litter.bornDate
     if (!current) return
-    const date = new Date(`${current}T00:00:00.000Z`)
-    date.setUTCDate(date.getUTCDate() + days)
+    const currentOffset = dayOffset(current, litter.bornDate)
+    const nextOffset = Math.max(-1, Math.min(1, currentOffset + days))
+    if (nextOffset === currentOffset) return
+    const date = new Date(`${litter.bornDate}T00:00:00.000Z`)
+    date.setUTCDate(date.getUTCDate() + nextOffset)
     const nextDate = date.toISOString().slice(0, 10)
     const previousDate = puppyDates[puppy.listingId]
 
@@ -157,6 +167,8 @@ export default function LitterDashboard({
         puppyCount: details.puppyCount ? Number(details.puppyCount) : null,
         handoverDate: details.handoverDate || null,
         notes: details.notes || null,
+        ...puppyCare,
+        trainingNotes: puppyCare.trainingNotes || null,
       }),
     })
     setSavingDetails(false)
@@ -376,6 +388,15 @@ export default function LitterDashboard({
             </div>
           )}
 
+          <div className="border-t border-cream-deep pt-5">
+            <h4 className="font-serif text-lg font-bold text-stone-900">Standardwerte für die Welpen</h4>
+            <p className="mt-1 text-xs text-stone-400">
+              Diese Angaben werden beim Anlegen neuer Welpen automatisch übernommen und können pro Welpe individuell angepasst werden.
+            </p>
+          </div>
+
+          <PuppyCareFields values={puppyCare} onChange={(values) => { setPuppyCare(values); setDetailsSuccess(false) }} />
+
           <div>
             <label className={labelClass}>Notizen</label>
             <textarea
@@ -463,7 +484,10 @@ export default function LitterDashboard({
             </p>
           ) : (
             <div className="space-y-2">
-              {puppies.map((puppy) => (
+              {puppies.map((puppy) => {
+                const currentDate = puppyDates[puppy.listingId]
+                const offset = currentDate && litter.bornDate ? dayOffset(currentDate, litter.bornDate) : 0
+                return (
                 <div key={puppy.listingId} className="rounded-xl border border-cream-deep p-3">
                   <div className="flex items-center gap-4">
                     <Link href={`/dashboard/inserat/${puppy.listingId}`} className="flex min-w-0 flex-1 items-center gap-4">
@@ -497,14 +521,14 @@ export default function LitterDashboard({
                         : 'Entwurf'}
                     </span>
                   </div>
-                  {puppy.dogId && puppyDates[puppy.listingId] && (
+                  {puppy.dogId && currentDate && litter.bornDate && (
                     <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-cream-deep pt-3 text-xs">
-                      <span className="text-stone-500">Geboren: {new Date(`${puppyDates[puppy.listingId]}T00:00:00.000Z`).toLocaleDateString('de-DE', { timeZone: 'UTC' })}</span>
+                      <span className="text-stone-500">Geboren: {new Date(`${currentDate}T00:00:00.000Z`).toLocaleDateString('de-DE', { timeZone: 'UTC' })}</span>
                       <div className="ml-auto flex gap-1.5">
                         <button
                           type="button"
                           onClick={() => adjustPuppyDate(puppy, -1)}
-                          disabled={savingPuppyDate === puppy.listingId}
+                          disabled={savingPuppyDate === puppy.listingId || offset <= -1}
                           className="rounded-lg border border-stone-200 px-2.5 py-1.5 font-semibold text-stone-600 hover:border-forest/30 disabled:opacity-40"
                         >
                           −1 Tag
@@ -512,7 +536,7 @@ export default function LitterDashboard({
                         <button
                           type="button"
                           onClick={() => adjustPuppyDate(puppy, 1)}
-                          disabled={savingPuppyDate === puppy.listingId}
+                          disabled={savingPuppyDate === puppy.listingId || offset >= 1}
                           className="rounded-lg border border-stone-200 px-2.5 py-1.5 font-semibold text-stone-600 hover:border-forest/30 disabled:opacity-40"
                         >
                           +1 Tag
@@ -521,7 +545,8 @@ export default function LitterDashboard({
                     </div>
                   )}
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
