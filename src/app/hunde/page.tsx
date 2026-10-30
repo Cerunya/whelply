@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 export default async function HundePage({
   searchParams,
 }: {
-  searchParams: { rasse?: string; region?: string; seite?: string }
+  searchParams: { rasse?: string; region?: string; seite?: string; ort?: string; radius?: string }
 }) {
   const page = Number(searchParams.seite ?? 1)
   const perPage = 24
@@ -26,12 +26,29 @@ export default async function HundePage({
 
   const selectedBreed = breeds.find((b) => b.slug === searchParams.rasse)
 
+  let radiusFilter: any = {}
+  let searchCoords: { lat: number; lng: number } | null = null
+  const radiusKm = Number(searchParams.radius) || 0
+  if (searchParams.ort && radiusKm > 0) {
+    const { geocodeAddress } = await import('@/lib/geocode')
+    searchCoords = await geocodeAddress({ city: searchParams.ort })
+    if (searchCoords) {
+      const delta = radiusKm / 111
+      radiusFilter = {
+        latitude: { gte: searchCoords.lat - delta, lte: searchCoords.lat + delta },
+        longitude: { gte: searchCoords.lng - delta, lte: searchCoords.lng + delta },
+      }
+    }
+  }
+
   const where = {
     status: 'available' as const,
     type: 'adult_dog' as const,
     breeder: {
       isActive: true,
       ...(searchParams.region ? { state: searchParams.region } : {}),
+      ...(searchParams.ort && (!radiusKm || !searchCoords) ? { OR: [{ zip: { startsWith: searchParams.ort } }, { city: { contains: searchParams.ort, mode: 'insensitive' as const } }] } : {}),
+      ...radiusFilter,
     },
     ...(selectedBreed ? { breedId: selectedBreed.id } : {}),
   }
@@ -76,7 +93,7 @@ export default async function HundePage({
 
   function buildUrl(params: Record<string, string | undefined>) {
     const p = new URLSearchParams()
-    const merged = { rasse: searchParams.rasse, region: searchParams.region, ...params }
+    const merged = { rasse: searchParams.rasse, region: searchParams.region, ort: searchParams.ort, radius: searchParams.radius, ...params }
     Object.entries(merged).forEach(([k, v]) => { if (v) p.set(k, v) })
     return `/hunde?${p.toString()}`
   }
