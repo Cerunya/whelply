@@ -102,29 +102,59 @@ export default async function HundePage({
     <>
       <Navbar />
       <main className="min-h-screen bg-cream">
-        <section className="bg-forest px-4 py-12">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="font-serif text-3xl font-bold text-white mb-2">
-              Hunde
-            </h1>
-            <p className="text-white/70 text-sm">
-              Erwachsene Hunde, die von unseren Züchtern abgegeben werden.
-            </p>
+        <section className="relative overflow-hidden bg-forest px-4 pb-24 pt-12">
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <svg className="absolute inset-0 h-full w-full text-white opacity-[0.035]" aria-hidden="true">
+              <defs>
+                <pattern id="hunde-paw-pattern" width="190" height="190" patternUnits="userSpaceOnUse">
+                  <g fill="currentColor" transform="translate(22 24) rotate(-18 30 30)">
+                    <ellipse cx="30" cy="40" rx="13" ry="15" />
+                    <ellipse cx="10" cy="25" rx="6" ry="8" />
+                    <ellipse cx="23" cy="14" rx="6" ry="8" />
+                    <ellipse cx="37" cy="14" rx="6" ry="8" />
+                    <ellipse cx="50" cy="25" rx="6" ry="8" />
+                  </g>
+                  <g fill="currentColor" transform="translate(112 108) rotate(16 30 30)">
+                    <ellipse cx="30" cy="40" rx="13" ry="15" />
+                    <ellipse cx="10" cy="25" rx="6" ry="8" />
+                    <ellipse cx="23" cy="14" rx="6" ry="8" />
+                    <ellipse cx="37" cy="14" rx="6" ry="8" />
+                    <ellipse cx="50" cy="25" rx="6" ry="8" />
+                  </g>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#hunde-paw-pattern)" />
+            </svg>
+          </div>
+          <div className="pointer-events-none absolute -right-16 -top-28 h-[330px] w-[330px] rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
+          <div className="relative z-10 mx-auto flex max-w-6xl px-4 flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-honey-light">Erwachsene Hunde von verifizierten Züchtern</p>
+              <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl">Ein neues Zuhause für erfahrene Hunde</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+                Erwachsene Hunde aus seriöser, eingetragener Zucht, die ein liebevolles Zuhause suchen.
+              </p>
+            </div>
+            <div className="max-w-xs rounded-2xl border border-white/15 bg-white/[0.07] p-5 lg:mr-0">
+              <p className="text-sm font-bold text-white">Nur eingetragene Züchter</p>
+              <p className="mt-2 text-xs leading-relaxed text-white/70">Mit transparenten Angaben zum Hund und seiner Herkunft.</p>
+            </div>
           </div>
         </section>
 
-        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
-          <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
-            <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
+        <div className="relative z-20 mx-auto -mt-16 max-w-6xl px-4">
+          <div className="rounded-2xl border border-cream-deep bg-white p-5 shadow-[7px_7px_0_rgba(18,38,25,0.08)]">
+            <Suspense fallback={<div className="h-12 w-full animate-pulse rounded-lg bg-stone-100" />}>
               <WelpenFilter breeds={breeds} basePath="/hunde" />
             </Suspense>
-            <span className="text-sm text-stone-400">
-              {total} {total === 1 ? 'Inserat' : 'Inserate'}
-            </span>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="max-w-6xl mx-auto px-4 pb-10 pt-10">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 className="font-serif text-2xl font-bold text-stone-900">{total} {total === 1 ? 'Hund gefunden' : 'Hunde gefunden'}</h2>
+            <span className="text-sm text-stone-400">Neueste zuerst</span>
+          </div>
 
           {/* Empfohlen-Bereich (geboostete Inserate, max. 5, faire Rotation) */}
           {boosted.length > 0 && (
@@ -149,6 +179,8 @@ export default async function HundePage({
                     isBoosted={true}
                     imageUrl={listing.media[0]?.url}
                     tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                    status={listing.status}
+                    sticker
                   />
                 ))}
               </div>
@@ -156,7 +188,7 @@ export default async function HundePage({
           )}
 
           {listings.length === 0 ? (
-            <div className="text-center py-24 bg-white rounded-2xl border border-cream-deep">
+            <div className="text-center py-24 bg-stone-50 rounded-2xl border border-stone-200">
               <div className="text-5xl mb-4">🔍</div>
               <p className="text-stone-600 font-medium mb-2">Keine Inserate gefunden</p>
               <p className="text-stone-400 text-sm mb-6">Versuch einen anderen Filter oder schau später nochmal.</p>
@@ -182,6 +214,8 @@ export default async function HundePage({
                     isBoosted={!!listing.boostExpiresAt && listing.boostExpiresAt > now}
                     imageUrl={listing.media[0]?.url}
                     tint={listing.sex === 'male' ? 'male' : listing.sex === 'female' ? 'female' : null}
+                    status={listing.status}
+                    sticker
                   />
                 ))}
               </div>
