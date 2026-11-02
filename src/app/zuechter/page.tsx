@@ -38,6 +38,10 @@ export default async function ZuechterVerzeichnisPage({
         take: 1,
         select: { url: true },
       },
+      memberships: {
+        select: { verband: true },
+        orderBy: { createdAt: 'asc' },
+      },
       _count: {
         select: {
           dogs: { where: { isStud: true } },
@@ -174,8 +178,14 @@ export default async function ZuechterVerzeichnisPage({
                     <div className="relative flex flex-1 flex-col p-5 pb-12 sm:p-6">
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div>
-                          <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-forest">Rassehundezucht</p>
                           <h2 className="font-serif text-xl font-bold text-stone-900">{displayName}</h2>
+                          {(breeder.memberships.length > 0 || breeder.verband) && (
+                            <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-forest">
+                              {breeder.memberships.length > 0
+                                ? breeder.memberships.map((membership) => membership.verband).join(' · ')
+                                : breeder.verband}
+                            </p>
+                          )}
                           {breeder.showFullName && breeder.fullName && (
                             <p className="text-xs text-stone-400 mt-0.5">{breeder.fullName}</p>
                           )}
