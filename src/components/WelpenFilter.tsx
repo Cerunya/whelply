@@ -13,7 +13,7 @@ const BUNDESLAENDER = [
 
 type Breed = { id: number | string; nameDe: string; slug: string }
 
-export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds: Breed[]; basePath?: string }) {
+export default function WelpenFilter({ breeds, basePath = '/welpen', showStatus = true }: { breeds: Breed[]; basePath?: string; showStatus?: boolean }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentRasse = searchParams.get('rasse') ?? ''
@@ -63,17 +63,19 @@ export default function WelpenFilter({ breeds, basePath = '/welpen' }: { breeds:
         ))}
       </select>
 
-      <select
-        value={currentStatus}
-        onChange={(e) => update('status', e.target.value)}
-        aria-label="Verfügbarkeit"
-        className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
-      >
-        <option value="">Alle Verfügbarkeiten</option>
-        <option value="available">Frei</option>
-        <option value="reserved">Reserviert</option>
-        <option value="sold">Verkauft</option>
-      </select>
+      {showStatus && (
+        <select
+          value={currentStatus}
+          onChange={(e) => update('status', e.target.value)}
+          aria-label="Verfügbarkeit"
+          className="border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-stone-900"
+        >
+          <option value="">Alle Verfügbarkeiten</option>
+          <option value="available">Frei</option>
+          <option value="reserved">Reserviert</option>
+          <option value="sold">Verkauft</option>
+        </select>
+      )}
 
       {(currentRasse || currentRegion || currentStatus || currentOrt || currentRadius) && (
         <button
