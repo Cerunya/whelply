@@ -92,32 +92,65 @@ export default async function ZuechterVerzeichnisPage({
     <>
       <Navbar />
       <main className="min-h-screen bg-cream">
-        <section className="bg-forest px-4 py-12">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="font-serif text-3xl font-bold text-white mb-2">
-              Züchter-Verzeichnis
-            </h1>
-            <p className="text-white/70 text-sm">
-              Alle registrierten Rassehunde-Züchter auf Whelply — verifiziert über anerkannte Zuchtverbände.
-            </p>
+        <section className="relative overflow-hidden bg-forest px-4 pb-24 pt-12">
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <svg className="absolute inset-0 h-full w-full text-white opacity-[0.035]" aria-hidden="true">
+              <defs>
+                <pattern id="zuechter-paw-pattern" width="190" height="190" patternUnits="userSpaceOnUse">
+                  <g fill="currentColor" transform="translate(22 24) rotate(-18 30 30)">
+                    <ellipse cx="30" cy="40" rx="13" ry="15" />
+                    <ellipse cx="10" cy="25" rx="6" ry="8" />
+                    <ellipse cx="23" cy="14" rx="6" ry="8" />
+                    <ellipse cx="37" cy="14" rx="6" ry="8" />
+                    <ellipse cx="50" cy="25" rx="6" ry="8" />
+                  </g>
+                  <g fill="currentColor" transform="translate(112 108) rotate(16 30 30)">
+                    <ellipse cx="30" cy="40" rx="13" ry="15" />
+                    <ellipse cx="10" cy="25" rx="6" ry="8" />
+                    <ellipse cx="23" cy="14" rx="6" ry="8" />
+                    <ellipse cx="37" cy="14" rx="6" ry="8" />
+                    <ellipse cx="50" cy="25" rx="6" ry="8" />
+                  </g>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#zuechter-paw-pattern)" />
+            </svg>
+          </div>
+          <div className="pointer-events-none absolute -right-16 -top-28 h-[330px] w-[330px] rounded-full bg-honey-light/[0.08]" aria-hidden="true" />
+          <div className="relative z-10 mx-auto flex max-w-6xl px-4 flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-honey-light">Seriöse Rassehundezucht entdecken</p>
+              <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl">Züchter mit Verantwortung finden</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+                Registrierte Rassehunde-Züchter mit transparenten Profilen, aktuellen Würfen und verfügbaren Hunden.
+              </p>
+            </div>
+            <div className="max-w-xs rounded-2xl border border-white/15 bg-white/[0.07] p-5 lg:mr-0">
+              <p className="text-sm font-bold text-white">Nur eingetragene Züchter</p>
+              <p className="mt-2 text-xs leading-relaxed text-white/70">Mit nachvollziehbaren Angaben zur Zuchtstätte und Verifizierung.</p>
+            </div>
           </div>
         </section>
 
-        <div className="border-b border-stone-200 bg-stone-50 px-4 py-4">
-          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-            <Suspense fallback={<div className="h-9 w-64 bg-stone-200 rounded-lg animate-pulse" />}>
-              <WelpenFilter breeds={allBreeds} basePath="/zuechter" />
+        <div className="relative z-20 mx-auto -mt-16 max-w-6xl px-4">
+          <div className="rounded-2xl border border-cream-deep bg-white p-5 shadow-[7px_7px_0_rgba(18,38,25,0.08)]">
+            <Suspense fallback={<div className="h-12 w-full animate-pulse rounded-lg bg-stone-100" />}>
+              <WelpenFilter breeds={allBreeds} basePath="/zuechter" showStatus={false} />
             </Suspense>
-            <p className="text-xs text-stone-400 flex-shrink-0">{filtered.length} Züchter</p>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto px-4 py-10">
+
+        <div className="max-w-6xl mx-auto px-4 pb-10 pt-10">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 className="font-serif text-2xl font-bold text-stone-900">{filtered.length} Züchter gefunden</h2>
+            <span className="text-sm text-stone-400">Neueste zuerst</span>
+          </div>
           {filtered.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
+            <div className="text-center py-24 bg-stone-50 rounded-2xl border border-stone-200">
               <p className="text-stone-400 text-sm">Keine Züchter gefunden.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-12 pb-8" style={{overflow: 'visible'}}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12 pb-8" style={{overflow: 'visible'}}>
               {filtered.map((breeder) => {
                 const displayName = breeder.displayName || breeder.kennelName
                 const location = [breeder.city, breeder.state].filter(Boolean).join(', ')
@@ -129,19 +162,20 @@ export default async function ZuechterVerzeichnisPage({
                 const bgImage = breeder.media[0]?.url
 
                 const cardContent = (
-                  <div className="relative pb-10">
-                  <div className={`bg-white rounded-2xl border border-cream-deep transition-all flex flex-col ${ published ? 'hover:border-forest/30 hover:shadow-md cursor-pointer' : 'cursor-default' }`}>
+                  <div className="relative h-full pb-10">
+                  <div className={`flex h-full flex-col overflow-hidden rounded-[26px] border border-cream-deep bg-white shadow-[7px_7px_0_#EDE4CE] transition-all duration-200 ${ published ? 'cursor-pointer hover:-translate-y-1 hover:shadow-[9px_9px_0_#EDE4CE]' : 'cursor-default' }`}>
                     {/* Hintergrundbild */}
                     {bgImage && (
-                      <div className="relative h-36 flex-shrink-0 overflow-hidden rounded-t-2xl">
-                        <img src={bgImage} alt="" className="w-full h-full object-cover" />
+                      <div className="relative aspect-[3/2] flex-shrink-0 overflow-hidden">
+                        <img src={bgImage} alt={displayName} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
                       </div>
                     )}
-                    <div className="relative p-6 pb-12 flex flex-col flex-1">
+                    <div className="relative flex flex-1 flex-col p-5 pb-12 sm:p-6">
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div>
-                          <h2 className="font-serif text-lg font-bold text-stone-900">{displayName}</h2>
+                          <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-forest">Rassehundezucht</p>
+                          <h2 className="font-serif text-xl font-bold text-stone-900">{displayName}</h2>
                           {breeder.showFullName && breeder.fullName && (
                             <p className="text-xs text-stone-400 mt-0.5">{breeder.fullName}</p>
                           )}
@@ -220,8 +254,8 @@ export default async function ZuechterVerzeichnisPage({
           {/* Zuletzt eingetragene Züchter — ganz unten */}
           {newestBreeders.length > 0 && !searchParams.rasse && !searchParams.region && !searchParams.ort && (
             <div className="mt-16 pt-10 border-t border-cream-deep">
-              <h2 className="font-serif text-xl font-bold text-stone-900 mb-6">Zuletzt eingetragene Züchter</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+              <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">Zuletzt eingetragene Züchter</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {newestBreeders.map((b) => {
                   const breeds = Array.from(new Set(b.listings.map((l) => l.breed.nameDe)))
                   const slug = b.kennelName.toLowerCase().replace(/\s+/g, '-')
