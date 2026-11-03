@@ -102,10 +102,12 @@ export default async function RassenlexikonPage({
               </p>
             </div>
             <div className="max-w-xs rounded-2xl border border-white/15 bg-white/[0.07] p-5">
-              <svg className="h-6 w-6 text-honey-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.25A4.25 4.25 0 0 0 7.75 2H3v15.5h4.75A4.25 4.25 0 0 1 12 21.75m0-15.5A4.25 4.25 0 0 1 16.25 2H21v15.5h-4.75A4.25 4.25 0 0 0 12 21.75m0-15.5v15.5" />
-              </svg>
-              <p className="mt-3 text-sm font-bold text-white">{breeds.length} Rassen im Lexikon</p>
+              <div className="flex items-center gap-2.5">
+                <svg className="h-6 w-6 flex-shrink-0 text-honey-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.25A4.25 4.25 0 0 0 7.75 2H3v15.5h4.75A4.25 4.25 0 0 1 12 21.75m0-15.5A4.25 4.25 0 0 1 16.25 2H21v15.5h-4.75A4.25 4.25 0 0 0 12 21.75m0-15.5v15.5" />
+                </svg>
+                <p className="text-sm font-bold text-white">{breeds.length} Rassen im Lexikon</p>
+              </div>
               <p className="mt-2 text-xs leading-relaxed text-white/70">Mit Wesen, Haltung und Besonderheiten der einzelnen Rassen.</p>
             </div>
           </div>
@@ -175,7 +177,7 @@ export default async function RassenlexikonPage({
                     >
                       <div>
                         <h3 className="font-serif text-base font-bold text-stone-800 transition-colors group-hover:text-forest">{breed.nameDe}</h3>
-                        <p className="mt-1 text-xs text-stone-500">FCI-Nr. {breed.fciNumber} · Rasseporträt ansehen</p>
+                        <p className="mt-1 text-xs text-stone-500">FCI-Nr. {breed.fciNumber} · Zur Rassenübersicht</p>
                       </div>
                       <svg className="h-5 w-5 flex-shrink-0 text-honey transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6 6 6-6 6" />
