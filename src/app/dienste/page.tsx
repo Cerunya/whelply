@@ -98,7 +98,7 @@ export default async function DienstePage({
         <div className="relative z-20 mx-auto -mt-16 max-w-6xl px-4">
           <div className="rounded-2xl border border-cream-deep bg-white p-5 shadow-[7px_7px_0_rgba(18,38,25,0.08)]">
             <Suspense fallback={<div className="h-32 w-full animate-pulse rounded-lg bg-stone-100" />}>
-              <DiensteSuche resultCount={providers.length} />
+              <DiensteSuche />
             </Suspense>
           </div>
         </div>
