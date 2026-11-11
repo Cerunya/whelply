@@ -25,6 +25,10 @@ export default async function AdminArtikelPage() {
         action={<Link href="/admin/artikel/neu" className="bg-forest text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-forest-light transition-colors">+ Neuer Artikel</Link>}
       />
       <div className="max-w-4xl mx-auto px-4 py-8">
+        <Link href="/admin/artikel/highlights" className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-cream-deep bg-[#F5EFE0] px-5 py-4 transition-colors hover:border-forest/40">
+          <div><p className="font-serif text-lg font-bold text-forest">Ratgeber-Highlights</p><p className="mt-1 text-xs text-stone-500">Bis zu fünf Artikel auf der Ratgeber-Startseite anpinnen und anordnen.</p></div>
+          <span className="text-honey">→</span>
+        </Link>
         {articles.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-cream-deep">
             <p className="text-stone-400 text-sm">Noch keine Artikel erstellt.</p>
