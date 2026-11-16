@@ -12,6 +12,10 @@ const schema = z.object({
   sex: z.enum(['male', 'female']).nullable().optional(),
   description: z.string().max(2000).nullable().optional(),
   status: z.enum(['draft', 'available']).default('draft'),
+  hasPedigree: z.boolean().default(false),
+  isVaccinated: z.boolean().default(false),
+  isDewormed: z.boolean().default(false),
+  isChipped: z.boolean().default(false),
 })
 
 export async function POST(req: NextRequest) {
@@ -62,6 +66,10 @@ export async function POST(req: NextRequest) {
       sex: parsed.data.sex ?? null,
       description: parsed.data.description ?? null,
       status: parsed.data.status,
+      hasPedigree: parsed.data.hasPedigree,
+      isVaccinated: parsed.data.isVaccinated,
+      isDewormed: parsed.data.isDewormed,
+      isChipped: parsed.data.isChipped,
     },
   })
 

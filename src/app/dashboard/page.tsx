@@ -223,6 +223,12 @@ export default async function DashboardPage() {
             </div>
           )}
           <Link
+            href="/dashboard/inserat-importieren"
+            className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
+          >
+            ↓ Inserat importieren
+          </Link>
+          <Link
             href="/dashboard/wurf-eintragen"
             className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
           >
