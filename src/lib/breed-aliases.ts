@@ -151,8 +151,18 @@ export function normalizeBreedName(value: string) {
     .trim()
 }
 
+const BREED_NAME_ALIASES: Record<string, string[]> = {
+  'staffordshire bull terrier': ['Staffy', 'Staffi'],
+  'staffordshire bullterrier': ['Staffy', 'Staffi'],
+  'italienisches windspiel': ['Iggy'],
+  'piccolo levriero italiano': ['Iggy'],
+  'italian greyhound': ['Iggy'],
+}
+
 export function breedSearchNames(breed: Omit<BreedSearchEntry, 'id'>) {
-  return [breed.nameDe, breed.nameEn ?? '', ...(BREED_ALIASES[breed.slug] ?? [])]
+  const officialNames = [breed.nameDe, breed.nameEn ?? '']
+  const nameAliases = officialNames.flatMap((name) => BREED_NAME_ALIASES[normalizeBreedName(name)] ?? [])
+  return [...officialNames, ...(BREED_ALIASES[breed.slug] ?? []), ...nameAliases]
 }
 
 export function findBreedByName(name: string, breeds: BreedSearchEntry[]) {
