@@ -10,6 +10,7 @@ type Breed = { id: number; nameDe: string }
 
 export default function InseratImport({ breeds }: { breeds: Breed[] }) {
   const router = useRouter()
+  const [platform, setPlatform] = useState<'edogs' | 'snautz'>('edogs')
   const [url, setUrl] = useState('')
   const [ownershipConfirmed, setOwnershipConfirmed] = useState(false)
   const [preview, setPreview] = useState<ImportedListing | null>(null)
@@ -29,7 +30,7 @@ export default function InseratImport({ breeds }: { breeds: Breed[] }) {
     try {
       const response = await fetch('/api/inserat-import', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ platform: 'edogs', url, ownershipConfirmed }),
+        body: JSON.stringify({ platform, url, ownershipConfirmed }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Import fehlgeschlagen')
@@ -79,10 +80,15 @@ export default function InseratImport({ breeds }: { breeds: Breed[] }) {
     <div className="min-h-screen bg-cream">
       <DashboardHeader title="Inserat importieren" backHref="/dashboard" backLabel="Dashboard" />
       <main className="mx-auto max-w-3xl px-4 py-10">
-        <div className="mb-8"><div className="flex flex-wrap items-center gap-3"><h1 className="font-serif text-3xl font-bold text-stone-900">Eigenes Inserat übernehmen</h1><span className="rounded-full bg-honey/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-honey">Beta</span></div><p className="mt-2 text-sm leading-relaxed text-stone-500">Importiere dein edogs-Inserat, prüfe alle Angaben und speichere es zunächst als Entwurf.</p></div>
+        <div className="mb-8"><div className="flex flex-wrap items-center gap-3"><h1 className="font-serif text-3xl font-bold text-stone-900">Eigenes Inserat übernehmen</h1><span className="rounded-full bg-honey/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-honey">Beta</span></div><p className="mt-2 text-sm leading-relaxed text-stone-500">Importiere dein edogs- oder Snautz-Inserat, prüfe alle Angaben und speichere es zunächst als Entwurf.</p></div>
         <section className="rounded-2xl border border-cream-deep bg-white p-5 sm:p-7">
-          <label className={labelClass} htmlFor="edogs-url">Link zu deinem edogs-Inserat</label>
-          <input id="edogs-url" type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://www.edogs.de/…/1234567.html" className={inputClass}/>
+          <label className={labelClass} htmlFor="import-platform">Plattform</label>
+          <select id="import-platform" value={platform} onChange={(event) => { setPlatform(event.target.value as 'edogs' | 'snautz'); setUrl(''); setPreview(null); setError('') }} className={`${inputClass} mb-5`}>
+            <option value="edogs">edogs.de</option>
+            <option value="snautz">snautz.de</option>
+          </select>
+          <label className={labelClass} htmlFor="import-url">Link zu deinem {platform === 'edogs' ? 'edogs' : 'Snautz'}-Inserat</label>
+          <input id="import-url" type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder={platform === 'edogs' ? 'https://www.edogs.de/…/1234567.html' : 'https://www.snautz.de/a/hund/…-123456789'} className={inputClass}/>
           <p className="mt-2 text-xs leading-relaxed text-stone-400">Das Inserat muss öffentlich aufrufbar sein. Whelply liest es einmalig aus.</p>
           <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-stone-600"><input type="checkbox" checked={ownershipConfirmed} onChange={(event) => setOwnershipConfirmed(event.target.checked)} className="mt-1 h-4 w-4 rounded border-stone-300 text-forest"/><span>Ich bestätige, dass dies mein eigenes Inserat ist und ich Texte und Bilder auf Whelply verwenden darf.</span></label>
           <button type="button" onClick={loadPreview} disabled={loading || !ownershipConfirmed || !url} className="mt-5 min-h-11 w-full rounded-xl bg-forest px-5 text-sm font-bold text-white disabled:opacity-40">{loading ? 'Daten werden gelesen…' : 'Vorschau erstellen'}</button>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { FCI_GROUPS } from '@/lib/fci-groups'
+import { breedSearchNames, normalizeBreedName } from '@/lib/breed-aliases'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import RassenSuche from '@/components/RassenSuche'
@@ -38,20 +39,10 @@ export default async function RassenlexikonPage({
     orderBy: { nameDe: 'asc' },
   })
 
-  const normalizeSearch = (value: string) =>
-    value
-      .toLocaleLowerCase('de')
-      .replace(/ä/g, 'ae')
-      .replace(/ö/g, 'oe')
-      .replace(/ü/g, 'ue')
-      .replace(/ß/g, 'ss')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-  const normalizedQuery = normalizeSearch(query)
+  const normalizedQuery = normalizeBreedName(query)
   const directMatches = normalizedQuery
     ? breeds.filter((breed) =>
-        normalizeSearch(breed.nameDe).includes(normalizedQuery) ||
-        normalizeSearch(breed.nameEn).includes(normalizedQuery)
+        breedSearchNames(breed).some((name) => normalizeBreedName(name).includes(normalizedQuery))
       )
     : breeds
   const familyParentSlugs = new Set(['belgian-shepherd-dog', 'german-spitz', 'dachshund', 'poodle'])
