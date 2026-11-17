@@ -55,6 +55,7 @@ export default async function Footer() {
             <p className="text-white text-sm font-semibold mb-4">Rechtliches</p>
             <ul className="space-y-2.5 text-sm">
               {[
+                ['/kontakt', 'Kontakt'],
                 ['/impressum', 'Impressum'],
                 ['/datenschutz', 'Datenschutz'],
                 ['/agb', 'AGB'],

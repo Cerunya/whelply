@@ -18,7 +18,7 @@ function wrapHtml(title: string, body: string) {
 </table></body></html>`
 }
 
-export async function sendMail(to: string, subject: string, html: string) {
+export async function sendMail(to: string, subject: string, html: string, replyTo?: string) {
   if (!RESEND_API_KEY) {
     console.warn('[mail] RESEND_API_KEY nicht gesetzt')
     return false
@@ -27,7 +27,7 @@ export async function sendMail(to: string, subject: string, html: string) {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${RESEND_API_KEY}` },
-      body: JSON.stringify({ from: `Whelply <${FROM_EMAIL}>`, to: [to], subject, html }),
+      body: JSON.stringify({ from: `Whelply <${FROM_EMAIL}>`, to: [to], subject, html, ...(replyTo ? { reply_to: replyTo } : {}) }),
     })
     return res.ok
   } catch (e) {

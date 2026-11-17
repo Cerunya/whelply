@@ -156,9 +156,12 @@ export default function ProfilForm({ breeder, verification }: { breeder: Breeder
 
       <main className="max-w-xl mx-auto px-4 py-12">
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Profil</h2>
-        <p className="text-stone-400 text-sm mb-8">
+        <p className="text-stone-400 text-sm">
           Zwingername: <span className="font-medium text-stone-600">{breeder.kennelName}</span>
           {' '}(nicht änderbar{memberships.length > 0 ? ` — ${memberships.map((m) => m.verband).filter(Boolean).join(', ')}-registriert` : ''})
+        </p>
+        <p className="mt-2 mb-8 text-xs leading-relaxed text-stone-400">
+          Du möchtest deinen Zwingernamen ändern? <Link href="/kontakt?betreff=Zwingername%20ändern" className="font-medium text-forest hover:underline">Kontaktiere dazu bitte den Support.</Link>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">

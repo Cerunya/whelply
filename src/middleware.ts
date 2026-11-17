@@ -101,6 +101,7 @@ export function middleware(request: NextRequest) {
     '/api/boost',
     '/api/onboarding',
     '/api/profil/check-subdomain',
+    '/api/kontakt',
     '/welpen-alert',
     '/passwort-',
     '/admin',
