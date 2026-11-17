@@ -7,6 +7,7 @@ import DashboardHeader from './DashboardHeader'
 import LitterImageUploader from './LitterImageUploader'
 import SaveToast from './SaveToast'
 import PuppyCareFields, { type PuppyCareValues } from './PuppyCareFields'
+import InfoHint from './InfoHint'
 
 type Litter = {
   id: string
@@ -287,8 +288,11 @@ export default function LitterDashboard({
           </div>
 
           <div>
-            <label className={labelClass}>Mutterhündin</label>
-            <select name="damId" value={details.damId} onChange={handleDetailsChange} className={inputClass}>
+            <div className="mb-1.5 flex items-center gap-2">
+              <label htmlFor="damId" className="block text-sm font-medium text-stone-700">Mutterhündin</label>
+              <InfoHint label="Hinweis zum Eintragen einer Mutterhündin" />
+            </div>
+            <select id="damId" name="damId" value={details.damId} onChange={handleDetailsChange} className={inputClass}>
               <option value="">Nicht angegeben</option>
               {matchingDams.map((d) => (
                 <option key={d.id} value={d.id}>{d.name}</option>
@@ -297,8 +301,11 @@ export default function LitterDashboard({
           </div>
 
           <div>
-            <label className={labelClass}>Deckrüde</label>
-            <select name="sireId" value={details.sireId} onChange={handleDetailsChange} className={inputClass}>
+            <div className="mb-1.5 flex items-center gap-2">
+              <label htmlFor="sireId" className="block text-sm font-medium text-stone-700">Deckrüde</label>
+              <InfoHint label="Hinweis zum Eintragen eines Deckrüden" />
+            </div>
+            <select id="sireId" name="sireId" value={details.sireId} onChange={handleDetailsChange} className={inputClass}>
               <option value="">Externer Deckrüde / nicht angegeben</option>
               {matchingSires.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
