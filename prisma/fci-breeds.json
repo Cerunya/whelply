@@ -9,7 +9,7 @@
   },
   {
     "fciNumber": 342,
-    "nameDe": "Australischer Schaferhund",
+    "nameDe": "Australischer Schäferhund",
     "nameEn": "Australian Shepherd",
     "fciGroup": 1,
     "fciSection": 1,
@@ -25,7 +25,7 @@
   },
   {
     "fciNumber": 347,
-    "nameDe": "Weisser Schweizer Schäferhund",
+    "nameDe": "Weißer Schweizer Schäferhund",
     "nameEn": "Berger Blanc Suisse",
     "fciGroup": 1,
     "fciSection": 1,
@@ -113,7 +113,7 @@
   },
   {
     "fciNumber": 138,
-    "nameDe": "Pyrenaen-Hutehund Mit Kurzhaarigem Gesicht",
+    "nameDe": "Pyrenäen-Hütehund Mit Kurzhaarigem Gesicht",
     "nameEn": "Chien De Berger Des Pyrenees A Face Rase",
     "fciGroup": 1,
     "fciSection": 1,
@@ -121,7 +121,7 @@
   },
   {
     "fciNumber": 141,
-    "nameDe": "Langhaariger Pyrenaen-Schaferhund",
+    "nameDe": "Langhaariger Pyrenäen-Schäferhund",
     "nameEn": "Chien De Berger Des Pyrenees A Poil Long",
     "fciGroup": 1,
     "fciSection": 1,
@@ -145,7 +145,7 @@
   },
   {
     "fciNumber": 156,
-    "nameDe": "Langhaariger Schottischer Schaferhund",
+    "nameDe": "Langhaariger Schottischer Schäferhund",
     "nameEn": "Collie Rough",
     "fciGroup": 1,
     "fciSection": 1,
@@ -153,7 +153,7 @@
   },
   {
     "fciNumber": 296,
-    "nameDe": "Kurzhaariger Schottischer Schaferhund",
+    "nameDe": "Kurzhaariger Schottischer Schäferhund",
     "nameEn": "Collie Smooth",
     "fciGroup": 1,
     "fciSection": 1,
@@ -169,7 +169,7 @@
   },
   {
     "fciNumber": 166,
-    "nameDe": "Deutscher Schaeferhund",
+    "nameDe": "Deutscher Schäferhund",
     "nameEn": "Deutscher Schäferhund",
     "fciGroup": 1,
     "fciSection": 1,
@@ -249,7 +249,7 @@
   },
   {
     "fciNumber": 16,
-    "nameDe": "Altenglischer Schaferhund",
+    "nameDe": "Altenglischer Schäferhund",
     "nameEn": "Old English Sheepdog",
     "fciGroup": 1,
     "fciSection": 1,
@@ -561,7 +561,7 @@
   },
   {
     "fciNumber": 340,
-    "nameDe": "Cao Fila De Sao Miguel",
+    "nameDe": "Cão de Fila de São Miguel",
     "nameEn": "Cão Fila De São Miguel",
     "fciGroup": 2,
     "fciSection": 2,
@@ -833,8 +833,8 @@
   },
   {
     "fciNumber": 58,
-    "nameDe": "Grosser Schweizer Sennenhund",
-    "nameEn": "Grosser Schweizer Sennenhund",
+    "nameDe": "Großer Schweizer Sennenhund",
+    "nameEn": "Großer Schweizer Sennenhund",
     "fciGroup": 2,
     "fciSection": 3,
     "slug": "great-swiss-mountain-dog"
@@ -1153,7 +1153,7 @@
   },
   {
     "fciNumber": 274,
-    "nameDe": "Groenlandhund",
+    "nameDe": "Grönlandhund",
     "nameEn": "Grønlandshund",
     "fciGroup": 5,
     "fciSection": 1,
@@ -1529,7 +1529,7 @@
   },
   {
     "fciNumber": 325,
-    "nameDe": "Mittelgrosser Anglo-Französischer Laufhund",
+    "nameDe": "Mittelgroßer Anglo-Französischer Laufhund",
     "nameEn": "Anglo-Français De Petite Venerie",
     "fciGroup": 6,
     "fciSection": 1,
@@ -1633,8 +1633,8 @@
   },
   {
     "fciNumber": 19,
-    "nameDe": "Briquet Griffon Vendeen",
-    "nameEn": "Briquet Griffon Vendeen",
+    "nameDe": "Briquet Griffon Vendéen",
+    "nameEn": "Briquet Griffon Vendéen",
     "fciGroup": 6,
     "fciSection": 1,
     "slug": "briquet-griffon-vendeen"
@@ -1721,7 +1721,7 @@
   },
   {
     "fciNumber": 220,
-    "nameDe": "Französischer Weiss-Schwarzer Laufhund",
+    "nameDe": "Französischer Weiß-Schwarzer Laufhund",
     "nameEn": "Français Blanc Et Noir",
     "fciGroup": 6,
     "fciSection": 1,
@@ -1729,7 +1729,7 @@
   },
   {
     "fciNumber": 316,
-    "nameDe": "Französischer Weiss-Oranger Laufhund",
+    "nameDe": "Französischer Weiß-Oranger Laufhund",
     "nameEn": "Français Blanc Et Orange",
     "fciGroup": 6,
     "fciSection": 1,
@@ -1761,7 +1761,7 @@
   },
   {
     "fciNumber": 323,
-    "nameDe": "Grosser Anglo-Franz.Weiss-Schwarzer Laufhund",
+    "nameDe": "Großer Anglo-Franz.Weiß-Schwarzer Laufhund",
     "nameEn": "Grand Anglo-Français Blanc Et Noir",
     "fciGroup": 6,
     "fciSection": 1,
@@ -1769,7 +1769,7 @@
   },
   {
     "fciNumber": 324,
-    "nameDe": "Grosser Anglo-Französischer Weiss-Oranger Laufhund",
+    "nameDe": "Großer Anglo-Französischer Weiß-Oranger Laufhund",
     "nameEn": "Grand Anglo-Français Blanc Et Orange",
     "fciGroup": 6,
     "fciSection": 1,
@@ -1777,7 +1777,7 @@
   },
   {
     "fciNumber": 322,
-    "nameDe": "Grosser Anglo-Französischer Dreifarbiger Laufhund",
+    "nameDe": "Großer Anglo-Französischer Dreifarbiger Laufhund",
     "nameEn": "Grand Anglo-Français Tricolore",
     "fciGroup": 6,
     "fciSection": 1,
@@ -1785,15 +1785,15 @@
   },
   {
     "fciNumber": 33,
-    "nameDe": "Grosser Basset Griffon Vendeen",
-    "nameEn": "Grand Basset Griffon Vendeen",
+    "nameDe": "Großer Basset Griffon Vendéen",
+    "nameEn": "Grand Basset Griffon Vendéen",
     "fciGroup": 6,
     "fciSection": 1,
     "slug": "grand-basset-griffon-vendeen"
   },
   {
     "fciNumber": 22,
-    "nameDe": "Grosser Blauer Gascogne-Laufhund",
+    "nameDe": "Großer Blauer Gascogne-Laufhund",
     "nameEn": "Grand Bleu De Gascogne",
     "fciGroup": 6,
     "fciSection": 1,
@@ -1801,8 +1801,8 @@
   },
   {
     "fciNumber": 282,
-    "nameDe": "Grosser Griffon Vendeen",
-    "nameEn": "Grand Griffon Vendeen",
+    "nameDe": "Großer Griffon Vendéen",
+    "nameEn": "Grand Griffon Vendéen",
     "fciGroup": 6,
     "fciSection": 1,
     "slug": "grand-griffon-vendeen"
@@ -1905,8 +1905,8 @@
   },
   {
     "fciNumber": 67,
-    "nameDe": "Kleiner Basset Griffon Vendeen",
-    "nameEn": "Petit Basset Griffon Vendeen",
+    "nameDe": "Kleiner Basset Griffon Vendéen",
+    "nameEn": "Petit Basset Griffon Vendéen",
     "fciGroup": 6,
     "fciSection": 1,
     "slug": "petit-basset-griffon-vendeen"
@@ -2257,7 +2257,7 @@
   },
   {
     "fciNumber": 175,
-    "nameDe": "Französicher Spaniel",
+    "nameDe": "Französischer Spaniel",
     "nameEn": "Epagneul Français",
     "fciGroup": 7,
     "fciSection": 1,
@@ -2289,8 +2289,8 @@
   },
   {
     "fciNumber": 118,
-    "nameDe": "Grosser Münsterländer Vorstehhund",
-    "nameEn": "Grosser Münsterländer Vorstehhund",
+    "nameDe": "Großer Münsterländer Vorstehhund",
+    "nameEn": "Großer Münsterländer Vorstehhund",
     "fciGroup": 7,
     "fciSection": 1,
     "slug": "large-munsterlander"
@@ -2393,7 +2393,7 @@
   },
   {
     "fciNumber": 330,
-    "nameDe": "Irischer Rot-Weisser Setter",
+    "nameDe": "Irischer Rot-Weißer Setter",
     "nameEn": "Irish Red And White Setter",
     "fciGroup": 7,
     "fciSection": 2,
@@ -2585,7 +2585,7 @@
   },
   {
     "fciNumber": 215,
-    "nameDe": "Bichon Frise",
+    "nameDe": "Bichon Frisé",
     "nameEn": "Bichon A Poil Frise",
     "fciGroup": 9,
     "fciSection": 1,
@@ -2609,8 +2609,8 @@
   },
   {
     "fciNumber": 283,
-    "nameDe": "Coton De Tulear",
-    "nameEn": "Coton De Tulear",
+    "nameDe": "Coton De Tuléar",
+    "nameEn": "Coton De Tuléar",
     "fciGroup": 9,
     "fciSection": 1,
     "slug": "coton-de-tulear"

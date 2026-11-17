@@ -159,9 +159,9 @@ export default async function WelpenDetailPage({
           {/* === HERO: Kopfzeile + Galerie (volle Breite) === */}
           <div className="mb-5">
             {/* Titel-Zeile */}
-            <div className="flex items-start justify-between gap-4 mb-5">
-              <div>
-                <p className="inline-block text-[11px] font-extrabold text-white bg-forest px-3 py-1.5 rounded-full uppercase tracking-wider mb-2 -rotate-2">{listing.breed.nameDe}</p>
+            <div className="flex flex-col items-start gap-4 mb-5 sm:flex-row sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="inline-block max-w-full whitespace-normal break-words leading-snug text-[11px] font-extrabold text-white bg-forest px-3 py-1.5 rounded-full uppercase tracking-wider mb-2 -rotate-2">{listing.breed.nameDe}</p>
                 <h1 className="font-serif text-3xl md:text-5xl font-extrabold text-stone-900 leading-tight">
                   <span className="inline-flex items-center gap-2 flex-wrap">
                     {listing.title || listing.breeder.kennelName}
@@ -193,10 +193,10 @@ export default async function WelpenDetailPage({
                   )}
                 </div>
               </div>
-              <div className="flex-shrink-0 flex flex-col items-end gap-2">
-                <div className="bg-white border-[2.5px] border-honey rounded-2xl px-5 py-2.5 text-center rotate-[1.5deg] shadow-sm">
+              <div className="w-full flex-shrink-0 flex flex-col items-end gap-2 sm:w-auto">
+                <div className="w-full bg-white border-[2.5px] border-honey rounded-2xl px-5 py-2.5 text-center rotate-[1.5deg] shadow-sm sm:w-auto">
                   <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#92610a]">Preis</p>
-                  <p className="text-2xl font-extrabold text-forest">{price}</p>
+                  <p className="text-xl sm:text-2xl font-extrabold text-forest">{price}</p>
                 </div>
                 {isLoggedIn && !viewerBreeder && (
                   <BookmarkButton
@@ -237,9 +237,9 @@ export default async function WelpenDetailPage({
                 <div className="bg-white rounded-3xl border-2 border-cream-deep shadow-[0_4px_0_#e9e0d2] p-5">
                   <h2 className="font-extrabold text-stone-900 text-sm mb-3">Eckdaten</h2>
                   <div className="space-y-2.5">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-stone-400">Rasse</span>
-                      <span className="font-semibold text-stone-800">{listing.breed.nameDe}</span>
+                    <div className="flex items-start justify-between gap-4 text-sm">
+                      <span className="flex-shrink-0 text-stone-400">Rasse</span>
+                      <span className="min-w-0 break-words text-right font-semibold text-stone-800">{listing.breed.nameDe}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-stone-400">Geschlecht</span>

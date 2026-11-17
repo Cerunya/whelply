@@ -73,7 +73,7 @@ export default function ListingCard({
         )}
 
         <div className={`${sticker ? 'p-4 pb-6 sm:p-5 sm:pb-7' : 'p-4'} flex flex-col flex-1`}>
-          <p className={`${sticker ? 'text-[11px] font-bold' : 'text-xs font-semibold'} text-forest uppercase tracking-wider mb-1`}>
+          <p className={`${sticker ? 'text-[11px] font-bold' : 'text-xs font-semibold'} break-words leading-snug text-forest uppercase tracking-wider mb-1`}>
             {breedName}
           </p>
           <h3 className={`${sticker ? 'text-base font-bold sm:text-lg' : 'text-sm font-semibold'} text-stone-900 leading-snug mb-0.5 group-hover:text-forest transition-colors line-clamp-1`}>
@@ -83,8 +83,8 @@ export default function ListingCard({
             <p className={`text-xs ${sticker ? 'text-stone-500 mb-4' : 'text-stone-400 mb-3'} line-clamp-1`}>{kennelName}</p>
           )}
           {!puppyName && <div className={sticker ? 'mb-4' : 'mb-3'} />}
-          <div className={`mt-auto flex items-center justify-between border-t ${sticker ? 'flex-wrap gap-2 border-forest/10 pt-4' : 'border-cream-deep pt-2'}`}>
-            <span className={`text-xs ${sticker ? 'text-stone-500' : 'text-stone-400'} flex items-center gap-1`}>
+          <div className={`mt-auto flex flex-wrap items-center justify-between gap-2 border-t ${sticker ? 'border-forest/10 pt-4' : 'border-cream-deep pt-2'}`}>
+            <span className={`text-xs ${sticker ? 'text-stone-500' : 'text-stone-400'} min-w-0 break-words flex items-center gap-1`}>
               {!sticker && (
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
