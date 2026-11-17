@@ -48,18 +48,21 @@ export default async function RassenlexikonPage({
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
   const normalizedQuery = normalizeSearch(query)
-  const matchingFciNumbers = normalizedQuery
-    ? new Set(
-        breeds
-          .filter((breed) =>
-            normalizeSearch(breed.nameDe).includes(normalizedQuery) ||
-            normalizeSearch(breed.nameEn).includes(normalizedQuery)
-          )
-          .map((breed) => breed.fciNumber)
+  const directMatches = normalizedQuery
+    ? breeds.filter((breed) =>
+        normalizeSearch(breed.nameDe).includes(normalizedQuery) ||
+        normalizeSearch(breed.nameEn).includes(normalizedQuery)
       )
-    : null
-  const filteredBreeds = matchingFciNumbers
-    ? breeds.filter((breed) => matchingFciNumbers.has(breed.fciNumber))
+    : breeds
+  const familyParentSlugs = new Set(['belgian-shepherd-dog', 'german-spitz', 'dachshund', 'poodle'])
+  const expandedFciNumbers = new Set(
+    directMatches
+      .filter((breed) => familyParentSlugs.has(breed.slug))
+      .map((breed) => breed.fciNumber)
+  )
+  const directMatchIds = new Set(directMatches.map((breed) => breed.id))
+  const filteredBreeds = normalizedQuery
+    ? breeds.filter((breed) => directMatchIds.has(breed.id) || expandedFciNumbers.has(breed.fciNumber))
     : breeds
 
   const byGroup = new Map<number, typeof filteredBreeds>()
