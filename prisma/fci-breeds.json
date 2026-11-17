@@ -1,0 +1,2914 @@
+[
+  {
+    "fciNumber": 293,
+    "nameDe": "Australian Kelpie",
+    "nameEn": "Australian Kelpie",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "australian-kelpie"
+  },
+  {
+    "fciNumber": 342,
+    "nameDe": "Australischer Schaferhund",
+    "nameEn": "Australian Shepherd",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "australian-shepherd"
+  },
+  {
+    "fciNumber": 271,
+    "nameDe": "Bearded Collie",
+    "nameEn": "Bearded Collie",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "bearded-collie"
+  },
+  {
+    "fciNumber": 347,
+    "nameDe": "Weisser Schweizer Schäferhund",
+    "nameEn": "Berger Blanc Suisse",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "white-swiss-shepherd-dog"
+  },
+  {
+    "fciNumber": 44,
+    "nameDe": "Beauceron",
+    "nameEn": "Berger De Beauce",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "beauce-sheepdog"
+  },
+  {
+    "fciNumber": 113,
+    "nameDe": "Berger De Brie",
+    "nameEn": "Berger De Brie",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "briard"
+  },
+  {
+    "fciNumber": 176,
+    "nameDe": "Picardie-Schäferhund",
+    "nameEn": "Berger De Picardie",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "picardy-sheepdog"
+  },
+  {
+    "fciNumber": 364,
+    "nameDe": "Böhmischer Schäferhund",
+    "nameEn": "Bohemian Shepherd Dog",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "bohemian-shepherd-dog"
+  },
+  {
+    "fciNumber": 297,
+    "nameDe": "Border Collie",
+    "nameEn": "Border Collie",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "border-collie"
+  },
+  {
+    "fciNumber": 321,
+    "nameDe": "Mallorca-Schäferhund",
+    "nameEn": "Ca De Bestiar",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "majorca-shepherd-dog"
+  },
+  {
+    "fciNumber": 201,
+    "nameDe": "Abruzzen-Maremmen-Schäferhund",
+    "nameEn": "Cane Da Pastore Abruzzese Maremmano",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "abruzzes-and-maremma-shepherd-dog"
+  },
+  {
+    "fciNumber": 194,
+    "nameDe": "Bergamasker Hirtenhund",
+    "nameEn": "Cane Da Pastore Bergamasco",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "bergamasco-shepherd-dog"
+  },
+  {
+    "fciNumber": 332,
+    "nameDe": "Tschechoslowakischer Wolfhund",
+    "nameEn": "Ceskoslovenský Vlciak",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "czechoslovakian-wolfdog"
+  },
+  {
+    "fciNumber": 15,
+    "nameDe": "Belgischer Schäferhund",
+    "nameEn": "Chien De Berger Belge",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "belgian-shepherd-dog"
+  },
+  {
+    "fciNumber": 138,
+    "nameDe": "Pyrenaen-Hutehund Mit Kurzhaarigem Gesicht",
+    "nameEn": "Chien De Berger Des Pyrenees A Face Rase",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "pyrenean-sheepdog-smooth-faced"
+  },
+  {
+    "fciNumber": 141,
+    "nameDe": "Langhaariger Pyrenaen-Schaferhund",
+    "nameEn": "Chien De Berger Des Pyrenees A Poil Long",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "long-haired-pyrenean-sheepdog"
+  },
+  {
+    "fciNumber": 350,
+    "nameDe": "Ciobanesc Românesc Carpatin",
+    "nameEn": "Ciobanesc Românesc Carpatin",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "romanian-carpathian-shepherd-dog"
+  },
+  {
+    "fciNumber": 349,
+    "nameDe": "Ciobanesc Românesc Mioritic",
+    "nameEn": "Ciobanesc Românesc Mioritic",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "romanian-mioritic-shepherd-dog"
+  },
+  {
+    "fciNumber": 156,
+    "nameDe": "Langhaariger Schottischer Schaferhund",
+    "nameEn": "Collie Rough",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "collie-rough"
+  },
+  {
+    "fciNumber": 296,
+    "nameDe": "Kurzhaariger Schottischer Schaferhund",
+    "nameEn": "Collie Smooth",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "collie-smooth"
+  },
+  {
+    "fciNumber": 93,
+    "nameDe": "Portugiesischer Schäferhund",
+    "nameEn": "Cão Da Serra De Aires",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "portuguese-sheepdog"
+  },
+  {
+    "fciNumber": 166,
+    "nameDe": "Deutscher Schaeferhund",
+    "nameEn": "Deutscher Schäferhund",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "german-shepherd-dog"
+  },
+  {
+    "fciNumber": 87,
+    "nameDe": "Katalanischer Schäferhund",
+    "nameEn": "Gos D'Atura Català",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "catalan-sheepdog"
+  },
+  {
+    "fciNumber": 223,
+    "nameDe": "Holländischer Schäferhund",
+    "nameEn": "Hollandse Herdershond",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "dutch-shepherd-dog"
+  },
+  {
+    "fciNumber": 277,
+    "nameDe": "Kroatischer Schäferhund",
+    "nameEn": "Hrvatski Ovcar",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "croatian-shepherd-dog"
+  },
+  {
+    "fciNumber": 53,
+    "nameDe": "Komondor",
+    "nameEn": "Komondor",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "komondor"
+  },
+  {
+    "fciNumber": 54,
+    "nameDe": "Kuvasz",
+    "nameEn": "Kuvasz",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "kuvasz"
+  },
+  {
+    "fciNumber": 360,
+    "nameDe": "Lancashire Heeler",
+    "nameEn": "Lancashire Heeler",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "lancashire-heeler"
+  },
+  {
+    "fciNumber": 367,
+    "nameDe": "Miniatur Amerikanischer Schäferhund",
+    "nameEn": "Miniature American Shepherd",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "miniature-american-shepherd"
+  },
+  {
+    "fciNumber": 238,
+    "nameDe": "Mudi",
+    "nameEn": "Mudi",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "mudi"
+  },
+  {
+    "fciNumber": 313,
+    "nameDe": "Niederländischer Schapendoes",
+    "nameEn": "Nederlandse Schapendoes",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "dutch-schapendoes"
+  },
+  {
+    "fciNumber": 16,
+    "nameDe": "Altenglischer Schaferhund",
+    "nameEn": "Old English Sheepdog",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "old-english-sheepdog"
+  },
+  {
+    "fciNumber": 251,
+    "nameDe": "Polnischer Niederungshütehund",
+    "nameEn": "Polski Owczarek Nizinny",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "polish-lowland-sheepdog"
+  },
+  {
+    "fciNumber": 252,
+    "nameDe": "Polnischer Tatra-Schäferhund",
+    "nameEn": "Polski Owczarek Podhalanski",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "polish-tatra-shepherd"
+  },
+  {
+    "fciNumber": 55,
+    "nameDe": "Puli",
+    "nameEn": "Puli",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "puli"
+  },
+  {
+    "fciNumber": 56,
+    "nameDe": "Pumi",
+    "nameEn": "Pumi",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "pumi"
+  },
+  {
+    "fciNumber": 311,
+    "nameDe": "Saarlooswolfhund",
+    "nameEn": "Saarlooswolfhond",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "saarloos-wolfhond"
+  },
+  {
+    "fciNumber": 83,
+    "nameDe": "Schipperke",
+    "nameEn": "Schipperke",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "schipperke"
+  },
+  {
+    "fciNumber": 88,
+    "nameDe": "Shetland Sheepdog",
+    "nameEn": "Shetland Sheepdog",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "shetland-sheepdog"
+  },
+  {
+    "fciNumber": 142,
+    "nameDe": "Slowakischer Tschuvatsch",
+    "nameEn": "Slovenský Cuvac",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "slovakian-chuvach"
+  },
+  {
+    "fciNumber": 326,
+    "nameDe": "Südrussischer Ovtcharka",
+    "nameEn": "Yuzhnorusskaya Ovcharka",
+    "fciGroup": 1,
+    "fciSection": 1,
+    "slug": "south-russian-shepherd-dog"
+  },
+  {
+    "fciNumber": 287,
+    "nameDe": "Australischer Treibhund",
+    "nameEn": "Australian Cattle Dog",
+    "fciGroup": 1,
+    "fciSection": 2,
+    "slug": "australian-cattle-dog"
+  },
+  {
+    "fciNumber": 351,
+    "nameDe": "Australian Stumpy Tail Cattle Dog",
+    "nameEn": "Australian Stumpy Tail Cattle Dog",
+    "fciGroup": 1,
+    "fciSection": 2,
+    "slug": "australian-stumpy-tail-cattle-dog"
+  },
+  {
+    "fciNumber": 171,
+    "nameDe": "Ardennen-Treibhund",
+    "nameEn": "Bouvier Des Ardennes",
+    "fciGroup": 1,
+    "fciSection": 2,
+    "slug": "bouvier-des-ardennes"
+  },
+  {
+    "fciNumber": 191,
+    "nameDe": "Flandrischer Treibhund",
+    "nameEn": "Bouvier Des Flandres-Vlaamse Koehond",
+    "fciGroup": 1,
+    "fciSection": 2,
+    "slug": "bouvier-des-flandres"
+  },
+  {
+    "fciNumber": 38,
+    "nameDe": "Cardigan",
+    "nameEn": "Welsh Corgi",
+    "fciGroup": 1,
+    "fciSection": 2,
+    "slug": "welsh-corgi-cardigan"
+  },
+  {
+    "fciNumber": 39,
+    "nameDe": "Pembroke",
+    "nameEn": "Welsh Corgi",
+    "fciGroup": 1,
+    "fciSection": 2,
+    "slug": "welsh-corgi-pembroke"
+  },
+  {
+    "fciNumber": 186,
+    "nameDe": "Affenpinscher",
+    "nameEn": "Affenpinscher",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "affenpinscher"
+  },
+  {
+    "fciNumber": 356,
+    "nameDe": "Dänisch-Schwedischer Farmhund",
+    "nameEn": "Dansk-Svensk Gårdshund",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "danish-swedish-farmdog"
+  },
+  {
+    "fciNumber": 184,
+    "nameDe": "Deutscher Pinscher",
+    "nameEn": "Deutscher Pinscher",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "german-pinscher"
+  },
+  {
+    "fciNumber": 143,
+    "nameDe": "Dobermann",
+    "nameEn": "Dobermann",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "dobermann"
+  },
+  {
+    "fciNumber": 308,
+    "nameDe": "Holländischer Smoushund",
+    "nameEn": "Hollandse Smoushond",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "dutch-smoushond"
+  },
+  {
+    "fciNumber": 181,
+    "nameDe": "Riesenschnauzer",
+    "nameEn": "Riesenschnauzer",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "giant-schnauzer"
+  },
+  {
+    "fciNumber": 327,
+    "nameDe": "Russischer Schwarzer Terrier",
+    "nameEn": "Russkiy Tchiorny Terrier",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "russian-black-terrier"
+  },
+  {
+    "fciNumber": 182,
+    "nameDe": "Schnauzer",
+    "nameEn": "Schnauzer",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "schnauzer"
+  },
+  {
+    "fciNumber": 185,
+    "nameDe": "Zwergpinscher",
+    "nameEn": "Zwergpinscher",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "miniature-pinscher"
+  },
+  {
+    "fciNumber": 183,
+    "nameDe": "Zwergschnauzer",
+    "nameEn": "Zwergschnauzer",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "miniature-schnauzer"
+  },
+  {
+    "fciNumber": 64,
+    "nameDe": "Österreichischer Pinscher",
+    "nameEn": "Österreichischer Pinscher",
+    "fciGroup": 2,
+    "fciSection": 1,
+    "slug": "austrian-pinscher"
+  },
+  {
+    "fciNumber": 247,
+    "nameDe": "Aïdi (Chien De Montagne De L'Atlas) (Atlas-Berghund (Aïdi))",
+    "nameEn": "Aïdi (Chien De Montagne De L'Atlas) (Atlas Mountain Dog (Aidi))",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "atlas-mountain-dog-aidi"
+  },
+  {
+    "fciNumber": 374,
+    "nameDe": "Brasilianische Campeiro-Bulldogge",
+    "nameEn": "Brazilian Campeiro Bulldog",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "brazilian-campeiro-bulldog"
+  },
+  {
+    "fciNumber": 315,
+    "nameDe": "Broholmer",
+    "nameEn": "Broholmer",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "broholmer"
+  },
+  {
+    "fciNumber": 149,
+    "nameDe": "Bulldog",
+    "nameEn": "Bulldog",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "bulldog"
+  },
+  {
+    "fciNumber": 157,
+    "nameDe": "Bullmastiff",
+    "nameEn": "Bullmastiff",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "bullmastiff"
+  },
+  {
+    "fciNumber": 343,
+    "nameDe": "Italienischer Corso-Hund",
+    "nameEn": "Cane Corso Italiano",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "italian-cane-corso"
+  },
+  {
+    "fciNumber": 137,
+    "nameDe": "Pyrenäen-Berghund",
+    "nameEn": "Chien De Montagne Des Pyrenees",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "pyrenean-mountain-dog"
+  },
+  {
+    "fciNumber": 353,
+    "nameDe": "Uruguayischer Cimarron",
+    "nameEn": "Cimarrón Uruguayo",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "cimarron-uruguayo"
+  },
+  {
+    "fciNumber": 357,
+    "nameDe": "Rumänischer Bukowina-Schäferhund",
+    "nameEn": "Ciobanesc Românesc De Bucovina",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "romanian-bucovina-shepherd"
+  },
+  {
+    "fciNumber": 369,
+    "nameDe": "Continental Bulldog",
+    "nameEn": "Continental Bulldog",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "continental-bulldog"
+  },
+  {
+    "fciNumber": 173,
+    "nameDe": "Serra-Da-Estrela-Berghund",
+    "nameEn": "Cão Da Serra Da Estrela",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "estrela-mountain-dog"
+  },
+  {
+    "fciNumber": 170,
+    "nameDe": "Castro-Laboreiro-Hund",
+    "nameEn": "Cão De Castro Laboreiro",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "castro-laboreiro-dog"
+  },
+  {
+    "fciNumber": 340,
+    "nameDe": "Cao Fila De Sao Miguel",
+    "nameEn": "Cão Fila De São Miguel",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "saint-miguel-cattle-dog"
+  },
+  {
+    "fciNumber": 235,
+    "nameDe": "Deutsche Dogge",
+    "nameEn": "Deutsche Dogge",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "great-dane"
+  },
+  {
+    "fciNumber": 144,
+    "nameDe": "Deutscher Boxer",
+    "nameEn": "Deutscher Boxer",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "boxer"
+  },
+  {
+    "fciNumber": 230,
+    "nameDe": "Do Khyi",
+    "nameEn": "Do-Khyi",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "tibetan-mastiff"
+  },
+  {
+    "fciNumber": 292,
+    "nameDe": "Argentinische Dogge",
+    "nameEn": "Dogo Argentino",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "dogo-argentino"
+  },
+  {
+    "fciNumber": 116,
+    "nameDe": "Bordeauxdogge",
+    "nameEn": "Dogue De Bordeaux",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "dogue-de-bordeaux"
+  },
+  {
+    "fciNumber": 225,
+    "nameDe": "Fila Brasileiro",
+    "nameEn": "Fila Brasileiro",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "fila-brasileiro"
+  },
+  {
+    "fciNumber": 190,
+    "nameDe": "Hovawart",
+    "nameEn": "Hovawart",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "hovawart"
+  },
+  {
+    "fciNumber": 41,
+    "nameDe": "Jugoslawischer Hirtenhund - Sarplaninac",
+    "nameEn": "Jugoslovenski Ovcarski Pas-Sarplaninac",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "yugoslavian-shepherd-dog-sharplanina"
+  },
+  {
+    "fciNumber": 331,
+    "nameDe": "Kangal-Hirtenhund",
+    "nameEn": "Kangal Çoban Köpegi",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "kangal-shepherd-dog"
+  },
+  {
+    "fciNumber": 328,
+    "nameDe": "Kaukasischer Schäferhund",
+    "nameEn": "Kavkazskaïa Ovtcharka",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "caucasian-shepherd-dog"
+  },
+  {
+    "fciNumber": 278,
+    "nameDe": "Karst-Schäferhund",
+    "nameEn": "Kraski Ovcar",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "karst-shepherd-dog"
+  },
+  {
+    "fciNumber": 226,
+    "nameDe": "Europäisch-Kontinentaler Typ",
+    "nameEn": "Landseer (Europäisch-Kontinentaler Typ) (Landseer (European Continental Type))",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "landseer-european-continental-type"
+  },
+  {
+    "fciNumber": 145,
+    "nameDe": "Leonberger",
+    "nameEn": "Leonberger",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "leonberger"
+  },
+  {
+    "fciNumber": 378,
+    "nameDe": "Macedonian Shepherd Dog Karaman",
+    "nameEn": "Macedonian Shepherd Dog Karaman",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "macedonian-shepherd-dog-karaman"
+  },
+  {
+    "fciNumber": 264,
+    "nameDe": "Mastiff",
+    "nameEn": "Mastiff",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "mastiff"
+  },
+  {
+    "fciNumber": 197,
+    "nameDe": "Mastino Napoletano",
+    "nameEn": "Mastino Napoletano",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "neapolitan-mastiff"
+  },
+  {
+    "fciNumber": 92,
+    "nameDe": "Pyrenäen-Mastiff",
+    "nameEn": "Mastín Del Pirineo",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "pyrenean-mastiff"
+  },
+  {
+    "fciNumber": 91,
+    "nameDe": "Spanischer Mastiff",
+    "nameEn": "Mastín Español",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "spanish-mastiff"
+  },
+  {
+    "fciNumber": 50,
+    "nameDe": "Neufundländer",
+    "nameEn": "Newfoundland",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "newfoundland"
+  },
+  {
+    "fciNumber": 249,
+    "nameDe": "Mallorca-Dogge",
+    "nameEn": "Perro Dogo Mallorquín",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "majorca-mastiff"
+  },
+  {
+    "fciNumber": 346,
+    "nameDe": "Presa Canario",
+    "nameEn": "Presa Canario",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "presa-canario"
+  },
+  {
+    "fciNumber": 96,
+    "nameDe": "Rafeiro Von Alentejo",
+    "nameEn": "Rafeiro Do Alentejo",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "rafeiro-of-alentejo"
+  },
+  {
+    "fciNumber": 373,
+    "nameDe": "Ciobănesc Românesc Corb",
+    "nameEn": "Romanian Raven Shepherd Dog",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "romanian-raven-shepherd-dog"
+  },
+  {
+    "fciNumber": 147,
+    "nameDe": "Rottweiler",
+    "nameEn": "Rottweiler",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "rottweiler"
+  },
+  {
+    "fciNumber": 309,
+    "nameDe": "Shar Pei",
+    "nameEn": "Shar Pei",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "shar-pei"
+  },
+  {
+    "fciNumber": 335,
+    "nameDe": "Mittelasiatischer Schäferhund",
+    "nameEn": "Sredneasiatskaya Ovtcharka",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "central-asia-shepherd-dog"
+  },
+  {
+    "fciNumber": 61,
+    "nameDe": "St.Bernhardshund - Bernhardiner (St. Bernhardshund (Bernhardiner))",
+    "nameEn": "St.Bernhardshund - Bernhardiner",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "st-bernard"
+  },
+  {
+    "fciNumber": 355,
+    "nameDe": "Bosnisch-Herzegowinischer-Kroatischer Schäferhund",
+    "nameEn": "Tornjak",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "bosnian-and-herzegovinian-croatian-shepherd-dog"
+  },
+  {
+    "fciNumber": 260,
+    "nameDe": "Tosa",
+    "nameEn": "Tosa",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "tosa"
+  },
+  {
+    "fciNumber": 368,
+    "nameDe": "Transmontano-Hirtenhund",
+    "nameEn": "Transmontano Mastiff",
+    "fciGroup": 2,
+    "fciSection": 2,
+    "slug": "transmontano-mastiff"
+  },
+  {
+    "fciNumber": 46,
+    "nameDe": "Appenzeller Sennenhund",
+    "nameEn": "Appenzeller Sennenhund",
+    "fciGroup": 2,
+    "fciSection": 3,
+    "slug": "appenzell-cattle-dog"
+  },
+  {
+    "fciNumber": 45,
+    "nameDe": "Berner Sennenhund",
+    "nameEn": "Berner Sennenhund",
+    "fciGroup": 2,
+    "fciSection": 3,
+    "slug": "bernese-mountain-dog"
+  },
+  {
+    "fciNumber": 47,
+    "nameDe": "Entlebucher Sennenhund",
+    "nameEn": "Entlebucher Sennenhund",
+    "fciGroup": 2,
+    "fciSection": 3,
+    "slug": "entlebuch-cattle-dog"
+  },
+  {
+    "fciNumber": 58,
+    "nameDe": "Grosser Schweizer Sennenhund",
+    "nameEn": "Grosser Schweizer Sennenhund",
+    "fciGroup": 2,
+    "fciSection": 3,
+    "slug": "great-swiss-mountain-dog"
+  },
+  {
+    "fciNumber": 7,
+    "nameDe": "Airedale Terrier",
+    "nameEn": "Airedale Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "airedale-terrier"
+  },
+  {
+    "fciNumber": 371,
+    "nameDe": "Andalusischer Terrier",
+    "nameEn": "Andalusian Terrier, Sherry Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "andalusian-terrier-sherry-terrier"
+  },
+  {
+    "fciNumber": 9,
+    "nameDe": "Bedlington Terrier",
+    "nameEn": "Bedlington Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "bedlington-terrier"
+  },
+  {
+    "fciNumber": 10,
+    "nameDe": "Border Terrier",
+    "nameEn": "Border Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "border-terrier"
+  },
+  {
+    "fciNumber": 103,
+    "nameDe": "Deutscher Jagdterrier",
+    "nameEn": "Deutscher Jagdterrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "german-hunting-terrier"
+  },
+  {
+    "fciNumber": 12,
+    "nameDe": "Fox Terrier (Smooth) (Fox Terrier (Glatthaar))",
+    "nameEn": "Fox Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "fox-terrier-smooth"
+  },
+  {
+    "fciNumber": 169,
+    "nameDe": "Fox Terrier (Wire) (Fox Terrier (Drahthaar))",
+    "nameEn": "Fox Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "fox-terrier-wire"
+  },
+  {
+    "fciNumber": 302,
+    "nameDe": "Irischer Glen Of Imaal Terrier",
+    "nameEn": "Irish Glen Of Imaal Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "irish-glen-of-imaal-terrier"
+  },
+  {
+    "fciNumber": 40,
+    "nameDe": "Irischer Soft Coated Wheaten Terrier",
+    "nameEn": "Irish Soft Coated Wheaten Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "irish-soft-coated-wheaten-terrier"
+  },
+  {
+    "fciNumber": 139,
+    "nameDe": "Irischer Terrier",
+    "nameEn": "Irish Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "irish-terrier"
+  },
+  {
+    "fciNumber": 3,
+    "nameDe": "Kerry Blue Terrier",
+    "nameEn": "Kerry Blue Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "kerry-blue-terrier"
+  },
+  {
+    "fciNumber": 70,
+    "nameDe": "Lakeland Terrier",
+    "nameEn": "Lakeland Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "lakeland-terrier"
+  },
+  {
+    "fciNumber": 71,
+    "nameDe": "Manchester Terrier",
+    "nameEn": "Manchester Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "manchester-terrier"
+  },
+  {
+    "fciNumber": 339,
+    "nameDe": "Parson Russell Terrier",
+    "nameEn": "Parson Russell Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "parson-russell-terrier"
+  },
+  {
+    "fciNumber": 341,
+    "nameDe": "Brasilianischer Terrier",
+    "nameEn": "Terrier Brasileiro",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "brazilian-terrier"
+  },
+  {
+    "fciNumber": 370,
+    "nameDe": "Valencianischer Terrier",
+    "nameEn": "Valencian Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "valencian-terrier"
+  },
+  {
+    "fciNumber": 78,
+    "nameDe": "Welsh Terrier",
+    "nameEn": "Welsh Terrier",
+    "fciGroup": 3,
+    "fciSection": 1,
+    "slug": "welsh-terrier"
+  },
+  {
+    "fciNumber": 8,
+    "nameDe": "Australian Terrier",
+    "nameEn": "Australian Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "australian-terrier"
+  },
+  {
+    "fciNumber": 4,
+    "nameDe": "Cairn Terrier",
+    "nameEn": "Cairn Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "cairn-terrier"
+  },
+  {
+    "fciNumber": 246,
+    "nameDe": "Tschechischer Terrier",
+    "nameEn": "Ceský Terier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "czech-terrier"
+  },
+  {
+    "fciNumber": 168,
+    "nameDe": "Dandie Dinmont Terrier",
+    "nameEn": "Dandie Dinmont Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "dandie-dinmont-terrier"
+  },
+  {
+    "fciNumber": 345,
+    "nameDe": "Jack Russell Terrier",
+    "nameEn": "Jack Russell Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "jack-russell-terrier"
+  },
+  {
+    "fciNumber": 259,
+    "nameDe": "Japanischer Terrier",
+    "nameEn": "Nihon Teria",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "japanese-terrier"
+  },
+  {
+    "fciNumber": 272,
+    "nameDe": "Norfolk Terrier",
+    "nameEn": "Norfolk Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "norfolk-terrier"
+  },
+  {
+    "fciNumber": 72,
+    "nameDe": "Norwich Terrier",
+    "nameEn": "Norwich Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "norwich-terrier"
+  },
+  {
+    "fciNumber": 73,
+    "nameDe": "Schottischer Terrier",
+    "nameEn": "Scottish Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "scottish-terrier"
+  },
+  {
+    "fciNumber": 74,
+    "nameDe": "Sealyham Terrier",
+    "nameEn": "Sealyham Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "sealyham-terrier"
+  },
+  {
+    "fciNumber": 75,
+    "nameDe": "Skye Terrier",
+    "nameEn": "Skye Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "skye-terrier"
+  },
+  {
+    "fciNumber": 85,
+    "nameDe": "West Highland White Terrier",
+    "nameEn": "West Highland White Terrier",
+    "fciGroup": 3,
+    "fciSection": 2,
+    "slug": "west-highland-white-terrier"
+  },
+  {
+    "fciNumber": 286,
+    "nameDe": "American Staffordshire Terrier",
+    "nameEn": "American Staffordshire Terrier",
+    "fciGroup": 3,
+    "fciSection": 3,
+    "slug": "american-staffordshire-terrier"
+  },
+  {
+    "fciNumber": 11,
+    "nameDe": "Bull Terrier",
+    "nameEn": "Bull Terrier",
+    "fciGroup": 3,
+    "fciSection": 3,
+    "slug": "bull-terrier"
+  },
+  {
+    "fciNumber": 359,
+    "nameDe": "Miniature Bull Terrier",
+    "nameEn": "Miniature Bull Terrier",
+    "fciGroup": 3,
+    "fciSection": 3,
+    "slug": "miniature-bull-terrier"
+  },
+  {
+    "fciNumber": 76,
+    "nameDe": "Staffordshire Bull Terrier",
+    "nameEn": "Staffordshire Bull Terrier",
+    "fciGroup": 3,
+    "fciSection": 3,
+    "slug": "staffordshire-bull-terrier"
+  },
+  {
+    "fciNumber": 236,
+    "nameDe": "Australian Silky Terrier",
+    "nameEn": "Australian Silky Terrier",
+    "fciGroup": 3,
+    "fciSection": 4,
+    "slug": "australian-silky-terrier"
+  },
+  {
+    "fciNumber": 13,
+    "nameDe": "English Toy Terrier (Englischer Toy Terrier (Schwarz Und Loh))",
+    "nameEn": "English Toy Terrier (English Toy Terrier (Black &Tan))",
+    "fciGroup": 3,
+    "fciSection": 4,
+    "slug": "english-toy-terrier-black-tan"
+  },
+  {
+    "fciNumber": 86,
+    "nameDe": "Yorkshire Terrier",
+    "nameEn": "Yorkshire Terrier",
+    "fciGroup": 3,
+    "fciSection": 4,
+    "slug": "yorkshire-terrier"
+  },
+  {
+    "fciNumber": 148,
+    "nameDe": "Dachshund",
+    "nameEn": "Dachshund",
+    "fciGroup": 4,
+    "fciSection": 0,
+    "slug": "dachshund"
+  },
+  {
+    "fciNumber": 243,
+    "nameDe": "Alaskan Malamute",
+    "nameEn": "Alaskan Malamute",
+    "fciGroup": 5,
+    "fciSection": 1,
+    "slug": "alaskan-malamute"
+  },
+  {
+    "fciNumber": 211,
+    "nameDe": "Kanadischer Eskimohund",
+    "nameEn": "Canadian Eskimo Dog",
+    "fciGroup": 5,
+    "fciSection": 1,
+    "slug": "canadian-eskimo-dog"
+  },
+  {
+    "fciNumber": 274,
+    "nameDe": "Groenlandhund",
+    "nameEn": "Grønlandshund",
+    "fciGroup": 5,
+    "fciSection": 1,
+    "slug": "greenland-dog"
+  },
+  {
+    "fciNumber": 212,
+    "nameDe": "Samojede",
+    "nameEn": "Samoiedskaïa Sabaka",
+    "fciGroup": 5,
+    "fciSection": 1,
+    "slug": "samoyed"
+  },
+  {
+    "fciNumber": 270,
+    "nameDe": "Siberian Husky",
+    "nameEn": "Siberian Husky",
+    "fciGroup": 5,
+    "fciSection": 1,
+    "slug": "siberian-husky"
+  },
+  {
+    "fciNumber": 365,
+    "nameDe": "Yakutskaya Laika",
+    "nameEn": "Yakutian Laika",
+    "fciGroup": 5,
+    "fciSection": 1,
+    "slug": "yakutian-laika"
+  },
+  {
+    "fciNumber": 42,
+    "nameDe": "Schwedischer Elchhund",
+    "nameEn": "Jämthund",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "jamthund"
+  },
+  {
+    "fciNumber": 48,
+    "nameDe": "Karelischer Bärenhund",
+    "nameEn": "Karjalankarhukoira",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "karelian-bear-dog"
+  },
+  {
+    "fciNumber": 276,
+    "nameDe": "Norrbottenspitz",
+    "nameEn": "Norrbottenspets",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "norrbottenspitz"
+  },
+  {
+    "fciNumber": 242,
+    "nameDe": "Norwegischer Elchhund Grau",
+    "nameEn": "Norsk Elghund Grå",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "norwegian-elkhound-grey"
+  },
+  {
+    "fciNumber": 268,
+    "nameDe": "Norwegischer Elchhund Schwarz",
+    "nameEn": "Norsk Elghund Sort",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "norwegian-elkhound-black"
+  },
+  {
+    "fciNumber": 265,
+    "nameDe": "Norwegischer Lundehund",
+    "nameEn": "Norsk Lundehund",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "norwegian-lundehund"
+  },
+  {
+    "fciNumber": 304,
+    "nameDe": "Russisch-Europäischer Laïka",
+    "nameEn": "Russko-Evropeïskaïa Laïka",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "russian-european-laika"
+  },
+  {
+    "fciNumber": 49,
+    "nameDe": "Finnen-Spitz",
+    "nameEn": "Suomenpystykorva",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "finnish-spitz"
+  },
+  {
+    "fciNumber": 305,
+    "nameDe": "Ostsibirischer Laïka",
+    "nameEn": "Vostotchno-Sibirskaïa Laïka",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "east-siberian-laika"
+  },
+  {
+    "fciNumber": 306,
+    "nameDe": "Westsibirischer Laïka",
+    "nameEn": "Zapadno-Sibirskaïa Laïka",
+    "fciGroup": 5,
+    "fciSection": 2,
+    "slug": "west-siberian-laika"
+  },
+  {
+    "fciNumber": 284,
+    "nameDe": "Finnischer Lapplandhirtenhund",
+    "nameEn": "Lapinporokoira",
+    "fciGroup": 5,
+    "fciSection": 3,
+    "slug": "lapponian-herder"
+  },
+  {
+    "fciNumber": 237,
+    "nameDe": "Norwegischer Buhund",
+    "nameEn": "Norsk Buhund",
+    "fciGroup": 5,
+    "fciSection": 3,
+    "slug": "norwegian-buhund"
+  },
+  {
+    "fciNumber": 189,
+    "nameDe": "Finnischer Lapphund",
+    "nameEn": "Suomenlapinkoira",
+    "fciGroup": 5,
+    "fciSection": 3,
+    "slug": "finnish-lapponian-dog"
+  },
+  {
+    "fciNumber": 135,
+    "nameDe": "Schwedischer Lapphund",
+    "nameEn": "Svensk Lapphund",
+    "fciGroup": 5,
+    "fciSection": 3,
+    "slug": "swedish-lapphund"
+  },
+  {
+    "fciNumber": 14,
+    "nameDe": "Schwedischer Wallhund",
+    "nameEn": "Västgötaspets",
+    "fciGroup": 5,
+    "fciSection": 3,
+    "slug": "swedish-vallhund"
+  },
+  {
+    "fciNumber": 289,
+    "nameDe": "Islandhund",
+    "nameEn": "Íslenskur Fjárhundur",
+    "fciGroup": 5,
+    "fciSection": 3,
+    "slug": "icelandic-sheepdog"
+  },
+  {
+    "fciNumber": 97,
+    "nameDe": "Deutscher Spitz",
+    "nameEn": "Deutscher Spitz",
+    "fciGroup": 5,
+    "fciSection": 4,
+    "slug": "german-spitz"
+  },
+  {
+    "fciNumber": 195,
+    "nameDe": "Italienischer Volpino",
+    "nameEn": "Volpino Italiano",
+    "fciGroup": 5,
+    "fciSection": 4,
+    "slug": "italian-volpino"
+  },
+  {
+    "fciNumber": 255,
+    "nameDe": "Akita",
+    "nameEn": "Akita",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "akita"
+  },
+  {
+    "fciNumber": 344,
+    "nameDe": "Amerikanischer Akita",
+    "nameEn": "American Akita",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "american-akita"
+  },
+  {
+    "fciNumber": 205,
+    "nameDe": "Chow Chow",
+    "nameEn": "Chow Chow",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "chow-chow"
+  },
+  {
+    "fciNumber": 291,
+    "nameDe": "Eurasier",
+    "nameEn": "Eurasier",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "eurasian"
+  },
+  {
+    "fciNumber": 261,
+    "nameDe": "Hokkaido",
+    "nameEn": "Hokkaido",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "hokkaido"
+  },
+  {
+    "fciNumber": 317,
+    "nameDe": "Kai",
+    "nameEn": "Kai",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "kai"
+  },
+  {
+    "fciNumber": 362,
+    "nameDe": "Kintamani-Bali-Hund",
+    "nameEn": "Kintamani-Bali Dog",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "kintamani-bali-dog"
+  },
+  {
+    "fciNumber": 318,
+    "nameDe": "Kishu",
+    "nameEn": "Kishu",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "kishu"
+  },
+  {
+    "fciNumber": 334,
+    "nameDe": "Koreanischer Jindo",
+    "nameEn": "Korea Jindo Dog",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "korea-jindo-dog"
+  },
+  {
+    "fciNumber": 262,
+    "nameDe": "Japan-Spitz",
+    "nameEn": "Nihon Supittsu",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "japanese-spitz"
+  },
+  {
+    "fciNumber": 257,
+    "nameDe": "Shiba",
+    "nameEn": "Shiba",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "shiba"
+  },
+  {
+    "fciNumber": 319,
+    "nameDe": "Shikoku",
+    "nameEn": "Shikoku",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "shikoku"
+  },
+  {
+    "fciNumber": 358,
+    "nameDe": "Thai-Bangkaew-Hund",
+    "nameEn": "Thai Bangkaew Dog",
+    "fciGroup": 5,
+    "fciSection": 5,
+    "slug": "thai-bangkaew-dog"
+  },
+  {
+    "fciNumber": 43,
+    "nameDe": "Basenji",
+    "nameEn": "Basenji",
+    "fciGroup": 5,
+    "fciSection": 6,
+    "slug": "basenji"
+  },
+  {
+    "fciNumber": 273,
+    "nameDe": "Kanaan-Hund",
+    "nameEn": "Canaan Dog",
+    "fciGroup": 5,
+    "fciSection": 6,
+    "slug": "canaan-dog"
+  },
+  {
+    "fciNumber": 310,
+    "nameDe": "Peruanischer Nackthund",
+    "nameEn": "Perro Sin Pelo Del Perú",
+    "fciGroup": 5,
+    "fciSection": 6,
+    "slug": "peruvian-hairless-dog"
+  },
+  {
+    "fciNumber": 248,
+    "nameDe": "Pharaonenhund",
+    "nameEn": "Pharaoh Hound",
+    "fciGroup": 5,
+    "fciSection": 6,
+    "slug": "pharaoh-hound"
+  },
+  {
+    "fciNumber": 234,
+    "nameDe": "Mexikanischer Nackthund",
+    "nameEn": "Xoloitzcuintle",
+    "fciGroup": 5,
+    "fciSection": 6,
+    "slug": "xoloitzcuintle"
+  },
+  {
+    "fciNumber": 199,
+    "nameDe": "Cirneco Dell'Etna",
+    "nameEn": "Cirneco Dell'Etna",
+    "fciGroup": 5,
+    "fciSection": 7,
+    "slug": "cirneco-dell-etna"
+  },
+  {
+    "fciNumber": 329,
+    "nameDe": "Kanarischer Podenco",
+    "nameEn": "Podenco Canario",
+    "fciGroup": 5,
+    "fciSection": 7,
+    "slug": "canarian-warren-hound"
+  },
+  {
+    "fciNumber": 89,
+    "nameDe": "Ibiza-Podenco",
+    "nameEn": "Podenco Ibicenco",
+    "fciGroup": 5,
+    "fciSection": 7,
+    "slug": "ibizan-podenco"
+  },
+  {
+    "fciNumber": 94,
+    "nameDe": "Portugiesischer Podengo",
+    "nameEn": "Podengo Português",
+    "fciGroup": 5,
+    "fciSection": 7,
+    "slug": "portuguese-warren-hound-portuguese-podengo"
+  },
+  {
+    "fciNumber": 348,
+    "nameDe": "Taiwan-Hund",
+    "nameEn": "Taiwan Dog",
+    "fciGroup": 5,
+    "fciSection": 7,
+    "slug": "taiwan-dog"
+  },
+  {
+    "fciNumber": 338,
+    "nameDe": "Thailand-Ridgeback",
+    "nameEn": "Thai Ridgeback Dog",
+    "fciGroup": 5,
+    "fciSection": 7,
+    "slug": "thai-ridgeback-dog"
+  },
+  {
+    "fciNumber": 303,
+    "nameDe": "American Foxhound",
+    "nameEn": "American Foxhound",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "american-foxhound"
+  },
+  {
+    "fciNumber": 325,
+    "nameDe": "Mittelgrosser Anglo-Französischer Laufhund",
+    "nameEn": "Anglo-Français De Petite Venerie",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "medium-sized-anglo-french-hound"
+  },
+  {
+    "fciNumber": 375,
+    "nameDe": "Segugio Dell'Appennino",
+    "nameEn": "Appennine Hound - Italian Hare-Hunting Dog",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "appennine-hound-italian-hare-hunting-dog"
+  },
+  {
+    "fciNumber": 20,
+    "nameDe": "Ariegeois",
+    "nameEn": "Ariegeois",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "ariegeois"
+  },
+  {
+    "fciNumber": 34,
+    "nameDe": "Basset Artesien Normand",
+    "nameEn": "Basset Artesien Normand",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "norman-artesien-basset"
+  },
+  {
+    "fciNumber": 35,
+    "nameDe": "Blauer Basset Der Gascogne",
+    "nameEn": "Basset Bleu De Gascogne",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "blue-gascony-basset"
+  },
+  {
+    "fciNumber": 36,
+    "nameDe": "Basset Fauve De Bretagne",
+    "nameEn": "Basset Fauve De Bretagne",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "basset-fauve-de-bretagne"
+  },
+  {
+    "fciNumber": 163,
+    "nameDe": "Basset Hound",
+    "nameEn": "Basset Hound",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "basset-hound"
+  },
+  {
+    "fciNumber": 161,
+    "nameDe": "Beagle",
+    "nameEn": "Beagle",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "beagle"
+  },
+  {
+    "fciNumber": 290,
+    "nameDe": "Beagle-Harrier",
+    "nameEn": "Beagle-Harrier",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "beagle-harrier"
+  },
+  {
+    "fciNumber": 25,
+    "nameDe": "Billy",
+    "nameEn": "Billy",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "billy"
+  },
+  {
+    "fciNumber": 300,
+    "nameDe": "Schwarz-Lohfarbener Waschbärenhund",
+    "nameEn": "Black And Tan Coonhound",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "black-and-tan-coonhound"
+  },
+  {
+    "fciNumber": 155,
+    "nameDe": "Stichelhaariger Bosnischer Laufhund- Genannt Barak",
+    "nameEn": "Bosanski Ostrodlaki Gonic-Barak",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "bosnian-broken-haired-hound-called-barak"
+  },
+  {
+    "fciNumber": 63,
+    "nameDe": "Brandlbracke - (Vieräugl) (Brandlbracke (Vieräugl))",
+    "nameEn": "Brandlbracke - (Vieräugl)",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "austrian-black-and-tan-hound"
+  },
+  {
+    "fciNumber": 19,
+    "nameDe": "Briquet Griffon Vendeen",
+    "nameEn": "Briquet Griffon Vendeen",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "briquet-griffon-vendeen"
+  },
+  {
+    "fciNumber": 28,
+    "nameDe": "Chien D'Artois",
+    "nameEn": "Chien D'Artois",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "artois-hound"
+  },
+  {
+    "fciNumber": 84,
+    "nameDe": "Bluthund",
+    "nameEn": "Chien De Saint Hubert",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "bloodhound"
+  },
+  {
+    "fciNumber": 376,
+    "nameDe": "Sabueso Fino Colombiano",
+    "nameEn": "Colombian Fino Hound",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "colombian-fino-hound"
+  },
+  {
+    "fciNumber": 279,
+    "nameDe": "Montenegrinischer Gebirgslaufhund",
+    "nameEn": "Crnogorski Planinski Gonic",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "montenegrin-mountain-hound"
+  },
+  {
+    "fciNumber": 299,
+    "nameDe": "Deutsche Bracke",
+    "nameEn": "Deutsche Bracke",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "german-hound"
+  },
+  {
+    "fciNumber": 130,
+    "nameDe": "Schwedische Dachsbracke",
+    "nameEn": "Drever",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "drever"
+  },
+  {
+    "fciNumber": 203,
+    "nameDe": "Dunkerbracke - Norwegischer Laufhund",
+    "nameEn": "Dunker",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "norwegian-hound"
+  },
+  {
+    "fciNumber": 159,
+    "nameDe": "English Foxhound",
+    "nameEn": "English Foxhound",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "english-foxhound"
+  },
+  {
+    "fciNumber": 241,
+    "nameDe": "Ungarische Bracke - Transylvanischer Laufhund",
+    "nameEn": "Erdélyi Kopó",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "hungarian-hound-transylvanian-scent-hound"
+  },
+  {
+    "fciNumber": 366,
+    "nameDe": "Estnische Bracke",
+    "nameEn": "Estonian Hound",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "estonian-hound"
+  },
+  {
+    "fciNumber": 220,
+    "nameDe": "Französischer Weiss-Schwarzer Laufhund",
+    "nameEn": "Français Blanc Et Noir",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "french-white-black-hound"
+  },
+  {
+    "fciNumber": 316,
+    "nameDe": "Französischer Weiss-Oranger Laufhund",
+    "nameEn": "Français Blanc Et Orange",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "french-white-and-orange-hound"
+  },
+  {
+    "fciNumber": 219,
+    "nameDe": "Französischer Dreifarbiger Laufhund",
+    "nameEn": "Français Tricolore",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "french-tricolour-hound"
+  },
+  {
+    "fciNumber": 21,
+    "nameDe": "Gascon Saintongeois",
+    "nameEn": "Gascon Saintongeois",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "gascon-saintongeois"
+  },
+  {
+    "fciNumber": 354,
+    "nameDe": "Polnischer Jagdhund",
+    "nameEn": "Gonczy Polski",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "polish-hunting-dog"
+  },
+  {
+    "fciNumber": 323,
+    "nameDe": "Grosser Anglo-Franz.Weiss-Schwarzer Laufhund",
+    "nameEn": "Grand Anglo-Français Blanc Et Noir",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "great-anglo-french-white-and-black-hound"
+  },
+  {
+    "fciNumber": 324,
+    "nameDe": "Grosser Anglo-Französischer Weiss-Oranger Laufhund",
+    "nameEn": "Grand Anglo-Français Blanc Et Orange",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "great-anglo-french-white-orange-hound"
+  },
+  {
+    "fciNumber": 322,
+    "nameDe": "Grosser Anglo-Französischer Dreifarbiger Laufhund",
+    "nameEn": "Grand Anglo-Français Tricolore",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "great-anglo-french-tricolour-hound"
+  },
+  {
+    "fciNumber": 33,
+    "nameDe": "Grosser Basset Griffon Vendeen",
+    "nameEn": "Grand Basset Griffon Vendeen",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "grand-basset-griffon-vendeen"
+  },
+  {
+    "fciNumber": 22,
+    "nameDe": "Grosser Blauer Gascogne-Laufhund",
+    "nameEn": "Grand Bleu De Gascogne",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "great-gascony-blue"
+  },
+  {
+    "fciNumber": 282,
+    "nameDe": "Grosser Griffon Vendeen",
+    "nameEn": "Grand Griffon Vendeen",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "grand-griffon-vendeen"
+  },
+  {
+    "fciNumber": 32,
+    "nameDe": "Blauer Griffon Der Gascogne",
+    "nameEn": "Griffon Bleu De Gascogne",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "blue-gascony-griffon"
+  },
+  {
+    "fciNumber": 66,
+    "nameDe": "Griffon Fauve De Bretagne",
+    "nameEn": "Griffon Fauve De Bretagne",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "fawn-brittany-griffon"
+  },
+  {
+    "fciNumber": 17,
+    "nameDe": "Griffon Nivernais",
+    "nameEn": "Griffon Nivernais",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "griffon-nivernais"
+  },
+  {
+    "fciNumber": 267,
+    "nameDe": "Halden-Bracke",
+    "nameEn": "Haldenstøver",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "halden-hound"
+  },
+  {
+    "fciNumber": 132,
+    "nameDe": "Hamiltonstövare",
+    "nameEn": "Hamiltonstövare",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "hamiltonstovare"
+  },
+  {
+    "fciNumber": 295,
+    "nameDe": "Harrier",
+    "nameEn": "Harrier",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "harrier"
+  },
+  {
+    "fciNumber": 214,
+    "nameDe": "Griechischer Laufhund",
+    "nameEn": "Hellinikos Ichnilatis",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "hellenic-hound"
+  },
+  {
+    "fciNumber": 266,
+    "nameDe": "Hygen-Bracke",
+    "nameEn": "Hygenhund",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "hygen-hound"
+  },
+  {
+    "fciNumber": 151,
+    "nameDe": "Kurzhaarige Istrianer Bracke",
+    "nameEn": "Istarski Kratkodlaki Gonic",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "istrian-short-haired-hound"
+  },
+  {
+    "fciNumber": 152,
+    "nameDe": "Rauhhaarige Istrianer Bracke",
+    "nameEn": "Istarski Ostrodlaki Gonic",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "istrian-wire-haired-hound"
+  },
+  {
+    "fciNumber": 52,
+    "nameDe": "Polnische Bracke",
+    "nameEn": "Ogar Polski",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "polish-hound"
+  },
+  {
+    "fciNumber": 294,
+    "nameDe": "Otterhund",
+    "nameEn": "Otterhound",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "otterhound"
+  },
+  {
+    "fciNumber": 67,
+    "nameDe": "Kleiner Basset Griffon Vendeen",
+    "nameEn": "Petit Basset Griffon Vendeen",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "petit-basset-griffon-vendeen"
+  },
+  {
+    "fciNumber": 31,
+    "nameDe": "Kleiner Blauer Gascogne Laufhund",
+    "nameEn": "Petit Bleu De Gascogne",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "small-blue-gascony"
+  },
+  {
+    "fciNumber": 24,
+    "nameDe": "Poitevin",
+    "nameEn": "Poitevin",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "poitevin"
+  },
+  {
+    "fciNumber": 30,
+    "nameDe": "Porcelaine",
+    "nameEn": "Porcelaine",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "porcelaine"
+  },
+  {
+    "fciNumber": 154,
+    "nameDe": "Savetalbracke - Posavatz-Bracke",
+    "nameEn": "Posavski Gonic",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "posavatz-hound"
+  },
+  {
+    "fciNumber": 275,
+    "nameDe": "Brasilianischer Laufhund",
+    "nameEn": "Rastreador Brasileiro",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "brazilian-tracker"
+  },
+  {
+    "fciNumber": 204,
+    "nameDe": "Spanischer Laufhund",
+    "nameEn": "Sabueso Español",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "spanish-hound"
+  },
+  {
+    "fciNumber": 131,
+    "nameDe": "Schillerstövare",
+    "nameEn": "Schillerstövare",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "schillerstovare"
+  },
+  {
+    "fciNumber": 59,
+    "nameDe": "Schweizer Laufhund",
+    "nameEn": "Schweizer Laufhund - Chien Courant Suisse",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "swiss-hound"
+  },
+  {
+    "fciNumber": 60,
+    "nameDe": "Schweizer Niederlaufhund",
+    "nameEn": "Schweizer Niederlaufhund",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "small-swiss-hound"
+  },
+  {
+    "fciNumber": 198,
+    "nameDe": "Drahthaariger Italienischer Laufhund",
+    "nameEn": "Segugio Italiano A Pelo Forte",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "italian-rough-haired-segugio"
+  },
+  {
+    "fciNumber": 337,
+    "nameDe": "Kurzhaariger Italienischer Laufhund",
+    "nameEn": "Segugio Italiano A Pelo Raso",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "italian-short-haired-segugio"
+  },
+  {
+    "fciNumber": 361,
+    "nameDe": "Segugio Maremmano",
+    "nameEn": "Segugio Maremmano",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "segugio-maremmano"
+  },
+  {
+    "fciNumber": 244,
+    "nameDe": "Slowakischer Laufhund",
+    "nameEn": "Slovenský Kopov",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "slovakian-hound"
+  },
+  {
+    "fciNumber": 129,
+    "nameDe": "Smålandsstövare",
+    "nameEn": "Smålandsstövare",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "smalandsstovare"
+  },
+  {
+    "fciNumber": 150,
+    "nameDe": "Serbischer Laufhund",
+    "nameEn": "Srpski Gonic",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "serbian-hound"
+  },
+  {
+    "fciNumber": 229,
+    "nameDe": "Dreifarbiger Serbischer Laufhund",
+    "nameEn": "Srpski Trobojni Gonic",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "serbian-tricolour-hound"
+  },
+  {
+    "fciNumber": 62,
+    "nameDe": "Steirische Rauhhaarbracke",
+    "nameEn": "Steirische Rauhhaarbracke",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "coarse-haired-styrian-hound"
+  },
+  {
+    "fciNumber": 51,
+    "nameDe": "Finnischer Laufhund",
+    "nameEn": "Suomenajokoira",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "finnish-hound"
+  },
+  {
+    "fciNumber": 68,
+    "nameDe": "Tiroler Bracke",
+    "nameEn": "Tiroler Bracke",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "tyrolean-hound"
+  },
+  {
+    "fciNumber": 100,
+    "nameDe": "Westfälische Dachsbracke",
+    "nameEn": "Westfälische Dachsbracke",
+    "fciGroup": 6,
+    "fciSection": 1,
+    "slug": "westphalian-dachsbracke"
+  },
+  {
+    "fciNumber": 254,
+    "nameDe": "Alpenländische Dachsbracke",
+    "nameEn": "Alpenländische Dachsbracke",
+    "fciGroup": 6,
+    "fciSection": 2,
+    "slug": "alpine-dachsbracke"
+  },
+  {
+    "fciNumber": 217,
+    "nameDe": "Bayerischer Gebirgsschweisshund",
+    "nameEn": "Bayerischer Gebirgsschweisshund",
+    "fciGroup": 6,
+    "fciSection": 2,
+    "slug": "bavarian-mountain-scent-hound"
+  },
+  {
+    "fciNumber": 213,
+    "nameDe": "Hannoverscher Schweisshund",
+    "nameEn": "Hannoverscher Schweisshund",
+    "fciGroup": 6,
+    "fciSection": 2,
+    "slug": "hanoverian-scent-hound"
+  },
+  {
+    "fciNumber": 377,
+    "nameDe": "Tatranský Durič",
+    "nameEn": "Tatra Hound",
+    "fciGroup": 6,
+    "fciSection": 2,
+    "slug": "tatra-hound"
+  },
+  {
+    "fciNumber": 153,
+    "nameDe": "Dalmatiner",
+    "nameEn": "Dalmatinski Pas",
+    "fciGroup": 6,
+    "fciSection": 3,
+    "slug": "dalmatian"
+  },
+  {
+    "fciNumber": 146,
+    "nameDe": "Rhodesian Ridgeback",
+    "nameEn": "Rhodesian Ridgeback",
+    "fciGroup": 6,
+    "fciSection": 3,
+    "slug": "rhodesian-ridgeback"
+  },
+  {
+    "fciNumber": 202,
+    "nameDe": "Italienischer Vorstehhund",
+    "nameEn": "Bracco Italiano",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "italian-pointing-dog"
+  },
+  {
+    "fciNumber": 180,
+    "nameDe": "Braque D'Auvergne",
+    "nameEn": "Braque D'Auvergne",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "auvergne-pointer"
+  },
+  {
+    "fciNumber": 177,
+    "nameDe": "Ariege-Vorstehhund",
+    "nameEn": "Braque De L'Ariège",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "ariege-pointing-dog"
+  },
+  {
+    "fciNumber": 179,
+    "nameDe": "Bourbonnaiser Vorstehhund",
+    "nameEn": "Braque Du Bourbonnais",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "bourbonnais-pointing-dog"
+  },
+  {
+    "fciNumber": 133,
+    "nameDe": "Französischer Vorstehhund - Typus Gascogne",
+    "nameEn": "Braque Français - Type Gascogne",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "french-pointing-dog-gascogne-type"
+  },
+  {
+    "fciNumber": 134,
+    "nameDe": "Französischer Vorstehhund - Typus Pyrenäen",
+    "nameEn": "Braque Français - Type Pyrenees",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "french-pointing-dog-pyrenean-type"
+  },
+  {
+    "fciNumber": 115,
+    "nameDe": "Braque Saint-Germain",
+    "nameEn": "Braque Saint-Germain",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "saint-germain-pointer"
+  },
+  {
+    "fciNumber": 245,
+    "nameDe": "Böhmisch Rauhbart",
+    "nameEn": "Ceský Fousek",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "bohemian-wire-haired-pointing-griffon"
+  },
+  {
+    "fciNumber": 98,
+    "nameDe": "Deutsch Drahthaar",
+    "nameEn": "Deutsch Drahthaar",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "german-wire-haired-pointing-dog"
+  },
+  {
+    "fciNumber": 119,
+    "nameDe": "Deutsch Kurzhaar",
+    "nameEn": "Deutsch Kurzhaar",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "german-short-haired-pointing-dog"
+  },
+  {
+    "fciNumber": 117,
+    "nameDe": "Deutsch Langhaar",
+    "nameEn": "Deutsch Langhaar",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "deutsch-langhaar"
+  },
+  {
+    "fciNumber": 232,
+    "nameDe": "Deutsch Stichelhaar",
+    "nameEn": "Deutsch Stichelhaar",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "deutsch-stichelhaar"
+  },
+  {
+    "fciNumber": 224,
+    "nameDe": "Drent'Scher Hühnerhund",
+    "nameEn": "Drentsche Patrijshond",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "drentsche-partridge-dog"
+  },
+  {
+    "fciNumber": 239,
+    "nameDe": "Drahthaariger Ungarischer Vorstehhund",
+    "nameEn": "Drótzörü Magyar Vizsla",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "hungarian-wire-haired-pointer"
+  },
+  {
+    "fciNumber": 106,
+    "nameDe": "Blauer Picardie-Spaniel",
+    "nameEn": "Epagneul Bleu De Picardie",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "blue-picardy-spaniel"
+  },
+  {
+    "fciNumber": 95,
+    "nameDe": "Bretonischer Spaniel",
+    "nameEn": "Epagneul Breton",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "brittany-spaniel"
+  },
+  {
+    "fciNumber": 114,
+    "nameDe": "Pont-Audemer Spaniel",
+    "nameEn": "Epagneul De Pont-Audemer",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "pont-audemer-spaniel"
+  },
+  {
+    "fciNumber": 175,
+    "nameDe": "Französicher Spaniel",
+    "nameEn": "Epagneul Français",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "french-spaniel"
+  },
+  {
+    "fciNumber": 108,
+    "nameDe": "Picardie-Spaniel",
+    "nameEn": "Epagneul Picard",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "picardy-spaniel"
+  },
+  {
+    "fciNumber": 281,
+    "nameDe": "Altdänischer Vorstehhund",
+    "nameEn": "Gammel Dansk Hønsehund",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "old-danish-pointing-dog"
+  },
+  {
+    "fciNumber": 107,
+    "nameDe": "Griffon A Poil Dur Korthals (Französischer Rauhhaariger Vorstehhund (Korthals))",
+    "nameEn": "Griffon A Poil Dur Korthals",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "wire-haired-pointing-griffon-korthals"
+  },
+  {
+    "fciNumber": 118,
+    "nameDe": "Grosser Münsterländer Vorstehhund",
+    "nameEn": "Grosser Münsterländer Vorstehhund",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "large-munsterlander"
+  },
+  {
+    "fciNumber": 102,
+    "nameDe": "Kleiner Münsterländer",
+    "nameEn": "Kleiner Münsterländer",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "kleiner-munsterlander"
+  },
+  {
+    "fciNumber": 187,
+    "nameDe": "Portugiesischer Vorstehhund",
+    "nameEn": "Perdigueiro Português",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "portuguese-pointing-dog"
+  },
+  {
+    "fciNumber": 90,
+    "nameDe": "Perdiguero Von Burgos",
+    "nameEn": "Perdiguero De Burgos",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "burgos-pointing-dog"
+  },
+  {
+    "fciNumber": 216,
+    "nameDe": "Pudelpointer",
+    "nameEn": "Pudelpointer",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "pudelpointer"
+  },
+  {
+    "fciNumber": 57,
+    "nameDe": "Rövidszörü Magyar Vizsla (Kurzhaariger Ungarischer Vorstehhund (Vizsla))",
+    "nameEn": "Rövidszörü Magyar Vizsla (Hungarian Short-Haired Pointer (Vizsla))",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "hungarian-short-haired-pointer-vizsla"
+  },
+  {
+    "fciNumber": 320,
+    "nameDe": "Slowakischer Rauhbart",
+    "nameEn": "Slovenský Hrubosrstý Stavac (Ohar)",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "wirehaired-slovakian-pointer"
+  },
+  {
+    "fciNumber": 165,
+    "nameDe": "Italienischer Spinone",
+    "nameEn": "Spinone Italiano",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "italian-spinone"
+  },
+  {
+    "fciNumber": 222,
+    "nameDe": "Friesischer Vorstehhund",
+    "nameEn": "Stabijhoun",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "stabijhoun"
+  },
+  {
+    "fciNumber": 99,
+    "nameDe": "Weimaraner",
+    "nameEn": "Weimaraner",
+    "fciGroup": 7,
+    "fciSection": 1,
+    "slug": "weimaraner"
+  },
+  {
+    "fciNumber": 1,
+    "nameDe": "Englischer Pointer",
+    "nameEn": "English Pointer",
+    "fciGroup": 7,
+    "fciSection": 2,
+    "slug": "english-pointer"
+  },
+  {
+    "fciNumber": 2,
+    "nameDe": "Englischer Setter",
+    "nameEn": "English Setter",
+    "fciGroup": 7,
+    "fciSection": 2,
+    "slug": "english-setter"
+  },
+  {
+    "fciNumber": 6,
+    "nameDe": "Gordon Setter",
+    "nameEn": "Gordon Setter",
+    "fciGroup": 7,
+    "fciSection": 2,
+    "slug": "gordon-setter"
+  },
+  {
+    "fciNumber": 330,
+    "nameDe": "Irischer Rot-Weisser Setter",
+    "nameEn": "Irish Red And White Setter",
+    "fciGroup": 7,
+    "fciSection": 2,
+    "slug": "irish-red-and-white-setter"
+  },
+  {
+    "fciNumber": 120,
+    "nameDe": "Irischer Roter Setter",
+    "nameEn": "Irish Red Setter",
+    "fciGroup": 7,
+    "fciSection": 2,
+    "slug": "irish-red-setter"
+  },
+  {
+    "fciNumber": 263,
+    "nameDe": "Chesapeake Bay Retriever",
+    "nameEn": "Chesapeake Bay Retriever",
+    "fciGroup": 8,
+    "fciSection": 1,
+    "slug": "chesapeake-bay-retriever"
+  },
+  {
+    "fciNumber": 110,
+    "nameDe": "Curly Coated Retriever",
+    "nameEn": "Curly Coated Retriever",
+    "fciGroup": 8,
+    "fciSection": 1,
+    "slug": "curly-coated-retriever"
+  },
+  {
+    "fciNumber": 121,
+    "nameDe": "Flat Coated Retriever",
+    "nameEn": "Flat Coated Retriever",
+    "fciGroup": 8,
+    "fciSection": 1,
+    "slug": "flat-coated-retriever"
+  },
+  {
+    "fciNumber": 111,
+    "nameDe": "Golden Retriever",
+    "nameEn": "Golden Retriever",
+    "fciGroup": 8,
+    "fciSection": 1,
+    "slug": "golden-retriever"
+  },
+  {
+    "fciNumber": 122,
+    "nameDe": "Labrador Retriever",
+    "nameEn": "Labrador Retriever",
+    "fciGroup": 8,
+    "fciSection": 1,
+    "slug": "labrador-retriever"
+  },
+  {
+    "fciNumber": 312,
+    "nameDe": "Nova Scotia Retriever",
+    "nameEn": "Nova Scotia Duck Tolling Retriever",
+    "fciGroup": 8,
+    "fciSection": 1,
+    "slug": "nova-scotia-duck-tolling-retriever"
+  },
+  {
+    "fciNumber": 167,
+    "nameDe": "Amerikanischer Cocker Spaniel",
+    "nameEn": "American Cocker Spaniel",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "american-cocker-spaniel"
+  },
+  {
+    "fciNumber": 109,
+    "nameDe": "Clumber Spaniel",
+    "nameEn": "Clumber Spaniel",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "clumber-spaniel"
+  },
+  {
+    "fciNumber": 104,
+    "nameDe": "Deutscher Wachtelhund",
+    "nameEn": "Deutscher Wachtelhund",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "german-spaniel"
+  },
+  {
+    "fciNumber": 5,
+    "nameDe": "English Cocker Spaniel",
+    "nameEn": "English Cocker Spaniel",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "english-cocker-spaniel"
+  },
+  {
+    "fciNumber": 125,
+    "nameDe": "English Springer Spaniel",
+    "nameEn": "English Springer Spaniel",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "english-springer-spaniel"
+  },
+  {
+    "fciNumber": 123,
+    "nameDe": "Field Spaniel",
+    "nameEn": "Field Spaniel",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "field-spaniel"
+  },
+  {
+    "fciNumber": 314,
+    "nameDe": "Nederlandse Kooikerhondje",
+    "nameEn": "Nederlandse Kooikerhondje",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "nederlandse-kooikerhondje"
+  },
+  {
+    "fciNumber": 127,
+    "nameDe": "Sussex Spaniel",
+    "nameEn": "Sussex Spaniel",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "sussex-spaniel"
+  },
+  {
+    "fciNumber": 126,
+    "nameDe": "Welsh Springer Spaniel",
+    "nameEn": "Welsh Springer Spaniel",
+    "fciGroup": 8,
+    "fciSection": 2,
+    "slug": "welsh-springer-spaniel"
+  },
+  {
+    "fciNumber": 301,
+    "nameDe": "Amerikanischer Wasserspaniel",
+    "nameEn": "American Water Spaniel",
+    "fciGroup": 8,
+    "fciSection": 3,
+    "slug": "american-water-spaniel"
+  },
+  {
+    "fciNumber": 105,
+    "nameDe": "Französischer Wasserhund",
+    "nameEn": "Barbet",
+    "fciGroup": 8,
+    "fciSection": 3,
+    "slug": "french-water-dog"
+  },
+  {
+    "fciNumber": 37,
+    "nameDe": "Portugiesischer Wasserhund",
+    "nameEn": "Cão De Água Português",
+    "fciGroup": 8,
+    "fciSection": 3,
+    "slug": "portuguese-water-dog"
+  },
+  {
+    "fciNumber": 124,
+    "nameDe": "Irischer Wasserspaniel",
+    "nameEn": "Irish Water Spaniel",
+    "fciGroup": 8,
+    "fciSection": 3,
+    "slug": "irish-water-spaniel"
+  },
+  {
+    "fciNumber": 298,
+    "nameDe": "Wasserhund Der Romagna",
+    "nameEn": "Lagotto Romagnolo",
+    "fciGroup": 8,
+    "fciSection": 3,
+    "slug": "romagna-water-dog"
+  },
+  {
+    "fciNumber": 336,
+    "nameDe": "Spanischer Wasserhund",
+    "nameEn": "Perro De Agua Español",
+    "fciGroup": 8,
+    "fciSection": 3,
+    "slug": "spanish-water-dog"
+  },
+  {
+    "fciNumber": 221,
+    "nameDe": "Friesischer Wasserhund",
+    "nameEn": "Wetterhoun",
+    "fciGroup": 8,
+    "fciSection": 3,
+    "slug": "wetterhoun"
+  },
+  {
+    "fciNumber": 215,
+    "nameDe": "Bichon Frise",
+    "nameEn": "Bichon A Poil Frise",
+    "fciGroup": 9,
+    "fciSection": 1,
+    "slug": "bichon-frise"
+  },
+  {
+    "fciNumber": 250,
+    "nameDe": "Havaneser",
+    "nameEn": "Bichon Havanais",
+    "fciGroup": 9,
+    "fciSection": 1,
+    "slug": "havanese"
+  },
+  {
+    "fciNumber": 196,
+    "nameDe": "Bologneser",
+    "nameEn": "Bolognese",
+    "fciGroup": 9,
+    "fciSection": 1,
+    "slug": "bolognese"
+  },
+  {
+    "fciNumber": 283,
+    "nameDe": "Coton De Tulear",
+    "nameEn": "Coton De Tulear",
+    "fciGroup": 9,
+    "fciSection": 1,
+    "slug": "coton-de-tulear"
+  },
+  {
+    "fciNumber": 65,
+    "nameDe": "Malteser",
+    "nameEn": "Maltese",
+    "fciGroup": 9,
+    "fciSection": 1,
+    "slug": "maltese"
+  },
+  {
+    "fciNumber": 233,
+    "nameDe": "Löwchen",
+    "nameEn": "Petit Chien Lion",
+    "fciGroup": 9,
+    "fciSection": 1,
+    "slug": "little-lion-dog"
+  },
+  {
+    "fciNumber": 172,
+    "nameDe": "Pudel",
+    "nameEn": "Caniche",
+    "fciGroup": 9,
+    "fciSection": 2,
+    "slug": "poodle"
+  },
+  {
+    "fciNumber": 81,
+    "nameDe": "Belgischer Griffon",
+    "nameEn": "Griffon Belge",
+    "fciGroup": 9,
+    "fciSection": 3,
+    "slug": "griffon-belge"
+  },
+  {
+    "fciNumber": 80,
+    "nameDe": "Brüsseler Griffon",
+    "nameEn": "Griffon Bruxellois",
+    "fciGroup": 9,
+    "fciSection": 3,
+    "slug": "griffon-bruxellois"
+  },
+  {
+    "fciNumber": 82,
+    "nameDe": "Brabanter Griffon",
+    "nameEn": "Petit Brabançon",
+    "fciGroup": 9,
+    "fciSection": 3,
+    "slug": "petit-brabancon"
+  },
+  {
+    "fciNumber": 288,
+    "nameDe": "Chinesischer Schopfhund",
+    "nameEn": "Chinese Crested Dog",
+    "fciGroup": 9,
+    "fciSection": 4,
+    "slug": "chinese-crested-dog"
+  },
+  {
+    "fciNumber": 227,
+    "nameDe": "Lhasa Apso",
+    "nameEn": "Lhasa Apso",
+    "fciGroup": 9,
+    "fciSection": 5,
+    "slug": "lhasa-apso"
+  },
+  {
+    "fciNumber": 208,
+    "nameDe": "Shih Tzu",
+    "nameEn": "Shih Tzu",
+    "fciGroup": 9,
+    "fciSection": 5,
+    "slug": "shih-tzu"
+  },
+  {
+    "fciNumber": 231,
+    "nameDe": "Tibet-Spaniel",
+    "nameEn": "Tibetan Spaniel",
+    "fciGroup": 9,
+    "fciSection": 5,
+    "slug": "tibetan-spaniel"
+  },
+  {
+    "fciNumber": 209,
+    "nameDe": "Tibet-Terrier",
+    "nameEn": "Tibetan Terrier",
+    "fciGroup": 9,
+    "fciSection": 5,
+    "slug": "tibetan-terrier"
+  },
+  {
+    "fciNumber": 218,
+    "nameDe": "Chihuahua",
+    "nameEn": "Chihuahueño",
+    "fciGroup": 9,
+    "fciSection": 6,
+    "slug": "chihuahua"
+  },
+  {
+    "fciNumber": 136,
+    "nameDe": "Cavalier King Charles Spaniel",
+    "nameEn": "Cavalier King Charles Spaniel",
+    "fciGroup": 9,
+    "fciSection": 7,
+    "slug": "cavalier-king-charles-spaniel"
+  },
+  {
+    "fciNumber": 128,
+    "nameDe": "King Charles Spaniel",
+    "nameEn": "King Charles Spaniel",
+    "fciGroup": 9,
+    "fciSection": 7,
+    "slug": "king-charles-spaniel"
+  },
+  {
+    "fciNumber": 206,
+    "nameDe": "Japan-Chin",
+    "nameEn": "Chin",
+    "fciGroup": 9,
+    "fciSection": 8,
+    "slug": "japanese-chin"
+  },
+  {
+    "fciNumber": 207,
+    "nameDe": "Pekingese",
+    "nameEn": "Pekingese",
+    "fciGroup": 9,
+    "fciSection": 8,
+    "slug": "pekingese"
+  },
+  {
+    "fciNumber": 77,
+    "nameDe": "Kontinentaler Zwergspaniel",
+    "nameEn": "Epagneul Nain Continental",
+    "fciGroup": 9,
+    "fciSection": 9,
+    "slug": "continental-toy-spaniel"
+  },
+  {
+    "fciNumber": 363,
+    "nameDe": "Prager Rattler",
+    "nameEn": "Prague Ratter",
+    "fciGroup": 9,
+    "fciSection": 9,
+    "slug": "prague-ratter"
+  },
+  {
+    "fciNumber": 352,
+    "nameDe": "Russischer Toy",
+    "nameEn": "Russkiy Toy",
+    "fciGroup": 9,
+    "fciSection": 9,
+    "slug": "russian-toy"
+  },
+  {
+    "fciNumber": 192,
+    "nameDe": "Kromfohrländer",
+    "nameEn": "Kromfohrländer",
+    "fciGroup": 9,
+    "fciSection": 10,
+    "slug": "kromfohrlander"
+  },
+  {
+    "fciNumber": 140,
+    "nameDe": "Boston Terrier",
+    "nameEn": "Boston Terrier",
+    "fciGroup": 9,
+    "fciSection": 11,
+    "slug": "boston-terrier"
+  },
+  {
+    "fciNumber": 101,
+    "nameDe": "Französische Bulldogge",
+    "nameEn": "Bouledogue Français",
+    "fciGroup": 9,
+    "fciSection": 11,
+    "slug": "french-bulldog"
+  },
+  {
+    "fciNumber": 253,
+    "nameDe": "Mops",
+    "nameEn": "Pug",
+    "fciGroup": 9,
+    "fciSection": 11,
+    "slug": "pug"
+  },
+  {
+    "fciNumber": 228,
+    "nameDe": "Afghanischer Windhund",
+    "nameEn": "Afghan Hound",
+    "fciGroup": 10,
+    "fciSection": 1,
+    "slug": "afghan-hound"
+  },
+  {
+    "fciNumber": 372,
+    "nameDe": "Kazakh Tazy",
+    "nameEn": "Kazakh Tazy",
+    "fciGroup": 10,
+    "fciSection": 1,
+    "slug": "kazakh-tazy"
+  },
+  {
+    "fciNumber": 193,
+    "nameDe": "Barsoi - Russischer Jagdwindhund",
+    "nameEn": "Russkaya Psovaya Borzaya",
+    "fciGroup": 10,
+    "fciSection": 1,
+    "slug": "borzoi-russian-hunting-sighthound"
+  },
+  {
+    "fciNumber": 269,
+    "nameDe": "Saluki",
+    "nameEn": "Saluki",
+    "fciGroup": 10,
+    "fciSection": 1,
+    "slug": "saluki"
+  },
+  {
+    "fciNumber": 164,
+    "nameDe": "Schottischer Hirschhund",
+    "nameEn": "Deerhound",
+    "fciGroup": 10,
+    "fciSection": 2,
+    "slug": "deerhound"
+  },
+  {
+    "fciNumber": 160,
+    "nameDe": "Irischer Wolfshund",
+    "nameEn": "Irish Wolfhound",
+    "fciGroup": 10,
+    "fciSection": 2,
+    "slug": "irish-wolfhound"
+  },
+  {
+    "fciNumber": 307,
+    "nameDe": "Azawakh",
+    "nameEn": "Azawakh",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "azawakh"
+  },
+  {
+    "fciNumber": 333,
+    "nameDe": "Polnischer Windhund",
+    "nameEn": "Chart Polski",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "polish-greyhound"
+  },
+  {
+    "fciNumber": 285,
+    "nameDe": "Spanischer Windhund",
+    "nameEn": "Galgo Español",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "spanish-greyhound"
+  },
+  {
+    "fciNumber": 158,
+    "nameDe": "Greyhound",
+    "nameEn": "Greyhound",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "greyhound"
+  },
+  {
+    "fciNumber": 240,
+    "nameDe": "Ungarischer Windhund",
+    "nameEn": "Magyar Agar",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "hungarian-greyhound"
+  },
+  {
+    "fciNumber": 200,
+    "nameDe": "Italienisches Windspiel",
+    "nameEn": "Piccolo Levriero Italiano",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "italian-sighthound"
+  },
+  {
+    "fciNumber": 188,
+    "nameDe": "Sloughi",
+    "nameEn": "Sloughi",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "sloughi"
+  },
+  {
+    "fciNumber": 162,
+    "nameDe": "Whippet",
+    "nameEn": "Whippet",
+    "fciGroup": 10,
+    "fciSection": 3,
+    "slug": "whippet"
+  }
+]
