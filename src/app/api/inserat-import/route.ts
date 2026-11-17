@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { parseEdogs, parseTierweltText } from '@/lib/inserat-import'
+import { parseEdogs } from '@/lib/inserat-import'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
-const schema = z.discriminatedUnion('platform', [
-  z.object({ platform: z.literal('edogs'), url: z.string().url(), ownershipConfirmed: z.literal(true) }),
-  z.object({ platform: z.literal('tierwelt'), text: z.string().min(30).max(30000), imageText: z.string().max(8000).default(''), ownershipConfirmed: z.literal(true) }),
-])
+const schema = z.object({
+  platform: z.literal('edogs'),
+  url: z.string().url(),
+  ownershipConfirmed: z.literal(true),
+})
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -21,10 +22,6 @@ export async function POST(req: NextRequest) {
   const breeds = await prisma.breed.findMany({ select: { id: true, nameDe: true }, orderBy: { nameDe: 'asc' } })
 
   try {
-    if (parsed.data.platform === 'tierwelt') {
-      return NextResponse.json(parseTierweltText(parsed.data.text, parsed.data.imageText, breeds))
-    }
-
     const source = new URL(parsed.data.url)
     if (source.protocol !== 'https:' || !['edogs.de', 'www.edogs.de'].includes(source.hostname) || !/\/\d+\.html$/.test(source.pathname)) {
       return NextResponse.json({ error: 'Bitte einen gültigen Link zu einem einzelnen edogs-Inserat eingeben.' }, { status: 400 })

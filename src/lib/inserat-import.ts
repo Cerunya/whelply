@@ -82,29 +82,3 @@ export function parseEdogs(html: string, breeds: Breed[]): ImportedListing {
     isChipped: /gechipt/i.test(text),
   }
 }
-
-export function parseTierweltText(text: string, imageText: string, breeds: Breed[]): ImportedListing {
-  const cleaned = text.replace(/\r/g, '').trim()
-  if (cleaned.length < 30) throw new Error('Füge bitte den vollständigen Text deines Deine-Tierwelt-Inserats ein.')
-  const lines = cleaned.split('\n').map((line) => line.trim()).filter(Boolean)
-  const title = lines.find((line) => line.length >= 5 && !/^(Rasse|Preis|Geschlecht|Beschreibung|Kategorie)\b/i.test(line)) ?? 'Importiertes Inserat'
-  const breedMatch = cleaned.match(/(?:Rasse|Hunderasse)\s*[:\-]?\s*([^\n,|]+)/i)
-  const sexMatch = cleaned.match(/(?:Geschlecht)\s*[:\-]?\s*(Rüde|Hündin|männlich|weiblich)/i)
-  const priceMatch = cleaned.match(/(?:VB\s*)?(\d{1,3}(?:\.\d{3})+|\d+)(?:[,.]\d{1,2})?\s*(?:€|EUR)/i)
-  const descriptionMatch = cleaned.match(/Beschreibung\s*[:\-]?\s*([\s\S]*?)(?:\n(?:Standort|Anbieter|Kontakt|Weitere Informationen)\b|$)/i)
-  const images = imageText.split(/\s+/).filter((url) => /^https:\/\//i.test(url)).slice(0, 8)
-  return {
-    title: title.slice(0, 80),
-    type: /deckrüde/i.test(cleaned) ? 'stud' : /welpe/i.test(cleaned) ? 'puppy' : 'adult_dog',
-    breedId: findBreed(breedMatch?.[1]?.trim() ?? '', breeds),
-    breedName: breedMatch?.[1]?.trim().slice(0, 100) ?? '',
-    sex: sexMatch ? (/hündin|weiblich/i.test(sexMatch[1]) ? 'female' : 'male') : null,
-    priceCents: priceMatch ? parsePrice(priceMatch[1]) : null,
-    description: (descriptionMatch?.[1]?.trim() || cleaned).replace(/\s+/g, ' ').slice(0, 2000),
-    images,
-    hasPedigree: /ahnentafel|stammbaum/i.test(cleaned) && !/(?:keine|ohne)\s+(?:ahnentafel|stammbaum)/i.test(cleaned),
-    isVaccinated: /geimpft/i.test(cleaned),
-    isDewormed: /entwurmt/i.test(cleaned),
-    isChipped: /gechipt/i.test(cleaned),
-  }
-}

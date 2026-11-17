@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { VERBAENDE } from '@/lib/verbaende'
 
 export default function UpgradePage() {
   const router = useRouter()
   const [kennelName, setKennelName] = useState('')
+  const [verband, setVerband] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -18,7 +20,7 @@ export default function UpgradePage() {
     const res = await fetch('/api/upgrade-to-breeder', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kennelName }),
+      body: JSON.stringify({ kennelName, verband }),
     })
 
     const data = await res.json()
@@ -60,13 +62,33 @@ export default function UpgradePage() {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                Zuchtverband <span className="text-red-400">*</span>
+              </label>
+              <select
+                value={verband}
+                onChange={(e) => setVerband(e.target.value)}
+                required
+                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+              >
+                <option value="">— Verband auswählen —</option>
+                {VERBAENDE.map((v) => (
+                  <option key={v.value} value={v.value}>{v.label}</option>
+                ))}
+              </select>
+              <a href="mailto:info@whelply.de?subject=Verband%20vorschlagen&body=Hallo%2C%0A%0Aich%20möchte%20folgenden%20Verband%20vorschlagen%3A%0A%0AName%3A%20%0AWebsite%3A%20%0A%0ADanke!" className="text-xs text-forest hover:underline mt-1.5 inline-block">
+                Dein Verband fehlt? Vorschlagen →
+              </a>
+            </div>
+
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
             )}
 
             <button
               type="submit"
-              disabled={loading || !kennelName.trim()}
+              disabled={loading || !kennelName.trim() || !verband}
               className="w-full bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
             >
               {loading ? 'Wird geändert...' : 'Zu Züchter-Konto upgraden'}

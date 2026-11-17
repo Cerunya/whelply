@@ -4,7 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
 const schema = z.object({
-  kennelName: z.string().min(2).max(80),
+  kennelName: z.string().trim().min(2).max(80),
+  verband: z.string().min(1, 'Bitte wähle einen Zuchtverband aus').max(20),
 })
 
 export async function POST(req: NextRequest) {
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
   const parsed = schema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
 
-  const { kennelName } = parsed.data
+  const { kennelName, verband } = parsed.data
 
   const existingKennel = await prisma.breederProfile.findUnique({ where: { kennelName } })
   if (existingKennel) return NextResponse.json({ error: 'Dieser Zwingername ist bereits vergeben' }, { status: 409 })
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
   await prisma.$transaction(async (tx) => {
     await tx.user.update({ where: { id: user.id }, data: { role: 'breeder' } })
     const breeder = await tx.breederProfile.create({
-      data: { userId: user.id, kennelName, verificationLevel: 'email_verified' },
+      data: { userId: user.id, kennelName, verband, verificationLevel: 'email_verified' },
     })
     await tx.subscription.create({ data: { breederId: breeder.id, plan: 'free' } })
   })
