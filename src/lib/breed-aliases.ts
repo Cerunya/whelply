@@ -151,7 +151,7 @@ export function normalizeBreedName(value: string) {
     .trim()
 }
 
-export function breedSearchNames(breed: BreedSearchEntry) {
+export function breedSearchNames(breed: Omit<BreedSearchEntry, 'id'>) {
   return [breed.nameDe, breed.nameEn ?? '', ...(BREED_ALIASES[breed.slug] ?? [])]
 }
 

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { breedSearchNames, normalizeBreedName } from '@/lib/breed-aliases'
 
-type Breed = { id: number | string; nameDe: string; slug: string }
+type Breed = { id: number | string; nameDe: string; nameEn?: string | null; slug: string }
 
 type Props = {
   breeds: Breed[]
@@ -23,8 +24,11 @@ export default function BreedSearch({ breeds, value, onChange, valueKey = 'slug'
   // Angezeigter Name basierend auf aktuellem Value
   const selectedBreed = breeds.find((b) => getKey(b) === value)
 
-  const filtered = query.trim()
-    ? breeds.filter((b) => b.nameDe.toLowerCase().includes(query.toLowerCase()))
+  const normalizedQuery = normalizeBreedName(query)
+  const filtered = normalizedQuery
+    ? breeds.filter((breed) =>
+        breedSearchNames(breed).some((name) => normalizeBreedName(name).includes(normalizedQuery))
+      )
     : breeds
 
   // Klick außerhalb schließt Dropdown
