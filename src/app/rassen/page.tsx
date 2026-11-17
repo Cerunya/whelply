@@ -38,12 +38,28 @@ export default async function RassenlexikonPage({
     orderBy: { nameDe: 'asc' },
   })
 
-  const normalizedQuery = query.toLocaleLowerCase('de')
-  const filteredBreeds = normalizedQuery
-    ? breeds.filter((breed) =>
-        breed.nameDe.toLocaleLowerCase('de').includes(normalizedQuery) ||
-        breed.nameEn.toLocaleLowerCase('de').includes(normalizedQuery)
+  const normalizeSearch = (value: string) =>
+    value
+      .toLocaleLowerCase('de')
+      .replace(/ä/g, 'ae')
+      .replace(/ö/g, 'oe')
+      .replace(/ü/g, 'ue')
+      .replace(/ß/g, 'ss')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+  const normalizedQuery = normalizeSearch(query)
+  const matchingFciNumbers = normalizedQuery
+    ? new Set(
+        breeds
+          .filter((breed) =>
+            normalizeSearch(breed.nameDe).includes(normalizedQuery) ||
+            normalizeSearch(breed.nameEn).includes(normalizedQuery)
+          )
+          .map((breed) => breed.fciNumber)
       )
+    : null
+  const filteredBreeds = matchingFciNumbers
+    ? breeds.filter((breed) => matchingFciNumbers.has(breed.fciNumber))
     : breeds
 
   const byGroup = new Map<number, typeof filteredBreeds>()
