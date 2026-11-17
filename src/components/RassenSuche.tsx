@@ -13,9 +13,11 @@ export default function RassenSuche({ initialQuery, activeGroup, resultCount }: 
   const router = useRouter()
   const [query, setQuery] = useState(initialQuery)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const focusedRef = useRef(false)
 
   useEffect(() => {
-    setQuery(initialQuery)
+    // Ein verzögerter URL-Stand darf die laufende Eingabe nicht überschreiben.
+    if (!focusedRef.current) setQuery(initialQuery)
   }, [initialQuery])
 
   useEffect(() => () => {
@@ -62,6 +64,8 @@ export default function RassenSuche({ initialQuery, activeGroup, resultCount }: 
         type="search"
         value={query}
         onChange={(event) => handleChange(event.target.value)}
+        onFocus={() => { focusedRef.current = true }}
+        onBlur={() => { focusedRef.current = false }}
         placeholder="Welche Rasse suchst du?"
         autoComplete="off"
         className="min-h-11 min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-stone-800 outline-none placeholder:text-stone-500 focus:ring-0"
