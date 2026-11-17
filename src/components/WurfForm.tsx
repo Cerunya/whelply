@@ -6,6 +6,7 @@ import Link from 'next/link'
 import DashboardHeader from './DashboardHeader'
 import BreedSearch from './BreedSearch'
 import PuppyCareFields, { EMPTY_PUPPY_CARE } from './PuppyCareFields'
+import InfoHint from './InfoHint'
 
 type Breed = { id: number; nameDe: string; slug: string }
 type DogOption = { id: string; name: string; sex: string; breedId: number }
@@ -163,8 +164,11 @@ export default function WurfForm({
           </div>
 
           <div>
-            <label className={labelClass}>Mutterhündin</label>
-            <select name="damId" value={form.damId} onChange={handleChange} className={inputClass}>
+            <div className="mb-1.5 flex items-center gap-2">
+              <label htmlFor="damId" className="block text-sm font-medium text-stone-700">Mutterhündin</label>
+              <InfoHint label="Hinweis zum Eintragen einer Mutterhündin" />
+            </div>
+            <select id="damId" name="damId" value={form.damId} onChange={handleChange} className={inputClass}>
               <option value="">Nicht angegeben</option>
               {matchingDams.map((d) => (
                 <option key={d.id} value={d.id}>{d.name}</option>
@@ -181,8 +185,11 @@ export default function WurfForm({
           </div>
 
           <div>
-            <label className={labelClass}>Deckrüde</label>
-            <select name="sireId" value={form.sireId} onChange={handleChange} className={inputClass}>
+            <div className="mb-1.5 flex items-center gap-2">
+              <label htmlFor="sireId" className="block text-sm font-medium text-stone-700">Deckrüde</label>
+              <InfoHint label="Hinweis zum Eintragen eines Deckrüden" />
+            </div>
+            <select id="sireId" name="sireId" value={form.sireId} onChange={handleChange} className={inputClass}>
               <option value="">Externer Deckrüde / nicht angegeben</option>
               {matchingSires.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>

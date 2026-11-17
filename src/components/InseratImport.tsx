@@ -34,7 +34,7 @@ export default function InseratImport({ breeds }: { breeds: Breed[] }) {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Import fehlgeschlagen')
-      setPreview(data)
+      setPreview({ ...data, type: 'puppy' })
       setPriceEuro(data.priceCents ? String(data.priceCents / 100) : '')
     } catch (err: any) { setError(err.message) } finally { setLoading(false) }
   }
