@@ -124,7 +124,7 @@ export default async function Home() {
           </svg>
 
           <div className="max-w-6xl mx-auto relative grid items-start gap-10 lg:grid-cols-[minmax(0,570px)_minmax(0,1fr)]">
-            <div className="relative z-10 max-w-[570px]">
+            <div className="relative z-20 max-w-[570px]">
               <span className="mb-6 inline-flex rounded-lg border border-white/15 bg-white/[0.06] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-honey-light">
                 Nur FCI-anerkannte Rassen
               </span>
