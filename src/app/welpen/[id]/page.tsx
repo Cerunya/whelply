@@ -343,15 +343,20 @@ export default async function WelpenDetailPage({
                     </a>
                   )}
                   {!isOwner && (
-                    <div>
-                      <NachrichtButton
-                        breederId={listing.breeder.id}
-                        kennelName={listing.breeder.kennelName}
-                        isLoggedIn={isLoggedIn}
-                        isOwnProfile={false}
-                        variant="dark"
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <NachrichtButton
+                          breederId={listing.breeder.id}
+                          kennelName={listing.breeder.kennelName}
+                          isLoggedIn={isLoggedIn}
+                          isOwnProfile={false}
+                          variant="dark"
+                        />
+                      </div>
+                      <div className="flex justify-center border-t border-white/15 pt-3">
+                        <ReportButton listingId={listing.id} isLoggedIn={isLoggedIn} label="Anzeige melden" className="flex min-h-9 items-center gap-1.5 text-xs font-medium text-white/65 transition-colors hover:text-white" />
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -554,12 +559,6 @@ export default async function WelpenDetailPage({
             </div>
           )}
 
-          {/* Melden — ganz unten */}
-          {!isOwner && (
-            <div className="flex justify-center pt-4 pb-2">
-              <ReportButton listingId={listing.id} isLoggedIn={isLoggedIn} />
-            </div>
-          )}
         </div>
       </main>
       <Footer />
