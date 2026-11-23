@@ -2,26 +2,42 @@ import { auth, signOut } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import MobileNav from '@/components/MobileNav'
-
-export const dynamic = 'force-dynamic'
 import { slugify } from '@/lib/slugify'
 import BreederStatusToggles from '@/components/BreederStatusToggles'
 import { getBoostSettings, formatBoostPrice } from '@/lib/boost'
 import OnboardingChecklist from '@/components/OnboardingChecklist'
+import DashboardIcon from '@/components/DashboardIcon'
+
+export const dynamic = 'force-dynamic'
+
+const listingStatus = {
+  available: { label: 'Aktiv', classes: 'bg-green-50 text-green-700' },
+  reserved: { label: 'Reserviert', classes: 'bg-amber-50 text-amber-700' },
+  sold: { label: 'Verkauft', classes: 'bg-stone-200 text-stone-600' },
+  draft: { label: 'Entwurf', classes: 'bg-stone-100 text-stone-500' },
+} as const
+
+const litterStatus = {
+  available: { label: 'Verfügbar', classes: 'bg-green-50 text-green-700' },
+  sold_out: { label: 'Ausverkauft', classes: 'bg-stone-200 text-stone-600' },
+  born: { label: 'Geboren', classes: 'bg-blue-50 text-blue-700' },
+  pregnant: { label: 'Trächtig', classes: 'bg-pink-50 text-pink-700' },
+  planned: { label: 'Geplant', classes: 'bg-amber-50 text-amber-700' },
+} as const
+
+function SignOutButton({ className = '' }: { className?: string }) {
+  return <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
+    <button type="submit" className={className}>Abmelden</button>
+  </form>
+}
 
 export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
-  // Nutzer-Rolle prüfen
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true, onboardingDismissedAt: true } })
   if (!user) redirect('/login')
-
-  // Dienstleister → eigenes Dashboard
   if (user.role === 'service') redirect('/dashboard-service')
-
-  // Nicht-Züchter → eigene Seite
   if (user.role !== 'breeder' && user.role !== 'admin') redirect('/dashboard/nutzer')
 
   const breeder = await prisma.breederProfile.findUnique({
@@ -58,14 +74,11 @@ export default async function DashboardPage() {
 
   if (!breeder) redirect('/dashboard/upgrade')
 
-  // Ungelesene Nachrichten zählen — als Züchter UND als Nutzer in Konversationen
   const unreadCount = await prisma.message.count({
     where: {
       readAt: null,
       OR: [
-        // Nachrichten in Konversationen wo ich der Züchter bin (von Nutzern gesendet)
         { senderRole: 'user', conversation: { breederId: breeder.id } },
-        // Nachrichten in Konversationen wo ich der kontaktierende Nutzer bin (Antworten vom Züchter)
         { senderRole: 'breeder', conversation: { userId: session.user.id } },
       ],
     },
@@ -77,12 +90,9 @@ export default async function DashboardPage() {
   const plan = breeder.subscription?.plan ?? 'free'
   const maxFree = 15
   const canAddMore = plan !== 'free' || activeListings.length < maxFree
-
-  // Aktueller Boost-Preis aus den Admin-Einstellungen (für die "X € buchen"-Buttons)
   const boostSettings = await getBoostSettings()
   const boostPriceLabel = formatBoostPrice(boostSettings.priceCents)
 
-  // Onboarding-Checkliste (Züchter) — Häkchen kommen aus echten DB-Daten
   const onboardingItems = [
     { key: 'profil', label: 'Profil ausfüllen (Ort, Kontaktdaten)', href: '/dashboard/profil', done: !!breeder.city },
     { key: 'ueber-uns', label: '„Über uns“-Text schreiben', href: '/dashboard/ueber-uns', done: !!breeder.bio },
@@ -93,470 +103,147 @@ export default async function DashboardPage() {
     { key: 'theme', label: 'Züchterseite gestalten (Theme & Branding)', href: '/dashboard/theme', done: !!breeder.themeColor },
   ]
 
+  const navItems = [
+    { label: 'Übersicht', href: '#uebersicht', icon: 'overview' as const },
+    { label: 'Würfe', href: '#wuerfe', icon: 'litter' as const },
+    { label: 'Meine Hunde', href: '#hunde', icon: 'dog' as const },
+    { label: 'Inserate', href: '#inserate', icon: 'listing' as const },
+    { label: 'Züchterseite', href: '#zuechterseite', icon: 'profile' as const },
+  ]
+
+  const stats = [
+    { label: 'Aktive Inserate', value: activeListings.length, icon: 'listing' as const, note: `${breeder._count.listings} Inserate gesamt` },
+    { label: 'Aktuelle Würfe', value: breeder.litters.length, icon: 'litter' as const, note: `${draftListings.length} Entwürfe` },
+    { label: 'Profilaufrufe', value: totalViews.toLocaleString('de-DE'), icon: 'eye' as const, note: 'Aufrufe deiner Inserate' },
+    { label: 'Nachrichten', value: unreadCount, icon: 'mail' as const, note: 'Ungelesen' },
+  ]
+
   return (
-    <div className="min-h-screen bg-cream font-sans">
-      {/* Navbar */}
-      <header className="bg-white border-b border-cream-deep sticky top-0 z-50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="font-serif font-bold text-forest text-xl">Whelply</Link>
-            <span className="text-stone-300">|</span>
-            <span className="text-sm text-stone-500 font-medium">Mein Dashboard</span>
+    <div className="min-h-screen bg-[#F7F5EF] font-sans text-stone-800">
+      {/* Desktop: feste Seitennavigation */}
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col bg-[#122619] px-4 py-6 text-white lg:flex">
+        <Link href="/" className="mb-8 flex items-center gap-3 px-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-honey text-forest-dark"><DashboardIcon name="litter" /></span>
+          <span><span className="block font-serif text-2xl font-bold">Whelply</span><span className="block text-[10px] text-white/60">Züchterdashboard</span></span>
+        </Link>
+        <nav className="space-y-1.5" aria-label="Dashboard-Navigation">
+          {navItems.map((item, index) => <Link key={item.label} href={item.href} className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${index === 0 ? 'bg-cream text-forest' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}><DashboardIcon name={item.icon} className="h-[19px] w-[19px]" />{item.label}</Link>)}
+          <Link href="/dashboard/nachrichten" className="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"><DashboardIcon name="messages" className="h-[19px] w-[19px]" /><span className="flex-1">Nachrichten</span>{unreadCount > 0 && <span className="rounded-full bg-honey px-2 py-0.5 text-[10px] font-bold text-forest-dark">{unreadCount > 9 ? '9+' : unreadCount}</span>}</Link>
+        </nav>
+        <div className="mt-auto space-y-1 border-t border-white/10 pt-5">
+          <Link href="/dashboard/profil" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-xs font-medium text-white/65 hover:bg-white/10 hover:text-white"><DashboardIcon name="settings" className="h-[18px] w-[18px]" />Einstellungen</Link>
+          <Link href="/" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-xs font-medium text-white/65 hover:bg-white/10 hover:text-white"><DashboardIcon name="website" className="h-[18px] w-[18px]" />Zur Website</Link>
+          {breeder.user.role === 'admin' && <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-xs font-semibold text-honey-light hover:bg-white/10">Admin</Link>}
+          <div className="mt-4 flex items-center gap-3 px-3 pt-4">
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-honey text-xs font-bold text-forest-dark">{breeder.kennelName.slice(0, 2).toUpperCase()}</span>
+            <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{breeder.kennelName}</p><p className="mt-0.5 text-[10px] capitalize text-white/50">{plan} Plan</p></div>
+            <SignOutButton className="text-[10px] text-white/45 hover:text-white" />
           </div>
-          <div className="hidden md:flex items-center gap-4">
-            {breeder.user.role === 'admin' && (
-              <Link href="/admin" className="text-sm text-honey font-semibold hover:text-honey-light transition-colors">
-                Admin
-              </Link>
-            )}
-            <Link href="/" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-              Zur Website
-            </Link>
-            <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
-              <button type="submit" className="text-sm text-stone-400 hover:text-stone-700 transition-colors">
-                Abmelden
-              </button>
-            </form>
-          </div>
-
-          <MobileNav
-            links={[]}
-            extra={
-              <>
-                {breeder.user.role === 'admin' && (
-                  <Link href="/admin" className="font-semibold text-honey hover:text-honey-light transition-colors">
-                    Admin
-                  </Link>
-                )}
-                <Link href="/" className="font-medium text-stone-700 hover:text-forest transition-colors">
-                  Zur Website
-                </Link>
-                <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
-                  <button type="submit" className="text-stone-400 hover:text-stone-700 transition-colors">
-                    Abmelden
-                  </button>
-                </form>
-              </>
-            }
-          />
         </div>
-      </header>
+      </aside>
 
-      <main className="max-w-5xl mx-auto px-4 py-10">
-        {/* Begrüßung + Status-Toggles */}
-        <div className="flex items-start justify-between gap-4 mb-10">
-          <div>
-            <h1 className="font-serif text-3xl font-bold text-stone-900 mb-1">
-              {breeder.kennelName}
-            </h1>
-            <p className="text-stone-400 text-sm">
-              {breeder.city ? `${breeder.city} · ` : ''}
-              Plan: <span className="font-medium text-forest capitalize">{plan}</span>
-              {plan === 'free' && (
-                <span className="text-stone-400"> · {activeListings.length}/{maxFree} Inserate</span>
-              )}
-            </p>
+      <div className="lg:pl-60">
+        {/* Mobile: kompakter Kopfbereich */}
+        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-cream-deep bg-cream px-4 lg:hidden">
+          <Link href="/" className="flex items-center gap-2.5"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-forest text-white"><DashboardIcon name="litter" className="h-[18px] w-[18px]" /></span><span className="font-serif text-2xl font-bold text-forest">Whelply</span></Link>
+          <div className="flex items-center gap-1">
+            <Link href="/dashboard/nachrichten" className="relative flex h-11 w-11 items-center justify-center text-stone-600" aria-label="Nachrichten"><DashboardIcon name="mail" className="h-5 w-5" />{unreadCount > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-honey" />}</Link>
+            <Link href="/dashboard/profil" className="flex h-9 w-9 items-center justify-center rounded-full bg-forest text-[10px] font-bold text-white" aria-label="Profil öffnen">{breeder.kennelName.slice(0, 2).toUpperCase()}</Link>
           </div>
-          <BreederStatusToggles
-            initialPublished={breeder.isPublished ?? true}
-            initialActive={breeder.isActive ?? true}
-          />
-        </div>
+        </header>
 
-        {/* Onboarding-Checkliste (ausblendbar, Fortschritt aus echten Daten) */}
-        {!user.onboardingDismissedAt && (
-          <OnboardingChecklist
-            title="Erste Schritte auf Whelply"
-            subtitle="Richte deinen Zwinger ein — so finden dich Welpeninteressenten"
-            items={onboardingItems}
-          />
-        )}
+        <section className="relative overflow-hidden bg-forest px-5 py-7 lg:hidden">
+          <svg className="pointer-events-none absolute inset-0 h-full w-full text-white opacity-[0.04]" aria-hidden="true"><defs><pattern id="dashboard-paws" width="180" height="180" patternUnits="userSpaceOnUse"><g fill="currentColor" transform="translate(20 20) rotate(-18 30 30)"><ellipse cx="30" cy="40" rx="13" ry="15"/><ellipse cx="10" cy="25" rx="6" ry="8"/><ellipse cx="23" cy="14" rx="6" ry="8"/><ellipse cx="37" cy="14" rx="6" ry="8"/><ellipse cx="50" cy="25" rx="6" ry="8"/></g><g fill="currentColor" transform="translate(105 100) rotate(16 30 30)"><ellipse cx="30" cy="40" rx="13" ry="15"/><ellipse cx="10" cy="25" rx="6" ry="8"/><ellipse cx="23" cy="14" rx="6" ry="8"/><ellipse cx="37" cy="14" rx="6" ry="8"/><ellipse cx="50" cy="25" rx="6" ry="8"/></g></pattern></defs><rect width="100%" height="100%" fill="url(#dashboard-paws)" /></svg>
+          <div className="relative">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-honey-light">Mein Züchterdashboard</p>
+            <h1 className="font-serif text-3xl font-bold text-white">{breeder.kennelName}</h1>
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-white/75"><DashboardIcon name="location" className="h-3.5 w-3.5" />{breeder.city || 'Deutschland'}<span>·</span><span className="capitalize">{plan} Plan</span></p>
+            <div className="mt-5 [&_button]:border-white/20 [&_button]:text-white"><BreederStatusToggles initialPublished={breeder.isPublished ?? true} initialActive={breeder.isActive ?? true} /></div>
+          </div>
+        </section>
 
-        {/* Stat-Karten */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
-          {[
-            { label: 'Aktive Inserate', value: activeListings.length },
-            { label: 'Entwürfe', value: draftListings.length },
-            { label: 'Profilaufrufe', value: totalViews },
-            { label: 'Inserate gesamt', value: breeder._count.listings },
-          ].map((s) => (
-            <div key={s.label} className="bg-white rounded-2xl border border-cream-deep p-5">
-              <p className="text-2xl font-bold text-stone-900 font-serif">{s.value}</p>
-              <p className="text-xs text-stone-400 mt-1">{s.label}</p>
-            </div>
-          ))}
-          <Link href="/dashboard/profil" className="bg-white rounded-2xl border border-cream-deep p-5 hover:border-forest/30 transition-colors">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🪪</span>
-                <span className={`text-xs ${breeder.diditStatus === 'approved' ? 'text-green-700' : 'text-stone-400'}`}>
-                  {breeder.diditStatus === 'approved' ? 'ID geprüft' : 'ID offen'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg">📄</span>
-                <span className={`text-xs ${breeder.verificationLevel === 'doc_verified' ? 'text-green-700' : breeder.verificationLevel === 'kennel_verified' ? 'text-amber-600' : 'text-stone-400'}`}>
-                  {breeder.verificationLevel === 'doc_verified' ? 'Zucht verifiziert' : breeder.verificationLevel === 'kennel_verified' ? 'In Prüfung' : 'Zucht offen'}
-                </span>
+        {/* Desktop: obere Leiste */}
+        <header className="hidden h-[68px] items-center justify-between border-b border-cream-deep bg-white px-8 lg:flex">
+          <p className="text-sm font-semibold text-stone-700">Übersicht</p>
+          <div className="flex items-center gap-3">
+            {breeder.user.role === 'admin' && <Link href="/admin" className="text-xs font-semibold text-honey">Admin</Link>}
+            <Link href="/dashboard/nachrichten" className="relative flex h-11 w-11 items-center justify-center rounded-xl text-stone-500 hover:bg-cream" aria-label="Nachrichten"><DashboardIcon name="mail" className="h-5 w-5" />{unreadCount > 0 && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-honey" />}</Link>
+            <Link href="/dashboard/profil" className="flex min-h-11 items-center gap-2 rounded-xl px-2 hover:bg-cream"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-forest text-[10px] font-bold text-white">{breeder.kennelName.slice(0, 2).toUpperCase()}</span><span className="text-xs font-semibold">{breeder.kennelName}</span></Link>
+          </div>
+        </header>
+
+        <main id="uebersicht" className="mx-auto max-w-[1440px] scroll-mt-24 px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-12 lg:pt-8">
+          <div className="mb-7 hidden items-center justify-between gap-6 lg:flex">
+            <div><p className="mb-1 text-xs text-stone-500">Willkommen zurück</p><h1 className="font-serif text-3xl font-bold text-forest">Dein Zwinger auf einen Blick.</h1><p className="mt-2 text-xs text-stone-400">{breeder.kennelName}{breeder.city ? ` · ${breeder.city}` : ''} · <span className="capitalize">{plan} Plan</span>{plan === 'free' && ` · ${activeListings.length}/${maxFree} aktive Inserate`}</p></div>
+            <div className="flex items-center gap-4"><BreederStatusToggles initialPublished={breeder.isPublished ?? true} initialActive={breeder.isActive ?? true} />{canAddMore && <Link href="/dashboard/inserat-erstellen" className="flex min-h-11 items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-forest-light"><DashboardIcon name="plus" className="h-4 w-4" />Neues Inserat</Link>}</div>
+          </div>
+
+          {/* Kennzahlen */}
+          <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+            {stats.map((stat) => <div key={stat.label} className="rounded-2xl border border-cream-deep bg-white p-4 shadow-[0_3px_12px_rgba(27,58,45,0.025)] lg:p-5"><div className="flex items-center justify-between gap-2 text-stone-400"><span className="text-[11px] font-medium text-stone-500">{stat.label}</span><DashboardIcon name={stat.icon} className="h-[18px] w-[18px]" /></div><p className="mt-2 font-serif text-2xl font-bold text-forest lg:mt-3 lg:text-3xl">{stat.value}</p><p className="mt-1 text-[10px] text-stone-400">{stat.note}</p></div>)}
+          </div>
+
+          {/* Zentrale Aktionen */}
+          <section className="mb-6 rounded-2xl bg-[#EAF3EC] p-4 lg:p-5" aria-labelledby="dashboard-actions">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div><h2 id="dashboard-actions" className="font-serif text-lg font-bold text-forest">Was möchtest du eintragen?</h2><p className="mt-1 text-xs text-stone-500">Der schnellste Weg zu deinen wichtigsten Aufgaben.</p></div>
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                {canAddMore ? <Link href="/dashboard/inserat-erstellen" className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-xs font-bold text-white hover:bg-forest-light sm:col-span-1 lg:hidden xl:flex"><DashboardIcon name="plus" className="h-4 w-4" />Neues Inserat</Link> : <div className="col-span-2 flex items-center gap-3 rounded-xl border border-honey/30 bg-honey-pale px-4 py-2.5 sm:col-span-1"><p className="text-xs text-stone-700">Free-Limit erreicht ({maxFree} Inserate)</p><Link href="/dashboard/upgrade" className="text-xs font-bold text-honey">Pro werden →</Link></div>}
+                <Link href="/dashboard/wurf-eintragen" className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-white px-3 py-2.5 text-xs font-bold text-forest hover:border-forest/35"><DashboardIcon name="litter" className="h-4 w-4" />Wurf eintragen</Link>
+                <Link href="/dashboard/hund-eintragen" className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-white px-3 py-2.5 text-xs font-bold text-forest hover:border-forest/35"><DashboardIcon name="dog" className="h-4 w-4" />Zuchthund eintragen</Link>
+                <Link href="/dashboard/inserat-importieren" className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-forest/15 bg-white px-3 py-2.5 text-xs font-bold text-forest hover:border-forest/35 sm:col-span-1"><DashboardIcon name="import" className="h-4 w-4" />Import<span className="rounded bg-honey/15 px-1.5 py-0.5 text-[9px] uppercase text-honey">Beta</span></Link>
               </div>
             </div>
-          </Link>
-        </div>
+          </section>
 
-        {/* Aktionen */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          {canAddMore ? (
-            <Link
-              href="/dashboard/inserat-erstellen"
-              className="bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest-light transition-colors"
-            >
-              + Neues Inserat
-            </Link>
-          ) : (
-            <div className="flex items-center gap-3 bg-honey-pale border border-honey/30 rounded-xl px-5 py-2.5">
-              <p className="text-sm text-stone-700">
-                Free-Limit erreicht ({maxFree} Inserate).
-              </p>
-              <Link href="/dashboard/upgrade" className="text-sm font-semibold text-honey hover:underline">
-                Pro werden →
-              </Link>
+          {!user.onboardingDismissedAt && <div className="mb-7"><OnboardingChecklist title="Erste Schritte auf Whelply" subtitle="Richte deinen Zwinger ein — so finden dich Welpeninteressenten" items={onboardingItems} /></div>}
+
+          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="min-w-0 space-y-7">
+              {/* Würfe */}
+              <section id="wuerfe" className="scroll-mt-24 rounded-2xl border border-cream-deep bg-white p-4 sm:p-5">
+                <div className="mb-4 flex items-start justify-between gap-4"><div><h2 className="font-serif text-xl font-bold text-forest">Deine Würfe</h2><p className="mt-1 text-xs text-stone-400">Aktuelle und geplante Würfe</p></div><Link href="/dashboard/wurf-eintragen" className="flex min-h-10 items-center gap-1.5 text-xs font-bold text-forest hover:text-honey">Neuer Wurf<DashboardIcon name="arrow" className="h-4 w-4" /></Link></div>
+                {breeder.litters.length === 0 ? <div className="rounded-xl bg-cream px-4 py-8 text-center"><p className="text-sm text-stone-400">Noch keine Würfe eingetragen.</p><Link href="/dashboard/wurf-eintragen" className="mt-3 inline-block text-xs font-bold text-forest">Ersten Wurf eintragen →</Link></div> : <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">{breeder.litters.map((litter) => { const status = litterStatus[litter.status as keyof typeof litterStatus] ?? litterStatus.planned; return <Link key={litter.id} href={`/dashboard/wurf/${litter.id}`} className="group flex min-w-0 items-center gap-3 rounded-xl border border-cream-deep bg-white p-3.5 transition-all hover:-translate-y-0.5 hover:border-forest/30"><span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#EAF3EC] text-forest"><DashboardIcon name="litter" /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="truncate text-sm font-semibold text-stone-800">{litter.name || litter.breed.nameDe}</h3><span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${status.classes}`}>{status.label}</span></div>{litter.name && <p className="mt-1 truncate text-[11px] text-stone-400">{litter.breed.nameDe}</p>}<p className="mt-1.5 flex items-center gap-1.5 text-[10px] text-stone-400"><DashboardIcon name="calendar" className="h-3.5 w-3.5" />{litter.bornDate ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}` : litter.expectedDate ? `Erwartet: ${litter.expectedDate}` : 'Geplant'}<span>·</span>{litter._count.listings} Welpe{litter._count.listings !== 1 ? 'n' : ''}</p></div><DashboardIcon name="arrow" className="h-4 w-4 flex-shrink-0 text-stone-300 transition-transform group-hover:translate-x-0.5 group-hover:text-forest" /></Link>})}</div>}
+              </section>
+
+              {/* Hunde */}
+              <section id="hunde" className="scroll-mt-24">
+                <div className="mb-4 flex items-center justify-between gap-4"><h2 className="font-serif text-xl font-bold text-forest">Meine Hunde</h2><Link href="/dashboard/hund-eintragen" className="flex min-h-10 items-center gap-1.5 text-xs font-bold text-forest hover:text-honey">Hund eintragen<DashboardIcon name="plus" className="h-4 w-4" /></Link></div>
+                {breeder.dogs.length === 0 ? <div className="rounded-2xl border border-cream-deep bg-white px-4 py-8 text-center"><p className="text-sm text-stone-400">Noch keine Zuchthunde eingetragen.</p><Link href="/dashboard/hund-eintragen" className="mt-3 inline-block text-xs font-bold text-forest">Ersten Zuchthund eintragen →</Link></div> : <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">{breeder.dogs.map((dog) => <Link key={dog.id} href={`/dashboard/hund/${dog.id}`} className="flex min-w-0 items-center gap-3 rounded-xl border border-cream-deep bg-white p-3 transition-colors hover:border-forest/30"><span className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-cream-dark text-stone-300">{dog.media[0]?.url ? <img src={dog.media[0].url} alt={dog.name} className="h-full w-full object-cover" /> : <DashboardIcon name="dog" />}</span><span className="min-w-0 flex-1"><strong className="block truncate text-sm font-semibold text-stone-800">{dog.name}</strong><span className="mt-1 block truncate text-[10px] text-stone-400">{dog.sex === 'male' ? 'Rüde · Deckrüde' : 'Hündin · Zuchthündin'}</span><span className="mt-0.5 block truncate text-[10px] text-stone-400">{dog.breed.nameDe}</span></span><DashboardIcon name="arrow" className="h-4 w-4 flex-shrink-0 text-stone-300" /></Link>)}</div>}
+              </section>
+
+              {/* Inserate */}
+              <section id="inserate" className="scroll-mt-24 overflow-hidden rounded-2xl border border-cream-deep bg-white">
+                <div className="flex items-center justify-between border-b border-cream-deep px-5 py-4"><div><h2 className="font-serif text-xl font-bold text-forest">Meine Inserate</h2><p className="mt-1 text-xs text-stone-400">Status, Aufrufe und Boosts verwalten</p></div><Link href="/dashboard/inserat-erstellen" className="hidden min-h-10 items-center gap-1.5 text-xs font-bold text-forest hover:text-honey sm:flex">Neues Inserat<DashboardIcon name="plus" className="h-4 w-4" /></Link></div>
+                {breeder.listings.length === 0 ? <div className="px-4 py-14 text-center"><p className="mb-3 text-sm text-stone-400">Noch keine Inserate.</p><Link href="/dashboard/inserat-erstellen" className="text-sm font-semibold text-forest hover:underline">Erstes Inserat erstellen →</Link></div> : <>
+                  <div className="hidden overflow-x-auto md:block"><table className="w-full text-sm"><thead><tr className="border-b border-cream-deep bg-cream text-left text-[10px] font-semibold uppercase tracking-wide text-stone-400"><th className="px-5 py-3">Inserat</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Aufrufe</th><th className="px-4 py-3">Preis</th><th className="px-4 py-3">Boost</th><th className="px-5 py-3" /></tr></thead><tbody className="divide-y divide-cream-deep">{breeder.listings.map((listing) => { const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date(); const status = listingStatus[listing.status as keyof typeof listingStatus] ?? listingStatus.draft; return <tr key={listing.id} className="hover:bg-cream/50"><td className="max-w-[240px] px-5 py-4"><Link href={`/welpen/${listing.id}`} target="_blank" className="block truncate text-xs font-semibold text-stone-800 hover:text-forest">{listing.title || listing.breed.nameDe}</Link><span className="mt-1 block truncate text-[10px] text-stone-400">{listing.breed.nameDe}</span></td><td className="px-4 py-4"><span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold ${status.classes}`}>{status.label}</span></td><td className="px-4 py-4"><span className="inline-flex items-center gap-1.5 text-xs text-stone-500"><DashboardIcon name="eye" className="h-4 w-4 text-stone-300" />{listing.viewCount}</span></td><td className="whitespace-nowrap px-4 py-4 text-xs text-stone-500">{listing.priceCents ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €` : 'Auf Anfrage'}</td><td className="px-4 py-4">{isBoosted ? <span className="text-[10px] font-semibold text-honey">★ Aktiv<span className="mt-0.5 block font-normal text-stone-400">{listing.boostImpressions} Einblendungen</span></span> : <Link href={`/dashboard/boost/${listing.id}`} className="whitespace-nowrap text-[10px] font-medium text-stone-400 hover:text-honey">{boostPriceLabel} buchen</Link>}</td><td className="px-5 py-4 text-right"><Link href={`/dashboard/inserat/${listing.id}`} className="text-[10px] font-semibold text-stone-400 hover:text-forest">Bearbeiten</Link></td></tr>})}</tbody></table></div>
+                  <div className="divide-y divide-cream-deep md:hidden">{breeder.listings.map((listing) => { const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date(); const status = listingStatus[listing.status as keyof typeof listingStatus] ?? listingStatus.draft; return <div key={listing.id} className="p-4"><div className="mb-2 flex items-start justify-between gap-3"><div className="min-w-0"><Link href={`/welpen/${listing.id}`} target="_blank" className="block text-sm font-semibold text-stone-800">{listing.title || listing.breed.nameDe}</Link><p className="mt-1 text-xs text-stone-400">{listing.breed.nameDe}</p></div><span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${status.classes}`}>{status.label}</span></div><div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-stone-500"><span>{listing.priceCents ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €` : 'Preis auf Anfrage'}</span><span className="inline-flex items-center gap-1"><DashboardIcon name="eye" className="h-3.5 w-3.5 text-stone-300" />{listing.viewCount}</span>{isBoosted ? <span className="font-semibold text-honey">★ Boost aktiv</span> : <Link href={`/dashboard/boost/${listing.id}`} className="font-medium text-stone-400">Boost: {boostPriceLabel}</Link>}</div><Link href={`/dashboard/inserat/${listing.id}`} className="block rounded-lg border border-cream-deep bg-cream py-2.5 text-center text-sm font-semibold text-stone-700">Bearbeiten</Link></div>})}</div>
+                </>}
+              </section>
             </div>
-          )}
-          <Link
-            href="/dashboard/inserat-importieren"
-            className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
-          >
-            ↓ Inserat importieren <span className="ml-1 rounded bg-honey/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-honey">Beta</span>
-          </Link>
-          <Link
-            href="/dashboard/wurf-eintragen"
-            className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
-          >
-            + Wurf eintragen
-          </Link>
-          <Link
-            href="/dashboard/hund-eintragen"
-            className="border-2 border-forest/20 text-forest px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest/5 transition-colors"
-          >
-            + Zuchthund eintragen
-          </Link>
-        </div>
 
-        {/* Meine Züchterseite */}
-        <div className="bg-white rounded-2xl border border-cream-deep p-5 mb-10" style={{overflow: 'visible'}}>
-          <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
-            <div>
-              <h3 className="font-serif text-base font-bold text-stone-900">Meine Züchterseite</h3>
-              <p className="text-xs text-stone-400 mt-0.5">
-                Branding, Neuigkeiten und Fotos für deine öffentliche Profilseite
-              </p>
-            </div>
-            <Link
-              href={`/zuechter/${slugify(breeder.kennelName)}`}
-              target="_blank"
-              className="text-sm text-forest font-semibold hover:underline whitespace-nowrap"
-            >
-              Seite ansehen →
-            </Link>
+            {/* Züchterseite und Verifizierung */}
+            <aside className="space-y-5">
+              <section id="zuechterseite" className="scroll-mt-24 overflow-hidden rounded-2xl border border-cream-deep bg-white">
+                <div className="relative flex h-24 items-center justify-center overflow-hidden bg-forest"><span className="flex h-12 w-12 -rotate-3 items-center justify-center rounded-2xl bg-cream text-forest shadow-sm"><DashboardIcon name="profile" className="h-6 w-6" /></span></div>
+                <div className="p-5"><h2 className="font-serif text-lg font-bold text-forest">{breeder.kennelName}</h2><p className="mt-1.5 flex items-center gap-1.5 text-xs text-stone-400"><DashboardIcon name="location" className="h-3.5 w-3.5" />{breeder.city || 'Deutschland'}{breeder.state ? `, ${breeder.state}` : ''}</p><Link href={`/zuechter/${slugify(breeder.kennelName)}`} target="_blank" className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-forest/20 text-xs font-bold text-forest hover:bg-forest/5">Züchterseite ansehen<DashboardIcon name="website" className="h-4 w-4" /></Link>
+                  <div className="mt-4 grid grid-cols-3 gap-2">{[{ label: 'Profil', href: '/dashboard/profil', icon: 'user' as const },{ label: 'Über uns', href: '/dashboard/ueber-uns', icon: 'listing' as const },{ label: 'Branding', href: '/dashboard/theme', icon: 'palette' as const },{ label: 'Aktuelles', href: '/dashboard/news', icon: 'news' as const },{ label: 'Galerie', href: '/dashboard/galerie', icon: 'gallery' as const },{ label: 'Nachrichten', href: '/dashboard/nachrichten', icon: 'messages' as const }].map((item) => <Link key={item.label} href={item.href} className="relative flex min-h-[68px] flex-col items-center justify-center gap-1.5 rounded-xl border border-cream-deep bg-cream/60 px-1 text-center text-[10px] font-semibold text-forest hover:border-forest/30 hover:bg-forest/5"><DashboardIcon name={item.icon} className="h-[18px] w-[18px]" />{item.label}{item.label === 'Nachrichten' && unreadCount > 0 && <span className="absolute right-1.5 top-1.5 rounded-full bg-honey px-1.5 text-[8px] font-bold text-forest-dark">{unreadCount}</span>}</Link>)}</div>
+                </div>
+              </section>
+
+              <Link href="/dashboard/profil" className="block rounded-2xl border border-cream-deep bg-white p-5 transition-colors hover:border-forest/30"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF3EC] text-forest"><DashboardIcon name="shield" /></span><div><h2 className="text-sm font-bold text-stone-800">Verifizierung</h2><p className="mt-0.5 text-[10px] text-stone-400">Vertrauen bei Interessenten stärken</p></div></div><div className="mt-4 space-y-2.5"><p className={`flex items-center gap-2 text-xs ${breeder.diditStatus === 'approved' ? 'text-green-700' : 'text-stone-400'}`}><DashboardIcon name={breeder.diditStatus === 'approved' ? 'check' : 'user'} className="h-4 w-4" />{breeder.diditStatus === 'approved' ? 'ID geprüft' : 'ID-Prüfung offen'}</p><p className={`flex items-center gap-2 text-xs ${breeder.verificationLevel === 'doc_verified' ? 'text-green-700' : breeder.verificationLevel === 'kennel_verified' ? 'text-amber-600' : 'text-stone-400'}`}><DashboardIcon name={breeder.verificationLevel === 'doc_verified' ? 'check' : 'shield'} className="h-4 w-4" />{breeder.verificationLevel === 'doc_verified' ? 'Zucht verifiziert' : breeder.verificationLevel === 'kennel_verified' ? 'Zucht in Prüfung' : 'Zuchtverifizierung offen'}</p></div><span className="mt-4 flex items-center gap-1.5 text-xs font-bold text-forest">Verifizierung verwalten<DashboardIcon name="arrow" className="h-4 w-4" /></span></Link>
+
+              <div className="rounded-2xl bg-[#FFF2D8] p-5"><div className="flex items-start gap-3"><DashboardIcon name="trend" className="h-5 w-5 flex-shrink-0 text-honey" /><div><h2 className="font-serif text-base font-bold text-[#664C1D]">Mehr Sichtbarkeit</h2><p className="mt-2 text-xs leading-relaxed text-[#725C34]">Hebe passende Inserate mit einem Boost in den Suchergebnissen hervor.</p><Link href="#inserate" className="mt-3 inline-flex min-h-9 items-center gap-1.5 text-xs font-bold text-[#82560D]">Inserat auswählen<DashboardIcon name="arrow" className="h-3.5 w-3.5" /></Link></div></div></div>
+              <div className="hidden justify-center lg:flex"><SignOutButton className="min-h-11 px-4 text-xs text-stone-400 hover:text-stone-700" /></div>
+            </aside>
           </div>
-          <div className="flex flex-wrap gap-3 overflow-visible">
-            <Link
-              href="/dashboard/profil"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Profil
-            </Link>
-            <Link
-              href="/dashboard/ueber-uns"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Über uns
-            </Link>            <Link
-              href="/dashboard/theme"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Theme & Branding
-            </Link>
-            <Link
-              href="/dashboard/news"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Aktuelles
-            </Link>
-            <Link
-              href="/dashboard/galerie"
-              className="border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Galerie
-            </Link>
-            <Link
-              href="/dashboard/nachrichten"
-              className="relative border-2 border-stone-200 text-stone-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-stone-50 transition-colors"
-            >
-              Nachrichten
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-sm ring-2 ring-white">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
+        </main>
+      </div>
 
-        {/* Würfe */}
-        {breeder.litters.length > 0 && (
-          <div className="mb-10">
-            <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Würfe</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {breeder.litters.map((litter) => (
-                <Link
-                  key={litter.id}
-                  href={`/dashboard/wurf/${litter.id}`}
-                  className="bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors flex items-center justify-between"
-                >
-                  <div>
-                    <p className="font-medium text-stone-800 text-sm">{litter.name || litter.breed.nameDe}</p>
-                    {litter.name && <p className="text-xs text-stone-400">{litter.breed.nameDe}</p>}
-                    <p className="text-xs text-stone-400 mt-0.5">
-                      {litter.bornDate
-                        ? `Geboren am ${litter.bornDate.toLocaleDateString('de-DE')}`
-                        : litter.expectedDate
-                        ? `Erwartet: ${litter.expectedDate}`
-                        : 'Geplant'}
-                      {' · '}{litter._count.listings} Welpe{litter._count.listings !== 1 ? 'n' : ''}
-                    </p>
-                  </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
-                    litter.status === 'available' ? 'bg-green-50 text-green-700'
-                    : litter.status === 'sold_out' ? 'bg-stone-200 text-stone-600'
-                    : 'bg-stone-100 text-stone-500'
-                  }`}>
-                    {litter.status === 'available' ? 'Verfügbar'
-                      : litter.status === 'sold_out' ? 'Ausverkauft'
-                      : litter.status === 'born' ? 'Geboren'
-                      : litter.status === 'pregnant' ? 'Trächtig'
-                      : 'Geplant'}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Alle Hunde */}
-        {breeder.dogs.length > 0 && (
-          <div className="mb-10">
-            <h3 className="font-serif text-lg font-bold text-stone-900 mb-4">Meine Hunde</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {breeder.dogs.map((dog) => (
-                <Link
-                  key={dog.id}
-                  href={`/dashboard/hund/${dog.id}`}
-                  className="bg-white rounded-xl border border-cream-deep p-4 hover:border-forest/30 transition-colors flex items-center gap-3"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-cream-dark overflow-hidden flex items-center justify-center flex-shrink-0">
-                    {dog.media[0]?.url ? (
-                      <img src={dog.media[0].url} alt={dog.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <svg className="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-stone-800 text-sm truncate">{dog.name}</p>
-                    <p className="text-xs text-stone-400 truncate">
-                      {dog.sex === 'male' ? 'Rüde' : 'Hündin'} · {dog.breed.nameDe}
-                      {dog.sex === 'male' ? ' · Deckrüde' : ' · Zuchthündin'}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Inserate-Tabelle */}
-        <div className="bg-white rounded-2xl border border-cream-deep overflow-hidden">
-          <div className="px-6 py-4 border-b border-cream-deep flex items-center justify-between">
-            <h2 className="font-semibold text-stone-900">Meine Inserate</h2>
-          </div>
-
-          {breeder.listings.length === 0 ? (
-            <div className="text-center py-16 px-4">
-              <p className="text-stone-400 text-sm mb-4">Noch keine Inserate.</p>
-              <Link
-                href="/dashboard/inserat-erstellen"
-                className="text-forest font-semibold text-sm hover:underline"
-              >
-                Erstes Inserat erstellen →
-              </Link>
-            </div>
-          ) : (
-            <>
-              {/* Desktop: Tabelle */}
-              <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-cream-deep bg-cream">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Rasse</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Preis</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Status</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Aufrufe</th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wide">Boost</th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-cream-deep">
-                  {breeder.listings.map((listing) => {
-                    const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date()
-                    return (
-                      <tr key={listing.id} className="hover:bg-cream/50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-stone-800">
-                          <Link
-                            href={`/welpen/${listing.id}`}
-                            target="_blank"
-                            className="hover:text-forest transition-colors"
-                          >
-                            {listing.title || listing.breed.nameDe}
-                          </Link>
-                          {listing.title && (
-                            <span className="text-stone-400 font-normal"> · {listing.breed.nameDe}</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-stone-500">
-                          {listing.priceCents
-                            ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
-                            : '—'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            listing.status === 'available' ? 'bg-green-50 text-green-700'
-                            : listing.status === 'reserved' ? 'bg-amber-50 text-amber-700'
-                            : listing.status === 'sold' ? 'bg-stone-200 text-stone-600'
-                            : 'bg-stone-100 text-stone-500'
-                          }`}>
-                            {listing.status === 'available' ? 'Aktiv'
-                              : listing.status === 'reserved' ? 'Reserviert'
-                              : listing.status === 'sold' ? 'Verkauft'
-                              : 'Entwurf'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-stone-500">
-                          <span className="inline-flex items-center gap-1.5">
-                            <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            {listing.viewCount}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {isBoosted ? (
-                            <span className="text-xs text-honey font-semibold">
-                              ★ Aktiv
-                              <span className="block text-stone-400 font-normal">
-                                {listing.boostImpressions} {listing.boostImpressions === 1 ? 'Einblendung' : 'Einblendungen'}
-                              </span>
-                            </span>
-                          ) : (
-                            <>
-                              <Link
-                                href={`/dashboard/boost/${listing.id}`}
-                                className="text-xs text-stone-400 hover:text-honey transition-colors font-medium"
-                              >
-                                {boostPriceLabel} buchen
-                              </Link>
-                              {listing.boostImpressions > 0 && (
-                                <span className="block text-[10px] text-stone-300 mt-0.5">
-                                  Letzter Boost: {listing.boostImpressions} Einblendungen
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <Link
-                            href={`/dashboard/inserat/${listing.id}`}
-                            className="text-xs text-stone-400 hover:text-forest transition-colors"
-                          >
-                            Bearbeiten
-                          </Link>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-              </div>
-
-              {/* Mobile: Karten */}
-              <div className="md:hidden divide-y divide-cream-deep">
-                {breeder.listings.map((listing) => {
-                  const isBoosted = !!listing.boostExpiresAt && listing.boostExpiresAt > new Date()
-                  return (
-                    <div key={listing.id} className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="min-w-0">
-                          <Link
-                            href={`/welpen/${listing.id}`}
-                            target="_blank"
-                            className="font-medium text-stone-800 hover:text-forest transition-colors block"
-                          >
-                            {listing.title || listing.breed.nameDe}
-                          </Link>
-                          {listing.title && (
-                            <p className="text-xs text-stone-400">{listing.breed.nameDe}</p>
-                          )}
-                        </div>
-                        <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          listing.status === 'available' ? 'bg-green-50 text-green-700'
-                          : listing.status === 'reserved' ? 'bg-amber-50 text-amber-700'
-                          : listing.status === 'sold' ? 'bg-stone-200 text-stone-600'
-                          : 'bg-stone-100 text-stone-500'
-                        }`}>
-                          {listing.status === 'available' ? 'Aktiv'
-                            : listing.status === 'reserved' ? 'Reserviert'
-                            : listing.status === 'sold' ? 'Verkauft'
-                            : 'Entwurf'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-stone-500 mb-3">
-                        <span>
-                          {listing.priceCents
-                            ? `${(listing.priceCents / 100).toLocaleString('de-DE')} €`
-                            : 'Preis auf Anfrage'}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <svg className="w-3.5 h-3.5 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          {listing.viewCount}
-                        </span>
-                        {isBoosted ? (
-                          <span className="text-honey font-semibold">★ Boost aktiv · {listing.boostImpressions} Einblendungen</span>
-                        ) : (
-                          <Link href={`/dashboard/boost/${listing.id}`} className="text-stone-400 hover:text-honey transition-colors font-medium">
-                            Boost: {boostPriceLabel} buchen
-                          </Link>
-                        )}
-                      </div>
-                      <Link
-                        href={`/dashboard/inserat/${listing.id}`}
-                        className="block text-center bg-cream border border-cream-deep rounded-lg py-2.5 text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
-                      >
-                        Bearbeiten
-                      </Link>
-                    </div>
-                  )
-                })}
-              </div>
-            </>
-          )}
-        </div>
-      </main>
+      {/* Mobile: untere Navigation */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex min-h-[70px] items-start justify-around border-t border-cream-deep bg-white px-1 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 lg:hidden" aria-label="Mobile Dashboard-Navigation">
+        {navItems.map((item, index) => <Link key={item.label} href={item.href} className={`flex min-w-[58px] flex-col items-center gap-1 rounded-lg px-2 py-1.5 ${index === 0 ? 'text-forest' : 'text-stone-400'}`}><DashboardIcon name={item.icon} className="h-5 w-5" /><span className="text-[9px] font-medium">{item.label === 'Meine Hunde' ? 'Hunde' : item.label === 'Züchterseite' ? 'Profil' : item.label}</span></Link>)}
+      </nav>
     </div>
   )
 }
