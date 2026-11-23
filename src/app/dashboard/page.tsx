@@ -110,11 +110,13 @@ export default async function DashboardPage() {
     { label: 'Züchterseite', href: '#zuechterseite', icon: 'profile' as const },
   ]
 
+  const verificationSteps = (breeder.diditStatus === 'approved' ? 1 : 0) + (breeder.verificationLevel === 'doc_verified' ? 1 : 0)
+
   const stats = [
     { label: 'Aktive Inserate', value: activeListings.length, icon: 'listing' as const, note: `${breeder._count.listings} Inserate gesamt` },
     { label: 'Aktuelle Würfe', value: breeder.litters.length, icon: 'litter' as const, note: `${draftListings.length} Entwürfe` },
     { label: 'Profilaufrufe', value: totalViews.toLocaleString('de-DE'), icon: 'eye' as const, note: 'Aufrufe deiner Inserate' },
-    { label: 'Verifizierung', value: breeder.verificationLevel === 'doc_verified' ? 'Verifiziert' : breeder.verificationLevel === 'kennel_verified' ? 'In Prüfung' : 'Offen', icon: 'shield' as const, note: breeder.diditStatus === 'approved' ? 'ID geprüft' : 'ID-Prüfung offen' },
+    { label: 'Verifizierung', value: `${verificationSteps} von 2`, icon: 'shield' as const, note: verificationSteps === 2 ? 'Zucht & ID abgeschlossen' : verificationSteps === 1 ? 'Eine Prüfung abgeschlossen' : 'Prüfungen noch offen' },
     { label: 'Nachrichten', value: unreadCount, icon: 'mail' as const, note: 'Ungelesen' },
   ]
 
@@ -180,7 +182,7 @@ export default async function DashboardPage() {
 
           {/* Kennzahlen */}
           <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4">
-            {stats.map((stat) => <div key={stat.label} className="rounded-2xl border border-cream-deep bg-white p-4 shadow-[0_3px_12px_rgba(27,58,45,0.025)] lg:p-5"><div className="flex items-center justify-between gap-2 text-stone-400"><span className="text-[11px] font-medium text-stone-500">{stat.label}</span><DashboardIcon name={stat.icon} className="h-[18px] w-[18px]" /></div>{stat.label === 'Verifizierung' ? <p className="mt-3"><span className={`inline-flex rounded-full px-3 py-1.5 text-sm font-bold ${stat.value === 'Verifiziert' ? 'bg-green-50 text-green-700' : stat.value === 'In Prüfung' ? 'bg-amber-50 text-amber-700' : 'bg-stone-100 text-stone-600'}`}>{stat.value}</span></p> : <p className="mt-2 font-serif text-2xl font-bold text-forest lg:mt-3 lg:text-3xl">{stat.value}</p>}<p className="mt-1 text-[10px] text-stone-400">{stat.note}</p></div>)}
+            {stats.map((stat) => <div key={stat.label} className="rounded-2xl border border-cream-deep bg-white p-4 shadow-[0_3px_12px_rgba(27,58,45,0.025)] lg:p-5"><div className="flex items-center justify-between gap-2 text-stone-400"><span className="text-[11px] font-medium text-stone-500">{stat.label}</span><DashboardIcon name={stat.icon} className="h-[18px] w-[18px]" /></div>{stat.label === 'Verifizierung' ? <><p className="mt-3 flex items-baseline gap-1.5"><strong className="text-xl font-bold text-forest">{stat.value}</strong><span className="text-[11px] text-stone-400">geprüft</span></p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100" role="progressbar" aria-label="Verifizierungsfortschritt" aria-valuemin={0} aria-valuemax={2} aria-valuenow={verificationSteps}><div className="h-full rounded-full bg-[#548366] transition-[width]" style={{ width: `${verificationSteps * 50}%` }} /></div></> : <p className="mt-2 font-serif text-2xl font-bold text-forest lg:mt-3 lg:text-3xl">{stat.value}</p>}<p className="mt-1 text-[10px] text-stone-400">{stat.note}</p></div>)}
           </div>
 
           {/* Zentrale Aktionen */}
