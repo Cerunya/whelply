@@ -310,7 +310,7 @@ export default async function WelpenDetailPage({
                     {listing.trainingNotes && (
                       <div className="mt-3 flex flex-wrap gap-2.5">
                         {listing.trainingNotes.split('\n').map((note) => note.trim()).filter(Boolean).map((note, index) => (
-                          <span key={`${note}-${index}`} className="rounded-lg bg-[#eaf3ec] px-3 py-1.5 text-[11px] font-bold text-forest shadow-[2.5px_2.5px_0_#c7dacb]">{note}</span>
+                          <span key={`${note}-${index}`} className="rounded-lg bg-[#e9f0f6] px-3 py-1.5 text-[11px] font-bold text-[#355d79] shadow-[2.5px_2.5px_0_#c7d6e1]">{note}</span>
                         ))}
                       </div>
                     )}
