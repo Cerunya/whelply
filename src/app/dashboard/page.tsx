@@ -14,6 +14,7 @@ const listingStatus = {
   available: { label: 'Aktiv', classes: 'bg-green-50 text-green-700' },
   reserved: { label: 'Reserviert', classes: 'bg-amber-50 text-amber-700' },
   sold: { label: 'Verkauft', classes: 'bg-stone-200 text-stone-600' },
+  expired: { label: 'Inaktiv', classes: 'bg-red-50 text-red-700' },
   draft: { label: 'Entwurf', classes: 'bg-stone-100 text-stone-500' },
 } as const
 
@@ -44,10 +45,8 @@ export default async function DashboardPage() {
     where: { userId: session.user.id },
     include: {
       listings: {
-        where: { status: { in: ['available', 'draft', 'reserved', 'sold'] } },
         include: { breed: { select: { nameDe: true } } },
         orderBy: { createdAt: 'desc' },
-        take: 10,
       },
       litters: {
         include: {
