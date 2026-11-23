@@ -346,6 +346,7 @@ export default async function WelpenPage({
                   </div>
                   <div className="p-4">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-400">{litter.breed.nameDe}</p>
+                    {litter.name && <h3 className="mt-0.5 font-serif text-lg font-bold text-stone-900">{litter.name}</h3>}
                     <p className="font-semibold text-forest text-sm">{litter.breeder.kennelName}</p>
                     <p className="text-xs text-stone-500 mt-0.5">
                       {litter.status === 'pregnant' ? 'Trächtigkeit bestätigt' : 'Wurf geplant'}
