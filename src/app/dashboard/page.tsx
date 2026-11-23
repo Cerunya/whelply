@@ -27,7 +27,7 @@ const litterStatus = {
 
 function SignOutButton({ className = '' }: { className?: string }) {
   return <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }) }}>
-    <button type="submit" className={className}>Abmelden</button>
+    <button type="submit" className={className}><DashboardIcon name="logout" className="h-4 w-4" />Abmelden</button>
   </form>
 }
 
@@ -134,11 +134,11 @@ export default async function DashboardPage() {
           <Link href="/dashboard/profil" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-xs font-medium text-white/65 hover:bg-white/10 hover:text-white"><DashboardIcon name="settings" className="h-[18px] w-[18px]" />Einstellungen</Link>
           <Link href="/" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-xs font-medium text-white/65 hover:bg-white/10 hover:text-white"><DashboardIcon name="website" className="h-[18px] w-[18px]" />Zur Website</Link>
           {breeder.user.role === 'admin' && <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-xs font-semibold text-honey-light hover:bg-white/10">Admin</Link>}
-          <div className="mt-4 flex items-center gap-3 px-3 pt-4">
+          <div className="mt-4 flex items-center gap-3 border-t border-white/10 px-3 pt-4">
             <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-honey text-xs font-bold text-forest-dark">{breeder.kennelName.slice(0, 2).toUpperCase()}</span>
             <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{breeder.kennelName}</p><p className="mt-0.5 text-[10px] capitalize text-white/50">{plan} Plan</p></div>
-            <SignOutButton className="text-[10px] text-white/45 hover:text-white" />
           </div>
+          <SignOutButton className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-3 text-xs font-semibold text-white/80 transition-colors hover:border-white/40 hover:bg-white/10 hover:text-white" />
         </div>
       </aside>
 
@@ -167,6 +167,7 @@ export default async function DashboardPage() {
           <p className="text-sm font-semibold text-stone-700">Übersicht</p>
           <div className="flex items-center gap-3">
             {breeder.user.role === 'admin' && <Link href="/admin" className="text-xs font-semibold text-honey">Admin</Link>}
+            <Link href="/dashboard/profil" className="flex min-h-10 items-center gap-2 rounded-xl border border-cream-deep bg-cream/60 px-3 text-xs font-semibold text-forest transition-colors hover:border-forest/25 hover:bg-cream"><DashboardIcon name="shield" className={`h-4 w-4 ${breeder.verificationLevel === 'doc_verified' ? 'text-green-700' : 'text-honey'}`} />Verifizierung</Link>
             <Link href="/dashboard/nachrichten" className="relative flex h-11 w-11 items-center justify-center rounded-xl text-stone-500 hover:bg-cream" aria-label="Nachrichten"><DashboardIcon name="mail" className="h-5 w-5" />{unreadCount > 0 && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-honey" />}</Link>
             <Link href="/dashboard/profil" className="flex min-h-11 items-center gap-2 rounded-xl px-2 hover:bg-cream"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-forest text-[10px] font-bold text-white">{breeder.kennelName.slice(0, 2).toUpperCase()}</span><span className="text-xs font-semibold">{breeder.kennelName}</span></Link>
           </div>
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
         <main id="uebersicht" className="mx-auto max-w-[1440px] scroll-mt-24 px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-12 lg:pt-8">
           <div className="mb-7 hidden items-center justify-between gap-6 lg:flex">
             <div><p className="mb-1 text-xs text-stone-500">Willkommen zurück</p><h1 className="font-serif text-3xl font-bold text-forest">Dein Zwinger auf einen Blick.</h1><p className="mt-2 text-xs text-stone-400">{breeder.kennelName}{breeder.city ? ` · ${breeder.city}` : ''} · <span className="capitalize">{plan} Plan</span>{plan === 'free' && ` · ${activeListings.length}/${maxFree} aktive Inserate`}</p></div>
-            <div className="flex items-center gap-4"><BreederStatusToggles initialPublished={breeder.isPublished ?? true} initialActive={breeder.isActive ?? true} />{canAddMore && <Link href="/dashboard/inserat-erstellen" className="flex min-h-11 items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-forest-light"><DashboardIcon name="plus" className="h-4 w-4" />Neues Inserat</Link>}</div>
+            {canAddMore && <Link href="/dashboard/inserat-erstellen" className="flex min-h-11 items-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-forest-light"><DashboardIcon name="plus" className="h-4 w-4" />Neues Inserat</Link>}
           </div>
 
           {/* Kennzahlen */}
@@ -222,19 +223,17 @@ export default async function DashboardPage() {
               </section>
             </div>
 
-            {/* Züchterseite und Verifizierung */}
+            {/* Züchterseite und Sichtbarkeit */}
             <aside className="space-y-5">
               <section id="zuechterseite" className="scroll-mt-24 overflow-hidden rounded-2xl border border-cream-deep bg-white">
                 <div className="relative flex h-24 items-center justify-center overflow-hidden bg-forest"><span className="flex h-12 w-12 -rotate-3 items-center justify-center rounded-2xl bg-cream text-forest shadow-sm"><DashboardIcon name="profile" className="h-6 w-6" /></span></div>
                 <div className="p-5"><h2 className="font-serif text-lg font-bold text-forest">{breeder.kennelName}</h2><p className="mt-1.5 flex items-center gap-1.5 text-xs text-stone-400"><DashboardIcon name="location" className="h-3.5 w-3.5" />{breeder.city || 'Deutschland'}{breeder.state ? `, ${breeder.state}` : ''}</p><Link href={`/zuechter/${slugify(breeder.kennelName)}`} target="_blank" className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-forest/20 text-xs font-bold text-forest hover:bg-forest/5">Züchterseite ansehen<DashboardIcon name="website" className="h-4 w-4" /></Link>
                   <div className="mt-4 grid grid-cols-3 gap-2">{[{ label: 'Profil', href: '/dashboard/profil', icon: 'user' as const },{ label: 'Über uns', href: '/dashboard/ueber-uns', icon: 'listing' as const },{ label: 'Branding', href: '/dashboard/theme', icon: 'palette' as const },{ label: 'Aktuelles', href: '/dashboard/news', icon: 'news' as const },{ label: 'Galerie', href: '/dashboard/galerie', icon: 'gallery' as const },{ label: 'Nachrichten', href: '/dashboard/nachrichten', icon: 'messages' as const }].map((item) => <Link key={item.label} href={item.href} className="relative flex min-h-[68px] flex-col items-center justify-center gap-1.5 rounded-xl border border-cream-deep bg-cream/60 px-1 text-center text-[10px] font-semibold text-forest hover:border-forest/30 hover:bg-forest/5"><DashboardIcon name={item.icon} className="h-[18px] w-[18px]" />{item.label}{item.label === 'Nachrichten' && unreadCount > 0 && <span className="absolute right-1.5 top-1.5 rounded-full bg-honey px-1.5 text-[8px] font-bold text-forest-dark">{unreadCount}</span>}</Link>)}</div>
+                  <div className="mt-5 border-t border-cream-deep pt-4 [&>div]:w-full [&_label]:justify-between"><BreederStatusToggles initialPublished={breeder.isPublished ?? true} initialActive={breeder.isActive ?? true} /></div>
                 </div>
               </section>
 
-              <Link href="/dashboard/profil" className="block rounded-2xl border border-cream-deep bg-white p-5 transition-colors hover:border-forest/30"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF3EC] text-forest"><DashboardIcon name="shield" /></span><div><h2 className="text-sm font-bold text-stone-800">Verifizierung</h2><p className="mt-0.5 text-[10px] text-stone-400">Vertrauen bei Interessenten stärken</p></div></div><div className="mt-4 space-y-2.5"><p className={`flex items-center gap-2 text-xs ${breeder.diditStatus === 'approved' ? 'text-green-700' : 'text-stone-400'}`}><DashboardIcon name={breeder.diditStatus === 'approved' ? 'check' : 'user'} className="h-4 w-4" />{breeder.diditStatus === 'approved' ? 'ID geprüft' : 'ID-Prüfung offen'}</p><p className={`flex items-center gap-2 text-xs ${breeder.verificationLevel === 'doc_verified' ? 'text-green-700' : breeder.verificationLevel === 'kennel_verified' ? 'text-amber-600' : 'text-stone-400'}`}><DashboardIcon name={breeder.verificationLevel === 'doc_verified' ? 'check' : 'shield'} className="h-4 w-4" />{breeder.verificationLevel === 'doc_verified' ? 'Zucht verifiziert' : breeder.verificationLevel === 'kennel_verified' ? 'Zucht in Prüfung' : 'Zuchtverifizierung offen'}</p></div><span className="mt-4 flex items-center gap-1.5 text-xs font-bold text-forest">Verifizierung verwalten<DashboardIcon name="arrow" className="h-4 w-4" /></span></Link>
-
               <div className="rounded-2xl bg-[#FFF2D8] p-5"><div className="flex items-start gap-3"><DashboardIcon name="trend" className="h-5 w-5 flex-shrink-0 text-honey" /><div><h2 className="font-serif text-base font-bold text-[#664C1D]">Mehr Sichtbarkeit</h2><p className="mt-2 text-xs leading-relaxed text-[#725C34]">Hebe passende Inserate mit einem Boost in den Suchergebnissen hervor.</p><Link href="#inserate" className="mt-3 inline-flex min-h-9 items-center gap-1.5 text-xs font-bold text-[#82560D]">Inserat auswählen<DashboardIcon name="arrow" className="h-3.5 w-3.5" /></Link></div></div></div>
-              <div className="hidden justify-center lg:flex"><SignOutButton className="min-h-11 px-4 text-xs text-stone-400 hover:text-stone-700" /></div>
             </aside>
           </div>
         </main>
