@@ -180,7 +180,7 @@ export default async function DashboardPage() {
 
           {/* Kennzahlen */}
           <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4">
-            {stats.map((stat) => <div key={stat.label} className="rounded-2xl border border-cream-deep bg-white p-4 shadow-[0_3px_12px_rgba(27,58,45,0.025)] lg:p-5"><div className="flex items-center justify-between gap-2 text-stone-400"><span className="text-[11px] font-medium text-stone-500">{stat.label}</span><DashboardIcon name={stat.icon} className="h-[18px] w-[18px]" /></div><p className="mt-2 font-serif text-2xl font-bold text-forest lg:mt-3 lg:text-3xl">{stat.value}</p><p className="mt-1 text-[10px] text-stone-400">{stat.note}</p></div>)}
+            {stats.map((stat) => <div key={stat.label} className="rounded-2xl border border-cream-deep bg-white p-4 shadow-[0_3px_12px_rgba(27,58,45,0.025)] lg:p-5"><div className="flex items-center justify-between gap-2 text-stone-400"><span className="text-[11px] font-medium text-stone-500">{stat.label}</span><DashboardIcon name={stat.icon} className="h-[18px] w-[18px]" /></div>{stat.label === 'Verifizierung' ? <p className="mt-3"><span className={`inline-flex rounded-full px-3 py-1.5 text-sm font-bold ${stat.value === 'Verifiziert' ? 'bg-green-50 text-green-700' : stat.value === 'In Prüfung' ? 'bg-amber-50 text-amber-700' : 'bg-stone-100 text-stone-600'}`}>{stat.value}</span></p> : <p className="mt-2 font-serif text-2xl font-bold text-forest lg:mt-3 lg:text-3xl">{stat.value}</p>}<p className="mt-1 text-[10px] text-stone-400">{stat.note}</p></div>)}
           </div>
 
           {/* Zentrale Aktionen */}
