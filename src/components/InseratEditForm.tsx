@@ -420,17 +420,17 @@ export default function InseratEditForm({
             </select>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-forest text-white py-3 rounded-xl text-sm font-bold hover:bg-forest-light transition-colors disabled:opacity-40"
+              className="min-h-11 w-full flex-1 rounded-xl bg-forest px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-forest-light disabled:opacity-40"
             >
               {loading ? 'Wird gespeichert...' : 'Änderungen speichern'}
             </button>
             <Link
               href="/dashboard"
-              className="px-5 py-3 border border-stone-200 rounded-xl text-sm text-stone-500 hover:bg-stone-50 transition-colors"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-stone-200 px-5 py-2.5 text-sm text-stone-500 transition-colors hover:bg-stone-50"
             >
               Abbrechen
             </Link>

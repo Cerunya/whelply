@@ -473,13 +473,13 @@ export default function LitterDashboard({
 
         {/* Welpen-Liste */}
         <div className="bg-white rounded-2xl border border-cream-deep p-7">
-          <div className="flex items-center justify-between mb-5">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-serif text-lg font-bold text-stone-900">
               Welpen ({puppies.length}{litter.puppyCount ? ` von ${litter.puppyCount}` : ''})
             </h3>
             <Link
               href={`/dashboard/wurf/${litter.id}/welpe-hinzufuegen`}
-              className="bg-forest text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-forest-light transition-colors"
+              className="inline-flex min-h-11 items-center justify-center self-start rounded-xl bg-forest px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-forest-light"
             >
               + Welpe hinzufügen
             </Link>

@@ -33,7 +33,7 @@ export default function BoostKaufButton({ listingId, priceLabel }: { listingId: 
       <button
         onClick={handleClick}
         disabled={loading}
-        className="w-full bg-honey text-white font-bold text-base px-8 py-4 rounded-xl hover:bg-honey-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-honey px-4 py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-honey-light disabled:cursor-not-allowed disabled:opacity-60 sm:px-8 sm:py-3 sm:text-base"
       >
         {loading && (
           <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
