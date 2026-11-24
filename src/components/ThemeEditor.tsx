@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import DashboardHeader from './DashboardHeader'
 import BreederImageUploader from './BreederImageUploader'
 import SaveToast from './SaveToast'
 
@@ -186,24 +185,14 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
 
   return (
     <div className="min-h-screen bg-cream font-sans">
-      <DashboardHeader
-        title="Theme & Branding"
-        action={
-          <Link
-            href={publicPath}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 bg-forest text-white text-xs font-bold px-3.5 py-2 rounded-lg hover:bg-forest-light transition-colors"
-          >
-            Zuechterseite ansehen
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </Link>
-        }
-      />
-
       <main className="max-w-7xl mx-auto px-4 py-10 space-y-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="font-serif text-2xl font-bold text-stone-900">Theme &amp; Branding</h1>
+          <Link href={publicPath} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-forest px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-forest-light">
+            Züchterseite ansehen
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+          </Link>
+        </div>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-4">
             {error}
