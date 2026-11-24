@@ -24,6 +24,7 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
   const [idManualPending, setIdManualPending] = useState(idDocPending)
   const [idUploading, setIdUploading] = useState(false)
   const [idConsent, setIdConsent] = useState(false)
+  const [idFileNames, setIdFileNames] = useState({ front: '', back: '', selfie: '' })
   const frontRef = useRef<HTMLInputElement>(null)
   const backRef = useRef<HTMLInputElement>(null)
   const selfieRef = useRef<HTMLInputElement>(null)
@@ -106,95 +107,109 @@ export default function VerifizierungSection({ verificationLevel, verifiedAt, re
   const idDeclined = diditStatus === 'declined'
   const idPending = diditStatus === 'pending'
 
+  function renderIdUploadField(label: string, field: 'front' | 'back' | 'selfie', inputRef: { current: HTMLInputElement | null }, optional = false) {
+    const fileName = idFileNames[field]
+    const selfie = field === 'selfie'
+    return (
+      <div>
+        <input
+          ref={(node) => { inputRef.current = node }}
+          type="file"
+          accept={selfie ? 'image/jpeg,image/png,image/webp' : 'image/jpeg,image/png,image/webp,application/pdf'}
+          className="sr-only"
+          aria-label={label}
+          onChange={(e) => setIdFileNames((current) => ({ ...current, [field]: e.target.files?.[0]?.name ?? '' }))}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className={`flex min-h-[76px] w-full items-center gap-3 rounded-xl border border-dashed px-4 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-forest/30 ${fileName ? 'border-forest/40 bg-forest/5' : 'border-stone-300 bg-[#fcfbf7] hover:border-forest/50 hover:bg-forest/5'}`}
+        >
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-forest/10 text-forest" aria-hidden="true">
+            {fileName ? '✓' : selfie ? '📷' : '↑'}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-forest">{label}{optional && <span className="ml-2 text-[10px] font-normal text-stone-500">Optional</span>}</span>
+            <span className="mt-1 block truncate text-xs text-stone-500">{fileName || (selfie ? 'Foto aufnehmen oder auswählen' : 'Bild oder PDF auswählen')}</span>
+          </span>
+          <span className="hidden text-xs font-bold text-forest sm:inline">{fileName ? 'Ändern' : 'Auswählen'}</span>
+        </button>
+      </div>
+    )
+  }
+
   function renderManualIdUpload() {
     return (
-      <div className="ml-10 space-y-4">
-            {idDeclined && (
-              <p className="text-sm text-red-600">Die automatische ID-Prüfung ist fehlgeschlagen.</p>
-            )}
+      <div className="mt-5 overflow-hidden rounded-2xl border border-cream-deep bg-white">
+        <div className="grid lg:grid-cols-[minmax(230px,0.72fr)_1.5fr]">
+          <aside className="bg-[#f2f4ed] p-5 sm:p-6">
+            <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-forest/10 text-xl text-forest" aria-hidden="true">🪪</span>
+            <span className="mb-3 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-800">ID-Prüfung ausstehend</span>
+            <h4 className="font-serif text-xl font-bold text-forest">Noch ein letzter Schritt.</h4>
+            <p className="mt-2 text-xs leading-relaxed text-stone-600">Dein Züchterstatus ist bereits bestätigt. Für die vollständige Verifizierung fehlt nur noch die Prüfung deiner Identität.</p>
+            <ul className="mt-5 space-y-2.5 text-xs text-stone-600">
+              <li className="flex items-center gap-2"><span className="text-forest">✓</span>Persönliche Prüfung durch unser Team</li>
+              <li className="flex items-center gap-2"><span className="text-forest">✓</span>Maximale Dateigröße: 10 MB</li>
+              <li className="flex items-center gap-2"><span className="text-forest">✓</span>Automatische Löschung nach der Prüfung</li>
+            </ul>
+            <div className="mt-5 flex items-start gap-2 border-t border-stone-200 pt-4 text-xs leading-relaxed text-stone-600">
+              <span aria-hidden="true">🔒</span><p><strong className="text-forest">Deine Dokumente sind geschützt.</strong> Sie werden nur zur Prüfung verwendet und anschließend automatisch gelöscht.</p>
+            </div>
+          </aside>
+          <div className="space-y-3 p-5 sm:p-6">
+            {idDeclined && <p className="text-sm text-red-600">Die automatische ID-Prüfung ist fehlgeschlagen.</p>}
             {idDocRejectReason && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-                <p className="font-semibold mb-0.5">ID-Prüfung abgelehnt</p>
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <p className="mb-0.5 font-semibold">ID-Prüfung abgelehnt</p>
                 <p>{idDocRejectReason}</p>
               </div>
             )}
-
-            <div>
-              <p className="text-xs font-semibold text-stone-700 mb-1">Manuelle Prüfung</p>
-              <p className="text-xs text-stone-500 mb-3">
-                Die automatische Online-Prüfung ist derzeit nicht verfügbar. Lade stattdessen dein
-                Ausweisdokument (Personalausweis oder Reisepass) sowie ein Selfie hoch, auf dem du den
-                Ausweis in der Hand hältst — wir prüfen beides von Hand.
-                Die Dateien werden nach der Prüfung automatisch gelöscht.
-              </p>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-stone-600 mb-1">Ausweis Vorderseite *</label>
-                  <input ref={frontRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
-                    className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-stone-600 mb-1">Ausweis Rückseite (optional)</label>
-                  <input ref={backRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
-                    className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-stone-600 mb-1">Selfie mit Ausweis in der Hand *</label>
-                  <input ref={selfieRef} type="file" accept="image/jpeg,image/png,image/webp"
-                    className="block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 file:cursor-pointer" />
-                </div>
-                <p className="text-xs text-stone-400">JPG, PNG, WebP oder PDF (Selfie: nur Bild) · max. 10 MB pro Datei</p>
-
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox" checked={idConsent} onChange={(e) => setIdConsent(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-stone-300 text-forest focus:ring-forest" />
-                  <span className="text-xs text-stone-500 leading-relaxed">
-                    Ich willige ein, dass diese Dateien ausschließlich zur Prüfung meiner Identität
-                    verwendet und nach der Entscheidung automatisch gelöscht werden.
-                  </span>
-                </label>
-
-                {error && <p className="text-sm text-red-600">{error}</p>}
-
-                <button onClick={handleIdUpload} disabled={idUploading}
-                  className="bg-forest text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-forest-light disabled:opacity-40">
-                  {idUploading ? 'Wird hochgeladen...' : 'Ausweis & Selfie einreichen'}
-                </button>
-              </div>
-            </div>
-                </div>
+            {renderIdUploadField('Ausweis Vorderseite', 'front', frontRef)}
+            {renderIdUploadField('Ausweis Rückseite', 'back', backRef, true)}
+            {renderIdUploadField('Selfie mit Ausweis', 'selfie', selfieRef)}
+            <label className="flex cursor-pointer items-start gap-2.5 pt-1">
+              <input type="checkbox" checked={idConsent} onChange={(e) => setIdConsent(e.target.checked)}
+                className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-stone-300 text-forest focus:ring-forest" />
+              <span className="text-xs leading-relaxed text-stone-600">Ich willige ein, dass diese Dateien ausschließlich zur Prüfung meiner Identität verwendet und nach der Entscheidung automatisch gelöscht werden.</span>
+            </label>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <button type="button" onClick={handleIdUpload} disabled={idUploading}
+              className="min-h-11 rounded-xl bg-forest px-5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-forest-light disabled:opacity-40">
+              {idUploading ? 'Wird hochgeladen...' : 'Dokumente zur Prüfung einreichen'}
+            </button>
+          </div>
+        </div>
+      </div>
     )
   }
 
   // ── Vollständig verifiziert ──
   if (verificationLevel === 'doc_verified') {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-lg">✓</div>
-          <div>
-            <p className="font-semibold text-green-800">Verifizierter Züchter</p>
-            <p className="text-sm text-green-600">
-              {verifiedAt ? `Verifiziert am ${new Date(verifiedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'Dein Profil ist verifiziert.'}
-            </p>
+      <div className="overflow-hidden rounded-2xl border border-green-200 bg-white">
+        <div className="bg-green-50 p-5 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-500 text-lg text-white">✓</div>
+            <div>
+              <p className="font-semibold text-green-800">Verifizierter Züchter</p>
+              <p className="text-sm text-green-600">
+                {verifiedAt ? `Züchterstatus bestätigt am ${new Date(verifiedAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'Dein Züchterstatus ist bestätigt.'}
+              </p>
+            </div>
+            <span className="ml-auto hidden items-center gap-1.5 rounded-full border border-green-200 px-2.5 py-1 text-[10px] font-bold text-green-700 sm:inline-flex">✓ Zucht bestätigt</span>
           </div>
         </div>
-        <div className="flex gap-4 ml-13 text-xs">
-          <span className={diditStatus === 'approved' ? 'text-green-700' : 'text-red-400'}>
-            {diditStatus === 'approved' ? '🪪 ID bestätigt' : '🪪 ID ausstehend'}
-          </span>
-          <span className="text-green-700">📄 Züchterstatus bestätigt</span>
-        </div>
+        {diditStatus === 'approved' && <p className="px-5 py-4 text-xs text-green-700 sm:px-6">🪪 ID bestätigt</p>}
         {diditStatus !== 'approved' && diditAvailable === true && !idManualPending && (
-          <div className="mt-4 pt-4 border-t border-green-200">
-            <p className="text-xs text-green-700 mb-2">Möchtest du zusätzlich deine Identität per Ausweischeck bestätigen?</p>
+          <div className="m-5 rounded-xl border border-green-200 bg-green-50 p-4 sm:m-6">
+            <p className="mb-2 text-xs text-green-700">Möchtest du zusätzlich deine Identität per Ausweischeck bestätigen?</p>
             <button onClick={startDiditCheck} disabled={diditLoading}
-              className="text-xs font-bold text-green-700 border border-green-300 px-4 py-2 rounded-lg hover:bg-green-100 disabled:opacity-40">
+              className="rounded-lg border border-green-300 px-4 py-2 text-xs font-bold text-green-700 hover:bg-green-100 disabled:opacity-40">
               {diditLoading ? 'Wird gestartet...' : 'ID-Prüfung nachholen'}
             </button>
           </div>
         )}
-        {diditStatus !== 'approved' && diditAvailable === false && !idManualPending && renderManualIdUpload()}
+        {diditStatus !== 'approved' && diditAvailable === false && !idManualPending && <div className="p-5 pt-0 sm:p-6 sm:pt-0">{renderManualIdUpload()}</div>}
       </div>
     )
   }
