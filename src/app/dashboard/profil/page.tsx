@@ -59,7 +59,7 @@ export default async function ProfilPage() {
           idDocRejectReason: breeder.idDocRejectReason ?? null,
         }}
       />
-      <div className="max-w-xl mx-auto px-4 pb-12">
+      <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         <div className="bg-white rounded-2xl border border-cream-deep p-6">
           <h2 className="font-serif text-lg font-bold text-stone-900 mb-4">Passwort ändern</h2>
           <PasswortAendernForm />

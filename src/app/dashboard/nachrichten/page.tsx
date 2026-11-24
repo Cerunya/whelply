@@ -49,7 +49,7 @@ export default async function NachrichtenPage() {
   return (
     <div className="min-h-screen bg-cream">
       <DashboardHeader title="Nachrichten" />
-      <main className="max-w-2xl mx-auto px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <h1 className="font-serif text-2xl font-bold text-stone-900 mb-6">Nachrichten</h1>
         {messageEmailOptIn !== null && <NachrichtenEinstellungen initial={messageEmailOptIn} />}
         {conversations.length === 0 ? (

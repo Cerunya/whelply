@@ -79,7 +79,7 @@ export default function InseratImport({ breeds }: { breeds: Breed[] }) {
   return (
     <div className="min-h-screen bg-cream">
       <DashboardHeader title="Inserat importieren" backHref="/dashboard" backLabel="Dashboard" />
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8"><div className="flex flex-wrap items-center gap-3"><h1 className="font-serif text-3xl font-bold text-stone-900">Eigenes Inserat übernehmen</h1><span className="rounded-full bg-honey/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-honey">Beta</span></div><p className="mt-2 text-sm leading-relaxed text-stone-500">Importiere dein edogs- oder Snautz-Inserat, prüfe alle Angaben und speichere es zunächst als Entwurf.</p></div>
         <section className="rounded-2xl border border-cream-deep bg-white p-5 sm:p-7">
           <label className={labelClass} htmlFor="import-platform">Plattform</label>

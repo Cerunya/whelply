@@ -24,7 +24,7 @@ export default async function NewsListPage() {
     <div className="min-h-screen bg-cream font-sans">
       <DashboardHeader title="Aktuelles" />
 
-      <main className="max-w-5xl mx-auto px-4 py-10">
+      <main className="max-w-7xl mx-auto px-4 py-10">
         <div className="mb-8">
           <h1 className="font-serif text-2xl font-bold text-stone-900 mb-1">Aktuelles</h1>
           <p className="text-stone-400 text-sm">

@@ -85,7 +85,7 @@ export default function NewsPostForm({ post }: { post?: Post }) {
     <div className="min-h-screen bg-cream font-sans">
       <DashboardHeader title={isEdit ? "Beitrag bearbeiten" : "Neuer Beitrag"} backHref="/dashboard/news" backLabel="Aktuelles" />
 
-      <main className="max-w-3xl mx-auto px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">

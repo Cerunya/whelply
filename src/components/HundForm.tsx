@@ -108,7 +108,7 @@ export default function HundForm({ breeds }: { breeds: Breed[] }) {
     <div className="min-h-screen bg-cream font-sans">
       <DashboardHeader title="Zuchthund eintragen" />
 
-      <main className="max-w-xl mx-auto px-4 py-12">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Zuchthund eintragen</h2>
         <p className="text-stone-400 text-sm mb-2">
           Trag deine Zuchthündinnen und -rüden ein. Sie erscheinen auf deiner Züchter-Seite

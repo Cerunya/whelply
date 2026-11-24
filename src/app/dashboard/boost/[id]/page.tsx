@@ -38,7 +38,7 @@ export default async function BoostPage({ params }: { params: { id: string } }) 
     <div className="min-h-screen bg-cream font-sans">
       <DashboardHeader title="Topanzeige buchen" backHref="/dashboard" backLabel="Dashboard" />
 
-      <main className="max-w-2xl mx-auto px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Inserat-Vorschau */}
         <div className="bg-white rounded-2xl border border-cream-deep p-4 mb-6 flex items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-cream-dark overflow-hidden flex items-center justify-center flex-shrink-0">

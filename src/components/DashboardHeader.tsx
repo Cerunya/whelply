@@ -10,7 +10,7 @@ type Props = {
 export default function DashboardHeader({ title, backHref = '/dashboard', backLabel = 'Dashboard', action }: Props) {
   return (
     <header className="border-b border-cream-deep bg-cream">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-6 sm:px-6 lg:px-8">
         <Link href={backHref} className="flex min-h-10 items-center gap-1.5 text-xs font-semibold text-stone-400 transition-colors hover:text-forest">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           {backLabel}

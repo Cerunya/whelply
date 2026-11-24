@@ -85,7 +85,7 @@ export default function WurfForm({
     <div className="min-h-screen bg-cream font-sans">
       <DashboardHeader title="Wurf eintragen" />
 
-      <main className="max-w-xl mx-auto px-4 py-12">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">Wurf eintragen</h2>
         <p className="text-stone-400 text-sm mb-8">
           Trag deinen geplanten oder bereits geborenen Wurf ein. Käufer können sich vormerken lassen.

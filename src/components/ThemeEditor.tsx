@@ -203,7 +203,7 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
         }
       />
 
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 py-10 space-y-8">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-4">
             {error}

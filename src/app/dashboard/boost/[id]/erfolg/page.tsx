@@ -76,7 +76,7 @@ export default async function BoostErfolgPage({
     <div className="min-h-screen bg-cream font-sans">
       <DashboardHeader title="Topanzeige" backHref="/dashboard" backLabel="Dashboard" />
 
-      <main className="max-w-2xl mx-auto px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {paymentOk && isBoosted ? (
           <>
             <div className="bg-white rounded-2xl border border-green-200 p-8 text-center mb-6">
