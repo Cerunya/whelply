@@ -160,7 +160,7 @@ export default async function DashboardPage() {
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-honey-light">Mein Züchterdashboard</p>
             <h1 className="font-serif text-3xl font-bold text-white">{breeder.kennelName}</h1>
             <p className="mt-2 flex items-center gap-1.5 text-xs text-white/75"><DashboardIcon name="location" className="h-3.5 w-3.5" />{breeder.city || 'Deutschland'}<span>·</span><span className="capitalize">{plan} Plan</span></p>
-            <div className="mt-5 [&_button]:border-white/20 [&_button]:text-white"><BreederStatusToggles initialPublished={breeder.isPublished ?? true} initialActive={breeder.isActive ?? true} /></div>
+            <div className="mt-5"><BreederStatusToggles initialPublished={breeder.isPublished ?? true} initialActive={breeder.isActive ?? true} onDark /></div>
           </div>
         </section>
 
