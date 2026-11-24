@@ -159,11 +159,11 @@ export default async function WelpenDetailPage({
           {/* === HERO: Kopfzeile + Galerie (volle Breite) === */}
           <div className="mb-5">
             {/* Titel-Zeile */}
-            <div className="flex flex-col items-start gap-4 mb-5 sm:flex-row sm:justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="inline-block max-w-full whitespace-normal break-words leading-snug text-[11px] font-extrabold text-white bg-forest px-3 py-1.5 rounded-full uppercase tracking-wider mb-2 -rotate-2">{listing.breed.nameDe}</p>
-                <h1 className="font-serif text-3xl md:text-5xl font-extrabold text-stone-900 leading-tight">
-                  <span className="inline-flex items-center gap-2 flex-wrap">
+            <div className="mb-5 flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1 text-center sm:text-left">
+                <p className="mb-2 inline-block max-w-full -rotate-2 whitespace-normal break-words rounded-full bg-forest px-3 py-1.5 text-[11px] font-extrabold uppercase leading-snug tracking-wider text-white">{listing.breed.nameDe}</p>
+                <h1 className="font-serif text-3xl font-extrabold leading-tight text-stone-900 md:text-5xl">
+                  <span className="inline-flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                     {listing.title || listing.breeder.kennelName}
                     <span className={`inline-flex items-end ${pawColor}`} aria-hidden="true">
                       <svg width="34" height="34" viewBox="0 0 60 60" className="rotate-[14deg]" fill="currentColor"><ellipse cx="30" cy="40" rx="13" ry="15" /><ellipse cx="10" cy="25" rx="6" ry="8" /><ellipse cx="23" cy="14" rx="6" ry="8" /><ellipse cx="37" cy="14" rx="6" ry="8" /><ellipse cx="50" cy="25" rx="6" ry="8" /></svg>
@@ -171,9 +171,9 @@ export default async function WelpenDetailPage({
                     </span>
                   </span>
                 </h1>
-                <div className="flex items-center gap-3 mt-2 flex-wrap">
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
                   {sex && (
-                    <span className={`text-sm font-semibold ${listing.sex === 'male' ? 'text-blue-500' : listing.sex === 'female' ? 'text-pink-500' : 'text-stone-400'}`}>{sex}</span>
+                    <span className={`text-sm font-semibold ${listing.sex === 'male' ? 'text-blue-500' : listing.sex === 'female' ? 'text-pink-500' : 'text-stone-400'}`}>{listing.sex ? sex : 'Geschlecht nicht angegeben'}</span>
                   )}
                   {listing.status !== 'available' && listing.status !== 'draft' && (
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
