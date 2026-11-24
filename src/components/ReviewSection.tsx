@@ -48,7 +48,7 @@ export default function ReviewSection({ breederId, isLoggedIn }: { breederId: st
 
   return (
     <div className="bg-white rounded-2xl border border-cream-deep p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-serif text-xl font-bold text-stone-900">Bewertungen</h2>
           {avg !== null && (
@@ -59,8 +59,8 @@ export default function ReviewSection({ breederId, isLoggedIn }: { breederId: st
         </div>
         {isLoggedIn && !showForm && (
           <button onClick={() => setShowForm(true)}
-            className="text-sm font-semibold text-forest border border-forest/30 px-4 py-2 rounded-xl hover:bg-forest/5 transition-colors">
-            Bewertung schreiben
+            className="min-h-10 self-start whitespace-nowrap rounded-xl border border-forest/30 px-3 py-2 text-xs font-semibold text-forest transition-colors hover:bg-forest/5 sm:px-4 sm:text-sm">
+            <span className="sm:hidden">Bewerten</span><span className="hidden sm:inline">Bewertung schreiben</span>
           </button>
         )}
       </div>
