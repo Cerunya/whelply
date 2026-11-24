@@ -205,16 +205,17 @@ export default function ThemeEditor({ breeder }: { breeder: BreederTheme }) {
           <p className="text-sm text-stone-400 mb-4">
             Reserviere eine eigene Adresse wie <span className="font-mono text-stone-600">deinzwinger.whelply.de</span>
           </p>
-          <div className="flex items-center gap-0 rounded-xl border border-stone-200 overflow-hidden">
-            <span className="px-3 py-2.5 bg-cream text-stone-400 text-sm border-r border-stone-200 whitespace-nowrap">whelply.de/</span>
+          <div className="flex items-center gap-0 overflow-hidden rounded-xl border border-stone-200">
             <input
               type="text"
               value={subdomain}
               onChange={(e) => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
               placeholder="dein-zwinger"
-              className="flex-1 px-3 py-2.5 text-sm focus:outline-none bg-white"
+              aria-label="Wunschname für deine Subdomain"
+              className="min-w-0 flex-1 bg-white px-3 py-2.5 text-sm focus:outline-none"
               maxLength={30}
             />
+            <span className="whitespace-nowrap border-l border-stone-200 bg-cream px-3 py-2.5 text-sm text-stone-400">.whelply.de</span>
           </div>
           {subdomainStatus === 'checking' && <p className="text-xs text-stone-400 mt-1.5">Wird geprueft...</p>}
           {subdomainStatus === 'available' && <p className="text-xs text-green-600 mt-1.5">Verfuegbar!</p>}
