@@ -34,12 +34,12 @@ export default function BreederStatusToggles({ initialPublished, initialActive, 
   }
 
   const rowClass = onDark
-    ? 'flex w-full cursor-pointer items-center justify-between gap-4 rounded-xl bg-white/10 px-3 py-2.5'
+    ? 'flex min-h-9 w-full cursor-pointer items-center justify-between gap-4 py-1'
     : 'group flex cursor-pointer items-center gap-2'
-  const switchClass = 'relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors disabled:opacity-60'
+  const switchClass = `relative inline-flex flex-shrink-0 items-center rounded-full border transition-colors disabled:opacity-60 ${onDark ? 'h-5 w-9' : 'h-6 w-11'}`
 
   return (
-    <div className={`flex flex-shrink-0 flex-col gap-2 ${onDark ? 'w-full' : 'items-end'}`}>
+    <div className={`flex flex-shrink-0 flex-col gap-1 ${onDark ? 'w-full max-w-64' : 'items-end'}`}>
       {/* Seite sichtbar Toggle */}
       <label className={rowClass}>
         <span className={`text-xs font-medium transition-colors ${onDark ? 'text-white' : published ? 'text-forest' : 'text-stone-400'}`}>
@@ -55,8 +55,8 @@ export default function BreederStatusToggles({ initialPublished, initialActive, 
             published ? onDark ? 'bg-honey' : 'bg-forest' : onDark ? 'bg-white/25' : 'bg-stone-300'
           }`}
         >
-          <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-            published ? 'translate-x-6' : 'translate-x-1'
+          <span className={`inline-block transform rounded-full bg-white shadow transition-transform ${onDark ? 'h-3 w-3' : 'h-4 w-4'} ${
+            published ? onDark ? 'translate-x-4' : 'translate-x-6' : 'translate-x-1'
           }`} />
         </button>
       </label>
@@ -76,8 +76,8 @@ export default function BreederStatusToggles({ initialPublished, initialActive, 
             active ? onDark ? 'bg-honey' : 'bg-forest' : onDark ? 'bg-white/25' : 'bg-amber-400'
           }`}
         >
-          <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-            active ? 'translate-x-6' : 'translate-x-1'
+          <span className={`inline-block transform rounded-full bg-white shadow transition-transform ${onDark ? 'h-3 w-3' : 'h-4 w-4'} ${
+            active ? onDark ? 'translate-x-4' : 'translate-x-6' : 'translate-x-1'
           }`} />
         </button>
       </label>
